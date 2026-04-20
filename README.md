@@ -1,80 +1,104 @@
-# java-base-project
+# ddsi-tp-template
 
-Esta es una plantilla de proyecto diseñada para:
+Plantilla base para el trabajo práctico de DDSI (UTN FRBA). Implementa una arquitectura de servicios con Spring Boot y una biblioteca compartida, usando un reactor de Maven multi-módulo.
 
-* Java 21. :warning: Si bien el proyecto no lo limita explícitamente, el comando `mvn verify` no funcionará con versiones más antiguas de Java.
-* JUnit 5. :warning: La versión 5 de JUnit es la más nueva del framework y presenta algunas diferencias respecto a la versión "clásica" (JUnit 4). Para mayores detalles, ver:
-  * [Apunte de herramientas](https://docs.google.com/document/d/1VYBey56M0UU6C0689hAClAvF9ILE6E7nKIuOqrRJnWQ/edit#heading=h.dnwhvummp994)
-  * [Entrada de Blog (en inglés)](https://www.baeldung.com/junit-5-migration)
-  * [Entrada de Blog (en español)](https://www.paradigmadigital.com/dev/nos-espera-junit-5/)
-* Maven 3.9 o superior (recomendado)
+---
 
-## Ejecutar tests
+## Requisitos previos
 
-```
-mvn test
-```
+- JDK 21
+- Maven 3.9+
+- Docker (opcional, solo para construir y ejecutar contenedores)
 
-## Validar el proyecto de forma exhaustiva
+---
+
+## Estructura del repositorio
 
 ```
-mvn clean verify
+ddsi-tp-template/
+├── pom.xml                    # POM padre: versiones y dependencyManagement
+├── common-lib/                # Librería compartida (JAR), importada por los servicios
+├── donaciones-service/        # Servicio de donaciones — puerto 8080
+└── notificaciones-service/    # Cervicio de notificaciones — puerto 8081
 ```
 
-Este comando hará lo siguiente:
+Cada servicio es una aplicación Spring Boot independiente que declara `common-lib` como dependencia local del reactor.
 
-1. Ejecutará los tests
-2. Validará las convenciones de formato mediante checkstyle
-3. Detectará la presencia de (ciertos) code smells
-4. Validará la cobertura del proyecto
+---
 
-## Entrega del proyecto
+## Tecnologías
 
-Para entregar el proyecto, crear un tag llamado `entrega-final`. Es importante que antes de realizarlo se corra la validación
-explicada en el punto anterior. Se recomienda hacerlo de la siguiente forma:
+| Tecnología          | Versión       |
+|---------------------|---------------|
+| Java                | 21            |
+| Spring Boot         | 4.0.5         |
+| Spring Cloud BOM    | 2025.1.1      |
+| Lombok              | 1.18.34       |
+| Maven               | 3.9+          |
 
+El BOM de Spring Cloud está declarado en el POM padre para que los módulos puedan incorporar dependencias de Spring Cloud sin especificar versión explícita.
+
+---
+
+## Desarrollo local (Maven)
+
+Todos los comandos se ejecutan desde la **raíz del proyecto**.
+
+### Compilar todos los módulos
+
+```bash
+mvn clean install
 ```
-mvn clean verify && git tag entrega-final && git push origin HEAD --tags
+
+Esto construye `common-lib` primero y luego los servicios que dependen de ella.
+
+### Ejecutar un servicio
+
+```bash
+# Servicio de donaciones (puerto 8080)
+mvn spring-boot:run -pl donaciones-service
+
+# Servicio de notificaciones (puerto 8081)
+mvn spring-boot:run -pl notificaciones-service
 ```
 
-## Configuración del IDE (IntelliJ)
+Maven resuelve `common-lib` directamente desde el reactor, por lo que no hace falta instalarla por separado si se ejecuta desde la raíz.
 
-### Usar el SDK de Java 21
+---
 
-1. En **File/Project Structure...**, ir a **Project Settings | Project**
-2. En **Project SDK** seleccionar la versión 21 y en **Project language level** seleccionar el nivel 21 (coincidente con el SDK)
+## Construcción de imágenes Docker
 
-![image](https://user-images.githubusercontent.com/39303639/228126065-221b9851-fb96-4f7f-a8e1-010732dc7ef6.png)
+Este proyecto utiliza una arquitectura multi-módulo de Maven. Los microservicios dependen del `pom.xml` padre y de `common-lib`, por lo que **el contexto de construcción de Docker siempre debe ser la raíz del proyecto**. Si se limita el contexto a la carpeta del microservicio, Maven fallará al no encontrar el POM padre ni las dependencias comunes.
 
-### Usar fin de línea unix
+### Construcción manual (CLI)
 
-1. En **File/Settings...**, ir a **Editor | Code Style**.
-2. En la lista **Line separator**, seleccionar `Unix and OS X (\n)`.
+Posicionarse en la carpeta raíz del proyecto y pasar el Dockerfile con `-f`, dejando `.` como contexto:
 
-![image](https://user-images.githubusercontent.com/39303639/228126546-352289fa-8feb-4b39-99db-d8b860915fea.png)
+```bash
+# donaciones-service (expone el puerto 8080)
+docker build -t donaciones-img -f donaciones-service/Dockerfile .
 
-### Tabular con dos espacios
+# notificaciones-service (expone el puerto 8081)
+docker build -t notificaciones-img -f notificaciones-service/Dockerfile .
+```
 
-1. En **File/Settings...**, ir a **Editor | Code Style | Java | Tabs and Indents**.
-2. Cambiar **Tab size**, **Indent** y **Continuation indent** a 2, 2 y 4 respectivamente:
+### Ejecutar los contenedores
 
-![image](https://user-images.githubusercontent.com/39303639/228127009-8c84ea72-969b-4e05-b311-45e3688a4164.png)
+```bash
+docker run -p 8080:8080 donaciones-img
+docker run -p 8081:8081 notificaciones-img
+```
 
-### Ordenar los imports
+### Nota sobre `ARG SERVICE_NAME`
 
-1. En **File/Settings...**, ir a **Editor | Code Style | Java | Imports**.
-2. Cambiar **Class count to use import with '\*'** y **Names count to use static import with '\*'** a un número muy alto (ej: 99).
-3. En **Import Layout**, dejarlo como se muestra a continuación:
-   - `import static all other imports`
-   - `<blank line>`
-   - `import all other imports`
+Cada Dockerfile define un `ARG SERVICE_NAME` cuyo valor por defecto ya coincide con el nombre del servicio (p. ej. `donaciones-service`). Solo es necesario sobreescribirlo si se reutiliza un Dockerfile genérico para construir un servicio diferente:
 
-![image](https://user-images.githubusercontent.com/39303639/228126787-36f9ecff-27f2-4b99-bf11-a6bd89f67087.png)
+```bash
+docker build --build-arg SERVICE_NAME=otro-service -f otro-service/Dockerfile .
+```
 
-### Instalar y configurar Checkstyle
+---
 
-1. Instalar el plugin https://plugins.jetbrains.com/plugin/1065-checkstyle-idea
-2. En **File/Settings...**, ir a **Tools | Checkstyle**.
-3. Configurarlo activando los Checks de Google y una versión de Checkstyle compatible con el plugin (alinear con la usada por `maven-checkstyle-plugin` del proyecto).
+## Estado del proyecto
 
-![image](https://github.com/dds-utn/java-base-project/assets/11719816/b1edc122-4675-4f8d-bffc-9e3d3366fac6)
+Los servicios son aplicaciones Spring Boot mínimas, listas para extender con controladores, repositorios y lógica de negocio. `common-lib` contiene el código compartido entre servicios.
