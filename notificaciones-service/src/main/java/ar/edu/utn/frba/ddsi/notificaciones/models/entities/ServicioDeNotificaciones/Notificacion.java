@@ -1,5 +1,6 @@
-package ar.edu.utn.frba.ddsi.notificaciones.models.entities;
+package ar.edu.utn.frba.ddsi.notificaciones.models.entities.ServicioDeNotificaciones;
 
+import ar.edu.utn.frba.ddsi.notificaciones.models.entities.ServicioDeNotificaciones.MedioDeNotificacion;
 import lombok.Getter;
 import lombok.Setter;
 

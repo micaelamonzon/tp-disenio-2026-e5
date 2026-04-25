@@ -1,4 +1,4 @@
-package ar.edu.utn.frba.ddsi.notificaciones.models.entities;
+package ar.edu.utn.frba.ddsi.notificaciones.models.entities.ServicioDeNotificaciones;
 
 public interface MedioDeNotificacion {
     boolean notificar(String destinatario, Notificacion notificacion);
