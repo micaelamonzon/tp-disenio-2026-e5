@@ -12,4 +12,6 @@ public class Subcategoria {
     private LocalDateTime fechaDeVencimiento;
     private EstadoDeUso esUsado;
     private boolean tipoDePerecidad;
+//    private Categoria categoria;
+
 }
