@@ -11,7 +11,7 @@ public class PersonaJuridica implements Donante {
     private Tipo tipo;
     private String rubro;
     private List<PersonaHumana> personasRepresentantes = new ArrayList<>();
-    private List<MedioDeNotificacion> mediosDeNotificacion;
+    private List<MedioDeNotificacion> mediosDeNotificacion = new ArrayList<>();
 
 
     public PersonaJuridica(String cuit,String razonSocial,Tipo tipo, String rubro) {
