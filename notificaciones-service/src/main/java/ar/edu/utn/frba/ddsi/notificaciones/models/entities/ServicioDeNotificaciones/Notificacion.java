@@ -10,4 +10,8 @@ public class Notificacion {
     private String destinatario;
     private String mensaje;
     private MedioDeNotificacion medioDeNotificacion;
+
+    public boolean enviar() {
+        return medioDeNotificacion.notificar(this.destinatario, this);
+    }
 }

@@ -1,4 +1,4 @@
-package ar.edu.utn.frba.ddsi.common.Donante;
+package ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante;
 
     public enum Tipo {
         GUBERNAMENTAL,

@@ -1,6 +1,6 @@
 package ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador;
 
-import ar.edu.utn.frba.ddsi.common.Donante.Donante;
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante.Donante;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.Bien;
 
 import java.util.ArrayList;

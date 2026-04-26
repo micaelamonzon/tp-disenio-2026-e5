@@ -1,10 +1,7 @@
 package ar.edu.utn.frba.ddsi.donaciones.models.entities.formulario;
 
-import ar.edu.utn.frba.ddsi.common.Donante.Donante;
-import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.Bien;
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante.Donante;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.DonacionSinSegmentar;
-
-import java.util.ArrayList;
 
 public class FormularioDeDonacion {
 //  private Donante donante;

@@ -6,7 +6,7 @@ import ar.edu.utn.frba.ddsi.notificaciones.models.entities.ServicioDeNotificacio
 public class SMS implements MedioDeNotificacion {
   @Override
   public boolean notificar(String destinatario, Notificacion notificacion) {
-    // TO DO: implementar lógica
+    // TODO: implementar lógica
     return false;
   }
 }

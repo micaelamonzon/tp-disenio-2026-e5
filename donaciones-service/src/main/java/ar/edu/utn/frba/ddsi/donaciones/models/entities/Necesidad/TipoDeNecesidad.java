@@ -1,4 +1,4 @@
-package ar.edu.utn.frba.ddsi.common.Necesidad;
+package ar.edu.utn.frba.ddsi.donaciones.models.entities.Necesidad;
 
 public interface TipoDeNecesidad {
     void satisfacerNecesidad();

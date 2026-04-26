@@ -8,5 +8,5 @@ import lombok.Setter;
 
 public class Categoria {
     private String nombre;
-    private UnidadDeMedida cantidadDeProducto;
+    private Unidad tipoUnidad;
 }
