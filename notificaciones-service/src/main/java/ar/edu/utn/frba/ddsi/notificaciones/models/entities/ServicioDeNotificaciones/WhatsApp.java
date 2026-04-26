@@ -5,8 +5,7 @@ import ar.edu.utn.frba.ddsi.notificaciones.models.entities.ServicioDeNotificacio
 
 public class WhatsApp implements MedioDeNotificacion {
   @Override
-  public boolean notificar(String destinatario, Notificacion notificacion) {
+  public void notificar(String destinatario, Notificacion notificacion) {
     // TODO: implementar lógica
-    return false;
   }
 }

@@ -1,5 +1,5 @@
 package ar.edu.utn.frba.ddsi.notificaciones.models.entities.ServicioDeNotificaciones;
 
 public interface MedioDeNotificacion {
-    boolean notificar(String destinatario, Notificacion notificacion);
+    void notificar(String destinatario, Notificacion notificacion);
 }
