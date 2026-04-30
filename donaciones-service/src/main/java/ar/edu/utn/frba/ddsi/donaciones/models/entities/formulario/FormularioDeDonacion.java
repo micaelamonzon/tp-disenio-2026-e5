@@ -4,7 +4,7 @@ import ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante.Donante;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.DonacionSinSegmentar;
 
 public class FormularioDeDonacion {
-//  private Donante donante;
+    private Donante donante;
     private String descripcionGeneral;
     private DonacionSinSegmentar donacion;
 

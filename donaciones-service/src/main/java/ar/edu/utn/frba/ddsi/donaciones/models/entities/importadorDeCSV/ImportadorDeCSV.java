@@ -84,13 +84,13 @@ public class ImportadorDeCSV {
         // Asociación -> Gubernamental
         // cooperativa -> INSTITUCIÓN
          // fundación  ->  ONG
-        if(nombreDeLaEmpresa.equals("S.A.") || nombreDeLaEmpresa.equals("S.A.S")|| nombreDeLaEmpresa.equals("S.R.L")){
+        if(nombreDeLaEmpresa.contains("S.A.") || nombreDeLaEmpresa.contains("S.A.S")|| nombreDeLaEmpresa.contains("S.R.L")){
             return Tipo.EMPRESA;
-        }else if(nombreDeLaEmpresa.equals("Asociación")){
+        }else if(nombreDeLaEmpresa.contains("Asociación")){
             return Tipo.GUBERNAMENTAL;
-        }else if (nombreDeLaEmpresa.equals("cooperativa")){
+        }else if (nombreDeLaEmpresa.contains("cooperativa")){
             return Tipo.INSTITUCION;
-        }else if(nombreDeLaEmpresa.equals("fundación")){
+        }else if(nombreDeLaEmpresa.contains("fundación")){
             return Tipo.ONG;
         }
         return null;
