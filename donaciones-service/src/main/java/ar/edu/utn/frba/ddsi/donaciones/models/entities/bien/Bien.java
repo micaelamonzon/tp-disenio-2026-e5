@@ -15,6 +15,10 @@ public class Bien {
     private String descripcion;
     private Foto foto;
     private Subcategoria subcategoria;
+    private LocalDateTime fechaDeVencimiento;
+    private EstadoDeUso esUsado;
+    private Unidad tipoUnidad;
+    private Integer cantidad;
 
     public boolean sePuedeDonar(){
         if(subcategoria.isTipoDePerecidad()){
