@@ -2,16 +2,16 @@ package ar.edu.utn.frba.ddsi.donaciones.models.entities.bien;
 
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.DonacionSegmentada;
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-@NoArgsConstructor
-@AllArgsConstructor
-@Getter
+
+@Data
 public class Bien {
-    private String Nombre;
+    private String nombre;
     private String descripcion;
     private Foto foto;
     private Subcategoria subcategoria;
@@ -20,12 +20,22 @@ public class Bien {
     private Unidad tipoUnidad;
     private Integer cantidad;
 
+    public Bien(String nombre, String descripcion, Foto foto, Subcategoria subcategoria, LocalDateTime fechaDeVencimiento, EstadoDeUso esUsado, Unidad tipoUnidad, Integer cantidad) {
+        this.nombre = nombre;
+        this.descripcion = descripcion;
+        this.foto = foto;
+        this.subcategoria = subcategoria;
+        this.fechaDeVencimiento = fechaDeVencimiento;
+        this.esUsado = esUsado;
+        this.tipoUnidad = tipoUnidad;
+        this.cantidad = cantidad;
+    }
     public boolean sePuedeDonar(){
-        if(subcategoria.isTipoDePerecidad()){
-            return subcategoria.getFechaDeVencimiento().isAfter(LocalDateTime.now());
+        if(subcategoria.isEsPerecedero()){
+            return this.getFechaDeVencimiento().isAfter(LocalDateTime.now());
         }
-        if(subcategoria.getEsUsado() != null){
-            return subcategoria.getEsUsado() == EstadoDeUso.NUEVO;
+        if(this.getEsUsado() != null){
+            return this.getEsUsado() == EstadoDeUso.NUEVO;
         }
         return true;
     }
