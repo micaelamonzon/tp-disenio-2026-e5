@@ -11,12 +11,13 @@ public class EntidadBeneficiaria {
     private String razonSocial;
     private String direccion;
     private Integer telefono;
-    private List<Representante> Representantes;
+    private List<Representante> representantes;
     private List<Necesidad> necesidades;
 
 
     public EntidadBeneficiaria() {
         this.necesidades = new ArrayList<>();
+        this.representantes = new ArrayList<>();
     }
 
     public void registradorNecesidad(Subcategoria subcategoria,String descripcion, TipoDeNecesidad tipo){
