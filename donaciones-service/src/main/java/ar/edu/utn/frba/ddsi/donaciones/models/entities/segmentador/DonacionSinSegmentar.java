@@ -12,9 +12,12 @@ import java.util.ArrayList;
 public class DonacionSinSegmentar {
 
   private ArrayList<Bien> bienes = new ArrayList<>();
+  private ArrayList<DonacionSegmentada> donacionesSegmentadas = new ArrayList<>();
 
   public void agregarBien(Bien bien){
     this.bienes.add(bien);
   }
-
+  public void agregarDonacionSegmentada(DonacionSegmentada donacion) {
+    this.donacionesSegmentadas.add(donacion);
+  }
 }
