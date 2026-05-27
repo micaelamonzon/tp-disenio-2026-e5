@@ -12,7 +12,7 @@ public class PersonaJuridica{
     private String razonSocial;
     private Tipo tipo;
     private String rubro;
-    private List<PersonaHumana> personasRepresentantes = new ArrayList<>();
+    private List<Representante> personasRepresentantes = new ArrayList<>();
     private List<MedioDeNotificacion> mediosDeNotificacion = new ArrayList<>();
     private List<Bien> donaciones = new ArrayList<>();
 
