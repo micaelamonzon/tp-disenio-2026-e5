@@ -1,13 +1,25 @@
 package ar.edu.utn.frba.ddsi.donaciones.models.entities.Necesidad;
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.Subcategoria;
 import lombok.Data;
+import lombok.Getter;
 
 @Data
-public class NecesidadExtraordinaria implements TipoDeNecesidad {
-    private Integer cantRequerida;
-    private Boolean estaSatisfecha = false;
+@Getter
+public class NecesidadExtraordinaria extends Necesidad {
+    private int cantidadRequerida;
+    private int cantidadRecibida;
+
+    public NecesidadExtraordinaria(Subcategoria subcategoria, String descripcion, int cantidadRequerida) {
+        super(subcategoria, descripcion);
+        this.cantidadRequerida = cantidadRequerida;
+        this.cantidadRecibida = 0;
+    }
 
     @Override
-    public void satisfacerNecesidad(){
-        this.estaSatisfecha = (this.cantRequerida == 0);
+    public void satisfacer(int cantidad) {
+        this.cantidadRecibida += cantidad;
+        if (this.cantidadRecibida >= this.cantidadRequerida) {
+            marcarComoSatisfecha();
+        }
     }
 }

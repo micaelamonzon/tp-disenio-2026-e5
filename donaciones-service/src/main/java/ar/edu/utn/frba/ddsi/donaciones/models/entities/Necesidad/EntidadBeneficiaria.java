@@ -1,4 +1,5 @@
 package ar.edu.utn.frba.ddsi.donaciones.models.entities.Necesidad;
+
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.Subcategoria;
 import lombok.Data;
 
@@ -13,27 +14,30 @@ public class EntidadBeneficiaria {
     private List<String> correosDeRepresentantes;
     private List<Necesidad> necesidades;
 
-
     public EntidadBeneficiaria() {
         this.necesidades = new ArrayList<>();
     }
 
-    public void registradorNecesidad(Subcategoria subcategoria,String descripcion, TipoDeNecesidad tipo){
-        Necesidad nuevaNecesidad = new Necesidad();
+    public void registrarNecesidadExtraordinaria(Subcategoria subcategoria,
+                                                 String descripcion,
+                                                 int cantidadRequerida) {
+        this.necesidades.add(
+                new NecesidadExtraordinaria(subcategoria, descripcion, cantidadRequerida)
+        );
+    }
 
-        nuevaNecesidad.setSubcategoria(subcategoria);
-        nuevaNecesidad.setDescripcion(descripcion);
-        nuevaNecesidad.setTipoDeNecesidad(tipo);
-
-        // Lo agrego a la lista de necesidades
-        this.necesidades.add(nuevaNecesidad);
+    public void registrarNecesidadRecurrente(Subcategoria subcategoria,
+                                             String descripcion,
+                                             int cantidadObjetivo,
+                                             TipoPeriodo periodo) {
+        this.necesidades.add(
+                new NecesidadRecurrente(subcategoria, descripcion, cantidadObjetivo, periodo)
+        );
     }
 
     public List<Necesidad> obtenerNecesidadesPendientes() {
         return necesidades.stream()
-                .filter(n -> !n.getTipoDeNecesidad().getEstaSatisfecha())
+                .filter(n -> !n.isEstaSatisfecha())
                 .toList();
-
-
     }
 }
