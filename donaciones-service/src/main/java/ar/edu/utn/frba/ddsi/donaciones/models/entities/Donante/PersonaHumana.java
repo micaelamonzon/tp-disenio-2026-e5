@@ -1,5 +1,9 @@
 package ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante;
 
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.Bien;
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.mediosDeNotificacion.MedioDeNotificacion;
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.DonacionSegmentada;
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.DonacionSinSegmentar;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,7 +14,7 @@ import java.util.List;
 @Getter
 @Setter
 @Data
-public class PersonaHumana implements Donante {
+public class PersonaHumana{
     private String nombre;
     private String apellido;
     private Integer edad;
@@ -19,6 +23,7 @@ public class PersonaHumana implements Donante {
     private String direccion;
     private List<MedioDeNotificacion> mediosDeNotificacion = new ArrayList<>();
     private MedioDeNotificacion medioDeNotificacionPredeterminado;
+    private List<Bien> donaciones = new ArrayList<>();
 
     public PersonaHumana(String nombre,String apellido,Integer edad,Integer numeroDeDocumento,String genero,String direccion) {
         this.nombre = nombre;
@@ -30,8 +35,8 @@ public class PersonaHumana implements Donante {
 
     }
 
-    @Override
-    public void mediosDeNotificaciones(MedioDeNotificacion unMedio) {
+
+    public void agregarMedioDeNotificacion(MedioDeNotificacion unMedio) {
         this.mediosDeNotificacion.add(unMedio);
     }
 

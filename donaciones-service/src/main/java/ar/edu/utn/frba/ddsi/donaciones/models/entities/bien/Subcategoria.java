@@ -9,9 +9,15 @@ import java.time.LocalDateTime;
 @Getter
 public class Subcategoria {
     private String nombre;
-    private LocalDateTime fechaDeVencimiento;
-    private EstadoDeUso esUsado;
-    private boolean tipoDePerecidad;
+    private boolean esPerecedero;
     private Categoria categoria;
+
+    public Subcategoria(String nombre, Boolean esPerecedero, Categoria categoria){
+        this.nombre = nombre;
+        this.esPerecedero = esPerecedero;
+        this.categoria = categoria;
+
+    }
+
 
 }

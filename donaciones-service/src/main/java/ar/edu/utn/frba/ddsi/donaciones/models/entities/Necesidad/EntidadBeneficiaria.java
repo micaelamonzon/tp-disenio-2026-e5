@@ -1,5 +1,5 @@
 package ar.edu.utn.frba.ddsi.donaciones.models.entities.Necesidad;
-
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante.Representante;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.Subcategoria;
 import lombok.Data;
 
@@ -11,11 +11,13 @@ public class EntidadBeneficiaria {
     private String razonSocial;
     private String direccion;
     private Integer telefono;
-    private List<String> correosDeRepresentantes;
+    private List<Representante> representantes;
     private List<Necesidad> necesidades;
+
 
     public EntidadBeneficiaria() {
         this.necesidades = new ArrayList<>();
+        this.representantes = new ArrayList<>();
     }
 
     public void registrarNecesidadExtraordinaria(Subcategoria subcategoria,
@@ -39,5 +41,7 @@ public class EntidadBeneficiaria {
         return necesidades.stream()
                 .filter(n -> !n.isEstaSatisfecha())
                 .toList();
+
+
     }
 }

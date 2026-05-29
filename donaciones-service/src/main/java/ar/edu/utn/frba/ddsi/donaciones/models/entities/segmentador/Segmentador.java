@@ -1,14 +1,31 @@
 package ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador;
 
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.Bien;
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.Subcategoria;
+import lombok.Data;
+
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
-
+@Data
 public class Segmentador {
 
+    public ArrayList<DonacionSegmentada> segmentar(DonacionSinSegmentar donacionSinSegmentar){
 
-    public ArrayList<DonacionSegmentada> segmentar(ArrayList<DonacionSinSegmentar> donacionesSinSegmentar){
-        //TODO: implementar el algoritmo de segmentacion
-        //para que despues se pueda guardar la donacion segmentada en el atributo de "donacionesSegmentadas"
-        return null;
+        ArrayList<DonacionSegmentada> nuevasDonacionesSegmentadas = new ArrayList<>();
+        Map<Subcategoria, List<Bien>> bienesAgrupados = donacionSinSegmentar.getBienes().stream().collect(Collectors.groupingBy(Bien::getSubcategoria));
+
+        bienesAgrupados.forEach((subcategoria, listaBienes) -> {
+
+            DonacionSegmentada donacionSegmentada = new DonacionSegmentada();
+            donacionSegmentada.setBienesDelMismoTipo(new ArrayList<>(listaBienes));
+            donacionSegmentada.setSubcategoria(subcategoria);
+
+            nuevasDonacionesSegmentadas.add(donacionSegmentada);
+        });
+
+        return nuevasDonacionesSegmentadas;
     }
 }
