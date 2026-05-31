@@ -1,7 +1,9 @@
 package ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante;
 
+import ar.edu.utn.frba.ddsi.donaciones.dto.DonacionSinSegmentarDTO;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.Bien;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.mediosDeNotificacion.MedioDeNotificacion;
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.DonacionSinSegmentar;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -15,7 +17,7 @@ public class PersonaJuridica{
     private String rubro;
     private List<Representante> personasRepresentantes = new ArrayList<>();
     private List<MedioDeNotificacion> mediosDeNotificacion = new ArrayList<>();
-    private List<Bien> donaciones = new ArrayList<>();
+    private List<DonacionSinSegmentar> donaciones = new ArrayList<>();
 
     public PersonaJuridica(String cuit,String razonSocial,Tipo tipo, String rubro) {
         this.cuit = cuit;

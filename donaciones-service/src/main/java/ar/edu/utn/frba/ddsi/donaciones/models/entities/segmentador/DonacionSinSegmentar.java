@@ -20,6 +20,10 @@ public class DonacionSinSegmentar {
   private List<DonacionSegmentada> donacionesSegmentadas = new ArrayList<>();
   LocalDateTime fechaDeIngreso;
 
+  public DonacionSinSegmentar(List<Bien> bienes,LocalDateTime fechaDeIngreso){
+    this.bienes = bienes;
+    this.fechaDeIngreso = fechaDeIngreso;
+  }
   public void agregarBien(Bien bien){
     this.bienes.add(bien);
   }

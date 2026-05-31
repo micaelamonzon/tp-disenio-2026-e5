@@ -1,4 +1,12 @@
 package ar.edu.utn.frba.ddsi.dto;
 
-public class PersonaJuridicaDTO {
+import java.util.ArrayList;
+import java.util.List;
+
+public record PersonaJuridicaDTO(
+        Long id,
+        String cuit,
+        String razonSocial,
+        List<DonacionSinSegmentarDTO> donaciones
+) {
 }

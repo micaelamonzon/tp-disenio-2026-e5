@@ -5,6 +5,7 @@ import ar.edu.utn.frba.ddsi.donaciones.dto.PersonaJuridicaDTO;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante.PersonaJuridica;
 import ar.edu.utn.frba.ddsi.donaciones.services.DonacionesService;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -45,16 +46,23 @@ public class DonacionesController {
         return donantesDTOS;
     }
 
-    @GetMapping("humano/obtenerDonaciones/{id}")
-    @ResponseStatus(HttpStatus.ACCEPTED)
-    public List<DonacionSinSegmentarDTO> obtenerDonacionesDeHumano(@PathVariable Long id){
-        List<DonacionSinSegmentarDTO> donaciones = this.donacionesService.obtenerDonacionesDeHumano(id);
+    @GetMapping("/humano/obtenerDonaciones/{id}")
+
+    public ResponseEntity<List<DonacionSinSegmentarDTO>> obtenerDonacionesDeHumano(@PathVariable Long id){
+       try{
+           List<DonacionSinSegmentarDTO> donaciones = this.donacionesService.obtenerDonacionesDeHumano(id);
+           return ResponseEntity.ok(donaciones);
+       }catch (RuntimeException e){
+           System.out.println(e.getMessage());
+           return ResponseEntity.notFound().build();
+       }
     }
 
-    @PostMapping("humano")
+    @PostMapping("/humano")
     @ResponseStatus(HttpStatus.CREATED)
-    public List<DonacionSinSegmentarDTO> crearDonanteHumanos(@RequestBody PersonaHumanaDTO request){
-        List<DonacionSinSegmentarDTO> donaciones = this.donacionesService.crearDonanteHumanos(request);
+    public PersonaHumanaDTO crearDonanteHumanos(@RequestBody PersonaHumanaDTO request){
+        PersonaHumanaDTO personaHumanaDTO = this.donacionesService.crearDonanteHumanos(request);
+        return personaHumanaDTO;
     }
 
 }
