@@ -4,6 +4,7 @@ import ar.edu.utn.frba.ddsi.config.RestProperties;
 import ar.edu.utn.frba.ddsi.dto.DonacionDTO;
 import ar.edu.utn.frba.ddsi.dto.InsigniaDTO;
 import ar.edu.utn.frba.ddsi.dto.MisionDTO;
+import ar.edu.utn.frba.ddsi.models.entities.persona.Insignia;
 import ar.edu.utn.frba.ddsi.services.IncentivosService;
 import ar.edu.utn.frba.ddsi.services.impl.IncentivosServiceImpl;
 import org.springframework.http.HttpStatus;
@@ -47,6 +48,12 @@ public class IncentivosController {
         return incentivosService.buscarMisionActualPorId(id);
     }
 
+    @GetMapping("/verificarMision/{idPersona}")
+    public ResponseEntity<Void> verificarMision(@PathVariable Long id){
+        Insignia insigniaObtenida = Insignia.COLABORADOR; // ejemplo
 
+        incentivosService.publicarYDifundirInsignia(id, insigniaObtenida);
 
+        return ResponseEntity.ok().build();
+    }
 }
