@@ -15,6 +15,7 @@ import java.util.List;
 @Setter
 @Data
 public class PersonaHumana{
+    private Long id;
     private String nombre;
     private String apellido;
     private Integer edad;
@@ -23,7 +24,7 @@ public class PersonaHumana{
     private String direccion;
     private List<MedioDeNotificacion> mediosDeNotificacion = new ArrayList<>();
     private MedioDeNotificacion medioDeNotificacionPredeterminado;
-    private List<Bien> donaciones = new ArrayList<>();
+    private List<DonacionSinSegmentar> donaciones = new ArrayList<>(); //al acceder a esta donacion sabremoscuales salieron
 
     public PersonaHumana(String nombre,String apellido,Integer edad,Integer numeroDeDocumento,String genero,String direccion) {
         this.nombre = nombre;

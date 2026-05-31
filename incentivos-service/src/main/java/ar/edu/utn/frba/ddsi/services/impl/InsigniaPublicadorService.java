@@ -1,4 +1,4 @@
-package ar.edu.utn.frba.ddsi.services;
+package ar.edu.utn.frba.ddsi.services.impl;
 
 import ar.edu.utn.frba.ddsi.config.N8NProperties;
 import ar.edu.utn.frba.ddsi.dto.InsigniaWebhookRequestDTO;

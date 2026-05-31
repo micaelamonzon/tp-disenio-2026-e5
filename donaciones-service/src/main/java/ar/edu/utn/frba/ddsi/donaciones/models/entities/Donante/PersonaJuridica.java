@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 @Data
 public class PersonaJuridica{
+    private Long id;
     private String cuit;
     private String razonSocial;
     private Tipo tipo;

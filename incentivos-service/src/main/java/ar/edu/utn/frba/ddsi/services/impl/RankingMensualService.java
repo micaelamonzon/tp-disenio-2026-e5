@@ -1,14 +1,7 @@
-package ar.edu.utn.frba.ddsi.services;
+package ar.edu.utn.frba.ddsi.services.impl;
 
-import ar.edu.utn.frba.ddsi.models.entities.persona.PersonaHumana;
-import ar.edu.utn.frba.ddsi.models.entities.persona.RankingMensual;
 import ar.edu.utn.frba.ddsi.repositories.IncentivosRepository;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDate;
-import java.util.Comparator;
-import java.util.List;
 
 @Service
 public class RankingMensualService {

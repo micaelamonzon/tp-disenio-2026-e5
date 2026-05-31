@@ -1,16 +1,14 @@
 package ar.edu.utn.frba.ddsi.services.impl;
 
 import ar.edu.utn.frba.ddsi.config.RestProperties;
-import ar.edu.utn.frba.ddsi.dto.DonacionDTO;
+import ar.edu.utn.frba.ddsi.dto.DonacionSinSegmentarDTO;
 import ar.edu.utn.frba.ddsi.dto.InsigniaDTO;
 import ar.edu.utn.frba.ddsi.dto.MisionDTO;
 import ar.edu.utn.frba.ddsi.models.entities.persona.Insignia;
 import ar.edu.utn.frba.ddsi.models.entities.persona.PersonaHumana;
 import ar.edu.utn.frba.ddsi.repositories.IncentivosRepository;
 import ar.edu.utn.frba.ddsi.services.IncentivosService;
-import ar.edu.utn.frba.ddsi.services.InsigniaPublicadorService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -39,13 +37,13 @@ public class IncentivosServiceImpl implements IncentivosService {
         URI uri = UriComponentsBuilder.fromUriString(propiedades.getUrl()).path("/obtenerDonaciones/{id}")
                 .buildAndExpand(id)
                 .toUri();
-        ResponseEntity<DonacionDTO[]> response = restTemplate.getForEntity(uri, DonacionDTO[].class);
+        ResponseEntity<DonacionSinSegmentarDTO[]> response = restTemplate.getForEntity(uri, DonacionSinSegmentarDTO[].class);
 
-        DonacionDTO[] arrayDeDonaciones = response.getBody();
+        DonacionSinSegmentarDTO[] arrayDeDonaciones = response.getBody();
 
-        List<DonacionDTO> listaDeDonaciones =  arrayDeDonaciones == null || arrayDeDonaciones.length == 0 ? List.of() : Arrays.asList(arrayDeDonaciones);
+        List<DonacionSinSegmentarDTO> listaDeDonaciones =  arrayDeDonaciones == null || arrayDeDonaciones.length == 0 ? List.of() : Arrays.asList(arrayDeDonaciones);
 
-      return  null;
+        return  null;
     }
 
     @Override

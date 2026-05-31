@@ -7,6 +7,7 @@ import lombok.Getter;
 
 import java.util.ArrayList;
 @Data
+@Getter
 public class DonacionSegmentada{
 
     private ArrayList<Bien> bienesDelMismoTipo = new ArrayList<>();
