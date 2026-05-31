@@ -9,6 +9,6 @@ import java.util.List;
 public class Representante {
     private String nombre;
     private String apellido;
-    private Integer numeroDeDocumento;
+    private Integer DNI;
     private ArrayList<MedioDeNotificacion> mediosDeNotificacion = new ArrayList<>();
 }
