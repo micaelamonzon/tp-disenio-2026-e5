@@ -1,5 +1,6 @@
 package ar.edu.utn.frba.ddsi.models.entities.persona;
 
+import ar.edu.utn.frba.ddsi.dto.PersonaDonanteDTO;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -7,11 +8,11 @@ import java.time.LocalDate;
 @Data
 public class RankingMensual {
     private LocalDate fecha;
-    private PersonaHumana primerPuesto;
-    private PersonaHumana segundoPuesto;
-    private PersonaHumana tercerPuesto;
+    private PersonaDonanteDTO primerPuesto;
+    private PersonaDonanteDTO segundoPuesto;
+    private PersonaDonanteDTO tercerPuesto;
 
-    public RankingMensual(LocalDate fecha, PersonaHumana primerPuesto, PersonaHumana segundoPuesto, PersonaHumana tercerPuesto){
+    public RankingMensual(LocalDate fecha, PersonaDonanteDTO primerPuesto, PersonaDonanteDTO segundoPuesto, PersonaDonanteDTO tercerPuesto){
         this.fecha = fecha;
         this.primerPuesto = primerPuesto;
         this.segundoPuesto = segundoPuesto;

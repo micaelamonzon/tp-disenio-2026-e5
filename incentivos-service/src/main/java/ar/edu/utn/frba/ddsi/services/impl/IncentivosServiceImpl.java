@@ -4,6 +4,7 @@ import ar.edu.utn.frba.ddsi.config.RestProperties;
 import ar.edu.utn.frba.ddsi.dto.DonacionSinSegmentarDTO;
 import ar.edu.utn.frba.ddsi.dto.InsigniaDTO;
 import ar.edu.utn.frba.ddsi.dto.MisionDTO;
+import ar.edu.utn.frba.ddsi.dto.PersonaDonanteDTO;
 import ar.edu.utn.frba.ddsi.models.entities.persona.Insignia;
 import ar.edu.utn.frba.ddsi.models.entities.persona.PersonaHumana;
 import ar.edu.utn.frba.ddsi.repositories.IncentivosRepository;
@@ -61,15 +62,29 @@ public class IncentivosServiceImpl implements IncentivosService {
     public String publicarYDifundirInsignia(Long id, Insignia insignia){
         URI uri = UriComponentsBuilder
                 .fromUriString(propiedades.getUrl())
-                .path("/personas/{id}") // DEPENDE DEL ENDPOINT DE SERVICIO DE DONACIONES q todavia no esta, por ahi desp se debde cambiar
+                .path("/donante/{id}") // DEPENDE DEL ENDPOINT DE SERVICIO DE DONACIONES q todavia no esta, por ahi desp se debde cambiar
                 .buildAndExpand(id)
                 .toUri();
 
-        ResponseEntity<PersonaHumana> response = restTemplate.getForEntity(uri, PersonaHumana.class);
-        PersonaHumana persona = response.getBody();
+        ResponseEntity<PersonaDonanteDTO> response = restTemplate.getForEntity(uri, PersonaDonanteDTO.class);
+        PersonaDonanteDTO donante = response.getBody();
 
-        if (persona == null) return null;
+        if (donante == null) return null;
                 // es el aviso a n8n
-        return publicadorService.publicarYDifundirInsignia(persona, insignia);
+        return publicadorService.publicarYDifundirInsignia(donante.nombre(), insignia);
+    }
+
+    @Override
+    public String procesarLogro(Long id, Insignia insignia, boolean esHumana) {
+    String path = esHumana ? "/personas-humanas/" : "/personas-juridicas/"; // si es persona humana -> un path, sino el otro
+    URI uri = UriComponentsBuilder.fromUriString(propiedades.getUrl())
+            .path(path + "{id}").buildAndExpand(id).toUri();
+
+    ResponseEntity<PersonaDonanteDTO> response = restTemplate.getForEntity(uri, PersonaDonanteDTO.class);
+    PersonaDonanteDTO donante = response.getBody();
+
+    String nombreAMencionar = esHumana ? donante.nombre() : donante.razonSocial();
+
+    return publicadorService.publicarYDifundirInsignia(nombreAMencionar, insignia);
     }
 }

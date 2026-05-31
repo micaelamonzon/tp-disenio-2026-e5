@@ -22,7 +22,7 @@ public class InsigniaPublicadorService {
         this.properties = properties;
     }
 
-    public String publicarYDifundirInsignia(PersonaHumana persona, Insignia insignia){
+    public String publicarYDifundirInsignia(String nombreDonante, Insignia insignia){
         URI uri = UriComponentsBuilder.
                 fromUriString(properties.getBaseURL())
                 .path(PATH_INSIGNIA)
@@ -30,7 +30,7 @@ public class InsigniaPublicadorService {
                 .toUri();
 
         InsigniaWebhookRequestDTO request = new InsigniaWebhookRequestDTO(
-                persona.getNombre(),
+                nombreDonante,
                 insignia.getNombre(),
                 insignia.texto()
         );
