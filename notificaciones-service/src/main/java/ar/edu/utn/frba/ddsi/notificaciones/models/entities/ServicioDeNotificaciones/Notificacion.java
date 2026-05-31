@@ -1,6 +1,5 @@
 package ar.edu.utn.frba.ddsi.notificaciones.models.entities.ServicioDeNotificaciones;
 
-import ar.edu.utn.frba.ddsi.notificaciones.models.entities.ServicioDeNotificaciones.MedioDeNotificacion;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,8 +9,14 @@ public class Notificacion {
     private String destinatario;
     private String mensaje;
     private MedioDeNotificacion medioDeNotificacion;
+    private EstadoNotificacion estado = EstadoNotificacion.PENDIENTE;
 
     public void enviar() {
-        medioDeNotificacion.notificar(this.destinatario, this);
+        try {
+            medioDeNotificacion.notificar(this.destinatario, this);
+            this.estado = EstadoNotificacion.ENVIADA;
+        } catch (Exception e) {
+            this.estado = EstadoNotificacion.FALLIDA;
+        }
     }
 }
