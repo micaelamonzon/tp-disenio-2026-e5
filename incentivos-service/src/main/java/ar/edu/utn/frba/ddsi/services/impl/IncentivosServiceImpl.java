@@ -5,8 +5,14 @@ import ar.edu.utn.frba.ddsi.dto.DonacionSinSegmentarDTO;
 import ar.edu.utn.frba.ddsi.dto.InsigniaDTO;
 import ar.edu.utn.frba.ddsi.dto.MisionDTO;
 import ar.edu.utn.frba.ddsi.dto.PersonaDonanteDTO;
+import ar.edu.utn.frba.ddsi.models.entities.donaciones.DonacionSinSegmentar;
+import ar.edu.utn.frba.ddsi.models.entities.misiones.Mision;
+import ar.edu.utn.frba.ddsi.models.entities.persona.Bien;
+import ar.edu.utn.frba.ddsi.models.entities.persona.Categoria;
+import ar.edu.utn.frba.ddsi.models.entities.persona.Donante;
 import ar.edu.utn.frba.ddsi.models.entities.persona.Insignia;
 import ar.edu.utn.frba.ddsi.models.entities.persona.PersonaHumana;
+import ar.edu.utn.frba.ddsi.models.entities.persona.Subcategoria;
 import ar.edu.utn.frba.ddsi.repositories.IncentivosRepository;
 import ar.edu.utn.frba.ddsi.services.IncentivosService;
 import org.springframework.http.ResponseEntity;
@@ -34,16 +40,44 @@ public class IncentivosServiceImpl implements IncentivosService {
     }
 
     @Override
-    public List<MisionDTO> buscarMisionesCompletadas(Long id){
-        URI uri = UriComponentsBuilder.fromUriString(propiedades.getUrl()).path("/obtenerDonaciones/{id}")
+    public List<MisionDTO> obtenerDonanteHumano(Long id){
+
+        URI uri = UriComponentsBuilder.fromUriString(propiedades.getUrl()).path("/humano/obtenerDonaciones/{id}")
                 .buildAndExpand(id)
                 .toUri();
-        ResponseEntity<DonacionSinSegmentarDTO[]> response = restTemplate.getForEntity(uri, DonacionSinSegmentarDTO[].class);
 
-        DonacionSinSegmentarDTO[] arrayDeDonaciones = response.getBody();
+        ResponseEntity<PersonaDonanteDTO> response = restTemplate.getForEntity(uri, PersonaDonanteDTO.class);
 
-        List<DonacionSinSegmentarDTO> listaDeDonaciones =  arrayDeDonaciones == null || arrayDeDonaciones.length == 0 ? List.of() : Arrays.asList(arrayDeDonaciones);
+        PersonaDonanteDTO personaDonante = response.getBody();
 
+        List<DonacionSinSegmentar> donaciones = this.convertirDonacionesDTO(personaDonante.donaciones());
+
+        List<Mision> misiones = this.convertirMisionesDTO(personaDonante.misiones());
+
+        Donante nuevoDonante = new Donante(null,null,personaDonante.nombre(),personaDonante.apellido(),personaDonante.edad(),personaDonante.DNI(),personaDonante.genero(),personaDonante.direccion(),donaciones,misiones);
+
+        //guardar en el repo
+
+        return  null;
+    }
+    @Override
+    public List<MisionDTO> obtenerDonanteJuridico(Long id){
+
+        URI uri = UriComponentsBuilder.fromUriString(propiedades.getUrl()).path("/juridico/obtenerDonaciones/{id}")
+                .buildAndExpand(id)
+                .toUri();
+
+        ResponseEntity<PersonaDonanteDTO> response = restTemplate.getForEntity(uri, PersonaDonanteDTO.class);
+
+        PersonaDonanteDTO personaDonante = response.getBody();
+
+        List<DonacionSinSegmentar> donaciones = this.convertirDonacionesDTO(personaDonante.donaciones());
+
+        List<Mision> misiones = this.convertirMisionesDTO(personaDonante.misiones());
+
+        Donante nuevoDonante = new Donante(personaDonante.cuit(),personaDonante.razonSocial(),null,null,null,null,null,null,donaciones,misiones);
+
+        //guardar en repo
         return  null;
     }
 
@@ -86,5 +120,44 @@ public class IncentivosServiceImpl implements IncentivosService {
     String nombreAMencionar = esHumana ? donante.nombre() : donante.razonSocial();
 
     return publicadorService.publicarYDifundirInsignia(nombreAMencionar, insignia);
+    }
+
+    public List<DonacionSinSegmentar> convertirDonacionesDTO(List<DonacionSinSegmentarDTO> donacionesDTO){
+
+        List<DonacionSinSegmentar> donaciones = donacionesDTO.stream().map(
+                donacion -> {
+                    List<Bien> bienes =
+                            donacion.bienes().stream()
+                                    .map(b -> new Bien(
+                                            b.nombre(),
+                                            b.descripcion(),
+                                            null,
+                                            new Subcategoria(
+                                                    b.subcategoria().nombre(),
+                                                    b.subcategoria().esPerecedero(),
+                                                    new Categoria(
+                                                            b.subcategoria().categoria().nombre()
+                                                    )
+                                            ),
+                                            b.fechaDeVencimiento(),
+                                            b.esUsado(),
+                                            b.tipoUnidad(),
+                                            b.cantidad()
+                                    ))
+                                    .toList();
+
+                    return new DonacionSinSegmentar(
+                            bienes,
+                            donacion.fechaDeIngreso()
+                    );
+                }).toList();
+
+        return donaciones;
+    }
+    public List<Mision> convertirMisionesDTO(List<MisionDTO> misionesDTO){
+
+        List<Mision> misiones = misionesDTO.stream().map(m -> new Mision(m.nombre())).toList();
+
+        return misiones;
     }
 }

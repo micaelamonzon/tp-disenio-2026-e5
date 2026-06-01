@@ -1,6 +1,6 @@
 package ar.edu.utn.frba.ddsi.models.entities.misiones;
 
-public class DonacionesExitosas implements Mision{
+public class DonacionesExitosas{
 
     private Integer cantidadDeDonaciones;
     private Boolean recibidaPorUnaEntidad;
@@ -11,7 +11,7 @@ public class DonacionesExitosas implements Mision{
     public DonacionesExitosas(Integer cantidadDeDonaciones){
         this.cantidadDeDonaciones = cantidadDeDonaciones;
     }
-    @Override
+
     public Boolean seCompletoLaMision() {
         return progreso == 100;
     }

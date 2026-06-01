@@ -1,7 +1,8 @@
 package ar.edu.utn.frba.ddsi.models.entities.misiones;
 
-public class HabilDonador implements Mision {
+public class HabilDonador {
 
+    private String nombre;
     private Integer cantidadDeBienes;
     private Integer distanciaDelObjetivo;
     private Integer progreso;
@@ -11,7 +12,7 @@ public class HabilDonador implements Mision {
         this.cantidadDeBienes = cantidadDeBienes;
     }
 
-    @Override
+
     public Boolean seCompletoLaMision() {
         //donación que supere X cantidad de bienes.
         return progreso == 100;

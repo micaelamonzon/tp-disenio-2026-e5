@@ -25,11 +25,16 @@ public class IncentivosController {
     }
 
     //Obtención de las misiones completadas por una persona donante.
-    @GetMapping("/misionesCompletadas/{id}/")
-    @ResponseStatus(HttpStatus.CREATED) //para devolver el 200
-    public List<MisionDTO> obtenerTodasLasMisiones(@PathVariable Long id){
+    @GetMapping("donanteHumano/misionesCompletadas/{id}/")
+    @ResponseStatus(HttpStatus.ACCEPTED) //para devolver el 200
+    public List<MisionDTO> obtenerTodasLasMisionesDeDonanteHumano(@PathVariable Long id){
+        return incentivosService.obtenerDonanteHumano(id);
+    }
 
-        return incentivosService.buscarMisionesCompletadas(id);
+    @GetMapping("donanteJuridico/misionesCompletadas/{id}/")
+    @ResponseStatus(HttpStatus.ACCEPTED) //para devolver el 200
+    public List<MisionDTO> obtenerTodasLasMisionesDeDonanteJuridico(@PathVariable Long id){
+        return incentivosService.obtenerDonanteJuridico(id);
     }
     //Obtención de las insignias para una persona donante.
     @GetMapping("{id}/insignias")

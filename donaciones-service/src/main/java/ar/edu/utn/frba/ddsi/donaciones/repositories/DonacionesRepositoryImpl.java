@@ -16,6 +16,7 @@ public class DonacionesRepositoryImpl implements DonacionesRepository{
     private final List<PersonaHumana> humanos = new ArrayList<>();
     private final List<PersonaJuridica> juridicos = new ArrayList<>();
 
+
     @Override
     public List<PersonaHumana> findAllHumanos(){
         return new ArrayList<>(humanos);

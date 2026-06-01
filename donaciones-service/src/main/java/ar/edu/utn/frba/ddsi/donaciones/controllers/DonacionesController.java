@@ -1,5 +1,6 @@
 package ar.edu.utn.frba.ddsi.donaciones.controllers;
 import ar.edu.utn.frba.ddsi.donaciones.dto.DonacionSinSegmentarDTO;
+import ar.edu.utn.frba.ddsi.donaciones.dto.PersonaDonanteDTO;
 import ar.edu.utn.frba.ddsi.donaciones.dto.PersonaHumanaDTO;
 import ar.edu.utn.frba.ddsi.donaciones.dto.PersonaJuridicaDTO;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante.PersonaJuridica;
@@ -47,18 +48,27 @@ public class DonacionesController {
     }
 
     @GetMapping("/humano/obtenerDonaciones/{id}")
-
-    public ResponseEntity<List<DonacionSinSegmentarDTO>> obtenerDonacionesDeHumano(@PathVariable Long id){
+    public ResponseEntity<PersonaDonanteDTO> obtenerDonacionesDeHumano(@PathVariable Long id){
        try{
-           List<DonacionSinSegmentarDTO> donaciones = this.donacionesService.obtenerDonacionesDeHumano(id);
-           return ResponseEntity.ok(donaciones);
+           PersonaDonanteDTO personaDonanteDTO = this.donacionesService.obtenerDonacionesDeHumano(id);
+           return ResponseEntity.ok(personaDonanteDTO);
        }catch (RuntimeException e){
            System.out.println(e.getMessage());
            return ResponseEntity.notFound().build();
        }
     }
+    @GetMapping("/juridica/obtenerDonaciones/{id}")
+    public ResponseEntity<PersonaDonanteDTO> obtenerDonacionesDeJuridico(@PathVariable Long id){
+        try{
+            PersonaDonanteDTO personaDonanteDTO = this.donacionesService.obtenerDonacionesDeJurico(id);
+            return ResponseEntity.ok(personaDonanteDTO);
+        }catch (RuntimeException e){
+            System.out.println(e.getMessage());
+            return ResponseEntity.notFound().build();
+        }
+    }
 
-    @PostMapping("/humano")
+    @PostMapping("/crearDonanteHumano")
     @ResponseStatus(HttpStatus.CREATED)
     public PersonaHumanaDTO crearDonanteHumanos(@RequestBody PersonaHumanaDTO request){
         PersonaHumanaDTO personaHumanaDTO = this.donacionesService.crearDonanteHumanos(request);

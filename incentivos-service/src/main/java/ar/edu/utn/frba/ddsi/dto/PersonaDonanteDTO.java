@@ -3,16 +3,16 @@ package ar.edu.utn.frba.ddsi.dto;
 import java.util.List;
 
 public record PersonaDonanteDTO (
-        Long idHumana,
+        Long idHumano,
         String nombre,
         String apellido,
         Integer DNI,
         String genero,
         Integer edad,
         String direccion,
-        List<DonacionSinSegmentarDTO> donacionesHumana,
-        Long idJuridica,
+        Long idJuridico,
+        List<DonacionSinSegmentarDTO> donaciones,
         String cuit,
         String razonSocial,
-        List<DonacionSinSegmentarDTO> donacionesJuridica
+        List<MisionDTO> misiones
 ){}

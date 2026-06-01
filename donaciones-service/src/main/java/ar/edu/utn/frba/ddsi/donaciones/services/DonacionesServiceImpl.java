@@ -3,6 +3,8 @@ package ar.edu.utn.frba.ddsi.donaciones.services;
 import ar.edu.utn.frba.ddsi.donaciones.dto.BienDTO;
 import ar.edu.utn.frba.ddsi.donaciones.dto.CategoriaDTO;
 import ar.edu.utn.frba.ddsi.donaciones.dto.DonacionSinSegmentarDTO;
+import ar.edu.utn.frba.ddsi.donaciones.dto.MisionDTO;
+import ar.edu.utn.frba.ddsi.donaciones.dto.PersonaDonanteDTO;
 import ar.edu.utn.frba.ddsi.donaciones.dto.PersonaHumanaDTO;
 import ar.edu.utn.frba.ddsi.donaciones.dto.PersonaJuridicaDTO;
 import ar.edu.utn.frba.ddsi.donaciones.dto.SubcategoriaDTO;
@@ -11,6 +13,7 @@ import ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante.PersonaJuridica;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.Bien;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.Categoria;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.Subcategoria;
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.mision.Mision;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.DonacionSinSegmentar;
 import ar.edu.utn.frba.ddsi.donaciones.repositories.DonacionesRepository;
 import org.springframework.stereotype.Service;
@@ -32,7 +35,7 @@ public class DonacionesServiceImpl implements DonacionesService {
 
         return humanos.stream().map(persona -> {
 
-            List<DonacionSinSegmentarDTO> donacionesDTO = this.donacionesSinSegmentarDTO(persona);
+            List<DonacionSinSegmentarDTO> donacionesDTO = this.donacionesSinSegmentarDTO(persona.getDonaciones());
 
             return new PersonaHumanaDTO(
                     persona.getId(),
@@ -59,13 +62,54 @@ public class DonacionesServiceImpl implements DonacionesService {
     }
 
     @Override
-    public List <DonacionSinSegmentarDTO> obtenerDonacionesDeHumano(Long id) {
+    public PersonaDonanteDTO obtenerDonacionesDeHumano(Long id) {
         PersonaHumana personaHumana = this.donacionesRepository.humanoFindById(id);
         if (personaHumana != null) {
-            List<DonacionSinSegmentarDTO> donacionSinSegmentarDTOS = this.donacionesSinSegmentarDTO(personaHumana);
-            return donacionSinSegmentarDTOS;
+            List<DonacionSinSegmentarDTO> donacionSinSegmentarDTOS = this.donacionesSinSegmentarDTO(personaHumana.getDonaciones());
+            List<MisionDTO> misionesDTO = this.misionesDTO(personaHumana.getMisiones());
+
+        PersonaDonanteDTO personaDTO = new PersonaDonanteDTO(
+                                        personaHumana.getId(),
+                                        personaHumana.getNombre(),
+                                        personaHumana.getApellido(),
+                                        personaHumana.getNumeroDeDocumento(),
+                                        personaHumana.getGenero(),
+                                        personaHumana.getEdad(),
+                                        personaHumana.getDireccion(),
+                                        null,
+                                        donacionSinSegmentarDTOS,
+                                        null,
+                                        null,
+                                        misionesDTO);
+            return personaDTO;
         }
-        throw new RuntimeException("Persona no encontrada");
+        throw new RuntimeException("Persona humana no encontrada");
+    }
+
+    @Override
+    public PersonaDonanteDTO obtenerDonacionesDeJurico(Long id) {
+        PersonaJuridica personaJuridica = this.donacionesRepository.juridicaFindById(id);
+        if (personaJuridica != null) {
+            List<DonacionSinSegmentarDTO> donacionSinSegmentarDTOS = this.donacionesSinSegmentarDTO(personaJuridica.getDonaciones());
+            List<MisionDTO> misionesDTO = this.misionesDTO(personaJuridica.getMisiones());
+            PersonaDonanteDTO personaDTO = new PersonaDonanteDTO(
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            personaJuridica.getId(),
+                                            donacionSinSegmentarDTOS,
+                                            personaJuridica.getCuit(),
+                                            personaJuridica.getRazonSocial(),
+                                            misionesDTO
+                                            );
+
+            return personaDTO;
+        }
+        throw new RuntimeException("Persona juridica no encontrada");
     }
 
     @Override
@@ -85,7 +129,7 @@ public class DonacionesServiceImpl implements DonacionesService {
 
         this.donacionesRepository.save(nuevaPersona);
 
-        List<DonacionSinSegmentarDTO> donacionesDTO = donacionesSinSegmentarDTO(nuevaPersona);
+        List<DonacionSinSegmentarDTO> donacionesDTO = donacionesSinSegmentarDTO(nuevaPersona.getDonaciones());
         PersonaHumanaDTO nuevaPersonaDTO = new PersonaHumanaDTO(
                 nuevaPersona.getId(),
                 nuevaPersona.getNombre(),
@@ -100,9 +144,9 @@ public class DonacionesServiceImpl implements DonacionesService {
         return nuevaPersonaDTO;
     }
 
-    public List<DonacionSinSegmentarDTO> donacionesSinSegmentarDTO(PersonaHumana personaHumana){
+    public List<DonacionSinSegmentarDTO> donacionesSinSegmentarDTO(List<DonacionSinSegmentar> donacionesSinSegmentar){
 
-        List<DonacionSinSegmentarDTO> donaciones = personaHumana.getDonaciones().stream().map(
+        List<DonacionSinSegmentarDTO> donaciones = donacionesSinSegmentar.stream().map(
                 donacion -> {
 
                     List<BienDTO> bienesDTO =
@@ -136,7 +180,6 @@ public class DonacionesServiceImpl implements DonacionesService {
     }
     public List<DonacionSinSegmentar> convertirDonacionesDTO(List<DonacionSinSegmentarDTO> donacionesDTO){
 
-        System.out.println(donacionesDTO);
         List<DonacionSinSegmentar> donaciones = donacionesDTO.stream().map(
                 donacion -> {
                     List<Bien> bienes =
@@ -166,5 +209,9 @@ public class DonacionesServiceImpl implements DonacionesService {
                 }).toList();
 
         return donaciones;
+    }
+    public List<MisionDTO> misionesDTO(List<Mision> misiones){
+        List<MisionDTO> misionesDTO = misiones.stream().map(m -> new MisionDTO(m.getNombre())).toList();
+        return misionesDTO;
     }
 }

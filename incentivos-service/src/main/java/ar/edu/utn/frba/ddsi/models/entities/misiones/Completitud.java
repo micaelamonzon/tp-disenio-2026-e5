@@ -6,7 +6,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class Completitud implements Mision{
+public class Completitud implements Tipo {
 
     private List<Categoria> categorias;
     private Integer distanciaDelObjetivo;
@@ -16,7 +16,7 @@ public class Completitud implements Mision{
     public Completitud(List<Categoria> categorias){
         this.categorias = categorias;
     }
-    @Override
+
     public Boolean seCompletoLaMision() {
         //realizar donaciones de X categorías distintas.
         return progreso == 100;

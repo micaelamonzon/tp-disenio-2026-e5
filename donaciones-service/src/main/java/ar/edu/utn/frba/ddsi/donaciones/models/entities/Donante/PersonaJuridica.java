@@ -3,6 +3,7 @@ package ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante;
 import ar.edu.utn.frba.ddsi.donaciones.dto.DonacionSinSegmentarDTO;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.Bien;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.mediosDeNotificacion.MedioDeNotificacion;
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.mision.Mision;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.DonacionSinSegmentar;
 import lombok.Data;
 
@@ -18,6 +19,7 @@ public class PersonaJuridica{
     private List<Representante> personasRepresentantes = new ArrayList<>();
     private List<MedioDeNotificacion> mediosDeNotificacion = new ArrayList<>();
     private List<DonacionSinSegmentar> donaciones = new ArrayList<>();
+    private List<Mision> misiones = new ArrayList<>();
 
     public PersonaJuridica(String cuit,String razonSocial,Tipo tipo, String rubro) {
         this.cuit = cuit;
@@ -31,4 +33,7 @@ public class PersonaJuridica{
         this.mediosDeNotificacion.add(unMedio);
     }
 
+    public void agregarMision(Mision mision){
+        this.misiones.add(mision);
+    }
 }

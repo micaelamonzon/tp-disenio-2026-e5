@@ -1,6 +1,6 @@
 package ar.edu.utn.frba.ddsi.models.entities.misiones;
 
-public class Racha implements Mision{
+public class Racha {
 
     private Integer meses;
     private Integer distanciaDelObjetivo;
@@ -10,7 +10,7 @@ public class Racha implements Mision{
     public Racha(Integer meses){
         this.meses = meses;
     }
-    @Override
+
     public Boolean seCompletoLaMision() {
         // pedirle al servicio de donaciones,
         // todas las donaciones de la persona donante y que se hayan hecho durante los x meses consecutivos

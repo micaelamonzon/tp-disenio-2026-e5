@@ -12,8 +12,8 @@ import java.util.List;
 public interface IncentivosService {
 
 
-    public List<MisionDTO> buscarMisionesCompletadas(Long id);
-
+    public List<MisionDTO> obtenerDonanteHumano(Long id);
+    public List<MisionDTO> obtenerDonanteJuridico(Long id);
     public List<InsigniaDTO> buscarInsigniasPorId(Long id);
 
     public MisionDTO buscarMisionActualPorId(Long id);
