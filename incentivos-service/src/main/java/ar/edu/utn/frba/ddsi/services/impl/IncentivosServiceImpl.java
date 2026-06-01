@@ -18,6 +18,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -133,18 +134,17 @@ public class IncentivosServiceImpl implements IncentivosService {
 
         return publicadorService.publicarYDifundirInsignia(donante, insignia);
     }
-/*
     @Override
     public void calcularYGuardarRanking() {
 
         // Traés todos los donantes del repositorio en memoria
         List<Donante> todosLosDonantes = incentivosRepository.findAllDonantes();
 
-        if (todosLosDonantes.isEmpty()) return;
+        YearMonth mesPasado = YearMonth.now().minusMonths(1);
 
         List<Donante> ranking = todosLosDonantes.stream()
                 .sorted(Comparator.comparingInt(
-                        d -> -calcularMisionesCumplidasEnMesActual(d))
+                        d -> -d.calcularMisionesCumplidasEn(mesPasado))
                 )
                 .limit(3)
                 .toList();
@@ -157,7 +157,7 @@ public class IncentivosServiceImpl implements IncentivosService {
                 ranking.get(1),
                 ranking.get(2)
         );
-    } */
+    }
     @Override
     public RankingMensual obtenerUltimoRanking() {
         return ultimoRanking;

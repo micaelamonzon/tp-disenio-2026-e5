@@ -2,9 +2,11 @@ package ar.edu.utn.frba.ddsi.models.entities.persona;
 
 import ar.edu.utn.frba.ddsi.models.entities.categorias.CategoriaDeDonante;
 import ar.edu.utn.frba.ddsi.models.entities.donaciones.DonacionSinSegmentar;
+import ar.edu.utn.frba.ddsi.models.entities.misiones.EstadoDeMision;
 import ar.edu.utn.frba.ddsi.models.entities.misiones.Mision;
 import lombok.Data;
 
+import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,5 +43,11 @@ public class Donante {
         this.categoria = categoria;
 
     }
-
+    public Integer calcularMisionesCumplidasEn(YearMonth periodo) {
+        return (int) this.misiones.stream()
+                .filter(m -> m.getEstadoDeMision() == EstadoDeMision.COMPLETADA) 
+                .filter(m -> m.getFechaCompletada() != null)
+                .filter(m -> YearMonth.from(m.getFechaCompletada()).equals(periodo))
+                .count();
+    }
 }

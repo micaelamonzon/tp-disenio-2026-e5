@@ -19,5 +19,5 @@ public interface IncentivosService {
     public String publicarYDifundirInsignia(Long idPersona, Insignia insignia);
 
     RankingMensual obtenerUltimoRanking();
-    //void calcularYGuardarRanking();
+    void calcularYGuardarRanking();
 }

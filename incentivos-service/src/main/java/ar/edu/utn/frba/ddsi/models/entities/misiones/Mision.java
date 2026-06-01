@@ -5,6 +5,7 @@ import ar.edu.utn.frba.ddsi.models.entities.misiones.Tipo;
 import ar.edu.utn.frba.ddsi.models.entities.persona.Insignia;
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Data
@@ -13,6 +14,7 @@ public class Mision {
     Tipo tipo;
     Insignia insigniaGanadora;
     EstadoDeMision estadoDeMision;
+    LocalDate fechaCompletada;
 
     public Mision(String nombre){
         this.nombre = nombre;
@@ -22,6 +24,7 @@ public class Mision {
         Boolean seCompleto = tipo.seCompletoLaMision(donaciones);
             if(seCompleto){
                 this.estadoDeMision = EstadoDeMision.DESBLOQUEADA;
+                this.fechaCompletada = LocalDate.now();
             }else{
                 this.estadoDeMision = EstadoDeMision.BLOQUEADA;
             }

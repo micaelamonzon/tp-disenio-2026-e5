@@ -19,9 +19,9 @@ public class RankingMensualService {
     public RankingMensualService(IncentivosService incentivosService) {
         this.incentivosService = incentivosService;
     }
-    /*
+                    //primer dia del mes, se repite todos los meses
     @Scheduled(cron = "0 0 0 1 * *")
     public void ejecutarRankingMensual() {
         incentivosService.calcularYGuardarRanking();
-    }*/
+    }
 }
