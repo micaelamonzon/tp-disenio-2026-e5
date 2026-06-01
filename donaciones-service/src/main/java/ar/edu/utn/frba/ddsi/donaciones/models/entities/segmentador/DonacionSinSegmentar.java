@@ -19,7 +19,7 @@ public class DonacionSinSegmentar {
   private List<Bien> bienes = new ArrayList<>();
   private List<DonacionSegmentada> donacionesSegmentadas = new ArrayList<>();
   private LocalDateTime fechaDeIngreso;
-  private Boolean donacionEntregada;
+  private Boolean donacionEntregada = false;
 
   public DonacionSinSegmentar(List<Bien> bienes,LocalDateTime fechaDeIngreso){
     this.bienes = bienes;

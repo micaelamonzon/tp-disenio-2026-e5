@@ -1,11 +1,12 @@
 package ar.edu.utn.frba.ddsi.models.entities.misiones;
 
 import ar.edu.utn.frba.ddsi.models.entities.donaciones.DonacionSinSegmentar;
+import lombok.Data;
 
 import java.util.List;
 import java.time.LocalDateTime;
 import java.time.Month;
-
+@Data
 public class Racha implements  Tipo{
 
     private Integer meses; //minimo 2 meses y maximo 12 meses

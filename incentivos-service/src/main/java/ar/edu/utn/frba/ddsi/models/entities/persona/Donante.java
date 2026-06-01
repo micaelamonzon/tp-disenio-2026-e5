@@ -7,7 +7,6 @@ import ar.edu.utn.frba.ddsi.models.entities.misiones.Mision;
 import lombok.Data;
 
 import java.time.YearMonth;
-import java.util.ArrayList;
 import java.util.List;
 
 @Data

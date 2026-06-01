@@ -5,20 +5,22 @@ import ar.edu.utn.frba.ddsi.donaciones.dto.DonacionSinSegmentarDTO;
 import ar.edu.utn.frba.ddsi.donaciones.dto.MisionDTO;
 import ar.edu.utn.frba.ddsi.donaciones.dto.PersonaDonanteDTO;
 import ar.edu.utn.frba.ddsi.donaciones.dto.PersonaHumanaDTO;
-import ar.edu.utn.frba.ddsi.donaciones.dto.PersonaJuridicaDTO;
 import ar.edu.utn.frba.ddsi.donaciones.dto.SubcategoriaDTO;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante.PersonaHumana;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante.PersonaJuridica;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.Bien;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.Categoria;
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.EstadoDeUso;
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.Foto;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.Subcategoria;
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.Unidad;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.mision.Mision;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.DonacionSinSegmentar;
 import ar.edu.utn.frba.ddsi.donaciones.repositories.DonacionesRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class DonacionesServiceImpl implements DonacionesService {
@@ -29,14 +31,14 @@ public class DonacionesServiceImpl implements DonacionesService {
     }
 
     @Override
-   public List<PersonaHumanaDTO> obtenerTodosHumanos(){
+   public List<PersonaDonanteDTO> obtenerTodosHumanos(){
         List<PersonaHumana> humanos = this.donacionesRepository.findAllHumanos();
 
         return humanos.stream().map(persona -> {
 
-            List<DonacionSinSegmentarDTO> donacionesDTO = this.donacionesSinSegmentarDTO(persona.getDonaciones());
-
-            return new PersonaHumanaDTO(
+            List<DonacionSinSegmentarDTO> donacionesDTO = this.obtenerDonacionesSinSegmentarDTO(persona.getDonaciones());
+            List<MisionDTO> misionesDTO = this.obtenerMisionesDTO(persona.getMisiones());
+            return new PersonaDonanteDTO(
                     persona.getId(),
                     persona.getNombre(),
                     persona.getApellido(),
@@ -44,7 +46,12 @@ public class DonacionesServiceImpl implements DonacionesService {
                     persona.getGenero(),
                     persona.getEdad(),
                     persona.getDireccion(),
-                    donacionesDTO
+                    null,
+                    donacionesDTO,
+                    null,
+                    null,
+                    misionesDTO,
+                    persona.getCategoria()
             );
 
         }).toList();
@@ -52,20 +59,41 @@ public class DonacionesServiceImpl implements DonacionesService {
 
 
     @Override
-    public List<PersonaJuridicaDTO> obtenerTodosJuridicos(){
+    public List<PersonaDonanteDTO> obtenerTodosJuridicos(){
 
         List<PersonaJuridica> juridicos = this.donacionesRepository.findAllJuridicos();
         //transformar a dto
+        return juridicos.stream().map(persona -> {
 
-        return null;
+            List<DonacionSinSegmentarDTO> donacionesDTO = this.obtenerDonacionesSinSegmentarDTO(persona.getDonaciones());
+            List<MisionDTO> misionesDTO = this.obtenerMisionesDTO(persona.getMisiones());
+
+            return new PersonaDonanteDTO(
+                    null,
+                   null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    persona.getId(),
+                    donacionesDTO,
+                    persona.getCuit(),
+                    persona.getRazonSocial(),
+                    misionesDTO,
+                    persona.getCategoria()
+            );
+
+        }).toList();
+
     }
 
     @Override
     public PersonaDonanteDTO obtenerDonacionesDeHumano(Long id) {
         PersonaHumana personaHumana = this.donacionesRepository.humanoFindById(id);
         if (personaHumana != null) {
-            List<DonacionSinSegmentarDTO> donacionSinSegmentarDTOS = this.donacionesSinSegmentarDTO(personaHumana.getDonaciones());
-            List<MisionDTO> misionesDTO = this.misionesDTO(personaHumana.getMisiones());
+            List<DonacionSinSegmentarDTO> donacionSinSegmentarDTOS = this.obtenerDonacionesSinSegmentarDTO(personaHumana.getDonaciones());
+            List<MisionDTO> misionesDTO = this.obtenerMisionesDTO(personaHumana.getMisiones());
 
         PersonaDonanteDTO personaDTO = new PersonaDonanteDTO(
                                         personaHumana.getId(),
@@ -91,8 +119,8 @@ public class DonacionesServiceImpl implements DonacionesService {
     public PersonaDonanteDTO obtenerDonacionesDeJurico(Long id) {
         PersonaJuridica personaJuridica = this.donacionesRepository.juridicaFindById(id);
         if (personaJuridica != null) {
-            List<DonacionSinSegmentarDTO> donacionSinSegmentarDTOS = this.donacionesSinSegmentarDTO(personaJuridica.getDonaciones());
-            List<MisionDTO> misionesDTO = this.misionesDTO(personaJuridica.getMisiones());
+            List<DonacionSinSegmentarDTO> donacionSinSegmentarDTOS = this.obtenerDonacionesSinSegmentarDTO(personaJuridica.getDonaciones());
+            List<MisionDTO> misionesDTO = this.obtenerMisionesDTO(personaJuridica.getMisiones());
             PersonaDonanteDTO personaDTO = new PersonaDonanteDTO(
                                             null,
                                             null,
@@ -115,7 +143,7 @@ public class DonacionesServiceImpl implements DonacionesService {
     }
 
     @Override
-    public PersonaHumanaDTO crearDonanteHumanos(PersonaHumanaDTO body){
+    public PersonaHumanaDTO crearDonanteHumano(PersonaHumanaDTO body){
 
         PersonaHumana nuevaPersona = new PersonaHumana(
                 body.nombre(),
@@ -129,48 +157,181 @@ public class DonacionesServiceImpl implements DonacionesService {
         List<DonacionSinSegmentar> donaciones = this.convertirDonacionesDTO(body.donaciones());
         nuevaPersona.setDonaciones(donaciones);
 
-        this.donacionesRepository.save(nuevaPersona);
+        PersonaHumana humano= this.donacionesRepository.saveHumana(nuevaPersona);
 
-        List<DonacionSinSegmentarDTO> donacionesDTO = donacionesSinSegmentarDTO(nuevaPersona.getDonaciones());
+        List<DonacionSinSegmentarDTO> donacionesDTO = obtenerDonacionesSinSegmentarDTO(humano.getDonaciones());
         PersonaHumanaDTO nuevaPersonaDTO = new PersonaHumanaDTO(
-                nuevaPersona.getId(),
-                nuevaPersona.getNombre(),
-                nuevaPersona.getApellido(),
-                nuevaPersona.getNumeroDeDocumento(),
-                nuevaPersona.getGenero(),
-                nuevaPersona.getEdad(),
-                nuevaPersona.getDireccion(),
+                humano.getId(),
+                humano.getNombre(),
+                humano.getApellido(),
+                humano.getNumeroDeDocumento(),
+                humano.getGenero(),
+                humano.getEdad(),
+                humano.getDireccion(),
                 donacionesDTO
                 );
 
         return nuevaPersonaDTO;
     }
 
-    public List<DonacionSinSegmentarDTO> donacionesSinSegmentarDTO(List<DonacionSinSegmentar> donacionesSinSegmentar){
+    @Override
+    public DonacionSinSegmentarDTO crearDonacionDeJuridico(DonacionSinSegmentarDTO body, Long id){
+
+        PersonaJuridica personaJuridica = this.donacionesRepository.juridicaFindById(id);
+        if (personaJuridica == null) {
+            throw new RuntimeException("Persona juridica no encontrada");
+        }
+
+        List<Bien> bienes = this.convertirBienesDTO(body.bienes());
+        DonacionSinSegmentar nuevaDonacion = new DonacionSinSegmentar(bienes, LocalDateTime.now());
+
+        personaJuridica.agregarDonacion(nuevaDonacion);
+
+
+        List<BienDTO> bienesDTO = this.obtenerBienesDTO(nuevaDonacion.getBienes());
+        return new DonacionSinSegmentarDTO(bienesDTO, nuevaDonacion.getFechaDeIngreso(), nuevaDonacion.getDonacionEntregada());
+
+    }
+    @Override
+    public DonacionSinSegmentarDTO crearDonacionDeHumano(DonacionSinSegmentarDTO body, Long id){
+
+        PersonaHumana personaHumana = this.donacionesRepository.humanoFindById(id);
+
+        if (personaHumana == null) {
+            throw new RuntimeException("Persona humana no encontrada");
+        }
+
+        List<Bien> bienes = this.convertirBienesDTO(body.bienes());
+        DonacionSinSegmentar nuevaDonacion = new DonacionSinSegmentar(bienes, LocalDateTime.now());
+
+        personaHumana.agregarDonacion(nuevaDonacion);
+
+
+        List<BienDTO> bienesDTO = this.obtenerBienesDTO(nuevaDonacion.getBienes());
+        return new DonacionSinSegmentarDTO(bienesDTO, nuevaDonacion.getFechaDeIngreso(), nuevaDonacion.getDonacionEntregada());
+    }
+    @Override
+    public List<DonacionSinSegmentarDTO> modificarDonacionDeHumano(DonacionSinSegmentarDTO body, Long idHumano, Long idDonacion, Long idBien){
+        PersonaHumana personaHumana = this.donacionesRepository.humanoFindById(idHumano);
+        try{
+            DonacionSinSegmentar donacionAModificada = personaHumana.getDonaciones().get(idDonacion.intValue());
+            this.modificarDonacion(donacionAModificada,body,idBien);
+            List<DonacionSinSegmentarDTO> donacionSinSegmentarDTO = this.obtenerDonacionesSinSegmentarDTO(personaHumana.getDonaciones()); //voy a ver todas las donaciones del humano para reutilizar la funcion
+
+            return donacionSinSegmentarDTO;
+        }catch (RuntimeException e){
+            System.out.println(e.getMessage());
+            throw new RuntimeException("Donacion no encontrada");
+
+        }
+    }
+    @Override
+    public List<DonacionSinSegmentarDTO> modificarDonacionDeJuridica(DonacionSinSegmentarDTO body, Long idJuridica, Long idDonacion, Long idBien){
+
+        PersonaJuridica personaJuridica = this.donacionesRepository.juridicaFindById(idJuridica);
+        try{
+            DonacionSinSegmentar donacionAModificada = personaJuridica.getDonaciones().get(idDonacion.intValue());
+            this.modificarDonacion(donacionAModificada,body,idBien);
+            List<DonacionSinSegmentarDTO> donacionSinSegmentarDTO = this.obtenerDonacionesSinSegmentarDTO(personaJuridica.getDonaciones()); //voy a ver todas las donaciones del humano para reutilizar la funcion
+
+            return donacionSinSegmentarDTO;
+        }catch (RuntimeException e){
+            System.out.println(e.getMessage());
+            throw new RuntimeException("Donacion no encontrada");
+
+        }
+    }
+    @Override
+    public List<DonacionSinSegmentarDTO> eliminarDonacionDeHumano(Long idHumano, Long idDonacion){
+        PersonaHumana personaHumana = this.donacionesRepository.humanoFindById(idHumano);
+        try{
+            if(!personaHumana.getDonaciones().isEmpty() && idDonacion < personaHumana.getDonaciones().size()){
+                personaHumana.getDonaciones().remove(idDonacion.intValue());
+                List<DonacionSinSegmentarDTO> donacionesDTO = this.obtenerDonacionesSinSegmentarDTO(personaHumana.getDonaciones());
+                return donacionesDTO;
+            }
+            return null;
+        }
+        catch (RuntimeException e){
+            throw new RuntimeException("Donacion no encontrada para eliminar");
+        }
+    }
+    @Override
+    public List<DonacionSinSegmentarDTO> eliminarDonacionDeJuridico(Long idJuridico, Long idDonacion){
+        PersonaJuridica personaJuridica = this.donacionesRepository.juridicaFindById(idJuridico);
+        try{
+            if(!personaJuridica.getDonaciones().isEmpty() && idDonacion < personaJuridica.getDonaciones().size()){
+                personaJuridica.getDonaciones().remove(idDonacion.intValue());
+                List<DonacionSinSegmentarDTO> donacionesDTO = this.obtenerDonacionesSinSegmentarDTO(personaJuridica.getDonaciones());
+                return donacionesDTO;
+            }
+            return null;
+        }
+        catch (RuntimeException e){
+            throw new RuntimeException("Donacion no encontrada para eliminar");
+        }
+    }
+    public void modificarDonacion(DonacionSinSegmentar donacionAModificada,DonacionSinSegmentarDTO body, Long idBien){
+
+        if(body.fechaDeIngreso() != null){
+            donacionAModificada.setFechaDeIngreso(body.fechaDeIngreso());
+        }
+        if(body.donacionEntregada() != null){
+            throw new RuntimeException("No se puede modificar el estado de entrega de una donacion");
+        }
+        if(body.bienes() != null){
+            Bien bienAModificar = donacionAModificada.getBienes().get(idBien.intValue());
+            if(bienAModificar != null){
+                if (body.bienes().get(idBien.intValue()) != null) {
+                    BienDTO bienDTO = body.bienes().get(idBien.intValue());
+                    if(bienDTO.nombre() != null){
+                        bienAModificar.setNombre(bienDTO.nombre());
+                    }
+                    if(bienDTO.descripcion() != null){
+                        bienAModificar.setDescripcion(bienDTO.descripcion());
+                    }
+                    if(bienDTO.subcategoria() != null){
+                        SubcategoriaDTO subcategoriaDTO = bienDTO.subcategoria();
+                        if(subcategoriaDTO.nombre() != null){
+                            bienAModificar.getSubcategoria().setNombre(subcategoriaDTO.nombre());
+                        }
+                        if(subcategoriaDTO.esPerecedero() != null){
+                            bienAModificar.getSubcategoria().setEsPerecedero(subcategoriaDTO.esPerecedero());
+                        }
+                        if(subcategoriaDTO.categoria() != null){
+                            CategoriaDTO categoriaDTO = subcategoriaDTO.categoria();
+                            if(categoriaDTO.nombre() != null){
+                                bienAModificar.getSubcategoria().getCategoria().setNombre(categoriaDTO.nombre());
+                            }
+                        }
+                        if(bienDTO.fechaDeVencimiento() != null){
+                            bienAModificar.setFechaDeVencimiento(bienDTO.fechaDeVencimiento());
+                        }
+                        if (bienDTO.esUsado() != null) {
+                            bienAModificar.setEsUsado(bienDTO.esUsado());
+                        }
+                        if (bienDTO.tipoUnidad() != null) {
+                            bienAModificar.setTipoUnidad(bienDTO.tipoUnidad());
+                        }
+                        if (bienDTO.cantidad() != null) {
+                            bienAModificar.setCantidad(bienDTO.cantidad());
+                        }
+                    }
+                }
+            }else {
+                throw new RuntimeException("No existe ese bien en la lista de bienes");
+            }
+        }
+    }
+
+
+    public List<DonacionSinSegmentarDTO> obtenerDonacionesSinSegmentarDTO(List<DonacionSinSegmentar> donacionesSinSegmentar){
 
         List<DonacionSinSegmentarDTO> donaciones = donacionesSinSegmentar.stream().map(
                 donacion -> {
 
-                    List<BienDTO> bienesDTO =
-                            donacion.getBienes().stream()
-                                    .map(b -> new BienDTO(
-                                            b.getNombre(),
-                                            b.getDescripcion(),
-                                            new SubcategoriaDTO(
-                                                    b.getSubcategoria().getNombre(),
-                                                    b.getSubcategoria().getEsPerecedero(),
-                                                    new CategoriaDTO(
-                                                            b.getSubcategoria()
-                                                                    .getCategoria()
-                                                                    .getNombre()
-                                                    )
-                                            ),
-                                            b.getFechaDeVencimiento(),
-                                            b.getEsUsado(),
-                                            b.getTipoUnidad(),
-                                            b.getCantidad()
-                                    ))
-                                    .toList();
+                    List<BienDTO> bienesDTO = this.obtenerBienesDTO(donacion.getBienes());
+
 
                     return new DonacionSinSegmentarDTO(
                             bienesDTO,
@@ -185,25 +346,7 @@ public class DonacionesServiceImpl implements DonacionesService {
 
         List<DonacionSinSegmentar> donaciones = donacionesDTO.stream().map(
                 donacion -> {
-                    List<Bien> bienes =
-                            donacion.bienes().stream()
-                                    .map(b -> new Bien(
-                                            b.nombre(),
-                                            b.descripcion(),
-                                            null,
-                                            new Subcategoria(
-                                                    b.subcategoria().nombre(),
-                                                    b.subcategoria().esPerecedero(),
-                                                    new Categoria(
-                                                            b.subcategoria().categoria().nombre()
-                                                    )
-                                            ),
-                                            b.fechaDeVencimiento(),
-                                            b.esUsado(),
-                                            b.tipoUnidad(),
-                                            b.cantidad()
-                                    ))
-                                    .toList();
+                    List<Bien> bienes = this.convertirBienesDTO(donacion.bienes());
 
                     return new DonacionSinSegmentar(
                             bienes,
@@ -213,8 +356,52 @@ public class DonacionesServiceImpl implements DonacionesService {
 
         return donaciones;
     }
-    public List<MisionDTO> misionesDTO(List<Mision> misiones){
-        List<MisionDTO> misionesDTO = misiones.stream().map(m -> new MisionDTO(m.getNombre())).toList();
+    public List<MisionDTO> obtenerMisionesDTO(List<Mision> misiones){
+        List<MisionDTO> misionesDTO = misiones.stream().map(m -> new MisionDTO(m.getNombre(), m.getEstadoDeMision())).toList();
         return misionesDTO;
     }
+    public List<BienDTO> obtenerBienesDTO(List<Bien> bienes){
+        List<BienDTO> bienesDTO = bienes.stream()
+                .map(b -> new BienDTO(
+                        b.getNombre(),
+                        b.getDescripcion(),
+                        new SubcategoriaDTO(
+                                b.getSubcategoria().getNombre(),
+                                b.getSubcategoria().getEsPerecedero(),
+                                new CategoriaDTO(
+                                        b.getSubcategoria()
+                                                .getCategoria()
+                                                .getNombre()
+                                )
+                        ),
+                        b.getFechaDeVencimiento(),
+                        b.getEsUsado(),
+                        b.getTipoUnidad(),
+                        b.getCantidad()
+                ))
+                .toList();
+
+        return bienesDTO;
+    }
+    public List<Bien> convertirBienesDTO(List<BienDTO> bienesDTO){
+        List<Bien> bienes = bienesDTO.stream().map(b -> new Bien(
+                b.nombre(),
+                b.descripcion(),
+                null,
+                new Subcategoria(
+                        b.subcategoria().nombre(),
+                        b.subcategoria().esPerecedero(),
+                        new Categoria(
+                                b.subcategoria().categoria().nombre()
+                        )
+                ),
+                b.fechaDeVencimiento(),
+                b.esUsado(),
+                b.tipoUnidad(),
+                b.cantidad()
+        )).toList();
+        return bienes;
+    }
+
 }
+

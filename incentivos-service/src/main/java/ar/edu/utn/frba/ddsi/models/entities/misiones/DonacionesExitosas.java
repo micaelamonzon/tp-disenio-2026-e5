@@ -1,9 +1,10 @@
 package ar.edu.utn.frba.ddsi.models.entities.misiones;
 
 import ar.edu.utn.frba.ddsi.models.entities.donaciones.DonacionSinSegmentar;
+import lombok.Data;
 
 import java.util.List;
-
+@Data
 public class DonacionesExitosas implements Tipo{
 
     private Integer cantidadDeDonaciones;

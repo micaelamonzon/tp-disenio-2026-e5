@@ -38,16 +38,32 @@ public class DonacionesRepositoryImpl implements DonacionesRepository{
     }
 
     @Override
-    public PersonaJuridica save(PersonaJuridica donante){
-            Long id = Long.valueOf(juridicos.size());
-            donante.setId(id);
-            this.juridicos.add(donante);
+    public PersonaJuridica saveJuridica(PersonaJuridica donante){
+        if (donante.getId() != null) {
+            int index = juridicos.indexOf(donante);
+            if (index != -1) {
+                this.juridicos.set(index, donante);
 
-            return donante;
+                return donante;
+            }
+        }
+        Long id = Long.valueOf(juridicos.size() + 1);
+        donante.setId(id);
+        this.juridicos.add(donante);
+
+        return donante;
     }
     @Override
-    public PersonaHumana save(PersonaHumana donante){
-        Long id = Long.valueOf(humanos.size());
+    public PersonaHumana saveHumana(PersonaHumana donante) {
+        if (donante.getId() != null) {
+            int index = humanos.indexOf(donante);
+            if (index != -1) {
+                this.humanos.set(index, donante);
+
+                return donante;
+            }
+        }
+        Long id = Long.valueOf(humanos.size() + 1);
         donante.setId(id);
         this.humanos.add(donante);
 

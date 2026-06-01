@@ -1,6 +1,6 @@
 package ar.edu.utn.frba.ddsi.donaciones.dto;
 
-import ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante.CategoriaDonante;
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante.CategoriaDeDonante;
 
 import java.util.List;
 
@@ -17,7 +17,7 @@ public record PersonaDonanteDTO (
         String cuit,
         String razonSocial,
         List<MisionDTO> misiones,
-        CategoriaDonante categoria
+        CategoriaDeDonante categoria
 ){
 
 }

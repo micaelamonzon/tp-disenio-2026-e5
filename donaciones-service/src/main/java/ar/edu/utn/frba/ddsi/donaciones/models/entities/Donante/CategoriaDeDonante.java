@@ -1,6 +1,6 @@
 package ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante;
 
-public enum CategoriaDonante {
+public enum CategoriaDeDonante {
     COLABORADOR,
     SOSTENEDOR,
     TRANSFORMADOR

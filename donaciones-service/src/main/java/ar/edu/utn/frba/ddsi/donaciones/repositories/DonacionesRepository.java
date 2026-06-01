@@ -14,8 +14,8 @@ public interface DonacionesRepository {
     PersonaHumana humanoFindById(Long id);
     PersonaJuridica juridicaFindById(Long id);
 
-    PersonaJuridica save(PersonaJuridica donante);
-    PersonaHumana save(PersonaHumana donante);
+    PersonaJuridica saveJuridica(PersonaJuridica donante);
+    PersonaHumana saveHumana(PersonaHumana donante);
 
     void deleteJuridica(PersonaJuridica donante);
     void deleteHumana(PersonaHumana donante);

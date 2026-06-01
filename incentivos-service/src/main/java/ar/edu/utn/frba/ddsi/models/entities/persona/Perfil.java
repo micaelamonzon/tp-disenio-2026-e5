@@ -1,6 +1,6 @@
 package ar.edu.utn.frba.ddsi.models.entities.persona;
 
-import ar.edu.utn.frba.ddsi.models.entities.categorias.CategoriaColaborador;
+
 import ar.edu.utn.frba.ddsi.models.entities.categorias.CategoriaDeDonante;
 import ar.edu.utn.frba.ddsi.models.entities.donaciones.DonacionSinSegmentar;
 import lombok.Data;
@@ -27,6 +27,8 @@ public class Perfil {
     public void subirDeCategoria(CategoriaDeDonante categoria, List<DonacionSinSegmentar> donaciones){
         if(categoria.pasaSiguienteCategoria(donaciones)){
             this.categoria = categoria;
+        }else{
+            throw new RuntimeException("Ya no podes subir de categoria, estas en la ultima categoria");
         }
     }
 

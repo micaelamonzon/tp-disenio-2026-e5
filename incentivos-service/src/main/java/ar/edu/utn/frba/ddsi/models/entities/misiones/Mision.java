@@ -23,7 +23,7 @@ public class Mision {
     public Boolean seCompletoLaMision(List<DonacionSinSegmentar> donaciones){
         Boolean seCompleto = tipo.seCompletoLaMision(donaciones);
             if(seCompleto){
-                this.estadoDeMision = EstadoDeMision.DESBLOQUEADA;
+                this.estadoDeMision = EstadoDeMision.COMPLETADA;
                 this.fechaCompletada = LocalDate.now();
             }else{
                 this.estadoDeMision = EstadoDeMision.BLOQUEADA;

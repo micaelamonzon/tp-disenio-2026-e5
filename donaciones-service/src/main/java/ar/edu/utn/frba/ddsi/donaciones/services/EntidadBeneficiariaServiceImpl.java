@@ -5,9 +5,11 @@ import ar.edu.utn.frba.ddsi.donaciones.dto.RepresentanteDTO;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante.Representante;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.Necesidad.EntidadBeneficiaria;
 import ar.edu.utn.frba.ddsi.donaciones.repositories.EntidadBeneficiariaRepository;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
 public class EntidadBeneficiariaServiceImpl implements EntidadBeneficiariaService{
     private final EntidadBeneficiariaRepository entidadBeneficiariaRepository;
 

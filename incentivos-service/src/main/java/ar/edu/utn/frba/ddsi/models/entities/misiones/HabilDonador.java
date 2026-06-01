@@ -2,10 +2,12 @@ package ar.edu.utn.frba.ddsi.models.entities.misiones;
 
 import ar.edu.utn.frba.ddsi.models.entities.donaciones.DonacionSinSegmentar;
 import ar.edu.utn.frba.ddsi.models.entities.persona.Bien;
+import lombok.Data;
 
 import java.util.List;
 import java.util.Optional;
 
+@Data
 public class HabilDonador implements Tipo{
 
     private String nombre;
