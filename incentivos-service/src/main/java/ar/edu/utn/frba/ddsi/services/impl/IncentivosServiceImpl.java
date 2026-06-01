@@ -123,7 +123,6 @@ public class IncentivosServiceImpl implements IncentivosService {
     @Override
     public String publicarYDifundirInsignia(Long id, Insignia insignia) {
 
-        // Buscás el donante en el repositorio en memoria
         Donante donante = incentivosRepository.findAllDonantes()
                 .stream()
                 .filter(d -> d.getId() != null && d.getId().equals(id))
@@ -137,7 +136,6 @@ public class IncentivosServiceImpl implements IncentivosService {
     @Override
     public void calcularYGuardarRanking() {
 
-        // Traés todos los donantes del repositorio en memoria
         List<Donante> todosLosDonantes = incentivosRepository.findAllDonantes();
 
         YearMonth mesPasado = YearMonth.now().minusMonths(1);
