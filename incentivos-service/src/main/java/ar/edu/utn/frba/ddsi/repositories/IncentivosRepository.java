@@ -8,6 +8,7 @@ import java.util.Optional;
 public interface IncentivosRepository {
     void guardarDonante(Donante donante);
     List<Donante> findAllDonantes();
+    Donante buscarDonantePorId(Long id);
 // tal vez esto sirva para las metricas
 
 //    List<Object> findAll();

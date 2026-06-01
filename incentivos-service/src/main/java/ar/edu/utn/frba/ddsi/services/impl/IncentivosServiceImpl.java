@@ -6,6 +6,7 @@ import ar.edu.utn.frba.ddsi.dto.InsigniaDTO;
 import ar.edu.utn.frba.ddsi.dto.MisionDTO;
 import ar.edu.utn.frba.ddsi.dto.PersonaDonanteDTO;
 import ar.edu.utn.frba.ddsi.models.entities.donaciones.DonacionSinSegmentar;
+import ar.edu.utn.frba.ddsi.models.entities.misiones.EstadoDeMision;
 import ar.edu.utn.frba.ddsi.models.entities.misiones.Mision;
 import ar.edu.utn.frba.ddsi.models.entities.persona.*;
 import ar.edu.utn.frba.ddsi.repositories.IncentivosRepository;
@@ -54,12 +55,12 @@ public class IncentivosServiceImpl implements IncentivosService {
 
         Donante nuevoDonante = new Donante(null,null,personaDonante.nombre(),personaDonante.apellido(),personaDonante.edad(),personaDonante.DNI(),personaDonante.genero(),personaDonante.direccion(),donaciones,misiones,personaDonante.categoria());
 
-        incentivosRepository.guardarDonante(nuevoDonante);
+        this.incentivosRepository.guardarDonante(nuevoDonante);
 
         nuevoDonante.getMisiones().forEach(m->nuevoDonante.getCategoria().agregarMision(m));
 
         List<Mision> misionesCompletadas = nuevoDonante.getCategoria().obtenerMisionesCompletadas(nuevoDonante.getDonaciones());
-        List <MisionDTO> misionesCompletadasDTO = misionesCompletadas.stream().map(m -> new MisionDTO(m.getNombre(), m.getEstadoDeMision())).toList();
+        List <MisionDTO> misionesCompletadasDTO = this.obtenerMisionDTO(misionesCompletadas);
 
         return  misionesCompletadasDTO;
     }
@@ -80,25 +81,42 @@ public class IncentivosServiceImpl implements IncentivosService {
 
         Donante nuevoDonante = new Donante(personaDonante.cuit(),personaDonante.razonSocial(),null,null,null,null,null,null,donaciones,misiones,personaDonante.categoria());
 
-        incentivosRepository.guardarDonante(nuevoDonante);
+        this.incentivosRepository.guardarDonante(nuevoDonante);
 
         nuevoDonante.getMisiones().forEach(m->nuevoDonante.getCategoria().agregarMision(m));
 
         List<Mision> misionesCompletadas = nuevoDonante.getCategoria().obtenerMisionesCompletadas(nuevoDonante.getDonaciones());
-        List <MisionDTO> misionesCompletadasDTO = misionesCompletadas.stream().map(m -> new MisionDTO(m.getNombre(), m.getEstadoDeMision())).toList();
+        List <MisionDTO> misionesCompletadasDTO = this.obtenerMisionDTO(misionesCompletadas);
 
         return  misionesCompletadasDTO;
     }
 
     @Override
     public List<InsigniaDTO> buscarInsigniasPorId(Long id){
+        Donante donante = this.incentivosRepository.buscarDonantePorId(id);
+            if (donante == null){
+                throw new RuntimeException("No se encontro el donante con id: " + id);
+            }
+            List<InsigniaDTO> insigniasDTO = this.obtenerInsigniasDTO(donante);
 
-        return null;
+            return insigniasDTO;
     }
 
     @Override
     public MisionDTO buscarMisionActualPorId(Long id){
-        return null;
+        Donante donante = this.incentivosRepository.buscarDonantePorId(id);
+        if (donante == null){
+            throw new RuntimeException("No se encontro el donante con id: " + id);
+        }
+            Mision misionActual = donante.getMisiones().stream().filter(m -> m.getEstadoDeMision() == EstadoDeMision.ACTUAL)
+                    .findFirst()
+                    .orElse(null);
+                if (misionActual == null){
+                    throw new RuntimeException("No se encontro una mision actual para el donante con id: " + id);
+                }
+            MisionDTO misionActualDTO = new MisionDTO(misionActual.getNombre(), misionActual.getEstadoDeMision());
+
+            return misionActualDTO;
     }
 
     @Override
@@ -182,5 +200,13 @@ public class IncentivosServiceImpl implements IncentivosService {
         List<Mision> misiones = misionesDTO.stream().map(m -> new Mision(m.nombre())).toList();
 
         return misiones;
+    }
+
+    public List<MisionDTO> obtenerMisionDTO(List<Mision> misiones){
+        return misiones.stream().map(m -> new MisionDTO(m.getNombre(), m.getEstadoDeMision())).toList();
+    }
+    public List<InsigniaDTO> obtenerInsigniasDTO(Donante donante){
+        List<InsigniaDTO> insigniasDTO =  donante.getPerfil().getInsignias().stream().map(i -> new InsigniaDTO(i.getNombre(), i.texto())).toList();
+        return insigniasDTO;
     }
 }

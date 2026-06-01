@@ -25,4 +25,9 @@ public class repositorioEnMemoria implements IncentivosRepository {
     public List<Donante> findAllDonantes() {
         return donantes;
     }
+
+    @Override
+    public Donante buscarDonantePorId(Long id){
+        return donantes.stream().filter(d -> d.getId().equals(id)).findFirst().orElse(null);
+    }
 }

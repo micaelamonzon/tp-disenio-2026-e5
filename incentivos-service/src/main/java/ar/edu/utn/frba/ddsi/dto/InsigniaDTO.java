@@ -1,6 +1,7 @@
 package ar.edu.utn.frba.ddsi.dto;
 
 public record InsigniaDTO(
-        String texto
+        String nombre,
+        String emojin
 ) {
 }

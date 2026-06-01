@@ -38,12 +38,23 @@ public class IncentivosController {
     }
     //Obtención de las insignias para una persona donante.
     @GetMapping("{id}/insignias")
+    @ResponseStatus(HttpStatus.ACCEPTED)
     public List<InsigniaDTO> obtenerInsignias(@PathVariable Long id){
-        return incentivosService.buscarInsigniasPorId(id);
+        try{
+            return incentivosService.buscarInsigniasPorId(id);
+        }catch(RuntimeException e){
+            throw new RuntimeException("Error al obtener las insignias porque " + e.getMessage());
+        }
+
     }
     @GetMapping("{id}/misionActual")
+    @ResponseStatus(HttpStatus.ACCEPTED)
     public MisionDTO obtenerMisionEnCurso(@PathVariable Long id){
-        return incentivosService.buscarMisionActualPorId(id);
+        try{
+            return incentivosService.buscarMisionActualPorId(id);
+        }catch(RuntimeException e){
+            throw new RuntimeException("Error al obtener la mision actual porque " + e.getMessage());
+        }
     }
 
     @GetMapping("/verificarMision/{idPersona}")
