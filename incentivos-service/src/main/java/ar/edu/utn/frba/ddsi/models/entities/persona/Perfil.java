@@ -4,12 +4,16 @@ import ar.edu.utn.frba.ddsi.models.entities.categorias.CategoriaColaborador;
 import ar.edu.utn.frba.ddsi.models.entities.categorias.CategoriaDeDonante;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class Perfil {
     Insignia insignia;
     Boolean insigniaPrivada;
     String nombreDeUsuario;
     CategoriaDeDonante categoria;
+    Integer totalHistoricoPorPeriodo;
+    List<MetricaMensual> evolucionMensual;
 
     public Perfil (Insignia insignia, Boolean insigniaPrivada, String nombreDeUsuario, CategoriaDeDonante categoria) {
         this.insignia = insignia;
