@@ -6,6 +6,7 @@ import ar.edu.utn.frba.ddsi.models.entities.persona.Categoria;
 import java.util.List;
 
 public record MisionDTO(
-       String nombre
+       String nombre,
+       EstadoDeMision estado
 ) {
 }

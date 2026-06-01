@@ -1,13 +1,30 @@
 package ar.edu.utn.frba.ddsi.models.entities.misiones;
 
-import ar.edu.utn.frba.ddsi.models.entities.persona.Tipo;
+import ar.edu.utn.frba.ddsi.models.entities.donaciones.DonacionSinSegmentar;
+import ar.edu.utn.frba.ddsi.models.entities.misiones.Tipo;
+import ar.edu.utn.frba.ddsi.models.entities.persona.Insignia;
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 public class Mision {
     String nombre;
     Tipo tipo;
+    Insignia insigniaGanadora;
+    EstadoDeMision estadoDeMision;
+
     public Mision(String nombre){
         this.nombre = nombre;
+    }
+
+    public Boolean seCompletoLaMision(List<DonacionSinSegmentar> donaciones){
+        Boolean seCompleto = tipo.seCompletoLaMision(donaciones);
+            if(seCompleto){
+                this.estadoDeMision = EstadoDeMision.DESBLOQUEADA;
+            }else{
+                this.estadoDeMision = EstadoDeMision.BLOQUEADA;
+            }
+        return seCompleto;
     }
 }

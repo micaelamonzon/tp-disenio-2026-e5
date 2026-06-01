@@ -10,11 +10,13 @@ import java.util.List;
 @Data
 public class DonacionSinSegmentar {
     private List<Bien> bienes;
-    LocalDateTime fechaDeIngreso;
+    private LocalDateTime fechaDeIngreso;
+    private Boolean donacionEntregada;
 
-    public DonacionSinSegmentar(List<Bien> bienes,LocalDateTime fechaDeIngreso){
+    public DonacionSinSegmentar(List<Bien> bienes,LocalDateTime fechaDeIngreso,Boolean donacionEntregada){
         this.bienes = bienes;
         this.fechaDeIngreso = fechaDeIngreso;
+        this.donacionEntregada = donacionEntregada;
     }
     public void agregarBien(Bien bien){
         this.bienes.add(bien);

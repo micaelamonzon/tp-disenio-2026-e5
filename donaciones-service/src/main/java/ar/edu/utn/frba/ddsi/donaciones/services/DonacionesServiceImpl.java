@@ -1,5 +1,4 @@
 package ar.edu.utn.frba.ddsi.donaciones.services;
-
 import ar.edu.utn.frba.ddsi.donaciones.dto.BienDTO;
 import ar.edu.utn.frba.ddsi.donaciones.dto.CategoriaDTO;
 import ar.edu.utn.frba.ddsi.donaciones.dto.DonacionSinSegmentarDTO;
@@ -80,7 +79,9 @@ public class DonacionesServiceImpl implements DonacionesService {
                                         donacionSinSegmentarDTOS,
                                         null,
                                         null,
-                                        misionesDTO);
+                                        misionesDTO,
+                                        personaHumana.getCategoria()
+                                        );
             return personaDTO;
         }
         throw new RuntimeException("Persona humana no encontrada");
@@ -104,7 +105,8 @@ public class DonacionesServiceImpl implements DonacionesService {
                                             donacionSinSegmentarDTOS,
                                             personaJuridica.getCuit(),
                                             personaJuridica.getRazonSocial(),
-                                            misionesDTO
+                                            misionesDTO,
+                                            personaJuridica.getCategoria()
                                             );
 
             return personaDTO;
@@ -172,7 +174,8 @@ public class DonacionesServiceImpl implements DonacionesService {
 
                     return new DonacionSinSegmentarDTO(
                             bienesDTO,
-                            donacion.getFechaDeIngreso()
+                            donacion.getFechaDeIngreso(),
+                            donacion.getDonacionEntregada()
                     );
                 }).toList();
 

@@ -27,6 +27,7 @@ public class PersonaHumana{
     private MedioDeNotificacion medioDeNotificacionPredeterminado;
     private List<DonacionSinSegmentar> donaciones = new ArrayList<>(); //al acceder a esta donacion sabremoscuales salieron
     private List<Mision> misiones = new ArrayList<>();
+    private CategoriaDonante categoria;
 
     public PersonaHumana(String nombre,String apellido,Integer edad,Integer numeroDeDocumento,String genero,String direccion) {
         this.nombre = nombre;

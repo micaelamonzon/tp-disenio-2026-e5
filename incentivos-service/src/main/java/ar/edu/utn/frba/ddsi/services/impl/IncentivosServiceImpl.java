@@ -52,11 +52,16 @@ public class IncentivosServiceImpl implements IncentivosService {
 
         List<Mision> misiones = this.convertirMisionesDTO(personaDonante.misiones());
 
-        Donante nuevoDonante = new Donante(null,null,personaDonante.nombre(),personaDonante.apellido(),personaDonante.edad(),personaDonante.DNI(),personaDonante.genero(),personaDonante.direccion(),donaciones,misiones);
+        Donante nuevoDonante = new Donante(null,null,personaDonante.nombre(),personaDonante.apellido(),personaDonante.edad(),personaDonante.DNI(),personaDonante.genero(),personaDonante.direccion(),donaciones,misiones,personaDonante.categoria());
 
         incentivosRepository.guardarDonante(nuevoDonante);
 
-        return  null;
+        nuevoDonante.getMisiones().forEach(m->nuevoDonante.getCategoria().agregarMision(m));
+
+        List<Mision> misionesCompletadas = nuevoDonante.getCategoria().obtenerMisionesCompletadas(nuevoDonante.getDonaciones());
+        List <MisionDTO> misionesCompletadasDTO = misionesCompletadas.stream().map(m -> new MisionDTO(m.getNombre(), m.getEstadoDeMision())).toList();
+
+        return  misionesCompletadasDTO;
     }
     @Override
     public List<MisionDTO> obtenerDonanteJuridico(Long id){
@@ -73,10 +78,16 @@ public class IncentivosServiceImpl implements IncentivosService {
 
         List<Mision> misiones = this.convertirMisionesDTO(personaDonante.misiones());
 
-        Donante nuevoDonante = new Donante(personaDonante.cuit(),personaDonante.razonSocial(),null,null,null,null,null,null,donaciones,misiones);
+        Donante nuevoDonante = new Donante(personaDonante.cuit(),personaDonante.razonSocial(),null,null,null,null,null,null,donaciones,misiones,personaDonante.categoria());
 
         incentivosRepository.guardarDonante(nuevoDonante);
-        return  null;
+
+        nuevoDonante.getMisiones().forEach(m->nuevoDonante.getCategoria().agregarMision(m));
+
+        List<Mision> misionesCompletadas = nuevoDonante.getCategoria().obtenerMisionesCompletadas(nuevoDonante.getDonaciones());
+        List <MisionDTO> misionesCompletadasDTO = misionesCompletadas.stream().map(m -> new MisionDTO(m.getNombre(), m.getEstadoDeMision())).toList();
+
+        return  misionesCompletadasDTO;
     }
 
     @Override
@@ -143,7 +154,6 @@ public class IncentivosServiceImpl implements IncentivosService {
                                     .map(b -> new Bien(
                                             b.nombre(),
                                             b.descripcion(),
-                                            null,
                                             new Subcategoria(
                                                     b.subcategoria().nombre(),
                                                     b.subcategoria().esPerecedero(),
@@ -160,7 +170,8 @@ public class IncentivosServiceImpl implements IncentivosService {
 
                     return new DonacionSinSegmentar(
                             bienes,
-                            donacion.fechaDeIngreso()
+                            donacion.fechaDeIngreso(),
+                            donacion.donacionEntregada()
                     );
                 }).toList();
 

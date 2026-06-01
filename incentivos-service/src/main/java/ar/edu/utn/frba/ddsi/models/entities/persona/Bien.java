@@ -1,7 +1,10 @@
 package ar.edu.utn.frba.ddsi.models.entities.persona;
 
+import lombok.Data;
+
 import java.time.LocalDateTime;
 
+@Data
 public class Bien {
     private String nombre;
     private String descripcion;
@@ -11,10 +14,9 @@ public class Bien {
     private Unidad tipoUnidad;
     private Integer cantidad;
 
-    public Bien(String nombre, String descripcion, Foto foto, Subcategoria subcategoria, LocalDateTime fechaDeVencimiento, EstadoDeUso esUsado, Unidad tipoUnidad, Integer cantidad) {
+    public Bien(String nombre, String descripcion, Subcategoria subcategoria, LocalDateTime fechaDeVencimiento, EstadoDeUso esUsado, Unidad tipoUnidad, Integer cantidad) {
         this.nombre = nombre;
         this.descripcion = descripcion;
-        this.foto = foto;
         this.subcategoria = subcategoria;
         this.fechaDeVencimiento = fechaDeVencimiento;
         this.esUsado = esUsado;

@@ -1,7 +1,7 @@
 package ar.edu.utn.frba.ddsi.models.entities.misiones;
 
 public enum EstadoDeMision {
-    COMPLETADA,
+    DESBLOQUEADA,
     BLOQUEADA,
-    ABANDONADA
+    ACTUAL
 }

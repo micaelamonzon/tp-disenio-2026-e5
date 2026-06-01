@@ -20,6 +20,7 @@ public class PersonaJuridica{
     private List<MedioDeNotificacion> mediosDeNotificacion = new ArrayList<>();
     private List<DonacionSinSegmentar> donaciones = new ArrayList<>();
     private List<Mision> misiones = new ArrayList<>();
+    private CategoriaDonante categoria;
 
     public PersonaJuridica(String cuit,String razonSocial,Tipo tipo, String rubro) {
         this.cuit = cuit;

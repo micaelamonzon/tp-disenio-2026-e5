@@ -2,6 +2,7 @@ package ar.edu.utn.frba.ddsi.models.entities.persona;
 
 import ar.edu.utn.frba.ddsi.models.entities.categorias.CategoriaColaborador;
 import ar.edu.utn.frba.ddsi.models.entities.categorias.CategoriaDeDonante;
+import ar.edu.utn.frba.ddsi.models.entities.donaciones.DonacionSinSegmentar;
 import lombok.Data;
 
 import java.util.List;
@@ -22,8 +23,8 @@ public class Perfil {
         this.categoria = categoria;
     }
 
-    public void subirDeCategoria(CategoriaDeDonante categoria){
-        if(categoria.cumplioTodasLasMisiones()){
+    public void subirDeCategoria(CategoriaDeDonante categoria, List<DonacionSinSegmentar> donaciones){
+        if(categoria.pasaSiguienteCategoria(donaciones)){
             this.categoria = categoria;
         }
     }

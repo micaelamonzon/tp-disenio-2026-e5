@@ -5,7 +5,8 @@ import java.util.List;
 
 public record DonacionSinSegmentarDTO(
         List<BienDTO> bienes,
-        LocalDateTime fechaDeIngreso
+        LocalDateTime fechaDeIngreso,
+        Boolean donacionEntregada
 )
 {
 }
