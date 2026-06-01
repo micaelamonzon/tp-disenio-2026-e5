@@ -5,19 +5,33 @@ import ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante.PersonaHumana;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante.PersonaJuridica;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.Bien;
 import lombok.Data;
+import lombok.Getter;
+import org.springframework.cglib.core.Local;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 
 @Data
+@Getter
 public class DonacionSinSegmentar {
 
-  private ArrayList<Bien> bienes = new ArrayList<>();
-  private ArrayList<DonacionSegmentada> donacionesSegmentadas = new ArrayList<>();
+  private List<Bien> bienes = new ArrayList<>();
+  private List<DonacionSegmentada> donacionesSegmentadas = new ArrayList<>();
+  private LocalDateTime fechaDeIngreso;
+  private Boolean donacionEntregada = false;
 
+  public DonacionSinSegmentar(List<Bien> bienes,LocalDateTime fechaDeIngreso){
+    this.bienes = bienes;
+    this.fechaDeIngreso = fechaDeIngreso;
+  }
   public void agregarBien(Bien bien){
     this.bienes.add(bien);
   }
   public void agregarDonacionSegmentada(DonacionSegmentada donacion) {
     this.donacionesSegmentadas.add(donacion);
+  }
+  public void verificarSiDonacionFueEntregada(){
+      this.setDonacionEntregada(donacionesSegmentadas.stream().allMatch( m -> m.getEntregadaAEntidad() == Boolean.TRUE));
   }
 }

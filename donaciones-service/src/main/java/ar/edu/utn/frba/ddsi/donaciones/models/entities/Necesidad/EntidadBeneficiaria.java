@@ -8,6 +8,7 @@ import java.util.ArrayList;
 
 @Data
 public class EntidadBeneficiaria {
+    private Long id;
     private String razonSocial;
     private String direccion;
     private Integer telefono;

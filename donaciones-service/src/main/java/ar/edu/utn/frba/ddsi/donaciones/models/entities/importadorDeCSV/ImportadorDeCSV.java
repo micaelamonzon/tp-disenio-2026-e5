@@ -21,8 +21,8 @@ import java.io.IOException;
 @Data
 public class ImportadorDeCSV{
 
-    ArrayList<PersonaHumana> donantesHumanos = new ArrayList<>();
-    ArrayList<PersonaJuridica> donantesJuridicos = new ArrayList<>();
+    private ArrayList<PersonaHumana> donantesHumanos = new ArrayList<>();
+    private ArrayList<PersonaJuridica> donantesJuridicos = new ArrayList<>();
 
    public Void importarCsv(String path) throws IOException, CsvValidationException{
 
@@ -119,62 +119,6 @@ public class ImportadorDeCSV{
 
 
 
-//    public ArrayList<Donante> importarCsv(String path) {
-//
-//        ArrayList<Donante> donantes = new ArrayList<>();
-//
-//        String linea;
-//        String separador = ",";
-//        String esHumano = "HUMANA";
-//        String esJuridica = "JURIDICA";
-//        String esEncabezado = "TipoPersona";
-//
-//        try (BufferedReader br = new BufferedReader(new FileReader(path))) {
-//
-//            while ((linea = br.readLine()) != null) { // HUMANA, DNI, Ana Navarro,45924197 ,anna@mail , +1121747299
-//
-//                String[] datos = linea.split(separador);  // datos es un vector/array que tiene los datos del registro. En donde
-//                //cada valor de cada celda está guardada en un sub-indice del array/vector
-//                //[HUMANA, DNI, Ana Navarro,45924197 ,anna@mail , +1121747299]
-//
-//                if(datos[0].equals(esEncabezado)){
-//                    continue;
-//                }
-//                if (datos[0].equals(esHumano)) {
-//
-//                    String[] nombreYapellido = datos[3].split(" "); // [Ana, Navarro]
-//                    Donante nuevoDonante = new PersonaHumana(nombreYapellido[0], nombreYapellido[1], null, null, null, null);
-//
-//                    MedioDeNotificacion medioEmail = new Email(datos[4]);
-//                    MedioDeNotificacion medioTelefono = new SMS(datos[5]);
-//
-//                    nuevoDonante.mediosDeNotificaciones(medioEmail);
-//                    nuevoDonante.mediosDeNotificaciones(medioTelefono);
-//
-//                    donantes.add(nuevoDonante);
-//
-//                } else if (datos[0].equals(esJuridica)) {
-//                    Tipo tipoIdentificado = identificarTipo(datos[2]);
-//                    Donante nuevoDonante = new PersonaJuridica(datos[2], datos[3], tipoIdentificado, null);
-//
-//                    MedioDeNotificacion medioEmail = new Email(datos[4]);
-//                    MedioDeNotificacion medioTelefono = new SMS(datos[5]);
-//
-//                    nuevoDonante.mediosDeNotificaciones(medioEmail);
-//                    nuevoDonante.mediosDeNotificaciones(medioTelefono);
-//
-//                    donantes.add(nuevoDonante);
-//                }
-//
-//
-//            }
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
-//
-//        return donantes;
-//    }
-//
-//
+
 
 

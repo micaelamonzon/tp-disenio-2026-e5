@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-
+@Getter
 @Data
 public class Bien {
     private String nombre;
@@ -31,7 +31,7 @@ public class Bien {
         this.cantidad = cantidad;
     }
     public boolean sePuedeDonar(){
-        if(subcategoria.isEsPerecedero()){
+        if(subcategoria.getEsPerecedero()){
             return this.getFechaDeVencimiento().isAfter(LocalDateTime.now());
         }
         if(this.getEsUsado() != null){
