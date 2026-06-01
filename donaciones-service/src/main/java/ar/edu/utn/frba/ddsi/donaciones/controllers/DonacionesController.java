@@ -145,5 +145,13 @@ public class DonacionesController {
         return personaHumanaDTO;
     }
 
+    @GetMapping("obtenerDonantes")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public List<PersonaDonanteDTO> obtenerTodosLosDonantesUnificados(){
+        List<PersonaDonanteDTO> donantesDTOS = this.donacionesService.obtenerTodosLosDonantesUnificados();
+        return donantesDTOS;
+    }
 }
+
+
 

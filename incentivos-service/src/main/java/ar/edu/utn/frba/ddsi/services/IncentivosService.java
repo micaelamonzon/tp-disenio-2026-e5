@@ -23,4 +23,6 @@ public interface IncentivosService {
     void calcularYGuardarRanking();
 
     MetricasImpactoDTO obtenerMetricasDeImpacto(Long idDonante);
+
+    public String procesarLogro(Long id, Insignia insignia, boolean esHumana);
 }

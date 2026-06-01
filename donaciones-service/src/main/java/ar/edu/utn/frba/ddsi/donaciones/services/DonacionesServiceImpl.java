@@ -20,6 +20,7 @@ import ar.edu.utn.frba.ddsi.donaciones.repositories.DonacionesRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -401,6 +402,21 @@ public class DonacionesServiceImpl implements DonacionesService {
                 b.cantidad()
         )).toList();
         return bienes;
+    }
+    public List<PersonaDonanteDTO> obtenerTodosLosDonantesUnificados() {
+        List<PersonaHumana> humanas = donacionesRepository.findAllHumanos();
+        List<PersonaJuridica> juridicas = donacionesRepository.findAllJuridicos();
+
+        List<PersonaDonanteDTO> dtos = new ArrayList<>();
+        humanas.forEach(h -> dtos.add(new PersonaDonanteDTO(h.getId(), h.getNombre(), h.getApellido(), h.getNumeroDeDocumento(), h.getGenero(),
+                h.getEdad(), h.getDireccion(), null,
+                null, null, null, null, null
+        )));
+        juridicas.forEach(j -> dtos.add(new PersonaDonanteDTO(
+                null, null, null, null, null, null, null, j.getId(),
+                null, j.getCuit(), j.getRazonSocial(), null, null
+        )));
+        return dtos;
     }
 
 }

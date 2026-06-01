@@ -2,6 +2,7 @@ package ar.edu.utn.frba.ddsi.donaciones.repositories;
 
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante.PersonaHumana;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante.PersonaJuridica;
+import ar.edu.utn.frba.ddsi.donaciones.utils.GeneradorIdSecuencial;
 import lombok.Data;
 import org.springframework.stereotype.Repository;
 
@@ -16,6 +17,11 @@ public class DonacionesRepositoryImpl implements DonacionesRepository{
     private final List<PersonaHumana> humanos = new ArrayList<>();
     private final List<PersonaJuridica> juridicos = new ArrayList<>();
 
+    private final GeneradorIdSecuencial generadorId;
+
+    public DonacionesRepositoryImpl(GeneradorIdSecuencial generadorId) {
+        this.generadorId = generadorId;
+    }
 
     @Override
     public List<PersonaHumana> findAllHumanos(){
@@ -47,8 +53,7 @@ public class DonacionesRepositoryImpl implements DonacionesRepository{
                 return donante;
             }
         }
-        Long id = Long.valueOf(juridicos.size() + 1);
-        donante.setId(id);
+        donante.setId(generadorId.siguiente());
         this.juridicos.add(donante);
 
         return donante;
@@ -63,8 +68,7 @@ public class DonacionesRepositoryImpl implements DonacionesRepository{
                 return donante;
             }
         }
-        Long id = Long.valueOf(humanos.size() + 1);
-        donante.setId(id);
+        donante.setId(generadorId.siguiente());
         this.humanos.add(donante);
 
         return donante;

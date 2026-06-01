@@ -55,7 +55,7 @@ public class IncentivosServiceImpl implements IncentivosService {
 
         List<Mision> misiones = this.convertirMisionesDTO(personaDonante.misiones());
 
-        Donante nuevoDonante = new Donante(null,null,personaDonante.nombre(),personaDonante.apellido(),personaDonante.edad(),personaDonante.DNI(),personaDonante.genero(),personaDonante.direccion(),donaciones,misiones,new CategoriaDeDonante(personaDonante.categoria()));
+        Donante nuevoDonante = new Donante(personaDonante.id(),null,null, personaDonante.nombre(),personaDonante.apellido(),personaDonante.edad(),personaDonante.DNI(),personaDonante.genero(),personaDonante.direccion(),donaciones,misiones,new CategoriaDeDonante(personaDonante.categoria()));
 
         this.incentivosRepository.guardarDonante(nuevoDonante);
 
@@ -81,7 +81,7 @@ public class IncentivosServiceImpl implements IncentivosService {
 
         List<Mision> misiones = this.convertirMisionesDTO(personaDonante.misiones());
 
-        Donante nuevoDonante = new Donante(personaDonante.cuit(),personaDonante.razonSocial(),null,null,null,null,null,null,donaciones,misiones,new CategoriaDeDonante(personaDonante.categoria()));
+        Donante nuevoDonante = new Donante(personaDonante.id(),personaDonante.cuit(),personaDonante.razonSocial(),null,null,null,null,null,null,donaciones,misiones,new CategoriaDeDonante(personaDonante.categoria()));
 
         this.incentivosRepository.guardarDonante(nuevoDonante);
 
@@ -116,23 +116,16 @@ public class IncentivosServiceImpl implements IncentivosService {
                 if (misionActual == null){
                     throw new RuntimeException("No se encontro una mision actual para el donante con id: " + id);
                 }
-            MisionDTO misionActualDTO = new MisionDTO(misionActual.getNombre(), misionActual.getEstadoDeMision());
+            MisionDTO misionActualDTO = new MisionDTO(misionActual.getNombre(), misionActual.getEstadoDeMision(),misionActual.getFechaCompletada());
 
             return misionActualDTO;
     }
 
     @Override
     public String publicarYDifundirInsignia(Long id, Insignia insignia) {
+        Donante donante = incentivosRepository.buscarDonantePorId(id);
 
-        Donante donante = incentivosRepository.findAllDonantes()
-                .stream()
-                .filter(d -> d.getId() != null && d.getId().equals(id))
-                .findFirst()
-                .orElse(null);
-
-        if (donante == null) return null;
-
-        return publicadorService.publicarYDifundirInsignia(donante, insignia);
+        return publicadorService.publicarYDifundirInsignia(donante.getNombre(), insignia);
     }
     @Override
     public void calcularYGuardarRanking() {
@@ -162,6 +155,7 @@ public class IncentivosServiceImpl implements IncentivosService {
         return ultimoRanking;
     }
 
+
     public List<DonacionSinSegmentar> convertirDonacionesDTO(List<DonacionSinSegmentarDTO> donacionesDTO){
 
         List<DonacionSinSegmentar> donaciones = donacionesDTO.stream().map(
@@ -188,7 +182,8 @@ public class IncentivosServiceImpl implements IncentivosService {
                     return new DonacionSinSegmentar(
                             bienes,
                             donacion.fechaDeIngreso(),
-                            donacion.donacionEntregada()
+                            donacion.donacionEntregada(),
+                            donacion.organizacionId()
                     );
                 }).toList();
 
@@ -202,7 +197,7 @@ public class IncentivosServiceImpl implements IncentivosService {
     }
 
     public List<MisionDTO> obtenerMisionDTO(List<Mision> misiones){
-        return misiones.stream().map(m -> new MisionDTO(m.getNombre(), m.getEstadoDeMision())).toList();
+        return misiones.stream().map(m -> new MisionDTO(m.getNombre(), m.getEstadoDeMision(),m.getFechaCompletada())).toList();
     }
     public List<InsigniaDTO> obtenerInsigniasDTO(Donante donante){
         List<InsigniaDTO> insigniasDTO =  donante.getPerfil().getInsignias().stream().map(i -> new InsigniaDTO(i.getNombre(), i.texto())).toList();
@@ -241,4 +236,27 @@ public class IncentivosServiceImpl implements IncentivosService {
                 posicion
         );
     }
+    @Override
+    public String procesarLogro(Long id, Insignia insignia, boolean esHumana) {
+        URI uri = UriComponentsBuilder.fromUriString(propiedades.getUrl())
+                .path("/servicioDeDonaciones/donantes/{id}") // endpoint de todos los donantes, tanto juridicos como humanos
+                .buildAndExpand(id)
+                .toUri();
+
+        ResponseEntity<PersonaDonanteDTO> response = restTemplate.getForEntity(uri, PersonaDonanteDTO.class);
+        PersonaDonanteDTO dto = response.getBody();
+
+        String nombre = esHumana ? dto.nombre() : dto.razonSocial();
+
+        Donante donanteLocal = new Donante(
+                id,
+                null,
+                nombre,
+                null, null, null, null, null, null, // Atributos no necesarios aquí
+                null,
+                null,null
+        );
+        return publicadorService.publicarYDifundirInsignia(donanteLocal.getNombre(), insignia);
+    }
+
 }

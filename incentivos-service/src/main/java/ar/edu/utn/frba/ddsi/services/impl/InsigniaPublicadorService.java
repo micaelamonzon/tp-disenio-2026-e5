@@ -4,6 +4,8 @@ import ar.edu.utn.frba.ddsi.config.N8NProperties;
 import ar.edu.utn.frba.ddsi.dto.InsigniaWebhookRequestDTO;
 import ar.edu.utn.frba.ddsi.models.entities.persona.Donante;
 import ar.edu.utn.frba.ddsi.models.entities.persona.Insignia;
+import ar.edu.utn.frba.ddsi.repositories.IncentivosRepository;
+import ar.edu.utn.frba.ddsi.repositories.enMemoria.repositorioEnMemoria;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -16,13 +18,14 @@ public class InsigniaPublicadorService {
 
     private final RestTemplate restTemplate;
     private final N8NProperties properties;
+    IncentivosRepository incentivosRepository;
 
     public InsigniaPublicadorService(RestTemplate restTemplate, N8NProperties properties){
         this.restTemplate = restTemplate;
         this.properties = properties;
     }
 
-    public String publicarYDifundirInsignia(Donante donante, Insignia insignia) {
+    public String publicarYDifundirInsignia(String nombreDonante, Insignia insignia) {
         URI uri = UriComponentsBuilder
                 .fromUriString(properties.getBaseURL())
                 .path(PATH_INSIGNIA)
@@ -30,7 +33,7 @@ public class InsigniaPublicadorService {
                 .toUri();
 
         InsigniaWebhookRequestDTO request = new InsigniaWebhookRequestDTO(
-                donante.getNombre(),
+                nombreDonante,
                 insignia.getNombre()
         );
 

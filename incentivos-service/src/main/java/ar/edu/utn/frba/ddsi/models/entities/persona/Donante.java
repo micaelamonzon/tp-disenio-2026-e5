@@ -30,7 +30,8 @@ public class Donante {
     private String genero;
     private String direccion;
 
-    public Donante(String cuit,String razonSocial,String nombre,String apellido,Integer edad,Integer DNI,String genero,String direccion,List<DonacionSinSegmentar> donaciones, List<Mision> misiones, CategoriaDeDonante categoria) {
+    public Donante(Long id,String cuit,String razonSocial,String nombre,String apellido,Integer edad,Integer DNI,String genero,String direccion,List<DonacionSinSegmentar> donaciones, List<Mision> misiones, CategoriaDeDonante categoria) {
+        this.id = id;
         this.cuit = cuit;
         this.razonSocial = razonSocial;
         this.nombre = nombre;

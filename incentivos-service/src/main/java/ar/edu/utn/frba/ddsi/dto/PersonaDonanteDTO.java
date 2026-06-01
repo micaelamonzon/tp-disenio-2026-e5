@@ -5,6 +5,7 @@ import ar.edu.utn.frba.ddsi.models.entities.categorias.NombreDeCategoria;
 import java.util.List;
 
 public record PersonaDonanteDTO (
+        Long id,
         Long idHumano,
         String nombre,
         String apellido,

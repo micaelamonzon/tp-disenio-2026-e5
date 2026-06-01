@@ -19,4 +19,5 @@ public interface DonacionesService {
     public List<DonacionSinSegmentarDTO> modificarDonacionDeJuridica(DonacionSinSegmentarDTO body, Long idJuridica, Long idDonacion, Long idBien);
     List<DonacionSinSegmentarDTO> eliminarDonacionDeHumano(Long idHumano, Long idDonacion);
     List<DonacionSinSegmentarDTO> eliminarDonacionDeJuridico(Long idJuridico, Long idDonacion);
+    List<PersonaDonanteDTO> obtenerTodosLosDonantesUnificados();
 }
