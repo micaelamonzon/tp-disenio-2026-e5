@@ -1,9 +1,13 @@
 package ar.edu.utn.frba.ddsi.repositories;
 
+import ar.edu.utn.frba.ddsi.models.entities.persona.Donante;
+
 import java.util.List;
 import java.util.Optional;
 
 public interface IncentivosRepository {
+    void guardarDonante(Donante donante);
+    List<Donante> findAllDonantes();
 // tal vez esto sirva para las metricas
 
 //    List<Object> findAll();

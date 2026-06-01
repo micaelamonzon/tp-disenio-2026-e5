@@ -7,12 +7,7 @@ import ar.edu.utn.frba.ddsi.dto.MisionDTO;
 import ar.edu.utn.frba.ddsi.dto.PersonaDonanteDTO;
 import ar.edu.utn.frba.ddsi.models.entities.donaciones.DonacionSinSegmentar;
 import ar.edu.utn.frba.ddsi.models.entities.misiones.Mision;
-import ar.edu.utn.frba.ddsi.models.entities.persona.Bien;
-import ar.edu.utn.frba.ddsi.models.entities.persona.Categoria;
-import ar.edu.utn.frba.ddsi.models.entities.persona.Donante;
-import ar.edu.utn.frba.ddsi.models.entities.persona.Insignia;
-import ar.edu.utn.frba.ddsi.models.entities.persona.PersonaHumana;
-import ar.edu.utn.frba.ddsi.models.entities.persona.Subcategoria;
+import ar.edu.utn.frba.ddsi.models.entities.persona.*;
 import ar.edu.utn.frba.ddsi.repositories.IncentivosRepository;
 import ar.edu.utn.frba.ddsi.services.IncentivosService;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +16,9 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
+import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -31,6 +28,7 @@ public class IncentivosServiceImpl implements IncentivosService {
     private final RestTemplate restTemplate;
     private final RestProperties propiedades;
     private final InsigniaPublicadorService publicadorService;
+    private RankingMensual ultimoRanking;
 
     public IncentivosServiceImpl(IncentivosRepository incentivosRepository, RestTemplate restTemplate, RestProperties propiedades, InsigniaPublicadorService publicadorService) {
         this.incentivosRepository = incentivosRepository;
@@ -56,7 +54,7 @@ public class IncentivosServiceImpl implements IncentivosService {
 
         Donante nuevoDonante = new Donante(null,null,personaDonante.nombre(),personaDonante.apellido(),personaDonante.edad(),personaDonante.DNI(),personaDonante.genero(),personaDonante.direccion(),donaciones,misiones);
 
-        //guardar en el repo
+        incentivosRepository.guardarDonante(nuevoDonante);
 
         return  null;
     }
@@ -77,7 +75,7 @@ public class IncentivosServiceImpl implements IncentivosService {
 
         Donante nuevoDonante = new Donante(personaDonante.cuit(),personaDonante.razonSocial(),null,null,null,null,null,null,donaciones,misiones);
 
-        //guardar en repo
+        incentivosRepository.guardarDonante(nuevoDonante);
         return  null;
     }
 
@@ -93,33 +91,47 @@ public class IncentivosServiceImpl implements IncentivosService {
     }
 
     @Override
-    public String publicarYDifundirInsignia(Long id, Insignia insignia){
-        URI uri = UriComponentsBuilder
-                .fromUriString(propiedades.getUrl())
-                .path("/donante/{id}") // DEPENDE DEL ENDPOINT DE SERVICIO DE DONACIONES q todavia no esta, por ahi desp se debde cambiar
-                .buildAndExpand(id)
-                .toUri();
+    public String publicarYDifundirInsignia(Long id, Insignia insignia) {
 
-        ResponseEntity<PersonaDonanteDTO> response = restTemplate.getForEntity(uri, PersonaDonanteDTO.class);
-        PersonaDonanteDTO donante = response.getBody();
+        // Buscás el donante en el repositorio en memoria
+        Donante donante = incentivosRepository.findAllDonantes()
+                .stream()
+                .filter(d -> d.getId() != null && d.getId().equals(id))
+                .findFirst()
+                .orElse(null);
 
         if (donante == null) return null;
-                // es el aviso a n8n
-        return publicadorService.publicarYDifundirInsignia(donante.nombre(), insignia);
+
+        return publicadorService.publicarYDifundirInsignia(donante, insignia);
     }
-
+/*
     @Override
-    public String procesarLogro(Long id, Insignia insignia, boolean esHumana) {
-    String path = esHumana ? "/personas-humanas/" : "/personas-juridicas/"; // si es persona humana -> un path, sino el otro
-    URI uri = UriComponentsBuilder.fromUriString(propiedades.getUrl())
-            .path(path + "{id}").buildAndExpand(id).toUri();
+    public void calcularYGuardarRanking() {
 
-    ResponseEntity<PersonaDonanteDTO> response = restTemplate.getForEntity(uri, PersonaDonanteDTO.class);
-    PersonaDonanteDTO donante = response.getBody();
+        // Traés todos los donantes del repositorio en memoria
+        List<Donante> todosLosDonantes = incentivosRepository.findAllDonantes();
 
-    String nombreAMencionar = esHumana ? donante.nombre() : donante.razonSocial();
+        if (todosLosDonantes.isEmpty()) return;
 
-    return publicadorService.publicarYDifundirInsignia(nombreAMencionar, insignia);
+        List<Donante> ranking = todosLosDonantes.stream()
+                .sorted(Comparator.comparingInt(
+                        d -> -calcularMisionesCumplidasEnMesActual(d))
+                )
+                .limit(3)
+                .toList();
+
+        if (ranking.size() < 3) return;
+
+        this.ultimoRanking = new RankingMensual(
+                LocalDate.now().minusMonths(1),
+                ranking.get(0),
+                ranking.get(1),
+                ranking.get(2)
+        );
+    } */
+    @Override
+    public RankingMensual obtenerUltimoRanking() {
+        return ultimoRanking;
     }
 
     public List<DonacionSinSegmentar> convertirDonacionesDTO(List<DonacionSinSegmentarDTO> donacionesDTO){

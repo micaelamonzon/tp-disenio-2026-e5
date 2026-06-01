@@ -8,11 +8,11 @@ import java.time.LocalDate;
 @Data
 public class RankingMensual {
     private LocalDate fecha;
-    private PersonaDonanteDTO primerPuesto;
-    private PersonaDonanteDTO segundoPuesto;
-    private PersonaDonanteDTO tercerPuesto;
+    private Donante primerPuesto;
+    private Donante segundoPuesto;
+    private Donante tercerPuesto;
 
-    public RankingMensual(LocalDate fecha, PersonaDonanteDTO primerPuesto, PersonaDonanteDTO segundoPuesto, PersonaDonanteDTO tercerPuesto){
+    public RankingMensual(LocalDate fecha, Donante primerPuesto, Donante segundoPuesto, Donante tercerPuesto){
         this.fecha = fecha;
         this.primerPuesto = primerPuesto;
         this.segundoPuesto = segundoPuesto;

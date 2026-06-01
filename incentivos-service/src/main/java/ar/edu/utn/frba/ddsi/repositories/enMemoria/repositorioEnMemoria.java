@@ -12,4 +12,17 @@ public class repositorioEnMemoria implements IncentivosRepository {
     //para Emi
     private final List<Object> listaDeMetricas = new ArrayList<>();
     private final List<Donante> donantes = new ArrayList<>();
+
+    @Override
+    public void guardarDonante(Donante donante){
+        donantes.removeIf(d -> d.getId()
+                != null && d.getId()
+                .equals(donante.getId()));
+        donantes.add(donante);
+    }
+
+    @Override
+    public List<Donante> findAllDonantes() {
+        return donantes;
+    }
 }

@@ -8,7 +8,7 @@ public class InsigniaWebhookRequestDTO {
     private String nombreInsignia;
     private String emojiInsignia;
 
-    public InsigniaWebhookRequestDTO(String nombreUsuario, String nombreInsignia, String emojiInsignia){
+    public InsigniaWebhookRequestDTO(String nombreUsuario, String nombreInsignia){
         this.nombreUsuario = nombreUsuario;
         this.nombreInsignia = nombreInsignia;
         this.emojiInsignia = emojiInsignia;
