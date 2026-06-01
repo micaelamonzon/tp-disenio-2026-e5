@@ -21,6 +21,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.net.URI;
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
@@ -32,6 +34,7 @@ public class IncentivosServiceImpl implements IncentivosService {
     private final RestProperties propiedades;
     private final InsigniaPublicadorService publicadorService;
     private RankingMensual ultimoRanking;
+    private List<Donante> rankingCompletoOrdenado = new ArrayList<>();
 
     public IncentivosServiceImpl(IncentivosRepository incentivosRepository, RestTemplate restTemplate, RestProperties propiedades, InsigniaPublicadorService publicadorService) {
         this.incentivosRepository = incentivosRepository;
@@ -129,25 +132,44 @@ public class IncentivosServiceImpl implements IncentivosService {
     }
     @Override
     public void calcularYGuardarRanking() {
+        URI uri = UriComponentsBuilder
+                .fromUriString(propiedades.getUrl())
+                .path("/servicioDeDonaciones/obtenerDonantes")
+                .build()
+                .toUri();
 
-        List<Donante> todosLosDonantes = incentivosRepository.findAllDonantes();
+        ResponseEntity<PersonaDonanteDTO[]> response = restTemplate.getForEntity(uri, PersonaDonanteDTO[].class);
+        PersonaDonanteDTO[] array = response.getBody(); if (array == null || array.length == 0) return;
 
         YearMonth mesPasado = YearMonth.now().minusMonths(1);
 
-        List<Donante> ranking = todosLosDonantes.stream()
-                .sorted(Comparator.comparingInt(
-                        d -> -d.calcularMisionesCumplidasEn(mesPasado))
-                )
-                .limit(3)
-                .toList();
+        List<Donante> donantes = Arrays.stream(array).map(dto -> {
+            List<Mision> misionesLocales = dto.misiones().stream()
+                    .map(misionDTO -> {
+                        Mision m = new Mision(misionDTO.nombre());
+                        m.setEstadoDeMision(misionDTO.estado());
+                        m.setFechaCompletada(misionDTO.fechaCompletada());
+                        return m;
+                    }).toList();
 
-        if (ranking.size() < 3) return;
+            return new Donante(
+                    dto.id(), null, null,
+                    dto.nombre(), dto.apellido(),
+                    null, null, null, null,
+                    null, misionesLocales, null
+            );
+        }).toList();
+
+        this.rankingCompletoOrdenado = donantes.stream()
+                .sorted(Comparator.comparingInt(
+                        (Donante d) -> -d.calcularMisionesCumplidasEn(mesPasado)))
+                .toList();
 
         this.ultimoRanking = new RankingMensual(
                 LocalDate.now().minusMonths(1),
-                ranking.get(0),
-                ranking.get(1),
-                ranking.get(2)
+                rankingCompletoOrdenado.get(0),
+                rankingCompletoOrdenado.get(1),
+                rankingCompletoOrdenado.get(2)
         );
     }
     @Override
@@ -238,25 +260,20 @@ public class IncentivosServiceImpl implements IncentivosService {
     }
     @Override
     public String procesarLogro(Long id, Insignia insignia, boolean esHumana) {
-        URI uri = UriComponentsBuilder.fromUriString(propiedades.getUrl())
-                .path("/servicioDeDonaciones/donantes/{id}") // endpoint de todos los donantes, tanto juridicos como humanos
-                .buildAndExpand(id)
-                .toUri();
+        Donante donante = incentivosRepository.buscarDonantePorId(id);
+        if (donante == null) {
+            if (esHumana) {
+                obtenerDonanteHumano(id);
+            } else {
+                obtenerDonanteJuridico(id);
+            }
+            donante = incentivosRepository.buscarDonantePorId(id);
+        }
 
-        ResponseEntity<PersonaDonanteDTO> response = restTemplate.getForEntity(uri, PersonaDonanteDTO.class);
-        PersonaDonanteDTO dto = response.getBody();
-
-        String nombre = esHumana ? dto.nombre() : dto.razonSocial();
-
-        Donante donanteLocal = new Donante(
-                id,
-                null,
-                nombre,
-                null, null, null, null, null, null, // Atributos no necesarios aquí
-                null,
-                null,null
-        );
-        return publicadorService.publicarYDifundirInsignia(donanteLocal.getNombre(), insignia);
+        String nombre = donante.getNombre() != null
+                ? donante.getNombre() + " " + donante.getApellido()
+                : donante.getRazonSocial();
+        return publicadorService.publicarYDifundirInsignia(nombre, insignia);
     }
 
 }
