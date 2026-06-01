@@ -1,6 +1,7 @@
 package ar.edu.utn.frba.ddsi.services;
 
 import ar.edu.utn.frba.ddsi.dto.InsigniaDTO;
+import ar.edu.utn.frba.ddsi.dto.MetricasImpactoDTO;
 import ar.edu.utn.frba.ddsi.dto.MisionDTO;
 import ar.edu.utn.frba.ddsi.models.entities.persona.Insignia;
 import ar.edu.utn.frba.ddsi.models.entities.persona.RankingMensual;
@@ -20,4 +21,6 @@ public interface IncentivosService {
 
     RankingMensual obtenerUltimoRanking();
     void calcularYGuardarRanking();
+
+    MetricasImpactoDTO obtenerMetricasDeImpacto(Long idDonante);
 }

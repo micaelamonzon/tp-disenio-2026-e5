@@ -9,6 +9,8 @@ public interface IncentivosRepository {
     void guardarDonante(Donante donante);
     List<Donante> findAllDonantes();
     Donante buscarDonantePorId(Long id);
+
+    <T> Optional<T> buscarPorId(Long idDonante);
 // tal vez esto sirva para las metricas
 
 //    List<Object> findAll();

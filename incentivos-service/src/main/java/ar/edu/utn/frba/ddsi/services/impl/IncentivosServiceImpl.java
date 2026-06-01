@@ -6,6 +6,7 @@ import ar.edu.utn.frba.ddsi.dto.InsigniaDTO;
 import ar.edu.utn.frba.ddsi.dto.MisionDTO;
 import ar.edu.utn.frba.ddsi.dto.PersonaDonanteDTO;
 import ar.edu.utn.frba.ddsi.models.entities.categorias.CategoriaDeDonante;
+import ar.edu.utn.frba.ddsi.dto.*;
 import ar.edu.utn.frba.ddsi.models.entities.donaciones.DonacionSinSegmentar;
 import ar.edu.utn.frba.ddsi.models.entities.misiones.EstadoDeMision;
 import ar.edu.utn.frba.ddsi.models.entities.misiones.Mision;
@@ -206,5 +207,38 @@ public class IncentivosServiceImpl implements IncentivosService {
     public List<InsigniaDTO> obtenerInsigniasDTO(Donante donante){
         List<InsigniaDTO> insigniasDTO =  donante.getPerfil().getInsignias().stream().map(i -> new InsigniaDTO(i.getNombre(), i.texto())).toList();
         return insigniasDTO;
+    }
+    @Override
+    public MetricasImpactoDTO obtenerMetricasDeImpacto(Long idDonante) {
+
+        Donante donante = (Donante) incentivosRepository.buscarPorId(idDonante)
+                .orElseGet(() -> {
+                    obtenerDonanteHumano(idDonante);
+                    return incentivosRepository.buscarPorId(idDonante)
+                            .orElseThrow(() -> new RuntimeException(
+                                    "Donante no encontrado: " + idDonante));
+                });
+
+        String nombre = donante.getNombre() != null
+                ? donante.getNombre() + " " + donante.getApellido()
+                : donante.getRazonSocial();
+
+        YearMonth mesPico = donante.mesDeMayorActividad();
+
+        Integer posicion = (ultimoRanking != null)
+                ? ultimoRanking.getPosicion(donante)
+                : null;
+
+        return new MetricasImpactoDTO(
+                idDonante,
+                nombre,
+                donante.totalDonaciones(),
+                mesPico,
+                mesPico != null ? donante.cantidadDonacionesEnMes(mesPico) : 0,
+                donante.calcularEvolucionMensual(),
+                donante.compararConMesAnterior(),
+                donante.totalOrganizacionesAyudadas(),
+                posicion
+        );
     }
 }

@@ -18,4 +18,7 @@ public class RankingMensual {
         this.segundoPuesto = segundoPuesto;
         this.tercerPuesto = tercerPuesto;
     }
+
+    public Integer getPosicion(Donante donante) {
+    }
 }
