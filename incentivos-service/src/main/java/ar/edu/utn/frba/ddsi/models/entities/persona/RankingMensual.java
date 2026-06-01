@@ -20,5 +20,9 @@ public class RankingMensual {
     }
 
     public Integer getPosicion(Donante donante) {
+        if (donante.equals(primerPuesto)) return 1;
+        if (donante.equals(segundoPuesto)) return 2;
+        if (donante.equals(tercerPuesto)) return 3;
+        return null;
     }
 }
