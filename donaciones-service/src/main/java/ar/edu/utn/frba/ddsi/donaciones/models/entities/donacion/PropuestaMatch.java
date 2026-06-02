@@ -19,6 +19,9 @@ public class PropuestaMatch {
     @OrderColumn(name = "orden_conjunto")
     private List<Necesidad> rankingConjunto = new ArrayList<>(); //Cuando hay coincidencias
 
+    @ManyToOne
+    private Necesidad necesidadSeleccionada;
+
     // Guarda los rankings separados si no hubo coincidencias globales
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "propuesta_match_id")
