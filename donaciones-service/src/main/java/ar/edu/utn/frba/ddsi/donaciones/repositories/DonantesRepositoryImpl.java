@@ -7,11 +7,10 @@ import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Data
 @Repository
-public class DonacionesRepositoryImpl implements DonacionesRepository{
+public class DonantesRepositoryImpl implements DonantesRepository {
 
     private final List<PersonaHumana> humanos = new ArrayList<>();
     private final List<PersonaJuridica> juridicos = new ArrayList<>();

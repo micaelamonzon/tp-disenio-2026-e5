@@ -10,13 +10,10 @@ import ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante.PersonaHumana;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante.PersonaJuridica;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.Bien;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.Categoria;
-import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.EstadoDeUso;
-import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.Foto;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.Subcategoria;
-import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.Unidad;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.mision.Mision;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.DonacionSinSegmentar;
-import ar.edu.utn.frba.ddsi.donaciones.repositories.DonacionesRepository;
+import ar.edu.utn.frba.ddsi.donaciones.repositories.DonantesRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -24,15 +21,15 @@ import java.util.List;
 
 @Service
 public class DonacionesServiceImpl implements DonacionesService {
-    private final DonacionesRepository donacionesRepository;
+    private final DonantesRepository donantesRepository;
 
-    public DonacionesServiceImpl(DonacionesRepository donacionesRepository) {
-        this.donacionesRepository = donacionesRepository;
+    public DonacionesServiceImpl(DonantesRepository donantesRepository) {
+        this.donantesRepository = donantesRepository;
     }
 
     @Override
    public List<PersonaDonanteDTO> obtenerTodosHumanos(){
-        List<PersonaHumana> humanos = this.donacionesRepository.findAllHumanos();
+        List<PersonaHumana> humanos = this.donantesRepository.findAllHumanos();
 
         return humanos.stream().map(persona -> {
 
@@ -61,7 +58,7 @@ public class DonacionesServiceImpl implements DonacionesService {
     @Override
     public List<PersonaDonanteDTO> obtenerTodosJuridicos(){
 
-        List<PersonaJuridica> juridicos = this.donacionesRepository.findAllJuridicos();
+        List<PersonaJuridica> juridicos = this.donantesRepository.findAllJuridicos();
         //transformar a dto
         return juridicos.stream().map(persona -> {
 
@@ -90,7 +87,7 @@ public class DonacionesServiceImpl implements DonacionesService {
 
     @Override
     public PersonaDonanteDTO obtenerDonacionesDeHumano(Long id) {
-        PersonaHumana personaHumana = this.donacionesRepository.humanoFindById(id);
+        PersonaHumana personaHumana = this.donantesRepository.humanoFindById(id);
         if (personaHumana != null) {
             List<DonacionSinSegmentarDTO> donacionSinSegmentarDTOS = this.obtenerDonacionesSinSegmentarDTO(personaHumana.getDonaciones());
             List<MisionDTO> misionesDTO = this.obtenerMisionesDTO(personaHumana.getMisiones());
@@ -117,7 +114,7 @@ public class DonacionesServiceImpl implements DonacionesService {
 
     @Override
     public PersonaDonanteDTO obtenerDonacionesDeJurico(Long id) {
-        PersonaJuridica personaJuridica = this.donacionesRepository.juridicaFindById(id);
+        PersonaJuridica personaJuridica = this.donantesRepository.juridicaFindById(id);
         if (personaJuridica != null) {
             List<DonacionSinSegmentarDTO> donacionSinSegmentarDTOS = this.obtenerDonacionesSinSegmentarDTO(personaJuridica.getDonaciones());
             List<MisionDTO> misionesDTO = this.obtenerMisionesDTO(personaJuridica.getMisiones());
@@ -157,7 +154,7 @@ public class DonacionesServiceImpl implements DonacionesService {
         List<DonacionSinSegmentar> donaciones = this.convertirDonacionesDTO(body.donaciones());
         nuevaPersona.setDonaciones(donaciones);
 
-        PersonaHumana humano= this.donacionesRepository.saveHumana(nuevaPersona);
+        PersonaHumana humano= this.donantesRepository.saveHumana(nuevaPersona);
 
         List<DonacionSinSegmentarDTO> donacionesDTO = obtenerDonacionesSinSegmentarDTO(humano.getDonaciones());
         PersonaHumanaDTO nuevaPersonaDTO = new PersonaHumanaDTO(
@@ -177,7 +174,7 @@ public class DonacionesServiceImpl implements DonacionesService {
     @Override
     public DonacionSinSegmentarDTO crearDonacionDeJuridico(DonacionSinSegmentarDTO body, Long id){
 
-        PersonaJuridica personaJuridica = this.donacionesRepository.juridicaFindById(id);
+        PersonaJuridica personaJuridica = this.donantesRepository.juridicaFindById(id);
         if (personaJuridica == null) {
             throw new RuntimeException("Persona juridica no encontrada");
         }
@@ -195,7 +192,7 @@ public class DonacionesServiceImpl implements DonacionesService {
     @Override
     public DonacionSinSegmentarDTO crearDonacionDeHumano(DonacionSinSegmentarDTO body, Long id){
 
-        PersonaHumana personaHumana = this.donacionesRepository.humanoFindById(id);
+        PersonaHumana personaHumana = this.donantesRepository.humanoFindById(id);
 
         if (personaHumana == null) {
             throw new RuntimeException("Persona humana no encontrada");
@@ -212,7 +209,7 @@ public class DonacionesServiceImpl implements DonacionesService {
     }
     @Override
     public List<DonacionSinSegmentarDTO> modificarDonacionDeHumano(DonacionSinSegmentarDTO body, Long idHumano, Long idDonacion, Long idBien){
-        PersonaHumana personaHumana = this.donacionesRepository.humanoFindById(idHumano);
+        PersonaHumana personaHumana = this.donantesRepository.humanoFindById(idHumano);
         try{
             DonacionSinSegmentar donacionAModificada = personaHumana.getDonaciones().get(idDonacion.intValue());
             this.modificarDonacion(donacionAModificada,body,idBien);
@@ -228,7 +225,7 @@ public class DonacionesServiceImpl implements DonacionesService {
     @Override
     public List<DonacionSinSegmentarDTO> modificarDonacionDeJuridica(DonacionSinSegmentarDTO body, Long idJuridica, Long idDonacion, Long idBien){
 
-        PersonaJuridica personaJuridica = this.donacionesRepository.juridicaFindById(idJuridica);
+        PersonaJuridica personaJuridica = this.donantesRepository.juridicaFindById(idJuridica);
         try{
             DonacionSinSegmentar donacionAModificada = personaJuridica.getDonaciones().get(idDonacion.intValue());
             this.modificarDonacion(donacionAModificada,body,idBien);
@@ -243,7 +240,7 @@ public class DonacionesServiceImpl implements DonacionesService {
     }
     @Override
     public List<DonacionSinSegmentarDTO> eliminarDonacionDeHumano(Long idHumano, Long idDonacion){
-        PersonaHumana personaHumana = this.donacionesRepository.humanoFindById(idHumano);
+        PersonaHumana personaHumana = this.donantesRepository.humanoFindById(idHumano);
         try{
             if(!personaHumana.getDonaciones().isEmpty() && idDonacion < personaHumana.getDonaciones().size()){
                 personaHumana.getDonaciones().remove(idDonacion.intValue());
@@ -258,7 +255,7 @@ public class DonacionesServiceImpl implements DonacionesService {
     }
     @Override
     public List<DonacionSinSegmentarDTO> eliminarDonacionDeJuridico(Long idJuridico, Long idDonacion){
-        PersonaJuridica personaJuridica = this.donacionesRepository.juridicaFindById(idJuridico);
+        PersonaJuridica personaJuridica = this.donantesRepository.juridicaFindById(idJuridico);
         try{
             if(!personaJuridica.getDonaciones().isEmpty() && idDonacion < personaJuridica.getDonaciones().size()){
                 personaJuridica.getDonaciones().remove(idDonacion.intValue());

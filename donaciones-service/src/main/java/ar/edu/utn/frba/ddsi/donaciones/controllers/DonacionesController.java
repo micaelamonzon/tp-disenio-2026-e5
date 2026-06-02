@@ -1,10 +1,10 @@
 package ar.edu.utn.frba.ddsi.donaciones.controllers;
-import ar.edu.utn.frba.ddsi.donaciones.dto.DonacionSinSegmentarDTO;
-import ar.edu.utn.frba.ddsi.donaciones.dto.PersonaDonanteDTO;
-import ar.edu.utn.frba.ddsi.donaciones.dto.PersonaHumanaDTO;
-import ar.edu.utn.frba.ddsi.donaciones.dto.PersonaJuridicaDTO;
+import ar.edu.utn.frba.ddsi.donaciones.dto.*;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante.PersonaJuridica;
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.donacion.PropuestaMatch;
 import ar.edu.utn.frba.ddsi.donaciones.services.DonacionesService;
+import ar.edu.utn.frba.ddsi.donaciones.services.MatchmakingService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -26,9 +26,12 @@ import java.util.List;
 public class DonacionesController {
     private final DonacionesService donacionesService;
 
-    public DonacionesController(DonacionesService donacionesService) {
+    public DonacionesController(DonacionesService donacionesService, MatchmakingService matchmakingService) {
         this.donacionesService = donacionesService;
+        this.matchmakingService = matchmakingService;
     }
+
+    private final MatchmakingService matchmakingService;
 
     @GetMapping("/saludar")
     @ResponseStatus(HttpStatus.ACCEPTED)
@@ -145,6 +148,27 @@ public class DonacionesController {
         PersonaHumanaDTO personaHumanaDTO = this.donacionesService.crearDonanteHumano(request);
         return personaHumanaDTO;
     }
+
+    @GetMapping("/matcheos/{matcheoId}")
+    public PropuestaMatch obtenerRankingGenerado(@PathVariable Long matcheoId) {
+        return matchmakingService.obtenerPropuestaPorId(matcheoId);
+    }
+
+    @PostMapping("/matcheos/ejecutar")
+    @ResponseStatus(HttpStatus.OK)
+    public String ejecutarAlgoritmosADemanda() {
+        matchmakingService.ejecutarProcesoMatchmaking(); // <-- Reutilización
+        return "Proceso de asignación ejecutado a demanda exitosamente.";
+    }
+
+    @PostMapping("/matcheos/{matcheoId}/seleccion")
+    public PropuestaMatch seleccionarNecesidad(
+            @PathVariable Long matcheoId,
+            @RequestBody SeleccionNecesidadRequestDTO request
+    ) {
+        return matchmakingService.seleccionarNecesidad(matcheoId, request.necesidadId());
+    }
+
 
 }
 

@@ -1,32 +1,82 @@
 package ar.edu.utn.frba.ddsi.donaciones.services;
 
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.Necesidad.Necesidad;
-import ar.edu.utn.frba.ddsi.donaciones.models.entities.donacion.PropuestaMatch;
-import ar.edu.utn.frba.ddsi.donaciones.models.entities.donacion.RankingPorAlgoritmo;
-import ar.edu.utn.frba.ddsi.donaciones.models.repositories.RepoMatcheo;
-import ar.edu.utn.frba.ddsi.donaciones.models.repositories.RepoNecesidades;
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.donacion.*;
+import ar.edu.utn.frba.ddsi.donaciones.repositories.DonacionesRepository;
+import ar.edu.utn.frba.ddsi.donaciones.repositories.MatchRepository;
+import ar.edu.utn.frba.ddsi.donaciones.repositories.NecesidadesRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class MatchmakingService {
-    private final RepoMatcheo repoMatcheo;
-    private final RepoNecesidades repoNecesidades;
+    private final MatchRepository matchRepository;
+    private final NecesidadesRepository necesidadesRepository;
+    private final DonacionesRepository donacionesRepository;
+    private final MotorDeMatchmaking motorMatchmaking;
+    private final List<Strategy_AlgoritmosMatchmaking> estrategiasActivas;
+
+    public PropuestaMatch obtenerPropuestaPorId(Long matcheoId) {
+        return matchRepository.findById(matcheoId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Propuesta de matcheo no encontrada"));
+    }
+
+    public void ejecutarProcesoMatchmaking() {
+        List<Donacion> donacionesPendientes = donacionesRepository.findByEstado(Estado.EN_DEPOSITO);
+        List<Necesidad> necesidadesActivas = necesidadesRepository.findByEstaSatisfechaFalse();
+
+        if (donacionesPendientes.isEmpty() || necesidadesActivas.isEmpty() || estrategiasActivas.isEmpty()) {
+            return;
+        }
+
+        for (Donacion donacion : donacionesPendientes) {
+            PropuestaMatch propuesta = new PropuestaMatch();
+            propuesta.setDonacion(donacion);
+
+            List<List<Necesidad>> todosLosRankings = new ArrayList<>();
+
+            for (Strategy_AlgoritmosMatchmaking estrategia : estrategiasActivas) {
+                motorMatchmaking.setEstrategiaActual(estrategia);
+                List<Necesidad> ranking = motorMatchmaking.generarRanking(donacion, necesidadesActivas);
+
+                todosLosRankings.add(ranking);
+
+                RankingPorAlgoritmo rankingIndividual = new RankingPorAlgoritmo();
+                rankingIndividual.setNombreAlgoritmo(estrategia.getClass().getSimpleName());
+                rankingIndividual.setNecesidades(ranking);
+                propuesta.getRankingsIndividuales().add(rankingIndividual);
+            }
+
+            List<Necesidad> coincidencias = new ArrayList<>(todosLosRankings.get(0));
+            for (int i = 1; i < todosLosRankings.size(); i++) {
+                coincidencias.retainAll(todosLosRankings.get(i));
+            }
+
+            if (!coincidencias.isEmpty()) {
+                propuesta.setRankingConjunto(coincidencias);
+                propuesta.getRankingsIndividuales().clear();
+            }
+
+            matchRepository.save(propuesta);
+        }
+    }
+
 
     public PropuestaMatch seleccionarNecesidad(Long matcheoId, Long necesidadId) {
         if (necesidadId == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Debe indicar una necesidadId");
         }
 
-        PropuestaMatch propuesta = repoMatcheo.findById(matcheoId)
+        PropuestaMatch propuesta = matchRepository.findById(matcheoId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Propuesta de matcheo no encontrada"));
 
-        Necesidad necesidad = repoNecesidades.findById(necesidadId)
+        Necesidad necesidad = necesidadesRepository.findById(necesidadId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Necesidad no encontrada"));
 
         if (!perteneceAAlgunRanking(propuesta, necesidadId)) {
@@ -34,7 +84,10 @@ public class MatchmakingService {
         }
 
         propuesta.setNecesidadSeleccionada(necesidad);
-        return repoMatcheo.save(propuesta);
+
+        //TODO Poner comportamiento de asignación con PosibleDonacion
+
+        return matchRepository.save(propuesta);
     }
 
     private boolean perteneceAAlgunRanking(PropuestaMatch propuesta, Long necesidadId) {

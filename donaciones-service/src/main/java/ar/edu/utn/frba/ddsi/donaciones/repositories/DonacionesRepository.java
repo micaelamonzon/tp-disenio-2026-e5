@@ -1,22 +1,14 @@
 package ar.edu.utn.frba.ddsi.donaciones.repositories;
 
-import ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante.PersonaHumana;
-import ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante.PersonaJuridica;
-
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.donacion.Donacion;
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.donacion.Estado;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 import java.util.List;
-import java.util.Optional;
 
-public interface DonacionesRepository {
+@Repository
+public interface DonacionesRepository extends JpaRepository<Donacion, Long> {
+    // Spring genera la query basándose en el parámetro Estado
+    List<Donacion> findByEstado(Estado estado);
 
-    List<PersonaHumana> findAllHumanos();
-    List<PersonaJuridica> findAllJuridicos();
-
-    PersonaHumana humanoFindById(Long id);
-    PersonaJuridica juridicaFindById(Long id);
-
-    PersonaJuridica saveJuridica(PersonaJuridica donante);
-    PersonaHumana saveHumana(PersonaHumana donante);
-
-    void deleteJuridica(PersonaJuridica donante);
-    void deleteHumana(PersonaHumana donante);
 }

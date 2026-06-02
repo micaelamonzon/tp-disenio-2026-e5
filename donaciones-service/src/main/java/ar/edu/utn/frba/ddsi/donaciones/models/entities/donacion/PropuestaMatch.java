@@ -15,6 +15,10 @@ public class PropuestaMatch {
     @OneToOne
     private Donacion donacion; // donación a la que corresponden los rankings
 
+    public Donacion getDonacion() {
+        return this.donacion;
+    }
+
     @ManyToMany
     @OrderColumn(name = "orden_conjunto")
     private List<Necesidad> rankingConjunto = new ArrayList<>(); //Cuando hay coincidencias
@@ -26,4 +30,5 @@ public class PropuestaMatch {
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "propuesta_match_id")
     private List<RankingPorAlgoritmo> rankingsIndividuales = new ArrayList<>();
+
 }
