@@ -23,12 +23,17 @@ public class RankingMensual {
     }
 
     public Integer getPosicion(Donante donante) {
+        return (donante != null) ? getPosicionPorId(donante.getId()) : null;
+    }
+
+    public Integer getPosicionPorId(Long id) {
+        if (id == null) return null;
         for (int i = 0; i < rankingCompletoOrdenado.size(); i++) {
-            if (rankingCompletoOrdenado.get(i).getId().equals(donante.getId())) {
-                return i + 1; // posición empieza en 1
+            if (rankingCompletoOrdenado.get(i).getId().equals(id)) {
+                return i + 1;
             }
         }
-        return null; // no está en el ranking
+        return null;
     }
     public List<Donante> getRankingCompleto() {
         return rankingCompletoOrdenado; }

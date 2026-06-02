@@ -1,6 +1,7 @@
 package ar.edu.utn.frba.ddsi.repositories.enMemoria;
 
 import ar.edu.utn.frba.ddsi.models.entities.persona.Donante;
+import ar.edu.utn.frba.ddsi.models.entities.persona.RankingMensual;
 import ar.edu.utn.frba.ddsi.repositories.IncentivosRepository;
 import org.springframework.stereotype.Repository;
 
@@ -13,6 +14,7 @@ public class repositorioEnMemoria implements IncentivosRepository {
     private final List<Object> listaDeMetricas = new ArrayList<>();
     private final List<Donante> donantes = new ArrayList<>();
 
+    private final List<RankingMensual> historialRankings = new ArrayList<>();
     @Override
     public void guardarDonante(Donante donante){
         donantes.removeIf(d -> d.getId()
@@ -29,5 +31,14 @@ public class repositorioEnMemoria implements IncentivosRepository {
     @Override
     public Donante buscarDonantePorId(Long id){
         return donantes.stream().filter(d -> d.getId().equals(id)).findFirst().orElse(null);
+    }
+
+    @Override
+    public void guardarRanking(RankingMensual ranking) {
+        this.historialRankings.add(ranking);
+    }
+    @Override
+    public List<RankingMensual> findAllRankings() {
+        return new ArrayList<>(this.historialRankings);
     }
 }

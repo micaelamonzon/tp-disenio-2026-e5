@@ -44,7 +44,7 @@ public class IncentivosServiceImpl implements IncentivosService {
     }
 
     @Override
-    public List<MisionDTO> obtenerDonanteHumano(Long id){
+    public List<MisionDTO> obtenerDonanteHumano(Long id) {
 
         URI uri = UriComponentsBuilder.fromUriString(propiedades.getUrl()).path("/donaciones/humano/{id}")
                 .buildAndExpand(id)
@@ -58,19 +58,20 @@ public class IncentivosServiceImpl implements IncentivosService {
 
         List<Mision> misiones = this.convertirMisionesDTO(personaDonante.misiones());
 
-        Donante nuevoDonante = new Donante(personaDonante.id(),null,null, personaDonante.nombre(),personaDonante.apellido(),personaDonante.edad(),personaDonante.DNI(),personaDonante.genero(),personaDonante.direccion(),donaciones,misiones,new CategoriaDeDonante(personaDonante.categoria()),personaDonante.fechaDeRegistro());
+        Donante nuevoDonante = new Donante(personaDonante.id(), null, null, personaDonante.nombre(), personaDonante.apellido(), personaDonante.edad(), personaDonante.DNI(), personaDonante.genero(), personaDonante.direccion(), donaciones, misiones, new CategoriaDeDonante(personaDonante.categoria()), personaDonante.fechaDeRegistro());
 
         this.incentivosRepository.guardarDonante(nuevoDonante);
 
-        nuevoDonante.getMisiones().forEach(m->nuevoDonante.getCategoria().agregarMision(m));
+        nuevoDonante.getMisiones().forEach(m -> nuevoDonante.getCategoria().agregarMision(m));
 
         List<Mision> misionesCompletadas = nuevoDonante.getCategoria().obtenerMisionesCompletadas(nuevoDonante.getDonaciones());
-        List <MisionDTO> misionesCompletadasDTO = this.obtenerMisionDTO(misionesCompletadas);
+        List<MisionDTO> misionesCompletadasDTO = this.obtenerMisionDTO(misionesCompletadas);
 
-        return  misionesCompletadasDTO;
+        return misionesCompletadasDTO;
     }
+
     @Override
-    public List<MisionDTO> obtenerDonanteJuridico(Long id){
+    public List<MisionDTO> obtenerDonanteJuridico(Long id) {
 
         URI uri = UriComponentsBuilder.fromUriString(propiedades.getUrl()).path("/donaciones/juridico/{id}")
                 .buildAndExpand(id)
@@ -84,44 +85,44 @@ public class IncentivosServiceImpl implements IncentivosService {
 
         List<Mision> misiones = this.convertirMisionesDTO(personaDonante.misiones());
 
-        Donante nuevoDonante = new Donante(personaDonante.id(),personaDonante.cuit(),personaDonante.razonSocial(),null,null,null,null,null,null,donaciones,misiones,new CategoriaDeDonante(personaDonante.categoria()),personaDonante.fechaDeRegistro());
+        Donante nuevoDonante = new Donante(personaDonante.id(), personaDonante.cuit(), personaDonante.razonSocial(), null, null, null, null, null, null, donaciones, misiones, new CategoriaDeDonante(personaDonante.categoria()), personaDonante.fechaDeRegistro());
 
         this.incentivosRepository.guardarDonante(nuevoDonante);
 
-        nuevoDonante.getMisiones().forEach(m->nuevoDonante.getCategoria().agregarMision(m));
+        nuevoDonante.getMisiones().forEach(m -> nuevoDonante.getCategoria().agregarMision(m));
 
         List<Mision> misionesCompletadas = nuevoDonante.getCategoria().obtenerMisionesCompletadas(nuevoDonante.getDonaciones());
-        List <MisionDTO> misionesCompletadasDTO = this.obtenerMisionDTO(misionesCompletadas);
+        List<MisionDTO> misionesCompletadasDTO = this.obtenerMisionDTO(misionesCompletadas);
 
-        return  misionesCompletadasDTO;
+        return misionesCompletadasDTO;
     }
 
     @Override
-    public List<InsigniaDTO> buscarInsigniasPorId(Long id){
+    public List<InsigniaDTO> buscarInsigniasPorId(Long id) {
         Donante donante = this.incentivosRepository.buscarDonantePorId(id);
-            if (donante == null){
-                throw new RuntimeException("No se encontro el donante con id: " + id);
-            }
-            List<InsigniaDTO> insigniasDTO = this.obtenerInsigniasDTO(donante);
-
-            return insigniasDTO;
-    }
-
-    @Override
-    public MisionDTO buscarMisionActualPorId(Long id){
-        Donante donante = this.incentivosRepository.buscarDonantePorId(id);
-        if (donante == null){
+        if (donante == null) {
             throw new RuntimeException("No se encontro el donante con id: " + id);
         }
-            Mision misionActual = donante.getMisiones().stream().filter(m -> m.getEstadoDeMision() == EstadoDeMision.ACTUAL)
-                    .findFirst()
-                    .orElse(null);
-                if (misionActual == null){
-                    throw new RuntimeException("No se encontro una mision actual para el donante con id: " + id);
-                }
-            MisionDTO misionActualDTO = new MisionDTO(misionActual.getNombre(), misionActual.getEstadoDeMision(),misionActual.getFechaCompletada());
+        List<InsigniaDTO> insigniasDTO = this.obtenerInsigniasDTO(donante);
 
-            return misionActualDTO;
+        return insigniasDTO;
+    }
+
+    @Override
+    public MisionDTO buscarMisionActualPorId(Long id) {
+        Donante donante = this.incentivosRepository.buscarDonantePorId(id);
+        if (donante == null) {
+            throw new RuntimeException("No se encontro el donante con id: " + id);
+        }
+        Mision misionActual = donante.getMisiones().stream().filter(m -> m.getEstadoDeMision() == EstadoDeMision.ACTUAL)
+                .findFirst()
+                .orElse(null);
+        if (misionActual == null) {
+            throw new RuntimeException("No se encontro una mision actual para el donante con id: " + id);
+        }
+        MisionDTO misionActualDTO = new MisionDTO(misionActual.getNombre(), misionActual.getEstadoDeMision(), misionActual.getFechaCompletada());
+
+        return misionActualDTO;
     }
 
     @Override
@@ -130,6 +131,7 @@ public class IncentivosServiceImpl implements IncentivosService {
 
         return publicadorService.publicarYDifundirInsignia(donante.getNombre(), insignia);
     }
+
     @Override
     public void calcularYGuardarRanking() {
         URI uri = UriComponentsBuilder
@@ -139,7 +141,8 @@ public class IncentivosServiceImpl implements IncentivosService {
                 .toUri();
 
         ResponseEntity<PersonaDonanteDTO[]> response = restTemplate.getForEntity(uri, PersonaDonanteDTO[].class);
-        PersonaDonanteDTO[] array = response.getBody(); if (array == null || array.length == 0) return;
+        PersonaDonanteDTO[] array = response.getBody();
+        if (array == null || array.length == 0) return;
 
         YearMonth mesPasado = YearMonth.now().minusMonths(1);
 
@@ -156,7 +159,7 @@ public class IncentivosServiceImpl implements IncentivosService {
                     dto.id(), null, null,
                     dto.nombre(), dto.apellido(),
                     null, null, null, null,
-                    null, misionesLocales, null,null
+                    null, misionesLocales, null, null
             );
         }).toList();
 
@@ -173,13 +176,14 @@ public class IncentivosServiceImpl implements IncentivosService {
                 rankingCompletoOrdenado
         );
     }
+
     @Override
     public RankingMensual obtenerUltimoRanking() {
         return ultimoRanking;
     }
 
 
-    public List<DonacionSinSegmentar> convertirDonacionesDTO(List<DonacionSinSegmentarDTO> donacionesDTO){
+    public List<DonacionSinSegmentar> convertirDonacionesDTO(List<DonacionSinSegmentarDTO> donacionesDTO) {
 
         List<DonacionSinSegmentar> donaciones = donacionesDTO.stream().map(
                 donacion -> {
@@ -212,18 +216,20 @@ public class IncentivosServiceImpl implements IncentivosService {
 
         return donaciones;
     }
-    public List<Mision> convertirMisionesDTO(List<MisionDTO> misionesDTO){
+
+    public List<Mision> convertirMisionesDTO(List<MisionDTO> misionesDTO) {
 
         List<Mision> misiones = misionesDTO.stream().map(m -> new Mision(m.nombre())).toList();
 
         return misiones;
     }
 
-    public List<MisionDTO> obtenerMisionDTO(List<Mision> misiones){
-        return misiones.stream().map(m -> new MisionDTO(m.getNombre(), m.getEstadoDeMision(),m.getFechaCompletada())).toList();
+    public List<MisionDTO> obtenerMisionDTO(List<Mision> misiones) {
+        return misiones.stream().map(m -> new MisionDTO(m.getNombre(), m.getEstadoDeMision(), m.getFechaCompletada())).toList();
     }
-    public List<InsigniaDTO> obtenerInsigniasDTO(Donante donante){
-        List<InsigniaDTO> insigniasDTO =  donante.getPerfil().getInsignias().stream().map(i -> new InsigniaDTO(i.getNombre(), i.texto())).toList();
+
+    public List<InsigniaDTO> obtenerInsigniasDTO(Donante donante) {
+        List<InsigniaDTO> insigniasDTO = donante.getPerfil().getInsignias().stream().map(i -> new InsigniaDTO(i.getNombre(), i.texto())).toList();
         return insigniasDTO;
     }
 
@@ -267,6 +273,7 @@ public class IncentivosServiceImpl implements IncentivosService {
                 posicion
         );
     }
+
     @Override
     public String procesarLogro(Long id, Insignia insignia, boolean esHumana) {
         Donante donante = incentivosRepository.buscarDonantePorId(id);
@@ -356,4 +363,31 @@ public class IncentivosServiceImpl implements IncentivosService {
         );
     }
 
+    @Override
+    public RankingMensualDTO obtenerUltimoRankingDTO() {
+        RankingMensual ranking = this.obtenerUltimoRanking();
+
+        if (ranking == null) return null;
+
+        return mapearDto(ranking);
+    }
+
+    private RankingMensualDTO mapearDto(RankingMensual ranking) {
+        return new RankingMensualDTO(
+                ranking.getFecha(),
+                ranking.getPrimerPuesto() != null ? ranking.getPrimerPuesto().getNombre() : "N/A",
+                ranking.getSegundoPuesto() != null ? ranking.getSegundoPuesto().getNombre() : "N/A",
+                ranking.getTercerPuesto() != null ? ranking.getTercerPuesto().getNombre() : "N/A"
+        );
+    }
+    @Override
+    public List<RankingMensualDTO> buscarRankings(Integer mes, Integer anio) {
+        List<RankingMensual> todosLosRankings = incentivosRepository.findAllRankings();
+
+        return todosLosRankings.stream()
+                .filter(r -> (anio == null || r.getFecha().getYear() == anio))
+                .filter(r -> (mes == null || r.getFecha().getMonthValue() == mes))
+                .map(this::mapearDto)
+                .toList();
+    }
 }

@@ -1,18 +1,12 @@
 package ar.edu.utn.frba.ddsi.controllers;
 
-import ar.edu.utn.frba.ddsi.dto.InsigniaDTO;
-import ar.edu.utn.frba.ddsi.dto.MetricasImpactoDTO;
-import ar.edu.utn.frba.ddsi.dto.MetricasSistemaDTO;
-import ar.edu.utn.frba.ddsi.dto.MisionDTO;
+import ar.edu.utn.frba.ddsi.dto.*;
 import ar.edu.utn.frba.ddsi.models.entities.persona.Insignia;
+import ar.edu.utn.frba.ddsi.models.entities.persona.RankingMensual;
 import ar.edu.utn.frba.ddsi.services.IncentivosService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -77,5 +71,30 @@ public class IncentivosController {
             @PathVariable Long id) {
         return ResponseEntity.ok(
                 incentivosService.obtenerMetricasDeImpacto(id));
+    }
+    @GetMapping("/ranking") // top 3
+    public ResponseEntity<RankingMensualDTO> obtenerRankingActual() {
+        RankingMensualDTO dto = incentivosService.obtenerUltimoRankingDTO();
+        if (dto == null) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(dto);
+    }
+    @GetMapping("/ranking/posicion/{idDonante}") // busco donante por ID
+    public ResponseEntity<Integer> obtenerPosicionDonante(@PathVariable Long idDonante) {
+        RankingMensual ranking = incentivosService.obtenerUltimoRanking();
+        if (ranking == null) return ResponseEntity.noContent().build();
+        Integer posicion = ranking.getPosicionPorId(idDonante);
+        if (posicion == null) return ResponseEntity.notFound().build();
+
+        return ResponseEntity.ok(posicion);
+    }
+    @GetMapping("/ranking/historial")
+    public ResponseEntity<List<RankingMensualDTO>> obtenerHistorial(
+            @RequestParam(required = false) Integer mes,
+            @RequestParam(required = false) Integer anio) {
+        List<RankingMensualDTO> historial = incentivosService.buscarRankings(mes, anio);
+        if (historial.isEmpty()) return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(historial);
     }
 }
