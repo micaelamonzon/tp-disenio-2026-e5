@@ -219,7 +219,7 @@ public class DonacionesServiceImpl implements DonacionesService {
         }
 
         List<Bien> bienes = this.convertirBienesDTO(body.bienes());
-        DonacionSinSegmentar nuevaDonacion = new DonacionSinSegmentar(bienes, LocalDateTime.now());
+        DonacionSinSegmentar nuevaDonacion = new DonacionSinSegmentar(bienes, LocalDateTime.now(),false,null);
 
         personaJuridica.agregarDonacion(nuevaDonacion);
 
