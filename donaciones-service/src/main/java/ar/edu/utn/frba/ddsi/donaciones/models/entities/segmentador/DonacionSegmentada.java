@@ -10,7 +10,6 @@ public class DonacionSegmentada{
 
     private ArrayList<Bien> bienesDelMismoTipo = new ArrayList<>();
     private Subcategoria subcategoria;
-    private EstadoDonacion_old estado = EstadoDonacion_old.EN_DEPOSITO;
 
     public void agregarBien(Bien bien){
         this.bienesDelMismoTipo.add(bien);
