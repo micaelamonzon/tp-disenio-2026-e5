@@ -28,7 +28,7 @@ public class DonacionesExitosas implements Tipo{
             }
         }
 
-        return cantInicial == cantidadDeDonaciones;
+        return cantInicial == cantidadDeDonaciones ? Boolean.TRUE : Boolean.FALSE;
     }
 
     public void subirProgreso(Integer cantDonaciones){

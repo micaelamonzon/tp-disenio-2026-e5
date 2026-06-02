@@ -60,6 +60,7 @@ public class DonacionesController {
            return ResponseEntity.notFound().build();
        }
     }
+    
     @GetMapping("/juridica/obtenerDonaciones/{id}")
     public ResponseEntity<PersonaDonanteDTO> obtenerDonacionesDeJuridico(@PathVariable Long id){
         try{

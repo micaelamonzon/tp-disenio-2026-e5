@@ -29,13 +29,13 @@ public class HabilDonador implements Tipo{
            if(donacionQueCumple != null){
                this.progreso = 100;
                this.distanciaDelObjetivo = 0;
-               return true;
+               return Boolean.TRUE;
            }
 
            this.progreso = 0;
            this.distanciaDelObjetivo = 100;
 
-           return false;
+           return Boolean.FALSE;
     }
 
 

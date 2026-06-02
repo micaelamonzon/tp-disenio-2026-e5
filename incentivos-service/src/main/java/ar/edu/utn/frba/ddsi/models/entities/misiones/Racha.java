@@ -49,7 +49,7 @@ public class Racha implements  Tipo{
             mesI += 1;
         }
 
-        return this.progreso == 100; //se habra completado cuando el progreso sea del 100
+        return this.progreso == 100 ? Boolean.TRUE : Boolean.FALSE; //se habra completado cuando el progreso sea del 100
     }
     public void subirProgreso(Integer cantDonaciones){
         this.progreso += (100/cantDonaciones);

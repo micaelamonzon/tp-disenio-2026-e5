@@ -38,10 +38,10 @@ public class Completitud implements Tipo {
         if (todasSonDistintas) {
             this.subirProgreso(donaciones.size());
             this.distanciaDelObjetivo -= this.progreso;
-            return true;
+            return Boolean.TRUE;
         }
 
-        return false;
+        return Boolean.FALSE;
 
     }
 
