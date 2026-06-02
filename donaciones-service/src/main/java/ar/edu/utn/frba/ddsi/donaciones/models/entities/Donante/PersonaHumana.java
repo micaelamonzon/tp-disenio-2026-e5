@@ -12,16 +12,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-
-public class PersonaHumana extends Persona{
+public class PersonaHumana{
+    private Long id;
     private String nombre;
     private String apellido;
     private Integer edad;
     private Integer numeroDeDocumento;
     private String genero;
     private String direccion;
+    private List<MedioDeNotificacion> mediosDeNotificacion = new ArrayList<>();
     private MedioDeNotificacion medioDeNotificacionPredeterminado;
-
+    private List<DonacionSinSegmentar> donaciones = new ArrayList<>(); //al acceder a esta donacion sabremoscuales salieron
+    private List<Mision> misiones = new ArrayList<>();
+    private CategoriaDeDonante categoria;
 
     public PersonaHumana(String nombre,String apellido,Integer edad,Integer numeroDeDocumento,String genero,String direccion) {
         this.nombre = nombre;
@@ -36,6 +39,14 @@ public class PersonaHumana extends Persona{
 
     public void agregarMedioDeNotificacion(MedioDeNotificacion unMedio) {
         this.mediosDeNotificacion.add(unMedio);
+    }
+
+    public void agregarMision(Mision mision){
+        this.misiones.add(mision);
+    }
+
+    public void agregarDonacion(DonacionSinSegmentar donacion){
+        this.donaciones.add(donacion);
     }
 
 }
