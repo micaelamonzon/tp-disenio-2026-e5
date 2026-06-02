@@ -8,15 +8,12 @@ import java.util.List;
 import java.util.Optional;
 
 @Data
-public class HabilDonador implements Tipo{
-
-    private String nombre;
+public class HabilDonador extends Mision{
     private Integer cantidadDeBienes;
-    private Integer distanciaDelObjetivo;
-    private Integer progreso;
 
 
-    public HabilDonador(Integer cantidadDeBienes){
+    public HabilDonador(String nombre,Integer cantidadDeBienes){
+        super(nombre);
         this.cantidadDeBienes = cantidadDeBienes;
     }
 
@@ -27,14 +24,16 @@ public class HabilDonador implements Tipo{
        DonacionSinSegmentar donacionQueCumple = donaciones.stream().filter(d -> d.getBienes().size() > this.cantidadDeBienes).findFirst().orElse(null);
 
            if(donacionQueCumple != null){
-               this.progreso = 100;
-               this.distanciaDelObjetivo = 0;
+               this.setProgreso(100);
+               this.setDistanciaDelObjetivo(0);
+               this.setEstadoDeMision(EstadoDeMision.COMPLETADA);
+               this.setFechaCompletada(java.time.LocalDate.now());
                return Boolean.TRUE;
            }
 
-           this.progreso = 0;
-           this.distanciaDelObjetivo = 100;
-
+           this.setProgreso(0);
+           this.setDistanciaDelObjetivo(100);
+           this.setEstadoDeMision(EstadoDeMision.BLOQUEADA);
            return Boolean.FALSE;
     }
 

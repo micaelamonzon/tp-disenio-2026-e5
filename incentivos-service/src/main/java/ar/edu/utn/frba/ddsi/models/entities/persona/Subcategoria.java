@@ -5,7 +5,7 @@ import lombok.Data;
 @Data
 public class Subcategoria {
     private String nombre;
-    private boolean esPerecedero;
+    private Boolean esPerecedero;
     private Categoria categoria;
 
     public Subcategoria(String nombre, Boolean esPerecedero, Categoria categoria){

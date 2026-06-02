@@ -7,16 +7,15 @@ import java.util.List;
 import java.time.LocalDateTime;
 import java.time.Month;
 @Data
-public class Racha implements  Tipo{
+public class Racha extends Mision{
 
     private Integer meses; //minimo 2 meses y maximo 12 meses
     private Integer mesInicial;
     private Integer mesFinal;
-    private Integer distanciaDelObjetivo = 100;
-    private Integer progreso;
 
 
-    public Racha(Integer meses){
+    public Racha(String nombre,Integer meses){
+        super(nombre);
         this.meses = meses;
         this.mesInicial = 1; //empiezo en el mes 1
         this.mesFinal = meses; // termino en el num de mes
@@ -27,13 +26,6 @@ public class Racha implements  Tipo{
         // pedirle al servicio de donaciones,
         // todas las donaciones de la persona donante y que se hayan hecho durante los x meses consecutivos
 
-        for(int i = 0; i < donaciones.size(); i++){
-            int numeroDeMes = donaciones.get(i).getFechaDeIngreso().getMonthValue();
-            if(numeroDeMes >= mesInicial && numeroDeMes <= mesFinal){
-                this.subirProgreso(donaciones.size());
-                this.distanciaDelObjetivo -= this.progreso;
-            }
-        }
 
         //por lo menos una donacion tiene que haber sido donada al mes siguiente
         int mesI = this.mesInicial;
@@ -44,17 +36,28 @@ public class Racha implements  Tipo{
             boolean cumple = donaciones.stream().map(DonacionSinSegmentar::getFechaDeIngreso).
                     anyMatch( f ->  f.getMonthValue() == finalMesI);
             if(!cumple){
+                int distanciaRestante = 100 - this.getProgreso();
+                this.setDistanciaDelObjetivo(Math.max(0, distanciaRestante));
                 this.bajarProgreso();
+            }else {
+                this.subirProgreso();
             }
             mesI += 1;
         }
 
-        return this.progreso == 100 ? Boolean.TRUE : Boolean.FALSE; //se habra completado cuando el progreso sea del 100
+        if (this.getProgreso() == 100) {
+            this.setEstadoDeMision(EstadoDeMision.COMPLETADA);
+            this.setFechaCompletada(java.time.LocalDate.now());
+            return Boolean.TRUE;
+        } else {
+            this.setEstadoDeMision(EstadoDeMision.BLOQUEADA);
+            return Boolean.FALSE;
+        }
     }
-    public void subirProgreso(Integer cantDonaciones){
-        this.progreso += (100/cantDonaciones);
+    public void subirProgreso(){
+        super.subirProgreso(this.meses);
     }
     public void bajarProgreso(){
-        this.progreso -= (100/meses);
+        super.bajarProgreso(this.meses);
     }
 }
