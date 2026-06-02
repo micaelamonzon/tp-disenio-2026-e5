@@ -27,6 +27,10 @@ public class PersonaJuridica{
         this.rubro= rubro;
     }
 
+    public PersonaJuridica(String cuit, String razonSocial) {
+
+    }
+
 
     public void agregarMedioDeNotificacion(MedioDeNotificacion unMedio) {
         this.mediosDeNotificacion.add(unMedio);

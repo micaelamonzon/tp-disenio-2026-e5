@@ -46,7 +46,7 @@ public class IncentivosServiceImpl implements IncentivosService {
     @Override
     public List<MisionDTO> obtenerDonanteHumano(Long id){
 
-        URI uri = UriComponentsBuilder.fromUriString(propiedades.getUrl()).path("/humano/obtenerDonaciones/{id}")
+        URI uri = UriComponentsBuilder.fromUriString(propiedades.getUrl()).path("/donaciones/humano/{id}")
                 .buildAndExpand(id)
                 .toUri();
 
@@ -72,7 +72,7 @@ public class IncentivosServiceImpl implements IncentivosService {
     @Override
     public List<MisionDTO> obtenerDonanteJuridico(Long id){
 
-        URI uri = UriComponentsBuilder.fromUriString(propiedades.getUrl()).path("/juridico/obtenerDonaciones/{id}")
+        URI uri = UriComponentsBuilder.fromUriString(propiedades.getUrl()).path("/donaciones/juridico/{id}")
                 .buildAndExpand(id)
                 .toUri();
 
@@ -134,7 +134,7 @@ public class IncentivosServiceImpl implements IncentivosService {
     public void calcularYGuardarRanking() {
         URI uri = UriComponentsBuilder
                 .fromUriString(propiedades.getUrl())
-                .path("/servicioDeDonaciones/obtenerDonantes")
+                .path("/obtenerDonantes")
                 .build()
                 .toUri();
 
@@ -226,26 +226,31 @@ public class IncentivosServiceImpl implements IncentivosService {
         List<InsigniaDTO> insigniasDTO =  donante.getPerfil().getInsignias().stream().map(i -> new InsigniaDTO(i.getNombre(), i.texto())).toList();
         return insigniasDTO;
     }
+
     @Override
     public MetricasImpactoDTO obtenerMetricasDeImpacto(Long idDonante) {
 
-        Donante donante = (Donante) incentivosRepository.buscarPorId(idDonante)
-                .orElseGet(() -> {
-                    obtenerDonanteHumano(idDonante);
-                    return incentivosRepository.buscarPorId(idDonante)
-                            .orElseThrow(() -> new RuntimeException(
-                                    "Donante no encontrado: " + idDonante));
-                });
+        Donante donante = incentivosRepository.buscarDonantePorId(idDonante);
+
+        if (donante == null) {
+            obtenerDonanteHumano(idDonante);
+            donante = incentivosRepository.buscarDonantePorId(idDonante);
+        }
+
+        if (donante == null) {
+            throw new RuntimeException("Donante no encontrado: " + idDonante);
+        }
 
         String nombre = donante.getNombre() != null
                 ? donante.getNombre() + " " + donante.getApellido()
                 : donante.getRazonSocial();
 
         YearMonth mesPico = donante.mesDeMayorActividad();
-        // Si no hay ranking calculado, lo calculamos ahora
+
         if (ultimoRanking == null) {
             calcularYGuardarRanking();
         }
+
         Integer posicion = (ultimoRanking != null)
                 ? ultimoRanking.getPosicion(donante)
                 : null;

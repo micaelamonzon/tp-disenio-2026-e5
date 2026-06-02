@@ -5,6 +5,7 @@ import ar.edu.utn.frba.ddsi.donaciones.dto.DonacionSinSegmentarDTO;
 import ar.edu.utn.frba.ddsi.donaciones.dto.MisionDTO;
 import ar.edu.utn.frba.ddsi.donaciones.dto.PersonaDonanteDTO;
 import ar.edu.utn.frba.ddsi.donaciones.dto.PersonaHumanaDTO;
+import ar.edu.utn.frba.ddsi.donaciones.dto.PersonaJuridicaDTO;
 import ar.edu.utn.frba.ddsi.donaciones.dto.SubcategoriaDTO;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante.PersonaHumana;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante.PersonaJuridica;
@@ -117,7 +118,41 @@ public class DonacionesServiceImpl implements DonacionesService {
     }
 
     @Override
-    public PersonaDonanteDTO obtenerDonacionesDeJurico(Long id) {
+    public PersonaHumanaDTO obtenerHumanoPorId(Long id) {
+        PersonaHumana personaHumana = donacionesRepository.humanoFindById(id);
+        if (personaHumana == null) {
+            throw new RuntimeException("Persona humana no encontrada");
+        }
+        List<DonacionSinSegmentarDTO> donacionesDTO = obtenerDonacionesSinSegmentarDTO(personaHumana.getDonaciones());
+        return new PersonaHumanaDTO(
+                personaHumana.getId(),
+                personaHumana.getNombre(),
+                personaHumana.getApellido(),
+                personaHumana.getNumeroDeDocumento(),
+                personaHumana.getGenero(),
+                personaHumana.getEdad(),
+                personaHumana.getDireccion(),
+                donacionesDTO
+        );
+    }
+
+    @Override
+    public PersonaJuridicaDTO obtenerJuridicoPorId(Long id) {
+        PersonaJuridica personaJuridica = donacionesRepository.juridicaFindById(id);
+        if (personaJuridica == null) {
+            throw new RuntimeException("Persona juridica no encontrada");
+        }
+        List<DonacionSinSegmentarDTO> donacionesDTO = obtenerDonacionesSinSegmentarDTO(personaJuridica.getDonaciones());
+        return new PersonaJuridicaDTO(
+                personaJuridica.getId(),
+                personaJuridica.getCuit(),
+                personaJuridica.getRazonSocial(),
+                donacionesDTO
+        );
+    }
+
+    @Override
+    public PersonaDonanteDTO obtenerDonacionesDeJuridico(Long id) {
         PersonaJuridica personaJuridica = this.donacionesRepository.juridicaFindById(id);
         if (personaJuridica != null) {
             List<DonacionSinSegmentarDTO> donacionSinSegmentarDTOS = this.obtenerDonacionesSinSegmentarDTO(personaJuridica.getDonaciones());
@@ -190,7 +225,7 @@ public class DonacionesServiceImpl implements DonacionesService {
 
 
         List<BienDTO> bienesDTO = this.obtenerBienesDTO(nuevaDonacion.getBienes());
-        return new DonacionSinSegmentarDTO(bienesDTO, nuevaDonacion.getFechaDeIngreso(), nuevaDonacion.getDonacionEntregada());
+        return new DonacionSinSegmentarDTO(bienesDTO, nuevaDonacion.getFechaDeIngreso(), nuevaDonacion.getDonacionEntregada(),nuevaDonacion.getOrganizacionId());
 
     }
     @Override
@@ -203,13 +238,13 @@ public class DonacionesServiceImpl implements DonacionesService {
         }
 
         List<Bien> bienes = this.convertirBienesDTO(body.bienes());
-        DonacionSinSegmentar nuevaDonacion = new DonacionSinSegmentar(bienes, LocalDateTime.now());
+        DonacionSinSegmentar nuevaDonacion = new DonacionSinSegmentar(bienes, LocalDateTime.now(),false,null);
 
         personaHumana.agregarDonacion(nuevaDonacion);
 
 
         List<BienDTO> bienesDTO = this.obtenerBienesDTO(nuevaDonacion.getBienes());
-        return new DonacionSinSegmentarDTO(bienesDTO, nuevaDonacion.getFechaDeIngreso(), nuevaDonacion.getDonacionEntregada());
+        return new DonacionSinSegmentarDTO(bienesDTO, nuevaDonacion.getFechaDeIngreso(), nuevaDonacion.getDonacionEntregada(),nuevaDonacion.getOrganizacionId());
     }
     @Override
     public List<DonacionSinSegmentarDTO> modificarDonacionDeHumano(DonacionSinSegmentarDTO body, Long idHumano, Long idDonacion, Long idBien){
@@ -337,7 +372,8 @@ public class DonacionesServiceImpl implements DonacionesService {
                     return new DonacionSinSegmentarDTO(
                             bienesDTO,
                             donacion.getFechaDeIngreso(),
-                            donacion.getDonacionEntregada()
+                            donacion.getDonacionEntregada(),
+                            donacion.getOrganizacionId()
                     );
                 }).toList();
 
@@ -351,7 +387,9 @@ public class DonacionesServiceImpl implements DonacionesService {
 
                     return new DonacionSinSegmentar(
                             bienes,
-                            donacion.fechaDeIngreso()
+                            donacion.fechaDeIngreso(),
+                            donacion.donacionEntregada() != null ? donacion.donacionEntregada() : false,
+                            donacion.organizacionId()
                     );
                 }).toList();
 
@@ -417,6 +455,100 @@ public class DonacionesServiceImpl implements DonacionesService {
                 null, j.getCuit(), j.getRazonSocial(), null, null
         )));
         return dtos;
+    }
+
+    @Override
+    public void eliminarDonanteJuridico(Long id) {
+        PersonaJuridica personaJuridica = donacionesRepository.juridicaFindById(id);
+        if (personaJuridica == null) {
+            throw new RuntimeException("Persona juridica no encontrada con id: " + id);
+        }
+        donacionesRepository.deleteJuridico(id);
+    }
+
+    @Override
+    public PersonaJuridicaDTO crearDonanteJuridico(PersonaJuridicaDTO request) {
+        // 1. Crear la entidad de dominio
+        PersonaJuridica nuevaPersona = new PersonaJuridica(
+                request.cuit(),
+                request.razonSocial()
+        );
+
+        if (request.donaciones() != null && !request.donaciones().isEmpty()) {
+            List<DonacionSinSegmentar> donaciones = this.convertirDonacionesDTO(request.donaciones());
+            nuevaPersona.setDonaciones(donaciones);
+        }
+
+        PersonaJuridica juridica = this.donacionesRepository.saveJuridica(nuevaPersona);
+
+        List<DonacionSinSegmentarDTO> donacionesDTO = obtenerDonacionesSinSegmentarDTO(
+                juridica.getDonaciones());
+
+        return new PersonaJuridicaDTO(
+                juridica.getId(),
+                juridica.getCuit(),
+                juridica.getRazonSocial(),
+                donacionesDTO
+        );
+    }
+
+    @Override
+    public PersonaHumanaDTO modificarDonanteHumano(Long id, PersonaHumanaDTO request) {
+        PersonaHumana personaHumana = donacionesRepository.humanoFindById(id);
+        if (personaHumana == null) {
+            throw new RuntimeException("Persona humana no encontrada con id: " + id);
+        }
+
+        // Solo actualizamos los campos que vienen con valor
+        if (request.nombre() != null) personaHumana.setNombre(request.nombre());
+        if (request.apellido() != null) personaHumana.setApellido(request.apellido());
+        if (request.edad() != null) personaHumana.setEdad(request.edad());
+        if (request.DNI() != null) personaHumana.setNumeroDeDocumento(request.DNI());
+        if (request.genero() != null) personaHumana.setGenero(request.genero());
+        if (request.direccion() != null) personaHumana.setDireccion(request.direccion());
+
+        List<DonacionSinSegmentarDTO> donacionesDTO = obtenerDonacionesSinSegmentarDTO(
+                personaHumana.getDonaciones());
+
+        return new PersonaHumanaDTO(
+                personaHumana.getId(),
+                personaHumana.getNombre(),
+                personaHumana.getApellido(),
+                personaHumana.getNumeroDeDocumento(),
+                personaHumana.getGenero(),
+                personaHumana.getEdad(),
+                personaHumana.getDireccion(),
+                donacionesDTO
+        );
+    }
+    @Override
+    public PersonaJuridicaDTO modificarDonanteJuridico(Long id, PersonaJuridicaDTO request) {
+        PersonaJuridica personaJuridica = donacionesRepository.juridicaFindById(id);
+        if (personaJuridica == null) {
+            throw new RuntimeException("Persona juridica no encontrada con id: " + id);
+        }
+
+        if (request.cuit() != null) personaJuridica.setCuit(request.cuit());
+        if (request.razonSocial() != null) personaJuridica.setRazonSocial(request.razonSocial());
+
+        List<DonacionSinSegmentarDTO> donacionesDTO = obtenerDonacionesSinSegmentarDTO(
+                personaJuridica.getDonaciones());
+
+        return new PersonaJuridicaDTO(
+                personaJuridica.getId(),
+                personaJuridica.getCuit(),
+                personaJuridica.getRazonSocial(),
+                donacionesDTO
+        );
+    }
+
+    @Override
+    public void eliminarDonanteHumano(Long id) {
+        PersonaHumana personaHumana = donacionesRepository.humanoFindById(id);
+        if (personaHumana == null) {
+            throw new RuntimeException("Persona humana no encontrada con id: " + id);
+        }
+        donacionesRepository.deleteHumano(id);
     }
 
 }
