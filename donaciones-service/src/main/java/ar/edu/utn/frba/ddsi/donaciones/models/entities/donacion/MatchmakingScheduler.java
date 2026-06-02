@@ -1,11 +1,18 @@
 package ar.edu.utn.frba.ddsi.donaciones.models.entities.donacion;
 
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.Necesidad.Necesidad;
+import ar.edu.utn.frba.ddsi.donaciones.models.repositories.RepoDonaciones;
+import ar.edu.utn.frba.ddsi.donaciones.models.repositories.RepoMatcheo;
+import ar.edu.utn.frba.ddsi.donaciones.models.repositories.RepoNecesidades;
+import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Component
+@RequiredArgsConstructor
 public class MatchmakingScheduler {
     private final MotorDeMatchmaking motorMatchmaking;
     private final RepoDonaciones repoDonaciones;   // Para buscar las donaciones pendientes

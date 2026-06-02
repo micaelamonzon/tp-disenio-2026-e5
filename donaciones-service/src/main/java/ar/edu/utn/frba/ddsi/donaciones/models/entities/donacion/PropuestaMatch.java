@@ -2,7 +2,6 @@ package ar.edu.utn.frba.ddsi.donaciones.models.entities.donacion;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.Necesidad.Necesidad;
 import jakarta.persistence.*;
 import lombok.Data;
-import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,10 +17,10 @@ public class PropuestaMatch {
 
     @ManyToMany
     @OrderColumn(name = "orden_conjunto")
-    private List<Necesidad> rankingConjunto = new ArrayList<>();
+    private List<Necesidad> rankingConjunto = new ArrayList<>(); //Cuando hay coincidencias
 
     // Guarda los rankings separados si no hubo coincidencias globales
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "propuesta_match_id") // Clave foránea en la tabla de rankings individuales
+    @JoinColumn(name = "propuesta_match_id")
     private List<RankingPorAlgoritmo> rankingsIndividuales = new ArrayList<>();
 }

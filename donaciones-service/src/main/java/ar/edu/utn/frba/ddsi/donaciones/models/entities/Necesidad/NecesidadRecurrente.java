@@ -1,14 +1,22 @@
 package ar.edu.utn.frba.ddsi.donaciones.models.entities.Necesidad;
 
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.Subcategoria;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+@Entity
 @Data
 @Getter
+@NoArgsConstructor
 public class NecesidadRecurrente extends Necesidad {
     private int cantidadObjetivoPorPeriodo;
     private int cantidadRecibidaEnPeriodo;
+
+    @Enumerated(EnumType.STRING)
     private TipoPeriodo periodo;
 
     public NecesidadRecurrente(Subcategoria subcategoria, String descripcion,

@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 public class PrioridadSubatendidos implements Strategy_AlgoritmosMatchmaking {
     private final double alpha; // Factor de suavizado
 
-    public PrioridadSubAtendidosStrategy(double alpha) {
+    public PrioridadSubatendidos(double alpha) {
         if (alpha <= 0) {
             throw new IllegalArgumentException("El factor de suavizado 'alpha' debe ser mayor a 0");
         }

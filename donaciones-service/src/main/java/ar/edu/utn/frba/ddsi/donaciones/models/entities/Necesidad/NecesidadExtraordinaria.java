@@ -1,10 +1,14 @@
 package ar.edu.utn.frba.ddsi.donaciones.models.entities.Necesidad;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.Subcategoria;
+import jakarta.persistence.Entity;
 import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+@Entity
 @Data
 @Getter
+@NoArgsConstructor
 public class NecesidadExtraordinaria extends Necesidad {
     private int cantidadRequerida;
     private int cantidadRecibida;
