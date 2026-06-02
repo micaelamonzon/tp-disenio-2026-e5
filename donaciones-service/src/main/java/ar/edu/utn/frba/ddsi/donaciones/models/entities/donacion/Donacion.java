@@ -1,6 +1,6 @@
 package ar.edu.utn.frba.ddsi.donaciones.models.entities.donacion;
 
-import ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante.PersonaDonanteDTO;
+import ar.edu.utn.frba.ddsi.donaciones.dto.PersonaDonanteDTO;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.Bien;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

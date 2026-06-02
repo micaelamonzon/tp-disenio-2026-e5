@@ -1,7 +1,7 @@
 package ar.edu.utn.frba.ddsi.donaciones.controllers;
 
 
-import ar.edu.utn.frba.ddsi.donaciones.dto.SeleccionNecesidadRequest;
+import ar.edu.utn.frba.ddsi.donaciones.dto.SeleccionNecesidadRequestDTO;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.donacion.PropuestaMatch;
 import ar.edu.utn.frba.ddsi.donaciones.services.MatchmakingService;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +29,7 @@ public class controllerDonaciones {
     @PostMapping("/matcheos/{matcheoId}/seleccion")
     public PropuestaMatch seleccionarNecesidad(
             @PathVariable Long matcheoId,
-            @RequestBody SeleccionNecesidadRequest request
+            @RequestBody SeleccionNecesidadRequestDTO request
     ) {
         return matchmakingService.seleccionarNecesidad(matcheoId, request.necesidadId());
     }
