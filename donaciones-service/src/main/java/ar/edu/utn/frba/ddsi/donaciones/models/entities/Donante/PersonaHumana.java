@@ -11,19 +11,17 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
 
-@Getter
-@Setter
 @Data
-public class PersonaHumana{
+
+public class PersonaHumana extends Persona{
     private String nombre;
     private String apellido;
     private Integer edad;
     private Integer numeroDeDocumento;
     private String genero;
     private String direccion;
-    private List<MedioDeNotificacion> mediosDeNotificacion = new ArrayList<>();
     private MedioDeNotificacion medioDeNotificacionPredeterminado;
-    private List<Bien> donaciones = new ArrayList<>();
+
 
     public PersonaHumana(String nombre,String apellido,Integer edad,Integer numeroDeDocumento,String genero,String direccion) {
         this.nombre = nombre;

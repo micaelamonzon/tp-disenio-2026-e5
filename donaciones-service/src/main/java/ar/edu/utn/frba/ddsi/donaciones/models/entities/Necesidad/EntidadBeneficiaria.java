@@ -3,6 +3,7 @@ import ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante.Representante;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.Subcategoria;
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -44,4 +45,13 @@ public class EntidadBeneficiaria {
 
 
     }
+
+    public int obtenerCantidadDonacionesUltimoTrimestre() {
+        LocalDate haceTresMeses = LocalDate.now().minusMonths(3);
+
+        return this.necesidades.stream()
+                .mapToInt(n -> n.contarDonacionesDesde(haceTresMeses))
+                .sum();
+    }
+
 }
