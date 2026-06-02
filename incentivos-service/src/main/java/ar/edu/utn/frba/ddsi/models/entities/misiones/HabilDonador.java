@@ -9,8 +9,6 @@ import java.util.Optional;
 
 @Data
 public class HabilDonador implements Tipo{
-
-    private String nombre;
     private Integer cantidadDeBienes;
     private Integer distanciaDelObjetivo;
     private Integer progreso;
