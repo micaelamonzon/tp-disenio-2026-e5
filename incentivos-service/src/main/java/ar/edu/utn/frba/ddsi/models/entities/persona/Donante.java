@@ -6,6 +6,7 @@ import ar.edu.utn.frba.ddsi.models.entities.misiones.EstadoDeMision;
 import ar.edu.utn.frba.ddsi.models.entities.misiones.Mision;
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.List;
 import java.util.Map;
@@ -14,7 +15,7 @@ import java.util.stream.Collectors;
 @Data
 public class Donante {
     private Long id;
-
+    private LocalDateTime fechaDeRegistro;
     private String cuit;
     private String razonSocial;
 
@@ -30,7 +31,7 @@ public class Donante {
     private String genero;
     private String direccion;
 
-    public Donante(Long id,String cuit,String razonSocial,String nombre,String apellido,Integer edad,Integer DNI,String genero,String direccion,List<DonacionSinSegmentar> donaciones, List<Mision> misiones, CategoriaDeDonante categoria) {
+    public Donante(Long id,String cuit,String razonSocial,String nombre,String apellido,Integer edad,Integer DNI,String genero,String direccion,List<DonacionSinSegmentar> donaciones, List<Mision> misiones, CategoriaDeDonante categoria,LocalDateTime fechaDeRegistro) {
         this.id = id;
         this.cuit = cuit;
         this.razonSocial = razonSocial;
@@ -43,6 +44,7 @@ public class Donante {
         this.donaciones = donaciones;
         this.misiones = misiones;
         this.categoria = categoria;
+        this.fechaDeRegistro = fechaDeRegistro;
 
     }
     public Integer calcularMisionesCumplidasEn(YearMonth periodo) {
@@ -117,5 +119,10 @@ public class Donante {
                 .distinct()
                 .count();
     }
+    public boolean esNuevoEn(YearMonth periodo) {
+        if (fechaDeRegistro == null) return false;
+        return YearMonth.from(fechaDeRegistro.toLocalDate()).equals(periodo);
+    }
+
 
 }

@@ -1,6 +1,8 @@
 package ar.edu.utn.frba.ddsi.controllers;
 
 import ar.edu.utn.frba.ddsi.dto.InsigniaDTO;
+import ar.edu.utn.frba.ddsi.dto.MetricasImpactoDTO;
+import ar.edu.utn.frba.ddsi.dto.MetricasSistemaDTO;
 import ar.edu.utn.frba.ddsi.dto.MisionDTO;
 import ar.edu.utn.frba.ddsi.models.entities.persona.Insignia;
 import ar.edu.utn.frba.ddsi.services.IncentivosService;
@@ -64,5 +66,16 @@ public class IncentivosController {
         incentivosService.publicarYDifundirInsignia(idPersona, insigniaObtenida);
 
         return ResponseEntity.ok().build();
+    }
+    @GetMapping("/admin/metricas-sistema")
+    public ResponseEntity<MetricasSistemaDTO> obtenerMetricasSistema() {
+        return ResponseEntity.ok(incentivosService.obtenerMetricasDelSistema());
+    }
+
+    @GetMapping("/{id}/metricas")
+    public ResponseEntity<MetricasImpactoDTO> obtenerMetricas(
+            @PathVariable Long id) {
+        return ResponseEntity.ok(
+                incentivosService.obtenerMetricasDeImpacto(id));
     }
 }

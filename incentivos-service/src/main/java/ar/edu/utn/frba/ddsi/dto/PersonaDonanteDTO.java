@@ -2,6 +2,7 @@ package ar.edu.utn.frba.ddsi.dto;
 
 import ar.edu.utn.frba.ddsi.models.entities.categorias.NombreDeCategoria;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public record PersonaDonanteDTO (
@@ -18,5 +19,6 @@ public record PersonaDonanteDTO (
         String cuit,
         String razonSocial,
         List<MisionDTO> misiones,
-        NombreDeCategoria categoria
+        NombreDeCategoria categoria,
+        LocalDateTime fechaDeRegistro
 ){}

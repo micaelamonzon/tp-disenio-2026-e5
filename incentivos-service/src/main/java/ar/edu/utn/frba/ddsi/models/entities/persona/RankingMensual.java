@@ -14,11 +14,12 @@ public class RankingMensual {
     private Donante tercerPuesto;
     private List<Donante> rankingCompletoOrdenado;
 
-    public RankingMensual(LocalDate fecha, Donante primerPuesto, Donante segundoPuesto, Donante tercerPuesto){
+    public RankingMensual(LocalDate fecha, Donante primerPuesto, Donante segundoPuesto, Donante tercerPuesto,List<Donante> rankingCompletoOrdenado){
         this.fecha = fecha;
         this.primerPuesto = primerPuesto;
         this.segundoPuesto = segundoPuesto;
         this.tercerPuesto = tercerPuesto;
+        this.rankingCompletoOrdenado = rankingCompletoOrdenado;
     }
 
     public Integer getPosicion(Donante donante) {

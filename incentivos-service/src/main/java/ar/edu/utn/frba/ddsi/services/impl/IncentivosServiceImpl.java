@@ -58,7 +58,7 @@ public class IncentivosServiceImpl implements IncentivosService {
 
         List<Mision> misiones = this.convertirMisionesDTO(personaDonante.misiones());
 
-        Donante nuevoDonante = new Donante(personaDonante.id(),null,null, personaDonante.nombre(),personaDonante.apellido(),personaDonante.edad(),personaDonante.DNI(),personaDonante.genero(),personaDonante.direccion(),donaciones,misiones,new CategoriaDeDonante(personaDonante.categoria()));
+        Donante nuevoDonante = new Donante(personaDonante.id(),null,null, personaDonante.nombre(),personaDonante.apellido(),personaDonante.edad(),personaDonante.DNI(),personaDonante.genero(),personaDonante.direccion(),donaciones,misiones,new CategoriaDeDonante(personaDonante.categoria()),personaDonante.fechaDeRegistro());
 
         this.incentivosRepository.guardarDonante(nuevoDonante);
 
@@ -84,7 +84,7 @@ public class IncentivosServiceImpl implements IncentivosService {
 
         List<Mision> misiones = this.convertirMisionesDTO(personaDonante.misiones());
 
-        Donante nuevoDonante = new Donante(personaDonante.id(),personaDonante.cuit(),personaDonante.razonSocial(),null,null,null,null,null,null,donaciones,misiones,new CategoriaDeDonante(personaDonante.categoria()));
+        Donante nuevoDonante = new Donante(personaDonante.id(),personaDonante.cuit(),personaDonante.razonSocial(),null,null,null,null,null,null,donaciones,misiones,new CategoriaDeDonante(personaDonante.categoria()),personaDonante.fechaDeRegistro());
 
         this.incentivosRepository.guardarDonante(nuevoDonante);
 
@@ -156,7 +156,7 @@ public class IncentivosServiceImpl implements IncentivosService {
                     dto.id(), null, null,
                     dto.nombre(), dto.apellido(),
                     null, null, null, null,
-                    null, misionesLocales, null
+                    null, misionesLocales, null,null
             );
         }).toList();
 
@@ -169,7 +169,8 @@ public class IncentivosServiceImpl implements IncentivosService {
                 LocalDate.now().minusMonths(1),
                 rankingCompletoOrdenado.get(0),
                 rankingCompletoOrdenado.get(1),
-                rankingCompletoOrdenado.get(2)
+                rankingCompletoOrdenado.get(2),
+                rankingCompletoOrdenado
         );
     }
     @Override
@@ -241,7 +242,10 @@ public class IncentivosServiceImpl implements IncentivosService {
                 : donante.getRazonSocial();
 
         YearMonth mesPico = donante.mesDeMayorActividad();
-
+        // Si no hay ranking calculado, lo calculamos ahora
+        if (ultimoRanking == null) {
+            calcularYGuardarRanking();
+        }
         Integer posicion = (ultimoRanking != null)
                 ? ultimoRanking.getPosicion(donante)
                 : null;
@@ -274,6 +278,77 @@ public class IncentivosServiceImpl implements IncentivosService {
                 ? donante.getNombre() + " " + donante.getApellido()
                 : donante.getRazonSocial();
         return publicadorService.publicarYDifundirInsignia(nombre, insignia);
+    }
+
+    @Override
+    public MetricasSistemaDTO obtenerMetricasDelSistema() {
+        List<Donante> todos = incentivosRepository.findAllDonantes();
+        YearMonth mesActual = YearMonth.now();
+        YearMonth mesAnterior = mesActual.minusMonths(1);
+
+        // Donantes activos (que tienen al menos una donación)
+        int totalActivos = (int) todos.stream()
+                .filter(d -> d.getDonaciones() != null
+                        && !d.getDonaciones().isEmpty())
+                .count();
+
+        // Donaciones de este mes en toda la plataforma
+        int donacionesEsteMes = todos.stream()
+                .filter(d -> d.getDonaciones() != null)
+                .flatMap(d -> d.getDonaciones().stream())
+                .filter(don -> YearMonth.from(
+                        don.getFechaDeIngreso().toLocalDate()).equals(mesActual))
+                .mapToInt(d -> 1)
+                .sum();
+
+        // Donaciones del mes anterior para comparar
+        int donacionesMesAnterior = todos.stream()
+                .filter(d -> d.getDonaciones() != null)
+                .flatMap(d -> d.getDonaciones().stream())
+                .filter(don -> YearMonth.from(
+                        don.getFechaDeIngreso().toLocalDate()).equals(mesAnterior))
+                .mapToInt(d -> 1)
+                .sum();
+
+        // Donaciones entregadas este mes
+        int entregadasEsteMes = todos.stream()
+                .filter(d -> d.getDonaciones() != null)
+                .flatMap(d -> d.getDonaciones().stream())
+                .filter(don -> YearMonth.from(
+                        don.getFechaDeIngreso().toLocalDate()).equals(mesActual))
+                .filter(don -> Boolean.TRUE.equals(don.getDonacionEntregada()))
+                .mapToInt(d -> 1)
+                .sum();
+
+        // Misiones completadas este mes en toda la plataforma
+        int misionesEsteMes = todos.stream()
+                .mapToInt(d -> d.calcularMisionesCumplidasEn(mesActual))
+                .sum();
+
+        // Top 3 del ranking
+        List<String> top3 = new ArrayList<>();
+        if (ultimoRanking != null) {
+            if (ultimoRanking.getPrimerPuesto() != null)
+                top3.add(ultimoRanking.getPrimerPuesto().getNombre());
+            if (ultimoRanking.getSegundoPuesto() != null)
+                top3.add(ultimoRanking.getSegundoPuesto().getNombre());
+            if (ultimoRanking.getTercerPuesto() != null)
+                top3.add(ultimoRanking.getTercerPuesto().getNombre());
+        }
+        int donantesNuevosEsteMes = (int) todos.stream()
+                .filter(d -> d.esNuevoEn(mesActual))
+                .count();
+
+        return new MetricasSistemaDTO(
+                totalActivos,
+                donantesNuevosEsteMes,
+                donacionesEsteMes,
+                entregadasEsteMes,
+                donacionesEsteMes - entregadasEsteMes,
+                donacionesEsteMes - donacionesMesAnterior,
+                misionesEsteMes,
+                top3
+        );
     }
 
 }
