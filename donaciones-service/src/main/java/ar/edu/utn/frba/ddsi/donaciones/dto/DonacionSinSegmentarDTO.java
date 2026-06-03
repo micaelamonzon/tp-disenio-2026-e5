@@ -13,8 +13,8 @@ public record DonacionSinSegmentarDTO(
         List<BienDTO> bienes,
 //        List<DonacionSegmentadaDTO> donacionesSegmentadas,
         LocalDateTime fechaDeIngreso,
-        Boolean donacionEntregada
-
+        Boolean donacionEntregada,
+        Long organizacionId
 
 ) {
 }

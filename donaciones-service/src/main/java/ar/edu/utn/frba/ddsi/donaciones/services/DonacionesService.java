@@ -10,8 +10,10 @@ import java.util.List;
 public interface DonacionesService {
     List<PersonaDonanteDTO> obtenerTodosHumanos();
     List<PersonaDonanteDTO> obtenerTodosJuridicos();
+    PersonaHumanaDTO obtenerHumanoPorId(Long id);
+    PersonaJuridicaDTO obtenerJuridicoPorId(Long id);
     PersonaDonanteDTO obtenerDonacionesDeHumano(Long id);
-    PersonaDonanteDTO obtenerDonacionesDeJurico(Long id);
+    PersonaDonanteDTO obtenerDonacionesDeJuridico(Long id);
     PersonaHumanaDTO crearDonanteHumano(PersonaHumanaDTO body);
     DonacionSinSegmentarDTO crearDonacionDeJuridico(DonacionSinSegmentarDTO body, Long id);
     DonacionSinSegmentarDTO crearDonacionDeHumano(DonacionSinSegmentarDTO body, Long id);
@@ -19,4 +21,11 @@ public interface DonacionesService {
     public List<DonacionSinSegmentarDTO> modificarDonacionDeJuridica(DonacionSinSegmentarDTO body, Long idJuridica, Long idDonacion, Long idBien);
     List<DonacionSinSegmentarDTO> eliminarDonacionDeHumano(Long idHumano, Long idDonacion);
     List<DonacionSinSegmentarDTO> eliminarDonacionDeJuridico(Long idJuridico, Long idDonacion);
+    List<PersonaDonanteDTO> obtenerTodosLosDonantesUnificados();
+
+    void eliminarDonanteJuridico(Long id);
+    PersonaJuridicaDTO crearDonanteJuridico(PersonaJuridicaDTO request);
+    PersonaHumanaDTO modificarDonanteHumano(Long id, PersonaHumanaDTO request);
+    PersonaJuridicaDTO modificarDonanteJuridico(Long id, PersonaJuridicaDTO request);
+    void eliminarDonanteHumano(Long id);
 }

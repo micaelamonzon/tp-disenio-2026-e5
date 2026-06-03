@@ -11,5 +11,8 @@ public interface DonacionesRepository {
     // Spring genera la query basándose en el parámetro Estado
    // List<Donacion> findByEstado(Estado estado);
 
+    void deleteHumano(Long id);
+
+    void deleteJuridico(Long id);
     List<DonacionSegmentada> findByEstado(String nombreEstado);
 }
