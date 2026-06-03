@@ -1,0 +1,67 @@
+# Correr NotificacionesServiceApplication
+
+EN POSTMAN:
+
+# EMAIL
+http://localhost:8081/servicioDeNotificaciones/notificar?destinatario=eperezarevalos@frba.utn.edu.ar&mensaje=Hola desde DonaTrack&medio=EMAIL
+
+# WHATSAPP (mandar mensaje al chat de Twilio para activarlo = join combination-pan)
+http://localhost:8081/servicioDeNotificaciones/notificar?destinatario=%2B5491133223615&mensaje=Hola desde DonaTrack&medio=WHATSAPP
+
+# SMS (en el teléfono virtual: https://console.twilio.com/us1/develop/sms/virtual-phone -> seleccionar el número para poder ver los mensajes entrantes)
+http://localhost:8081/servicioDeNotificaciones/notificar?destinatario=%2B18777804236&mensaje=Hola desde DonaTrack&medio=SMS
+
+
+--------------------------------------------------------------------------------------------------------
+
+# Correr NotificacionesServiceApplication y luego DonacionesServiceApplication
+
+
+EN POSTMAN:
+
+# Crear humano
+POST
+http://localhost:8080/servicioDeDonaciones/crearDonanteHumano
+
+Body:
+{
+    "id": null,
+    "nombre": "Eugenia",
+    "apellido": "Perez",
+    "DNI": 12345678,
+    "genero": "F",
+    "edad": 29,
+    "direccion": "Av. Cabildo 1234",
+    "donaciones": [],
+    "medioDeNotificacionPredeterminado": {
+        "tipoDeNotificacion": "EMAIL",
+        "datoDeContacto": "eperezarevalos@frba.utn.edu.ar"
+    }
+}
+
+
+# Crear donacion
+POST
+http://localhost:8080/servicioDeDonaciones/humana/CrearDonacion/{id} (poner el id del resultado del humano creado)
+
+{
+    "bienes": [
+        {
+            "nombre": "Arroz",
+            "descripcion": "Arroz blanco",
+            "subcategoria": {
+                "nombre": "Arroz",
+                "esPerecedero": false,
+                "categoria": {
+                    "nombre": "Alimentos"
+                }
+            },
+            "fechaDeVencimiento": null,
+            "esUsado": "NUEVO",
+            "tipoUnidad": "KILOGRAMOS",
+            "cantidad": 5
+        }
+    ],
+    "fechaDeIngreso": null,
+    "donacionEntregada": false
+}

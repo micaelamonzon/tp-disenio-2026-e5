@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import ar.edu.utn.frba.ddsi.donaciones.dto.MedioDeNotificacionDTO;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -395,7 +396,8 @@ public class DonacionesServiceImpl implements DonacionesService {
                             bienes,
                             donacion.fechaDeIngreso()
                     );
-                }).toList();
+                //}).toList();
+                }).collect(java.util.stream.Collectors.toCollection(ArrayList::new));
 
         return donaciones;
     }
