@@ -21,7 +21,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import ar.edu.utn.frba.ddsi.donaciones.dto.MedioDeNotificacionDTO;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 @Service
 public class DonacionesServiceImpl implements DonacionesService {
@@ -409,7 +412,8 @@ public class DonacionesServiceImpl implements DonacionesService {
                             bienes,
                             donacion.fechaDeIngreso()
                     );
-                }).toList();
+                //}).toList();
+                }).collect(java.util.stream.Collectors.toCollection(ArrayList::new));
 
         return donaciones;
     }
@@ -468,14 +472,24 @@ public class DonacionesServiceImpl implements DonacionesService {
     // URL resultante: http://localhost:8081/servicioDeNotificaciones/notificar?destinatario=X&mensaje=Y&medio=Z
     private void notificar(String destinatario, String mensaje, String medio) {
         try {
+
+            System.out.println("Destinatario original: [" + destinatario + "]");
+            System.out.println("Largo original: " + destinatario.length());
+
             String url = notificacionesProperties.getUrl() +
                     "/servicioDeNotificaciones/notificar" +
-                    "?destinatario=" + destinatario +
+                    "?destinatario=" + URLEncoder.encode(destinatario, StandardCharsets.UTF_8) +
                     "&mensaje=" + mensaje +
                     "&medio=" + medio;
-            restTemplate.postForObject(url, null, String.class);
+
+            System.out.println("URL enviada: " + url);
+
+            String respuesta = restTemplate.postForObject(url, null, String.class);
+
+            System.out.println("Respuesta: " + respuesta);
+
         } catch (Exception e) {
-            System.out.println("Error al notificar: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 }

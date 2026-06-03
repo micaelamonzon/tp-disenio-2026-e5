@@ -19,11 +19,21 @@ public class WhatsApp implements MedioDeNotificacion {
 
   @Override
   public void notificar(String destinatario, Notificacion notificacion) {
+
+    destinatario = destinatario.trim();
+
+    if (!destinatario.startsWith("+")) {
+      destinatario = "+" + destinatario;
+    }
+
     Twilio.init(twilioConfig.getAccountSid(), twilioConfig.getAuthToken());
-    Message.creator(
+
+    Message message = Message.creator(
             new PhoneNumber("whatsapp:" + destinatario),
             new PhoneNumber("whatsapp:" + twilioConfig.getWhatsappNumber()),
             notificacion.getMensaje()
     ).create();
+
+    System.out.println("SID: " + message.getSid());
   }
 }
