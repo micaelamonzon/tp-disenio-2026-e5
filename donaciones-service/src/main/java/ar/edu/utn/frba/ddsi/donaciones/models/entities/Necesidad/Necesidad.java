@@ -18,26 +18,18 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-@Entity
-@Inheritance(strategy = InheritanceType.JOINED)
 @Data
 @Getter
 @NoArgsConstructor
 public abstract class Necesidad {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+
     private Long id;
-
-    @Transient
     private EntidadBeneficiaria entidadBeneficiaria;
-
-    @Transient
     private Subcategoria subcategoria;
 
     private String descripcion;
     private boolean estaSatisfecha;
 
-    @ManyToMany
     private List<Donacion> donacionesRecibidas = new ArrayList<>();
 
     public Necesidad(Subcategoria subcategoria, String descripcion) {
@@ -62,5 +54,10 @@ public abstract class Necesidad {
                 .filter(d -> d.getFechaEntrega() != null && d.getFechaEntrega().isAfter(fechaLimite))
                 .count();
     }
+
+    public boolean estaSatisfecha() {
+        return true;
+    }
+
 
 }

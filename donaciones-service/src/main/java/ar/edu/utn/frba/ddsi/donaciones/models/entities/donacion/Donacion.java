@@ -15,24 +15,15 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 
-@Entity
+
 @Getter
 @NoArgsConstructor
 @Setter
 public class Donacion {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String descripcion;
-
-    @Enumerated(EnumType.STRING)
     private Estado estado;
-
-    @Transient
     private PersonaDonanteDTO donante;
-
-    @Transient
     private Bien bien;
 
     private LocalDate fechaEntrega;

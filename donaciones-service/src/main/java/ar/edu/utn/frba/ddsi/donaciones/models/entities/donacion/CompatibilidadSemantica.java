@@ -5,16 +5,25 @@ import ar.edu.utn.frba.ddsi.donaciones.models.entities.Necesidad.NecesidadExtrao
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.Necesidad.NecesidadRecurrente;
 import lombok.AllArgsConstructor;
 import lombok.Setter;
+import org.springframework.beans.factory.annotation.Value;
 import org.apache.commons.text.similarity.LevenshteinDistance;
 import org.springframework.stereotype.Component;
 
 @Setter
-@AllArgsConstructor
 @Component
 public class CompatibilidadSemantica implements Strategy_AlgoritmosMatchmaking {
     private double a1; // Peso de Similitud Textual
     private double a2; // Peso de Cobertura de Volumen
     private double a3; // Peso de Tipo de Necesidad
+
+    public CompatibilidadSemantica(
+            @Value("${match.a1}") double a1,
+            @Value("${match.a2}") double a2,
+            @Value("${match.a3}") double a3) {
+        this.a1 = a1;
+        this.a2 = a2;
+        this.a3 = a3;
+    }
 
     @Override
     public double calcularPuntaje(Donacion donacion, Necesidad necesidad) {

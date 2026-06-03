@@ -2,6 +2,7 @@ package ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante;
 
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.Bien;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.mediosDeNotificacion.MedioDeNotificacion;
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.mision.Mision;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.DonacionSegmentada;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.DonacionSinSegmentar;
 import lombok.Data;

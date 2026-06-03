@@ -1,7 +1,6 @@
 package ar.edu.utn.frba.ddsi.models.entities.misiones;
 
 import ar.edu.utn.frba.ddsi.models.entities.donaciones.DonacionSinSegmentar;
-import ar.edu.utn.frba.ddsi.models.entities.misiones.Tipo;
 import ar.edu.utn.frba.ddsi.models.entities.persona.Insignia;
 import lombok.Data;
 import lombok.NoArgsConstructor;

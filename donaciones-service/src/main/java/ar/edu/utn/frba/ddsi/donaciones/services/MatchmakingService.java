@@ -20,11 +20,11 @@ public class MatchmakingService {
     private final NecesidadesRepository necesidadesRepository;
     private final DonacionesRepository donacionesRepository;
     private final MotorDeMatchmaking motorMatchmaking;
-    private final List<Strategy_AlgoritmosMatchmaking> estrategiasActivas;
+    private final List<Strategy_AlgoritmosMatchmaking> estrategiasActivas = new ArrayList<>();
 
-    public PropuestaMatch obtenerPropuestaPorId(Long matcheoId) {
-        return matchRepository.findById(matcheoId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Propuesta de matcheo no encontrada"));
+
+    public PropuestaMatch obtenerPropuestaPorId(Long matcheoId ) {
+        return matchRepository.findById(matcheoId);
     }
 
     public void ejecutarProcesoMatchmaking() {
@@ -73,11 +73,10 @@ public class MatchmakingService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Debe indicar una necesidadId");
         }
 
-        PropuestaMatch propuesta = matchRepository.findById(matcheoId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Propuesta de matcheo no encontrada"));
+        PropuestaMatch propuesta = matchRepository.findById(matcheoId);
 
-        Necesidad necesidad = necesidadesRepository.findById(necesidadId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Necesidad no encontrada"));
+
+        Necesidad necesidad = necesidadesRepository.findById(necesidadId);
 
         if (!perteneceAAlgunRanking(propuesta, necesidadId)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La necesidad seleccionada no pertenece a los rankings generados");

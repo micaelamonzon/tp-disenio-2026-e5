@@ -1,19 +1,22 @@
 package ar.edu.utn.frba.ddsi.donaciones.models.entities.donacion;
 
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.Necesidad.Necesidad;
+import lombok.Data;
 import lombok.Setter;
+import org.springframework.stereotype.Component;
 
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Setter
+@Data
+@Component
 public class MotorDeMatchmaking {
     private Strategy_AlgoritmosMatchmaking estrategiaActual;
 
-    public MotorDeMatchmaking(Strategy_AlgoritmosMatchmaking estrategiaInicial) {
-        this.estrategiaActual = estrategiaInicial;
-    }
+//    public MotorDeMatchmaking(Strategy_AlgoritmosMatchmaking estrategiaInicial) {
+//        this.estrategiaActual = estrategiaInicial;
+//    }
 
     public List<Necesidad> generarRanking(Donacion donacion, List<Necesidad> todasLasNecesidades) {
         if (this.estrategiaActual == null) {
@@ -27,7 +30,9 @@ public class MotorDeMatchmaking {
 
         return todasLasNecesidades.stream()
                 //Solo se evalúan necesidades no satisfechas
-                .filter(necesidad -> !necesidad.estaSatisfecha())
+                .filter(necesidad -> {
+                    return !necesidad.estaSatisfecha();
+                })
                 // Solo se evalúan contra necesidades de la misma subcategoría
                 .filter(necesidad -> necesidad.getSubcategoria() != null &&
                         necesidad.getSubcategoria().equals(donacion.getBien().getSubcategoria()))

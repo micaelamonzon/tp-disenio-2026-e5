@@ -1,7 +1,7 @@
 package ar.edu.utn.frba.ddsi.donaciones.dto;
 import lombok.Data;
 
-@Data
+
 public class NecesidadDTO {
     private Long id;
     private String tipo;

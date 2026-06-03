@@ -2,13 +2,14 @@ package ar.edu.utn.frba.ddsi.donaciones.models.entities.donacion;
 
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.Necesidad.EntidadBeneficiaria;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.Necesidad.Necesidad;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
 public class PrioridadSubatendidos implements Strategy_AlgoritmosMatchmaking {
     private final double alpha; // Factor de suavizado
 
-    public PrioridadSubatendidos(double alpha) {
+    public PrioridadSubatendidos(@Value("${alpha}") double alpha) {
         if (alpha <= 0) {
             throw new IllegalArgumentException("El factor de suavizado 'alpha' debe ser mayor a 0");
         }
