@@ -4,7 +4,12 @@ import ar.edu.utn.frba.ddsi.donaciones.dto.DonacionSinSegmentarDTO;
 import ar.edu.utn.frba.ddsi.donaciones.dto.PersonaDonanteDTO;
 import ar.edu.utn.frba.ddsi.donaciones.dto.PersonaHumanaDTO;
 import ar.edu.utn.frba.ddsi.donaciones.dto.PersonaJuridicaDTO;
+import ar.edu.utn.frba.ddsi.donaciones.dto.*;
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante.PersonaJuridica;
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.donacion.PropuestaMatch;
 import ar.edu.utn.frba.ddsi.donaciones.services.DonacionesService;
+import ar.edu.utn.frba.ddsi.donaciones.services.MatchmakingService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,11 +22,12 @@ public class DonacionesController {
 
     private final DonacionesService donacionesService;
 
-    public DonacionesController(DonacionesService donacionesService) {
+    public DonacionesController(DonacionesService donacionesService, MatchmakingService matchmakingService) {
         this.donacionesService = donacionesService;
+        this.matchmakingService = matchmakingService;
     }
 
-    // ===================== ENDPOINTS GENERALES =====================
+    private final MatchmakingService matchmakingService;
 
     @GetMapping("/saludar")
     @ResponseStatus(HttpStatus.ACCEPTED)
@@ -51,9 +57,36 @@ public class DonacionesController {
         try {
             return ResponseEntity.ok(donacionesService.obtenerHumanoPorId(id));
         } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
+          return ResponseEntity.notFound().build();
         }
+      
+    @GetMapping("/obtenerDonantesJuridicos")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public List<PersonaDonanteDTO> obtenerDonantesJuridicos(){
+        List<PersonaDonanteDTO> donantesDTOS = this.donacionesService.obtenerTodosJuridicos();
+        return donantesDTOS;
     }
+
+    @GetMapping("/humano/obtenerDonaciones/{id}")
+    public ResponseEntity<PersonaDonanteDTO> obtenerDonacionesDeHumano(@PathVariable Long id){
+       try{
+           PersonaDonanteDTO personaDonanteDTO = this.donacionesService.obtenerDonacionesDeHumano(id);
+           return ResponseEntity.ok(personaDonanteDTO);
+       }catch (RuntimeException e){
+           System.out.println(e.getMessage());
+           return ResponseEntity.notFound().build();
+       }
+    }
+    
+    @GetMapping("/juridica/obtenerDonaciones/{id}")
+    public ResponseEntity<PersonaDonanteDTO> obtenerDonacionesDeJuridico(@PathVariable Long id){
+        try{
+            PersonaDonanteDTO personaDonanteDTO = this.donacionesService.obtenerDonacionesDeJurico(id);
+            return ResponseEntity.ok(personaDonanteDTO);
+        }catch (RuntimeException e){
+            System.out.println(e.getMessage());
+        }
+    
 
     @PutMapping("/donantes/humano/{id}")
     public ResponseEntity<PersonaHumanaDTO> modificarDonanteHumano(
@@ -187,6 +220,28 @@ public class DonacionesController {
             return ResponseEntity.notFound().build();
         }
     }
+    @GetMapping("/matcheos/{matcheoId}")
+    public PropuestaMatch obtenerRankingGenerado(@PathVariable Long matcheoId) {
+        return matchmakingService.obtenerPropuestaPorId(matcheoId);
+    }
+
+    @PostMapping("/matcheos/ejecutar")
+    @ResponseStatus(HttpStatus.OK)
+    public String ejecutarAlgoritmosADemanda() {
+        matchmakingService.ejecutarProcesoMatchmaking(); // <-- Reutilización
+        return "Proceso de asignación ejecutado a demanda exitosamente.";
+    }
+
+    @PostMapping("/matcheos/{matcheoId}/seleccion")
+    public PropuestaMatch seleccionarNecesidad(
+            @PathVariable Long matcheoId,
+            @RequestBody SeleccionNecesidadRequestDTO request
+    ) {
+        return matchmakingService.seleccionarNecesidad(matcheoId, request.necesidadId());
+    }
+
+
+}
 
     @DeleteMapping("/donaciones/juridico/{idDonante}/{idDonacion}")
     public ResponseEntity<Void> eliminarDonacionDeJuridico(

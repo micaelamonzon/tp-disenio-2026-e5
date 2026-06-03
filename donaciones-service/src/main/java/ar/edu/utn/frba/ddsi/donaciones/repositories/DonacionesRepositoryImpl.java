@@ -4,18 +4,21 @@ import ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante.PersonaHumana;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante.PersonaJuridica;
 import ar.edu.utn.frba.ddsi.donaciones.utils.GeneradorIdSecuencial;
 import lombok.Data;
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.donacion.Donacion;
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.donacion.Estado;
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.DonacionSegmentada;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 
-@Data
 @Repository
 public class DonacionesRepositoryImpl implements DonacionesRepository{
 
-    private final List<PersonaHumana> humanos = new ArrayList<>();
-    private final List<PersonaJuridica> juridicos = new ArrayList<>();
+    private final Map<Long, DonacionSegmentada> donaciones = new HashMap<>();
+    private final AtomicLong contador = new AtomicLong(1);
 
     private final GeneradorIdSecuencial generadorId;
 
@@ -30,17 +33,17 @@ public class DonacionesRepositoryImpl implements DonacionesRepository{
     @Override
     public List<PersonaJuridica> findAllJuridicos(){
         return new ArrayList<>(juridicos);
+    public Long guardar(DonacionSegmentada donacion) {
+        Long id = contador.getAndIncrement();
+        donaciones.put(id, donacion);
+        return id;
     }
 
     @Override
-    public PersonaHumana humanoFindById(Long id){
-        PersonaHumana p = humanos.stream().filter(ph -> ph.getId().equals(id)).findFirst().orElse(null);;
-        return p;
-    }
-    @Override
-    public PersonaJuridica juridicaFindById(Long id){
-        PersonaJuridica p = juridicos.stream().filter(pj -> pj.getId().equals(id)).findFirst().orElse(null);;
-        return p;
+    public List<DonacionSegmentada> findByEstado(String nombreEstado) {
+        return donaciones.values().stream()
+                .filter(d -> d.getNombreEstadoActual().equals(nombreEstado))
+                .toList();
     }
 
     @Override

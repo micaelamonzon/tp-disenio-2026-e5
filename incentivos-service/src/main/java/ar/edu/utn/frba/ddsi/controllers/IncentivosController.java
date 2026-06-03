@@ -21,13 +21,14 @@ public class IncentivosController {
     }
 
     //Obtención de las misiones completadas por una persona donante.
-    @GetMapping("donanteHumano/misionesCompletadas/{id}/")
+    @GetMapping("donanteHumano/misionesCompletadas/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED) //para devolver el 200
     public List<MisionDTO> obtenerTodasLasMisionesDeDonanteHumano(@PathVariable Long id){
+        System.out.println("Antes del GET");
         return incentivosService.obtenerDonanteHumano(id);
     }
 
-    @GetMapping("donanteJuridico/misionesCompletadas/{id}/")
+    @GetMapping("donanteJuridico/misionesCompletadas/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED) //para devolver el 200
     public List<MisionDTO> obtenerTodasLasMisionesDeDonanteJuridico(@PathVariable Long id){
         return incentivosService.obtenerDonanteJuridico(id);
@@ -54,8 +55,10 @@ public class IncentivosController {
     }
 
     @GetMapping("/verificarMision/{idPersona}")
-    public ResponseEntity<Void> verificarMision(@PathVariable Long idPersona){
-        Insignia insigniaObtenida = Insignia.COLABORADOR; // ejemplo
+    //public ResponseEntity<Void> verificarMision(@PathVariable Long idPersona){
+    //    Insignia insigniaObtenida = Insignia.COLABORADOR; // Antes del merge 
+    public ResponseEntity<Void> verificarMision(@PathVariable Long id){
+        Insignia insigniaObtenida = Insignia.DONACIONEXITOSA; // ejemplo
 
         incentivosService.publicarYDifundirInsignia(idPersona, insigniaObtenida);
 

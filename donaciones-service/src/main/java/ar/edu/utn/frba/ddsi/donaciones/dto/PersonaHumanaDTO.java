@@ -1,5 +1,6 @@
 package ar.edu.utn.frba.ddsi.donaciones.dto;
 
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante.CategoriaDeDonante;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.DonacionSinSegmentar;
 
 import java.util.ArrayList;
@@ -13,6 +14,9 @@ public record PersonaHumanaDTO(
         String genero,
         Integer edad,
         String direccion,
-        List<DonacionSinSegmentarDTO> donaciones
+        List<DonacionSinSegmentarDTO> donaciones,
+        List<MisionDTO> misiones,
+        CategoriaDeDonante categoria,
+        MedioDeNotificacionDTO medioDeNotificacionPredeterminado
 ) {
 }

@@ -1,5 +1,6 @@
 package ar.edu.utn.frba.ddsi.notificaciones;
 
+import ar.edu.utn.frba.ddsi.notificaciones.models.entities.ServicioDeNotificaciones.EstadoNotificacion;
 import ar.edu.utn.frba.ddsi.notificaciones.models.entities.ServicioDeNotificaciones.MedioDeNotificacion;
 import ar.edu.utn.frba.ddsi.notificaciones.models.entities.ServicioDeNotificaciones.Notificacion;
 import org.junit.jupiter.api.Test;
@@ -7,6 +8,7 @@ import org.junit.jupiter.api.Assertions;
 import static org.mockito.Mockito.*;
 
 public class NotificacionTest {
+
     @Test
     public void notificacionEnviada() {
         String destinatario = "ana@mail.com";
@@ -19,6 +21,8 @@ public class NotificacionTest {
         MedioDeNotificacion medioMock = mock(MedioDeNotificacion.class);
         notificacion.setMedioDeNotificacion(medioMock);
 
-        Assertions.assertDoesNotThrow(notificacion::enviar);
+        notificacion.enviar();
+
+        Assertions.assertEquals(EstadoNotificacion.ENVIADA, notificacion.getEstado());
     }
 }

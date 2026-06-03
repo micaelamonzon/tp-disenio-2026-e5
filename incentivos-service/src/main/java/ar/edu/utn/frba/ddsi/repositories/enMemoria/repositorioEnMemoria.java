@@ -20,6 +20,8 @@ public class repositorioEnMemoria implements IncentivosRepository {
         donantes.removeIf(d -> d.getId()
                 != null && d.getId()
                 .equals(donante.getId()));
+        Long id = Long.valueOf(this.donantes.size());
+        donante.setId(id);
         donantes.add(donante);
     }
 

@@ -8,8 +8,12 @@ import ar.edu.utn.frba.ddsi.dto.PersonaDonanteDTO;
 import ar.edu.utn.frba.ddsi.models.entities.categorias.CategoriaDeDonante;
 import ar.edu.utn.frba.ddsi.dto.*;
 import ar.edu.utn.frba.ddsi.models.entities.donaciones.DonacionSinSegmentar;
+import ar.edu.utn.frba.ddsi.models.entities.misiones.Completitud;
+import ar.edu.utn.frba.ddsi.models.entities.misiones.DonacionesExitosas;
 import ar.edu.utn.frba.ddsi.models.entities.misiones.EstadoDeMision;
+import ar.edu.utn.frba.ddsi.models.entities.misiones.HabilDonador;
 import ar.edu.utn.frba.ddsi.models.entities.misiones.Mision;
+import ar.edu.utn.frba.ddsi.models.entities.misiones.Racha;
 import ar.edu.utn.frba.ddsi.models.entities.persona.*;
 import ar.edu.utn.frba.ddsi.repositories.IncentivosRepository;
 import ar.edu.utn.frba.ddsi.services.IncentivosService;
@@ -46,7 +50,9 @@ public class IncentivosServiceImpl implements IncentivosService {
     @Override
     public List<MisionDTO> obtenerDonanteHumano(Long id) {
 
-        URI uri = UriComponentsBuilder.fromUriString(propiedades.getUrl()).path("/donaciones/humano/{id}")
+       // URI uri = UriComponentsBuilder.fromUriString(propiedades.getUrl()).path("/donaciones/humano/{id}")
+
+        URI uri = UriComponentsBuilder.fromUriString(propiedades.getUrl()).path("/humano/obtenerDonaciones/{id}")
                 .buildAndExpand(id)
                 .toUri();
 
@@ -62,14 +68,27 @@ public class IncentivosServiceImpl implements IncentivosService {
 
         this.incentivosRepository.guardarDonante(nuevoDonante);
 
-        nuevoDonante.getMisiones().forEach(m -> nuevoDonante.getCategoria().agregarMision(m));
+        nuevoDonante.setPerfil(new Perfil(nuevoDonante.getNombre(),nuevoDonante.getCategoria()));
+        //defino el tipo de mision que es
+        List<Mision> misionesDefinidas = this.definirMisiones(misiones);
+
+        if(misionesDefinidas!=null){
+            misionesDefinidas.forEach(m->nuevoDonante.getCategoria().agregarMision(m));
+        }else{
+            throw new RuntimeException("No hay misiones definidas para esta persona");
+        }
 
         List<Mision> misionesCompletadas = nuevoDonante.getCategoria().obtenerMisionesCompletadas(nuevoDonante.getDonaciones());
-        List<MisionDTO> misionesCompletadasDTO = this.obtenerMisionDTO(misionesCompletadas);
+        this.agregarInsignias(nuevoDonante, misionesCompletadas);
+        List <MisionDTO> misionesCompletadasDTO = this.obtenerMisionDTO(misionesCompletadas);
 
         return misionesCompletadasDTO;
     }
-
+    public void agregarInsignias(Donante nuevoDonante, List<Mision> misionesCompletadas){
+        if(!misionesCompletadas.isEmpty() && misionesCompletadas!= null){
+            misionesCompletadas.forEach(m->{nuevoDonante.getPerfil().agregarInsignia(m.getInsigniaGanadora());});
+        }
+    }
     @Override
     public List<MisionDTO> obtenerDonanteJuridico(Long id) {
 
@@ -89,12 +108,35 @@ public class IncentivosServiceImpl implements IncentivosService {
 
         this.incentivosRepository.guardarDonante(nuevoDonante);
 
-        nuevoDonante.getMisiones().forEach(m -> nuevoDonante.getCategoria().agregarMision(m));
+        nuevoDonante.setPerfil(new Perfil(nuevoDonante.getNombre(),nuevoDonante.getCategoria()));
+        //defino el tipo de mision que es
+        List<Mision> misionesDefinidas = this.definirMisiones(misiones);
+            if(misionesDefinidas!=null){
+                misionesDefinidas.forEach(m->nuevoDonante.getCategoria().agregarMision(m));
+            }else{
+                throw new RuntimeException("No hay misiones definidas para esta persona");
+            }
 
         List<Mision> misionesCompletadas = nuevoDonante.getCategoria().obtenerMisionesCompletadas(nuevoDonante.getDonaciones());
-        List<MisionDTO> misionesCompletadasDTO = this.obtenerMisionDTO(misionesCompletadas);
+        List <MisionDTO> misionesCompletadasDTO = this.obtenerMisionDTO(misionesCompletadas);
+        this.agregarInsignias(nuevoDonante, misionesCompletadas);
+        return  misionesCompletadasDTO;
+    }
 
-        return misionesCompletadasDTO;
+    List<Mision> definirMisiones( List<Mision>  misionesSinDefinir){
+        return misionesSinDefinir.stream().map(m -> {
+            if(m.getNombre().equals("Racha")){
+                return new Racha(m.getNombre(),2, 2, 3);
+            } else if (m.getNombre().equals("HabilDonador")) {
+                return new HabilDonador(m.getNombre(), 10);
+            } else if (m.getNombre().equals("DonacionesExitosas")) {
+                return new DonacionesExitosas(m.getNombre(), 2);
+            } else  if (m.getNombre().equals("Completitud")) {
+                return new Completitud(m.getNombre(), List.of(new Categoria("Alimentos"), new Categoria("Ropa"), new Categoria("Juguetes")));
+            }
+            return null;
+        }).toList();
+
     }
 
     @Override
@@ -219,7 +261,7 @@ public class IncentivosServiceImpl implements IncentivosService {
 
     public List<Mision> convertirMisionesDTO(List<MisionDTO> misionesDTO) {
 
-        List<Mision> misiones = misionesDTO.stream().map(m -> new Mision(m.nombre())).toList();
+        List<Mision> misiones = misionesDTO.stream().map(m -> new Mision(m.nombre(), m.estadoDeMision())).toList();
 
         return misiones;
     }

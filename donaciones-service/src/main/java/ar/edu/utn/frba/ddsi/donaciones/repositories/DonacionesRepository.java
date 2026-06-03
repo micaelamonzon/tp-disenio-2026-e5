@@ -1,23 +1,18 @@
 package ar.edu.utn.frba.ddsi.donaciones.repositories;
 
-import ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante.PersonaHumana;
-import ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante.PersonaJuridica;
-
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.donacion.Donacion;
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.donacion.Estado;
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.DonacionSegmentada;
+import org.springframework.stereotype.Repository;
 import java.util.List;
-import java.util.Optional;
+
 
 public interface DonacionesRepository {
-
-    List<PersonaHumana> findAllHumanos();
-    List<PersonaJuridica> findAllJuridicos();
-
-    PersonaHumana humanoFindById(Long id);
-    PersonaJuridica juridicaFindById(Long id);
-
-    PersonaJuridica saveJuridica(PersonaJuridica donante);
-    PersonaHumana saveHumana(PersonaHumana donante);
+    // Spring genera la query basándose en el parámetro Estado
+   // List<Donacion> findByEstado(Estado estado);
 
     void deleteHumano(Long id);
 
     void deleteJuridico(Long id);
+    List<DonacionSegmentada> findByEstado(String nombreEstado);
 }

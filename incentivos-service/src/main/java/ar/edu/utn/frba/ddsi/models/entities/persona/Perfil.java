@@ -19,7 +19,7 @@ public class Perfil {
 
     public Perfil ( String nombreDeUsuario, CategoriaDeDonante categoria) {
         this.insignias = new ArrayList<>();
-        this.insigniaPrivada = insigniaPrivada;
+        this.insigniaPrivada = false;
         this.nombreDeUsuario = nombreDeUsuario;
         this.categoria = categoria;
     }
