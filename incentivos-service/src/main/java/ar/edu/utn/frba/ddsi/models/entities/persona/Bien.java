@@ -1,10 +1,14 @@
 package ar.edu.utn.frba.ddsi.models.entities.persona;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Data
+@NoArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Bien {
     private String nombre;
     private String descripcion;

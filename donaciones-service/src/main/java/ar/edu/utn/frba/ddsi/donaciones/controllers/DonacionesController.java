@@ -114,6 +114,10 @@ public class DonacionesController {
     public void eliminarDonanteJuridico(@PathVariable Long id) {
         this.donacionesService.eliminarDonanteJuridico(id);
     }
+    @GetMapping("/humano/{id}")
+    public ResponseEntity<PersonaHumanaDTO> obtenerHumanoPorId(@PathVariable Long id) {
+        return ResponseEntity.ok(this.donacionesService.obtenerHumanoPorId(id));
+    }
     // Donaciones
 
     @GetMapping("/humano/obtenerDonaciones/{id}")

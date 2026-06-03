@@ -20,9 +20,10 @@ public class InsigniaPublicadorService {
     private final N8NProperties properties;
     IncentivosRepository incentivosRepository;
 
-    public InsigniaPublicadorService(RestTemplate restTemplate, N8NProperties properties){
+    public InsigniaPublicadorService(RestTemplate restTemplate, N8NProperties properties,IncentivosRepository incentivosRepository){
         this.restTemplate = restTemplate;
         this.properties = properties;
+        this.incentivosRepository = incentivosRepository;
     }
 
     public String publicarYDifundirInsignia(String nombreDonante, Insignia insignia) {
@@ -36,7 +37,7 @@ public class InsigniaPublicadorService {
                 nombreDonante,
                 insignia.getNombre()
         );
-
+        System.out.println(">>> Llamando a n8n en: " + uri);
         String respuesta = restTemplate.postForObject(uri, request, String.class);
         return respuesta == null || respuesta.isBlank() ? null : respuesta;
     }

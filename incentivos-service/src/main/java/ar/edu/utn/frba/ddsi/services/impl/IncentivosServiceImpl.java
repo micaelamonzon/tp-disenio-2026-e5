@@ -5,6 +5,7 @@ import ar.edu.utn.frba.ddsi.dto.DonacionSinSegmentarDTO;
 import ar.edu.utn.frba.ddsi.dto.InsigniaDTO;
 import ar.edu.utn.frba.ddsi.dto.MisionDTO;
 import ar.edu.utn.frba.ddsi.dto.PersonaDonanteDTO;
+import ar.edu.utn.frba.ddsi.exceptions.ResourceNotFoundException;
 import ar.edu.utn.frba.ddsi.models.entities.categorias.CategoriaDeDonante;
 import ar.edu.utn.frba.ddsi.dto.*;
 import ar.edu.utn.frba.ddsi.models.entities.donaciones.DonacionSinSegmentar;
@@ -18,7 +19,10 @@ import ar.edu.utn.frba.ddsi.models.entities.persona.*;
 import ar.edu.utn.frba.ddsi.repositories.IncentivosRepository;
 import ar.edu.utn.frba.ddsi.services.IncentivosService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -29,7 +33,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
-
+@RestController
 @Service
 public class IncentivosServiceImpl implements IncentivosService {
 
@@ -170,8 +174,32 @@ public class IncentivosServiceImpl implements IncentivosService {
     @Override
     public String publicarYDifundirInsignia(Long id, Insignia insignia) {
         Donante donante = incentivosRepository.buscarDonantePorId(id);
+        if (donante == null) {
+            System.out.println("Donante " + id + " no encontrado localmente. Sincronizando...");
 
-        return publicadorService.publicarYDifundirInsignia(donante.getNombre(), insignia);
+            try {
+                URI uri = UriComponentsBuilder
+                        .fromUriString("http://localhost:8080/servicioDeDonaciones")
+                        .path("/humano/{id}")
+                        .buildAndExpand(id)
+                        .toUri();
+
+                Donante donanteImportado = restTemplate.getForObject(uri, Donante.class);
+
+                if (donanteImportado != null) {
+                    incentivosRepository.guardarDonante(donanteImportado);
+                    donante = donanteImportado;
+                    System.out.println("Sincronización exitosa: " + donante.getNombre());
+                } else {
+                    throw new ResourceNotFoundException("Donante no existe en el sistema integral: " + id);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new ResourceNotFoundException("No se pudo recuperar al donante del servicio externo: " + id);
+            }
+        }
+        String nombre = donante.getNombre();
+        return publicadorService.publicarYDifundirInsignia(nombre, insignia);
     }
 
     @Override

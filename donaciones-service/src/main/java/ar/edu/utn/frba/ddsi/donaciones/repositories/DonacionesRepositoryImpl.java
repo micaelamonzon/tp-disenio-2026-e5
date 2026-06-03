@@ -9,6 +9,7 @@ import ar.edu.utn.frba.ddsi.donaciones.models.entities.donacion.Estado;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.DonacionSegmentada;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +22,8 @@ public class DonacionesRepositoryImpl implements DonacionesRepository{
     private final AtomicLong contador = new AtomicLong(1);
 
     private final GeneradorIdSecuencial generadorId;
+    private final List<PersonaHumana> humanos = new ArrayList<>();
+    private final List<PersonaJuridica> juridicos = new ArrayList<>();
 
     public DonacionesRepositoryImpl(GeneradorIdSecuencial generadorId) {
         this.generadorId = generadorId;
@@ -32,7 +35,7 @@ public class DonacionesRepositoryImpl implements DonacionesRepository{
     }
     @Override
     public List<PersonaJuridica> findAllJuridicos(){
-        return new ArrayList<>(juridicos);
+        return new ArrayList<>(juridicos); }
     public Long guardar(DonacionSegmentada donacion) {
         Long id = contador.getAndIncrement();
         donaciones.put(id, donacion);
@@ -40,7 +43,7 @@ public class DonacionesRepositoryImpl implements DonacionesRepository{
     }
 
     @Override
-    public List<DonacionSegmentada> findByEstado(String nombreEstado) {
+        public List<DonacionSegmentada> findByEstado(String nombreEstado) {
         return donaciones.values().stream()
                 .filter(d -> d.getNombreEstadoActual().equals(nombreEstado))
                 .toList();
