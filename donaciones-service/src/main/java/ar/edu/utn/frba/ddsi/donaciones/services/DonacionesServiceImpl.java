@@ -1,4 +1,5 @@
 package ar.edu.utn.frba.ddsi.donaciones.services;
+import ar.edu.utn.frba.ddsi.donaciones.config.NotificacionesProperties;
 import ar.edu.utn.frba.ddsi.donaciones.dto.BienDTO;
 import ar.edu.utn.frba.ddsi.donaciones.dto.CategoriaDTO;
 import ar.edu.utn.frba.ddsi.donaciones.dto.DonacionSinSegmentarDTO;
@@ -11,11 +12,13 @@ import ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante.PersonaJuridica;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.Bien;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.Categoria;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.Subcategoria;
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.mediosDeNotificacion.MedioDeNotificacion;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.mision.Mision;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.DonacionSinSegmentar;
 import ar.edu.utn.frba.ddsi.donaciones.repositories.DonantesRepository;
 import org.springframework.stereotype.Service;
-
+import org.springframework.web.client.RestTemplate;
+import ar.edu.utn.frba.ddsi.donaciones.dto.MedioDeNotificacionDTO;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -23,8 +26,16 @@ import java.util.List;
 public class DonacionesServiceImpl implements DonacionesService {
     private final DonantesRepository donantesRepository;
 
-    public DonacionesServiceImpl(DonantesRepository donantesRepository) {
+    // Cliente HTTP para llamar al servicio de notificaciones
+    private final RestTemplate restTemplate;
+    private final NotificacionesProperties notificacionesProperties;
+
+    public DonacionesServiceImpl(DonantesRepository donantesRepository,
+                                 RestTemplate restTemplate,
+                                 NotificacionesProperties notificacionesProperties) {
         this.donantesRepository = donantesRepository;
+        this.restTemplate = restTemplate;
+        this.notificacionesProperties = notificacionesProperties;
     }
 
     @Override
@@ -154,7 +165,25 @@ public class DonacionesServiceImpl implements DonacionesService {
         List<DonacionSinSegmentar> donaciones = this.convertirDonacionesDTO(body.donaciones());
         nuevaPersona.setDonaciones(donaciones);
 
+        // Mapper de DTO a entidad para el medio de notificación predeterminado
+        if (body.medioDeNotificacionPredeterminado() != null) {
+            MedioDeNotificacion medio = new MedioDeNotificacion(
+                    body.medioDeNotificacionPredeterminado().tipoDeNotificacion(),
+                    body.medioDeNotificacionPredeterminado().datoDeContacto()
+            );
+            nuevaPersona.setMedioDeNotificacionPredeterminado(medio);
+        }
+
         PersonaHumana humano= this.donantesRepository.saveHumana(nuevaPersona);
+
+        // Mapper de entidad a DTO para el medio de notificación predeterminado
+        MedioDeNotificacionDTO medioDTO = null;
+        if (humano.getMedioDeNotificacionPredeterminado() != null) {
+            medioDTO = new MedioDeNotificacionDTO(
+                    humano.getMedioDeNotificacionPredeterminado().getTipoDeNotificacion(),
+                    humano.getMedioDeNotificacionPredeterminado().getDatoDeContacto()
+            );
+        }
 
         List<DonacionSinSegmentarDTO> donacionesDTO = obtenerDonacionesSinSegmentarDTO(humano.getDonaciones());
         PersonaHumanaDTO nuevaPersonaDTO = new PersonaHumanaDTO(
@@ -165,7 +194,8 @@ public class DonacionesServiceImpl implements DonacionesService {
                 humano.getGenero(),
                 humano.getEdad(),
                 humano.getDireccion(),
-                donacionesDTO
+                donacionesDTO,
+                medioDTO
                 );
 
         return nuevaPersonaDTO;
@@ -184,6 +214,14 @@ public class DonacionesServiceImpl implements DonacionesService {
 
         personaJuridica.agregarDonacion(nuevaDonacion);
 
+        // Notificar al representante de la persona jurídica usando el primer medio disponible
+        if (!personaJuridica.getMediosDeNotificacion().isEmpty()) {
+            notificar(
+                    personaJuridica.getMediosDeNotificacion().get(0).getDatoDeContacto(),
+                    "Tu+donacion+fue+registrada+exitosamente",
+                    personaJuridica.getMediosDeNotificacion().get(0).getTipoDeNotificacion().name()
+            );
+        }
 
         List<BienDTO> bienesDTO = this.obtenerBienesDTO(nuevaDonacion.getBienes());
         return new DonacionSinSegmentarDTO(bienesDTO, nuevaDonacion.getFechaDeIngreso(), nuevaDonacion.getDonacionEntregada());
@@ -203,6 +241,14 @@ public class DonacionesServiceImpl implements DonacionesService {
 
         personaHumana.agregarDonacion(nuevaDonacion);
 
+        // Notificar al donante que su donación fue registrada
+        if (personaHumana.getMedioDeNotificacionPredeterminado() != null) {
+            notificar(
+                    personaHumana.getMedioDeNotificacionPredeterminado().getDatoDeContacto(),
+                    "Tu+donacion+fue+registrada+exitosamente",
+                    personaHumana.getMedioDeNotificacionPredeterminado().getTipoDeNotificacion().name()
+            );
+        }
 
         List<BienDTO> bienesDTO = this.obtenerBienesDTO(nuevaDonacion.getBienes());
         return new DonacionSinSegmentarDTO(bienesDTO, nuevaDonacion.getFechaDeIngreso(), nuevaDonacion.getDonacionEntregada());
@@ -400,5 +446,19 @@ public class DonacionesServiceImpl implements DonacionesService {
         return bienes;
     }
 
+    // Método para llamar al servicio de notificaciones
+    // URL resultante: http://localhost:8081/servicioDeNotificaciones/notificar?destinatario=X&mensaje=Y&medio=Z
+    private void notificar(String destinatario, String mensaje, String medio) {
+        try {
+            String url = notificacionesProperties.getUrl() +
+                    "/servicioDeNotificaciones/notificar" +
+                    "?destinatario=" + destinatario +
+                    "&mensaje=" + mensaje +
+                    "&medio=" + medio;
+            restTemplate.postForObject(url, null, String.class);
+        } catch (Exception e) {
+            System.out.println("Error al notificar: " + e.getMessage());
+        }
+    }
 }
 

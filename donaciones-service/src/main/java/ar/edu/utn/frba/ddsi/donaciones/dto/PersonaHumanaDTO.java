@@ -13,6 +13,7 @@ public record PersonaHumanaDTO(
         String genero,
         Integer edad,
         String direccion,
-        List<DonacionSinSegmentarDTO> donaciones
+        List<DonacionSinSegmentarDTO> donaciones,
+        MedioDeNotificacionDTO medioDeNotificacionPredeterminado
 ) {
 }

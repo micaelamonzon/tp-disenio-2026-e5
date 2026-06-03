@@ -27,7 +27,7 @@ public class MotorDeMatchmaking {
 
         return todasLasNecesidades.stream()
                 //Solo se evalúan necesidades no satisfechas
-                .filter(necesidad -> !necesidad.estaSatisfecha())
+                .filter(necesidad -> !necesidad.isEstaSatisfecha())
                 // Solo se evalúan contra necesidades de la misma subcategoría
                 .filter(necesidad -> necesidad.getSubcategoria() != null &&
                         necesidad.getSubcategoria().equals(donacion.getBien().getSubcategoria()))
