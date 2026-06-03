@@ -9,6 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+
 @RestController
 @RequestMapping("/servicioDeNotificaciones")
 public class controllerDeNotificaciones {
@@ -29,9 +32,19 @@ public class controllerDeNotificaciones {
     public String notificar(@RequestParam String destinatario,
                             @RequestParam String mensaje,
                             @RequestParam String medio) {
+
+        destinatario = URLDecoder.decode(destinatario, StandardCharsets.UTF_8);
+
+        System.out.println("Destinatario recibido: [" + destinatario + "]");
+
         Notificacion notificacion = new Notificacion();
         notificacion.setDestinatario(destinatario);
         notificacion.setMensaje(mensaje);
+
+        System.out.println("Destinatario recibido: [" + destinatario + "]");
+        System.out.println("Mensaje recibido: [" + mensaje + "]");
+        System.out.println("Medio recibido: [" + medio + "]");
+        System.out.println("Destinatario: " + destinatario.length());
 
         MedioDeNotificacion medioDeNotificacion = switch (medio.toUpperCase()) {
             case "EMAIL" -> email;
