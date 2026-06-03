@@ -2,6 +2,7 @@ package ar.edu.utn.frba.ddsi.donaciones.models.entities.donacion;
 
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.Necesidad.EntidadBeneficiaria;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.Necesidad.Necesidad;
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.DonacionSegmentada;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -17,7 +18,7 @@ public class PrioridadSubatendidos implements Strategy_AlgoritmosMatchmaking {
     }
 
     @Override
-    public double calcularPuntaje(Donacion donacion, Necesidad necesidad) {
+    public double calcularPuntaje(DonacionSegmentada donacion, Necesidad necesidad) {
         EntidadBeneficiaria entidad = necesidad.getEntidadBeneficiaria();
 
         if (entidad == null) {

@@ -19,9 +19,8 @@ public class Segmentador {
 
         bienesAgrupados.forEach((subcategoria, listaBienes) -> {
 
-            DonacionSegmentada donacionSegmentada = new DonacionSegmentada();
+            DonacionSegmentada donacionSegmentada = new DonacionSegmentada(subcategoria);
             donacionSegmentada.setBienesDelMismoTipo(new ArrayList<>(listaBienes));
-            donacionSegmentada.setSubcategoria(subcategoria);
 
             nuevasDonacionesSegmentadas.add(donacionSegmentada);
         });

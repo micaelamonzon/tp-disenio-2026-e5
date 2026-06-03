@@ -1,5 +1,7 @@
 package ar.edu.utn.frba.ddsi.donaciones.models.entities.donacion;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.Necesidad.Necesidad;
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.DonacionSegmentada;
+
 import jakarta.persistence.*;
 import lombok.Data;
 import java.util.ArrayList;
@@ -9,7 +11,7 @@ import java.util.List;
 @Data
 public class PropuestaMatch {
     private Long id;
-    private Donacion donacion; // donación a la que corresponden los rankings
+    private DonacionSegmentada donacion; // donación a la que corresponden los rankings
     private List<Necesidad> rankingConjunto = new ArrayList<>(); //Cuando hay coincidencias
     private Necesidad necesidadSeleccionada;
 

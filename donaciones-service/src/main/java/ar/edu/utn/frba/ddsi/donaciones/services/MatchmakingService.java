@@ -2,10 +2,12 @@ package ar.edu.utn.frba.ddsi.donaciones.services;
 
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.Necesidad.Necesidad;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.donacion.*;
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.DonacionSegmentada;
 import ar.edu.utn.frba.ddsi.donaciones.repositories.DonacionesRepository;
 import ar.edu.utn.frba.ddsi.donaciones.repositories.MatchRepository;
 import ar.edu.utn.frba.ddsi.donaciones.repositories.NecesidadesRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -20,6 +22,7 @@ public class MatchmakingService {
     private final NecesidadesRepository necesidadesRepository;
     private final DonacionesRepository donacionesRepository;
     private final MotorDeMatchmaking motorMatchmaking;
+    private final EstadoDonacionService estadoDonacionService;
     private final List<Strategy_AlgoritmosMatchmaking> estrategiasActivas = new ArrayList<>();
 
 
@@ -28,14 +31,14 @@ public class MatchmakingService {
     }
 
     public void ejecutarProcesoMatchmaking() {
-        List<Donacion> donacionesPendientes = donacionesRepository.findByEstado(Estado.EN_DEPOSITO);
+        List<DonacionSegmentada> donacionesPendientes = donacionesRepository.findByEstado("EN_DEPOSITO");
         List<Necesidad> necesidadesActivas = necesidadesRepository.findByEstaSatisfechaFalse();
 
         if (donacionesPendientes.isEmpty() || necesidadesActivas.isEmpty() || estrategiasActivas.isEmpty()) {
             return;
         }
 
-        for (Donacion donacion : donacionesPendientes) {
+        for (DonacionSegmentada donacion : donacionesPendientes) {
             PropuestaMatch propuesta = new PropuestaMatch();
             propuesta.setDonacion(donacion);
 
@@ -84,8 +87,8 @@ public class MatchmakingService {
 
         propuesta.setNecesidadSeleccionada(necesidad);
 
-        //TODO Poner comportamiento de asignación con PosibleDonacion
-
+        //TODO Poner comportamiento de asignación con DonacionSegmentada
+        estadoDonacionService.asignar(propuesta.getDonacion().getId());
         return matchRepository.save(propuesta);
     }
 

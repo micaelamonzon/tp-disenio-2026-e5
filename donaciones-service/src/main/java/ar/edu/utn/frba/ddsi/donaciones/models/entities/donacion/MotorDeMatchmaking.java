@@ -1,6 +1,8 @@
 package ar.edu.utn.frba.ddsi.donaciones.models.entities.donacion;
 
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.Necesidad.Necesidad;
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.DonacionSegmentada;
+
 import lombok.Data;
 import lombok.Setter;
 import org.springframework.stereotype.Component;
@@ -18,13 +20,13 @@ public class MotorDeMatchmaking {
 //        this.estrategiaActual = estrategiaInicial;
 //    }
 
-    public List<Necesidad> generarRanking(Donacion donacion, List<Necesidad> todasLasNecesidades) {
+    public List<Necesidad> generarRanking(DonacionSegmentada donacion, List<Necesidad> todasLasNecesidades) {
         if (this.estrategiaActual == null) {
             throw new IllegalStateException("Se debe configurar una estrategia de matchmaking antes de generar el ranking.");
         }
 
         // Validamos que la donación tenga un bien asignado para poder filtrar
-        if (donacion.getBien() == null || donacion.getBien().getSubcategoria() == null) {
+        if (donacion.getSubcategoria() == null) {
             throw new IllegalArgumentException("La donación debe contener un bien con una subcategoría válida.");
         }
 
@@ -35,7 +37,7 @@ public class MotorDeMatchmaking {
                 })
                 // Solo se evalúan contra necesidades de la misma subcategoría
                 .filter(necesidad -> necesidad.getSubcategoria() != null &&
-                        necesidad.getSubcategoria().equals(donacion.getBien().getSubcategoria()))
+                        necesidad.getSubcategoria().equals(donacion.getSubcategoria()))
                 //Calculamos el puntaje y las ordenamos de mayor a menor
                 .sorted(Comparator.comparingDouble((Necesidad necesidad) ->
                         estrategiaActual.calcularPuntaje(donacion, necesidad)).reversed())

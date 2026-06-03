@@ -3,6 +3,7 @@ package ar.edu.utn.frba.ddsi.donaciones.models.entities.donacion;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.Necesidad.Necesidad;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.Necesidad.NecesidadExtraordinaria;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.Necesidad.NecesidadRecurrente;
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.DonacionSegmentada;
 import lombok.AllArgsConstructor;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,7 +27,7 @@ public class CompatibilidadSemantica implements Strategy_AlgoritmosMatchmaking {
     }
 
     @Override
-    public double calcularPuntaje(Donacion donacion, Necesidad necesidad) {
+    public double calcularPuntaje(DonacionSegmentada donacion, Necesidad necesidad) {
         double x1 = calcularSimilitudTextual(donacion, necesidad);
         double x2 = calcularCoberturaVolumen(donacion, necesidad);
         double x3 = calcularTipoNecesidad(necesidad);
@@ -34,8 +35,8 @@ public class CompatibilidadSemantica implements Strategy_AlgoritmosMatchmaking {
         return (this.a1 * x1) + (this.a2 * x2) + (this.a3 * x3);
     }
 
-    private double calcularSimilitudTextual(Donacion donacion, Necesidad necesidad) {
-        String nombreBien = donacion.getBien().getNombre();
+    private double calcularSimilitudTextual(DonacionSegmentada donacion, Necesidad necesidad) {
+        String nombreBien = donacion.getSubcategoria().getNombre();
         String descNecesidad = necesidad.getDescripcion();
 
         if (nombreBien.isEmpty() && descNecesidad.isEmpty()) {
@@ -50,8 +51,8 @@ public class CompatibilidadSemantica implements Strategy_AlgoritmosMatchmaking {
         return 1.0 - ((double) distancia / maxLongitud);
     }
 
-    private double calcularCoberturaVolumen(Donacion donacion, Necesidad necesidad) {
-        double cantDonada = donacion.getBien().getCantidad();
+    private double calcularCoberturaVolumen(DonacionSegmentada donacion, Necesidad necesidad) {
+        double cantDonada = donacion.getBienesDelMismoTipo().size();
         double cantRequerida = 0.0;
 
         if (necesidad instanceof NecesidadExtraordinaria extraordinaria) {
