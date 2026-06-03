@@ -7,6 +7,7 @@ import ar.edu.utn.frba.ddsi.donaciones.dto.MisionDTO;
 import ar.edu.utn.frba.ddsi.donaciones.dto.PersonaDonanteDTO;
 import ar.edu.utn.frba.ddsi.donaciones.dto.PersonaHumanaDTO;
 import ar.edu.utn.frba.ddsi.donaciones.dto.SubcategoriaDTO;
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante.CategoriaDeDonante;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante.PersonaHumana;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante.PersonaJuridica;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.Bien;
@@ -118,7 +119,10 @@ public class DonacionesServiceImpl implements DonacionesService {
                                         misionesDTO,
                                         personaHumana.getCategoria()
                                         );
+
+            System.out.println(personaDTO);
             return personaDTO;
+
         }
         throw new RuntimeException("Persona humana no encontrada");
     }
@@ -165,6 +169,12 @@ public class DonacionesServiceImpl implements DonacionesService {
         List<DonacionSinSegmentar> donaciones = this.convertirDonacionesDTO(body.donaciones());
         nuevaPersona.setDonaciones(donaciones);
 
+        CategoriaDeDonante nuevaCategoria = body.categoria();
+        nuevaPersona.setCategoria(nuevaCategoria);
+
+        List<Mision> misiones = this.convertirMisionesDTO(body.misiones());
+        nuevaPersona.setMisiones(misiones);
+
         // Mapper de DTO a entidad para el medio de notificación predeterminado
         if (body.medioDeNotificacionPredeterminado() != null) {
             MedioDeNotificacion medio = new MedioDeNotificacion(
@@ -173,6 +183,7 @@ public class DonacionesServiceImpl implements DonacionesService {
             );
             nuevaPersona.setMedioDeNotificacionPredeterminado(medio);
         }
+        System.out.println(nuevaPersona);
 
         PersonaHumana humano= this.donantesRepository.saveHumana(nuevaPersona);
 
@@ -186,6 +197,7 @@ public class DonacionesServiceImpl implements DonacionesService {
         }
 
         List<DonacionSinSegmentarDTO> donacionesDTO = obtenerDonacionesSinSegmentarDTO(humano.getDonaciones());
+        List<MisionDTO> misionesDTO = this.obtenerMisionesDTO(humano.getMisiones());
         PersonaHumanaDTO nuevaPersonaDTO = new PersonaHumanaDTO(
                 humano.getId(),
                 humano.getNombre(),
@@ -195,6 +207,8 @@ public class DonacionesServiceImpl implements DonacionesService {
                 humano.getEdad(),
                 humano.getDireccion(),
                 donacionesDTO,
+                misionesDTO,
+                body.categoria(),
                 medioDTO
                 );
 
@@ -402,6 +416,10 @@ public class DonacionesServiceImpl implements DonacionesService {
     public List<MisionDTO> obtenerMisionesDTO(List<Mision> misiones){
         List<MisionDTO> misionesDTO = misiones.stream().map(m -> new MisionDTO(m.getNombre(), m.getEstadoDeMision())).toList();
         return misionesDTO;
+    }
+    public List<Mision> convertirMisionesDTO(List<MisionDTO> misionesDTO){
+        List<Mision> misiones = misionesDTO.stream().map(m -> new Mision(m.nombre(), m.estadoDeMision())).toList();
+        return misiones;
     }
     public List<BienDTO> obtenerBienesDTO(List<Bien> bienes){
         List<BienDTO> bienesDTO = bienes.stream()

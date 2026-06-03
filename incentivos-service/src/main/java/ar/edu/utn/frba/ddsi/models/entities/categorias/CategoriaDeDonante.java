@@ -4,14 +4,14 @@ import ar.edu.utn.frba.ddsi.models.entities.donaciones.DonacionSinSegmentar;
 import ar.edu.utn.frba.ddsi.models.entities.misiones.EstadoDeMision;
 import ar.edu.utn.frba.ddsi.models.entities.misiones.Mision;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class CategoriaDeDonante {
-    List<Mision> misiones; //lista de misiones consecutivas a cumplir
-
-    NombreDeCategoria nombreDeCategoriaActual;
-    CategoriaDeDonante categoriaSiguiente; // si esta en la ultima categoria, categoriaSiguiente es null
+    List<Mision> misiones = new ArrayList<>(); //lista de misiones consecutivas a cumplir -> se llena en el servis de incentivos
+    NombreDeCategoria nombreDeCategoriaActual; //me lo traigo del Servicio de Donaciones
+    CategoriaDeDonante categoriaSiguiente; // si esta en la ultima categoria, categoriaSiguiente es null -> se llama en el servis de incentivos
 
     public CategoriaDeDonante(NombreDeCategoria nombreDeCategoriaActual) {
         this.nombreDeCategoriaActual = nombreDeCategoriaActual;

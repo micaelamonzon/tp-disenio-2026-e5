@@ -2,6 +2,7 @@ package ar.edu.utn.frba.ddsi.models.entities.misiones;
 
 import ar.edu.utn.frba.ddsi.models.entities.donaciones.DonacionSinSegmentar;
 import ar.edu.utn.frba.ddsi.models.entities.persona.Bien;
+import ar.edu.utn.frba.ddsi.models.entities.persona.Insignia;
 import lombok.Data;
 
 import java.util.List;
@@ -13,14 +14,16 @@ public class HabilDonador extends Mision{
 
 
     public HabilDonador(String nombre,Integer cantidadDeBienes){
-        super(nombre);
+        this.setNombre(nombre);
         this.cantidadDeBienes = cantidadDeBienes;
+        setInsigniaGanadora(Insignia.HABILDONADOR);
     }
 
 
     @Override
     public Boolean seCompletoLaMision(List<DonacionSinSegmentar> donaciones) {
         //donación que supere X cantidad de bienes.
+        this.setProgreso(0);
        DonacionSinSegmentar donacionQueCumple = donaciones.stream().filter(d -> d.getBienes().size() > this.cantidadDeBienes).findFirst().orElse(null);
 
            if(donacionQueCumple != null){

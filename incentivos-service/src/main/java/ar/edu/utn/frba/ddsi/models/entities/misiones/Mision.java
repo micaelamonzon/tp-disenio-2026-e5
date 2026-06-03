@@ -18,11 +18,11 @@ public class Mision {
     private Integer distanciaDelObjetivo;
     private Integer progreso;
 
-    public Mision(String nombre){
+    public Mision(String nombre, EstadoDeMision estado){
         this.nombre = nombre;
         this.progreso = 0;
         this.distanciaDelObjetivo = 100;
-        this.estadoDeMision = EstadoDeMision.BLOQUEADA;
+        this.estadoDeMision = estado;
     }
 
     public Boolean seCompletoLaMision(List<DonacionSinSegmentar> donaciones){
