@@ -85,14 +85,14 @@ public class IncentivosServiceImpl implements IncentivosService {
         return misionesCompletadasDTO;
     }
     public void agregarInsignias(Donante nuevoDonante, List<Mision> misionesCompletadas){
-        if(!misionesCompletadas.isEmpty() && misionesCompletadas!= null){
+        if(misionesCompletadas != null && !misionesCompletadas.isEmpty()){
             misionesCompletadas.forEach(m->{nuevoDonante.getPerfil().agregarInsignia(m.getInsigniaGanadora());});
         }
     }
     @Override
     public List<MisionDTO> obtenerDonanteJuridico(Long id) {
 
-        URI uri = UriComponentsBuilder.fromUriString(propiedades.getUrl()).path("/donaciones/juridico/{id}")
+        URI uri = UriComponentsBuilder.fromUriString(propiedades.getUrl()).path("/juridica/obtenerDonaciones/{id}")
                 .buildAndExpand(id)
                 .toUri();
 
@@ -191,8 +191,7 @@ public class IncentivosServiceImpl implements IncentivosService {
         List<Donante> donantes = Arrays.stream(array).map(dto -> {
             List<Mision> misionesLocales = dto.misiones().stream()
                     .map(misionDTO -> {
-                        Mision m = new Mision(misionDTO.nombre());
-                        m.setEstadoDeMision(misionDTO.estado());
+                        Mision m = new Mision(misionDTO.nombre(), misionDTO.estado());
                         m.setFechaCompletada(misionDTO.fechaCompletada());
                         return m;
                     }).toList();
@@ -261,7 +260,7 @@ public class IncentivosServiceImpl implements IncentivosService {
 
     public List<Mision> convertirMisionesDTO(List<MisionDTO> misionesDTO) {
 
-        List<Mision> misiones = misionesDTO.stream().map(m -> new Mision(m.nombre(), m.estadoDeMision())).toList();
+        List<Mision> misiones = misionesDTO.stream().map(m -> new Mision(m.nombre(), m.estado())).toList();
 
         return misiones;
     }

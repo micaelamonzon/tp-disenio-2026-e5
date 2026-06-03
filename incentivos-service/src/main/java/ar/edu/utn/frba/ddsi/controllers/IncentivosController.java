@@ -55,12 +55,11 @@ public class IncentivosController {
     }
 
     @GetMapping("/verificarMision/{idPersona}")
-    //public ResponseEntity<Void> verificarMision(@PathVariable Long idPersona){
-    //    Insignia insigniaObtenida = Insignia.COLABORADOR; // Antes del merge 
+    //    Insignia insigniaObtenida = Insignia.COLABORADOR; // Antes del merge
     public ResponseEntity<Void> verificarMision(@PathVariable Long id){
         Insignia insigniaObtenida = Insignia.DONACIONEXITOSA; // ejemplo
 
-        incentivosService.publicarYDifundirInsignia(idPersona, insigniaObtenida);
+        incentivosService.publicarYDifundirInsignia(id, insigniaObtenida);
 
         return ResponseEntity.ok().build();
     }
