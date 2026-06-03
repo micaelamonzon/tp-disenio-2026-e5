@@ -237,7 +237,7 @@ public class IncentivosServiceImpl implements IncentivosService {
     }
     public List<Mision> convertirMisionesDTO(List<MisionDTO> misionesDTO){
 
-        List<Mision> misiones = misionesDTO.stream().map(m -> new Mision(m.nombre(), m.estado())).toList();
+        List<Mision> misiones = misionesDTO.stream().map(m -> new Mision(m.nombre(), m.estadoDeMision())).toList();
 
         return misiones;
     }
