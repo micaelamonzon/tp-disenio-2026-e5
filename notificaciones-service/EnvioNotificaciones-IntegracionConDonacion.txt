@@ -20,6 +20,8 @@ http://localhost:8081/servicioDeNotificaciones/notificar?destinatario=%2B1877780
 EN POSTMAN:
 
 # Crear humano
+
+-NOTIFICACION POR EMAIL
 POST
 http://localhost:8080/servicioDeDonaciones/crearDonanteHumano
 
@@ -38,6 +40,43 @@ Body:
         "datoDeContacto": "eperezarevalos@frba.utn.edu.ar"
     }
 }
+
+
+-NOTIFICACION POR WHATSAPP
+POST
+
+{
+  "id": null,
+  "nombre": "Eugenia",
+  "apellido": "Perez",
+  "DNI": 12345678,
+  "genero": "F",
+  "edad": 29,
+  "direccion": "Av. Cabildo 1234",
+  "donaciones": [],
+  "medioDeNotificacionPredeterminado": {
+    "tipoDeNotificacion": "WHATSAPP",
+    "datoDeContacto": "+5491133223615"
+  }
+}
+
+-NOTIFICACION POR SMS
+POST
+{
+  "id": null,
+  "nombre": "Eugenia",
+  "apellido": "Perez",
+  "DNI": 12345678,
+  "genero": "F",
+  "edad": 29,
+  "direccion": "Av. Cabildo 1234",
+  "donaciones": [],
+  "medioDeNotificacionPredeterminado": {
+    "tipoDeNotificacion": "SMS",
+    "datoDeContacto": "+18777804236"
+  }
+}
+
 
 
 # Crear donacion
