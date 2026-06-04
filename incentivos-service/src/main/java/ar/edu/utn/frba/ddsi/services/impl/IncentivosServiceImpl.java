@@ -82,6 +82,17 @@ public class IncentivosServiceImpl implements IncentivosService {
         this.incentivosRepository.guardarDonante(nuevoDonante);
 
         nuevoDonante.setPerfil(new Perfil(nuevoDonante.getNombre(),nuevoDonante.getCategoria()));
+
+        // Establece la categoría siguiente para poder detectar cambios de categoría
+        nuevoDonante.getCategoria().establecerCategoriaSiguiente();
+        // Fix temporal: si nombreDeCategoriaActual tiene siguiente, lo seteamos manualmente
+        if (nuevoDonante.getCategoria().getNombreDeCategoriaActual() != null &&
+                nuevoDonante.getCategoria().getNombreDeCategoriaActual().obtenerSiguiente() != null) {
+            nuevoDonante.getCategoria().setCategoriaSiguiente(
+                    new CategoriaDeDonante(nuevoDonante.getCategoria().getNombreDeCategoriaActual().obtenerSiguiente())
+            );
+        }
+
         //defino el tipo de mision que es
         List<Mision> misionesDefinidas = this.definirMisiones(misiones);
 
