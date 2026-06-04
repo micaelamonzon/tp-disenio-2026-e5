@@ -95,7 +95,6 @@ public class MatchmakingService {
 
         propuesta.setNecesidadSeleccionada(necesidad);
 
-        //TODO Poner comportamiento de asignación con DonacionSegmentada
         estadoDonacionService.asignar(propuesta.getDonacion().getId());
 
         // Evento 2: Notificar a la entidad beneficiaria que se le asignó una donación
