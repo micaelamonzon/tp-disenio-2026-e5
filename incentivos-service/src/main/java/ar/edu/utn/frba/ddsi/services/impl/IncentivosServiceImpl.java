@@ -1,5 +1,6 @@
 package ar.edu.utn.frba.ddsi.services.impl;
 
+import ar.edu.utn.frba.ddsi.config.NotificacionesProperties;
 import ar.edu.utn.frba.ddsi.config.RestProperties;
 import ar.edu.utn.frba.ddsi.dto.DonacionSinSegmentarDTO;
 import ar.edu.utn.frba.ddsi.dto.InsigniaDTO;
@@ -25,6 +26,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 import java.net.URI;
 import java.time.LocalDate;
@@ -43,12 +46,14 @@ public class IncentivosServiceImpl implements IncentivosService {
     private final InsigniaPublicadorService publicadorService;
     private RankingMensual ultimoRanking;
     private List<Donante> rankingCompletoOrdenado = new ArrayList<>();
+    private final NotificacionesProperties notificacionesProperties;
 
-    public IncentivosServiceImpl(IncentivosRepository incentivosRepository, RestTemplate restTemplate, RestProperties propiedades, InsigniaPublicadorService publicadorService) {
+    public IncentivosServiceImpl(IncentivosRepository incentivosRepository, RestTemplate restTemplate, RestProperties propiedades, InsigniaPublicadorService publicadorService, NotificacionesProperties notificacionesProperties) {
         this.incentivosRepository = incentivosRepository;
         this.restTemplate = restTemplate;
         this.propiedades = propiedades;
         this.publicadorService = publicadorService;
+        this.notificacionesProperties = notificacionesProperties;
     }
 
     @Override
@@ -84,6 +89,32 @@ public class IncentivosServiceImpl implements IncentivosService {
 
         List<Mision> misionesCompletadas = nuevoDonante.getCategoria().obtenerMisionesCompletadas(nuevoDonante.getDonaciones());
         this.agregarInsignias(nuevoDonante, misionesCompletadas);
+
+        // Evento 4: Notificar al donante que cumplió una misión
+        if (misionesCompletadas != null && !misionesCompletadas.isEmpty()) {
+            String nombreMision = misionesCompletadas.get(0).getNombre();
+            // Usamos el email del donante obtenido del servicio de donaciones
+            if (personaDonante.medioDeNotificacionPredeterminado() != null) {
+                notificar(
+                        personaDonante.medioDeNotificacionPredeterminado().datoDeContacto(),
+                        "Felicitaciones!+Completaste+la+mision+" + nombreMision,
+                        personaDonante.medioDeNotificacionPredeterminado().tipoDeNotificacion()
+                );
+            }
+        }
+
+        // Evento 5: Notificar al donante que cambió de categoría
+        if (nuevoDonante.getCategoria().pasaSiguienteCategoria(nuevoDonante.getDonaciones())) {
+            if (personaDonante.medioDeNotificacionPredeterminado() != null) {
+                String nuevaCategoria = nuevoDonante.getCategoria().getNombreDeCategoriaActual().obtenerSiguiente().name();
+                notificar(
+                        personaDonante.medioDeNotificacionPredeterminado().datoDeContacto(),
+                        "Subiste+de+categoria!+Ahora+sos+donante+" + nuevaCategoria,
+                        personaDonante.medioDeNotificacionPredeterminado().tipoDeNotificacion()
+                );
+            }
+        }
+
         List <MisionDTO> misionesCompletadasDTO = this.obtenerMisionDTO(misionesCompletadas);
 
         return misionesCompletadasDTO;
@@ -458,5 +489,20 @@ public class IncentivosServiceImpl implements IncentivosService {
                 .filter(r -> (mes == null || r.getFecha().getMonthValue() == mes))
                 .map(this::mapearDto)
                 .toList();
+    }
+
+    // Método para llamar al servicio de notificaciones
+    // URL resultante: http://localhost:8081/servicioDeNotificaciones/notificar?destinatario=X&mensaje=Y&medio=Z
+    private void notificar(String destinatario, String mensaje, String medio) {
+        try {
+            String url = notificacionesProperties.getUrl() +
+                    "/servicioDeNotificaciones/notificar" +
+                    "?destinatario=" + URLEncoder.encode(destinatario, StandardCharsets.UTF_8) +
+                    "&mensaje=" + mensaje +
+                    "&medio=" + medio;
+            restTemplate.postForObject(url, null, String.class);
+        } catch (Exception e) {
+            System.out.println("Error al notificar: " + e.getMessage());
+        }
     }
 }

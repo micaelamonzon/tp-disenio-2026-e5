@@ -20,5 +20,6 @@ public record PersonaDonanteDTO (
         String razonSocial,
         List<MisionDTO> misiones,
         NombreDeCategoria categoria,
-        LocalDateTime fechaDeRegistro
+        LocalDateTime fechaDeRegistro,
+        MedioDeNotificacionDTO medioDeNotificacionPredeterminado
 ){}
