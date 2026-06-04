@@ -68,7 +68,8 @@ public class DonacionesServiceImpl implements DonacionesService {
                     null,
                     null,
                     misionesDTO,
-                    persona.getCategoria()
+                    persona.getCategoria(),
+                    null
             );
 
         }).toList();
@@ -98,7 +99,8 @@ public class DonacionesServiceImpl implements DonacionesService {
                     persona.getCuit(),
                     persona.getRazonSocial(),
                     misionesDTO,
-                    persona.getCategoria()
+                    persona.getCategoria(),
+                    null
             );
 
         }).toList();
@@ -111,6 +113,15 @@ public class DonacionesServiceImpl implements DonacionesService {
         if (personaHumana != null) {
             List<DonacionSinSegmentarDTO> donacionSinSegmentarDTOS = this.obtenerDonacionesSinSegmentarDTO(personaHumana.getDonaciones());
             List<MisionDTO> misionesDTO = this.obtenerMisionesDTO(personaHumana.getMisiones());
+
+            // Mapper de entidad a DTO para el medio de notificación predeterminado
+            MedioDeNotificacionDTO medioDTO = null;
+            if (personaHumana.getMedioDeNotificacionPredeterminado() != null) {
+                medioDTO = new MedioDeNotificacionDTO(
+                        personaHumana.getMedioDeNotificacionPredeterminado().getTipoDeNotificacion(),
+                        personaHumana.getMedioDeNotificacionPredeterminado().getDatoDeContacto()
+                );
+            }
 
         PersonaDonanteDTO personaDTO = new PersonaDonanteDTO(
                                         personaHumana.getId(),
@@ -125,7 +136,8 @@ public class DonacionesServiceImpl implements DonacionesService {
                                         null,
                                         null,
                                         misionesDTO,
-                                        personaHumana.getCategoria()
+                                        personaHumana.getCategoria(),
+                                        medioDTO
                                         );
 
             System.out.println(personaDTO);
@@ -201,7 +213,8 @@ public class DonacionesServiceImpl implements DonacionesService {
                                             personaJuridica.getCuit(),
                                             personaJuridica.getRazonSocial(),
                                             misionesDTO,
-                                            personaJuridica.getCategoria()
+                                            personaJuridica.getCategoria(),
+                                            null
                                             );
 
             return personaDTO;
@@ -529,11 +542,11 @@ public class DonacionesServiceImpl implements DonacionesService {
         List<PersonaDonanteDTO> dtos = new ArrayList<>();
         humanas.forEach(h -> dtos.add(new PersonaDonanteDTO(h.getId(), h.getNombre(), h.getApellido(), h.getNumeroDeDocumento(), h.getGenero(),
                 h.getEdad(), h.getDireccion(), null,
-                null, null, null, null, null
+                null, null, null, null, null, null
         )));
         juridicas.forEach(j -> dtos.add(new PersonaDonanteDTO(
                 null, null, null, null, null, null, null, j.getId(),
-                null, j.getCuit(), j.getRazonSocial(), null, null
+                null, j.getCuit(), j.getRazonSocial(), null, null, null
         )));
         return dtos;
     }

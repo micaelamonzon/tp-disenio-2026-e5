@@ -69,6 +69,10 @@ public class IncentivosServiceImpl implements IncentivosService {
 
         PersonaDonanteDTO personaDonante = response.getBody();
 
+        System.out.println("Donante recibido: " + personaDonante);
+        System.out.println("Misiones recibidas: " + personaDonante.misiones());
+        System.out.println("Donaciones recibidas: " + personaDonante.donaciones().size());
+
         List<DonacionSinSegmentar> donaciones = this.convertirDonacionesDTO(personaDonante.donaciones());
 
         List<Mision> misiones = this.convertirMisionesDTO(personaDonante.misiones());
@@ -119,6 +123,7 @@ public class IncentivosServiceImpl implements IncentivosService {
 
         return misionesCompletadasDTO;
     }
+
     public void agregarInsignias(Donante nuevoDonante, List<Mision> misionesCompletadas){
         if(misionesCompletadas != null && !misionesCompletadas.isEmpty()){
             misionesCompletadas.forEach(m->{nuevoDonante.getPerfil().agregarInsignia(m.getInsigniaGanadora());});

@@ -17,7 +17,8 @@ public record PersonaDonanteDTO (
         String cuit,
         String razonSocial,
         List<MisionDTO> misiones,
-        CategoriaDeDonante categoria
+        CategoriaDeDonante categoria,
+        MedioDeNotificacionDTO medioDeNotificacionPredeterminado
 ){
 
 }
