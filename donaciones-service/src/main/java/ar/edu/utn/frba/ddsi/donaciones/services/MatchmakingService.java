@@ -8,7 +8,6 @@ import ar.edu.utn.frba.ddsi.donaciones.repositories.DonacionesRepository;
 import ar.edu.utn.frba.ddsi.donaciones.repositories.MatchRepository;
 import ar.edu.utn.frba.ddsi.donaciones.repositories.NecesidadesRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -28,7 +27,7 @@ public class MatchmakingService {
     private final NecesidadesRepository necesidadesRepository;
     private final DonacionesRepository donacionesRepository;
     private final MotorDeMatchmaking motorMatchmaking;
-    private final EstadoDonacionService estadoDonacionService;
+    private final EstadoDonacionServiceimpl estadoDonacionService;
     private final List<Strategy_AlgoritmosMatchmaking> estrategiasActivas = new ArrayList<>();
 
     private final RestTemplate restTemplate;

@@ -9,6 +9,7 @@ public class CambioEstadoDTO {
     private String estadoNuevo;
     private LocalDateTime fecha;
     private String justificacion;
+    private String responsableId;
 
     public CambioEstadoDTO(String estadoAnterior, String estadoNuevo, LocalDateTime fecha, String justificacion) {
 
