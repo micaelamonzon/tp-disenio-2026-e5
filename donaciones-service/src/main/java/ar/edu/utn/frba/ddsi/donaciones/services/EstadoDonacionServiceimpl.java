@@ -83,18 +83,20 @@ public class EstadoDonacionServiceimpl {
     }
 
     private DonacionSegmentadaDTO toDTO(DonacionSegmentada d) {
-        DonacionSegmentadaDTO dto = new DonacionSegmentadaDTO();
-        dto.setId(d.getId());
-        dto.setEstadoActual(d.getNombreEstadoActual());
-        dto.setHistorial(d.getHistorial().stream().map(c -> {
-            CambioEstadoDTO ce = new CambioEstadoDTO();
-            ce.setEstadoAnterior(c.getEstadoAnterior());
-            ce.setEstadoNuevo(c.getEstadoNuevo());
-            ce.setFecha(c.getFecha());
-            ce.setJustificacion(c.getJustificacion());
-            ce.setResponsableId(c.getResponsableId());
-            return ce;
-        }).toList());
-        return dto;
+        List<CambioEstadoDTO> historialDTO = d.getHistorial().stream()
+                .map(c -> new CambioEstadoDTO(
+                        c.getEstadoAnterior(),
+                        c.getEstadoNuevo(),
+                        c.getFecha(),
+                        c.getJustificacion(),
+                        c.getResponsableId()
+                ))
+                .toList();
+
+        return new DonacionSegmentadaDTO(
+                d.getId(),
+                d.getNombreEstadoActual(),
+                historialDTO
+        );
     }
 }

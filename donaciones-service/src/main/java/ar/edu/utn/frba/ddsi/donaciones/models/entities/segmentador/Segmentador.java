@@ -18,10 +18,8 @@ public class Segmentador {
         Map<Subcategoria, List<Bien>> bienesAgrupados = donacionSinSegmentar.getBienes().stream().collect(Collectors.groupingBy(Bien::getSubcategoria));
 
         bienesAgrupados.forEach((subcategoria, listaBienes) -> {
-
             DonacionSegmentada donacionSegmentada = new DonacionSegmentada(subcategoria);
-            donacionSegmentada.setBienesDelMismoTipo(new ArrayList<>(listaBienes));
-
+            listaBienes.forEach(donacionSegmentada::agregarBien); // ← en lugar de setBienesDelMismoTipo
             nuevasDonacionesSegmentadas.add(donacionSegmentada);
         });
 

@@ -36,8 +36,11 @@ public class DonacionSinSegmentar {
   public void agregarDonacionSegmentada(DonacionSegmentada donacion) {
     this.donacionesSegmentadas.add(donacion);
   }
-  public void verificarSiDonacionFueEntregada(){
-      this.setDonacionEntregada(donacionesSegmentadas.stream().allMatch( m -> m.getEntregadaAEntidad() == Boolean.TRUE));
+  public void verificarSiDonacionFueEntregada() {
+    this.setDonacionEntregada(
+            donacionesSegmentadas.stream()
+                    .allMatch(m -> m.getNombreEstadoActual().equals("ENTREGADA"))
+    );
   }
 
   public Long getOrganizacionId() {

@@ -94,7 +94,7 @@ public class MatchmakingService {
 
         propuesta.setNecesidadSeleccionada(necesidad);
 
-        estadoDonacionService.asignar(propuesta.getDonacion().getId());
+        estadoDonacionService.asignar(propuesta.getDonacion().getId(), "SISTEMA");
 
         // Evento 2: Notificar a la entidad beneficiaria que se le asignó una donación
         if (necesidad.getEntidadBeneficiaria() != null &&
