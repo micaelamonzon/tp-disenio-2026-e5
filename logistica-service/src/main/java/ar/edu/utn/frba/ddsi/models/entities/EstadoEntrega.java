@@ -3,7 +3,7 @@ package ar.edu.utn.frba.ddsi.models.entities;
 import java.util.Map;
 import java.util.Set;
 //Revisar si esta bien como enum o si se puede aplicar algun patron
-
+//prueba 2.0
 public enum EstadoEntrega {
     PENDIENTE,
     EN_CAMINO,
