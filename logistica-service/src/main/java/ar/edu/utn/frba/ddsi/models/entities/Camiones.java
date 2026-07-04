@@ -1,11 +1,12 @@
 package ar.edu.utn.frba.ddsi.models.entities;
 
 import ar.edu.utn.frba.ddsi.models.entities.persona.Bien;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
 
-
+@Getter
 public class Camiones {
     private String patente;
     private double volumen;
