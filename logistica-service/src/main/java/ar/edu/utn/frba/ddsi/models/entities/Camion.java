@@ -16,13 +16,15 @@ public class Camion {
     private Double capacidadCarga;
     private Ruta ruta;
     private List<Posicion> posiciones;
+    Boolean disponible;
 
-    public void Camion(String patente, Double volumen, Double altura, Double capacidadCarga){
+    public void Camion(String patente, Double volumen, Double altura, Double capacidadCarga, Boolean disponible){
         this.patente = patente;
         this.volumen = volumen;
         this.altura = altura;
         this.capacidadCarga = capacidadCarga;
         this.posiciones = new ArrayList<>();
+        this.disponible = disponible;
     }
 
     public Posicion ultimaPosicion(){
