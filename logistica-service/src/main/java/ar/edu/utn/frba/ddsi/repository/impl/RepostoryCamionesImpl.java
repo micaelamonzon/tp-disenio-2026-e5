@@ -38,4 +38,9 @@ public class RepostoryCamionesImpl implements RepositoryCamiones {
 
     }
 
+    @Override
+    public List<Camion> findAll(){
+        return camiones;
+    }
+
 }
