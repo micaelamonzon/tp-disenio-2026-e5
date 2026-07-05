@@ -5,7 +5,7 @@ import ar.edu.utn.frba.ddsi.dto.ConfirmarRecepcionDTO;
 import ar.edu.utn.frba.ddsi.dto.EntregaDTO;
 import ar.edu.utn.frba.ddsi.models.entities.Entrega;
 import org.springframework.stereotype.Service;
-
+import ar.edu.utn.frba.ddsi.services.NotificacionesPublisher;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,9 +18,12 @@ public class EntregaServiceImpl {
     private final Map<Long, Entrega> entregas = new HashMap<>();
     private final AtomicLong contador = new AtomicLong(1);
     private final DonacionesClient donacionesClient;
+    private final NotificacionesPublisher notificacionesPublisher;
 
-    public EntregaServiceImpl(DonacionesClient donacionesClient) {
+    public EntregaServiceImpl(DonacionesClient donacionesClient,
+                              NotificacionesPublisher notificacionesPublisher) {
         this.donacionesClient = donacionesClient;
+        this.notificacionesPublisher = notificacionesPublisher;
     }
 
     // Adopción al nuevo modelo de Entrega: ya no recibe patente ni busca camión,
@@ -54,6 +57,18 @@ public class EntregaServiceImpl {
         for (Long donacionId : entrega.getDonacionesIds()) {
             donacionesClient.confirmarEntrega(donacionId, responsableId);
         }
+
+        // Evento "Entrega realizada con éxito": se publica en la cola de RabbitMQ
+        // para que el servicio de notificaciones envíe el comprobante en forma
+        // asincrónica, como pide la entrega (integración por cola de mensajes)
+        // TODO: destinatario hardcodeado hasta resolver cómo obtener los medios de
+        // contacto del donante y la entidad desde donaciones-service
+        // TODO: falta el camión responsable en el comprobante; ese dato saldrá
+        // de la Ruta cuando se implemente iniciarRuta
+        String comprobante = "Entrega+realizada+con+exito.+Fecha:+" + entrega.getFechaEntrega()
+                + ".+Entrega+nro+" + entrega.getId();
+        notificacionesPublisher.publicar("+18777804236", comprobante, "SMS");
+
         return toDTO(entrega);
     }
 

@@ -79,6 +79,13 @@
             <artifactId>sendgrid-java</artifactId>
             <version>4.9.3</version>
         </dependency>
+
+        <!-- RabbitMQ: integración asincrónica con el servicio de notificaciones -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-amqp</artifactId>
+        </dependency>
+
     </dependencies>
 
 </project>
