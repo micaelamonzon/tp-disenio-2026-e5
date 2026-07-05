@@ -5,9 +5,8 @@ import java.util.List;
 
 public record EntregaDTO(
         Long id,
-        Long donacionSegmentadaId,
+        List<Long> donacionesIds,        // ids de las donaciones segmentadas (donaciones-service)
         Long entidadBeneficiariaId,
-        String patenteCamion,
         String estadoActual,
         LocalDateTime fechaEntrega,
         List<String> fotosUrl,

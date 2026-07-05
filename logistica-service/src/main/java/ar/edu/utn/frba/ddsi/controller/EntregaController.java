@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/servicioDeLogistica")
 
@@ -19,17 +21,17 @@ public class EntregaController {
 
 
     @PostMapping("/entrega")
+    // Adaptamos al nuevo modelo: la entrega recibe una lista de donaciones
+    // y ya no se le indica el camión al crearla
     public ResponseEntity<EntregaDTO> crearEntrega(
-            @RequestParam Long donacionId,
-            @RequestParam Long entidadId,
-            @RequestParam String patente) {
+            @RequestParam List<Long> donacionesIds,
+            @RequestParam Long entidadId) {
         try {
             return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(entregaService.crearEntrega(donacionId, entidadId, patente));
+                    .body(entregaService.crearEntrega(donacionesIds, entidadId));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().build();
         }
-
     }
     @PatchMapping("/entrega/{id}/iniciarTraslado")
     public ResponseEntity<EntregaDTO> iniciarTraslado(
