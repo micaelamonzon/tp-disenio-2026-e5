@@ -61,9 +61,9 @@ public class EntregaServiceImpl {
         // Evento "Entrega realizada con éxito": se publica en la cola de RabbitMQ
         // para que el servicio de notificaciones envíe el comprobante en forma
         // asincrónica, como pide la entrega (integración por cola de mensajes)
-        // TODO: destinatario hardcodeado hasta resolver cómo obtener los medios de
+        // TODO: destinatario hardcodeado hasta resolver como obtener los medios de
         // contacto del donante y la entidad desde donaciones-service
-        // TODO: falta el camión responsable en el comprobante; ese dato saldrá
+        // TODO: falta el camión responsable en el comprobante, el dato saldra
         // de la Ruta cuando se implemente iniciarRuta
         String comprobante = "Entrega+realizada+con+exito.+Fecha:+" + entrega.getFechaEntrega()
                 + ".+Entrega+nro+" + entrega.getId();
