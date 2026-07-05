@@ -1,6 +1,7 @@
 package ar.edu.utn.frba.ddsi.donaciones.services;
 import ar.edu.utn.frba.ddsi.donaciones.dto.CambioEstadoDTO;
 import ar.edu.utn.frba.ddsi.donaciones.dto.DonacionSegmentadaDTO;
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.donacion.Estado;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.DonacionSegmentada;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.EstadoDonacion;
 import org.springframework.stereotype.Service;
@@ -79,6 +80,12 @@ public class EstadoDonacionServiceimpl {
     private DonacionSegmentada buscar(Long id) {
         DonacionSegmentada d = donaciones.get(id);
         if (d == null) throw new RuntimeException("Donación no encontrada: " + id);
+        return d;
+    }
+
+    private DonacionSegmentada buscarPorEstado(Estado estado) {
+        DonacionSegmentada d = donaciones.get(estado);
+        if (d == null) throw new RuntimeException("Donación no encontrada: " + estado);
         return d;
     }
 
