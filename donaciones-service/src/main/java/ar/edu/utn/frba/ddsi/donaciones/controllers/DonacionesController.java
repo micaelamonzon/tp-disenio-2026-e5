@@ -59,15 +59,15 @@ public class DonacionesController {
     // Donantes
     @GetMapping("/obtenerDonantesJuridicos")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public List<PersonaDonanteDTO> obtenerDonantesJuridicos() {
-        List<PersonaDonanteDTO> donantesDTOS = this.donacionesService.obtenerTodosJuridicos();
+    public List<PersonaJuridicaDTO> obtenerDonantesJuridicos() {
+        List<PersonaJuridicaDTO> donantesDTOS = this.donacionesService.obtenerTodosJuridicos();
         return donantesDTOS;
     }
 
     @GetMapping("/obtenerDonantesHumanos")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public List<PersonaDonanteDTO> obtenerDonantesHumanos() {
-        List<PersonaDonanteDTO> donantesDTOS = this.donacionesService.obtenerTodosHumanos();
+    public List<PersonaHumanaDTO> obtenerDonantesHumanos() {
+        List<PersonaHumanaDTO> donantesDTOS = this.donacionesService.obtenerTodosHumanos();
         return donantesDTOS;
     }
 
@@ -121,10 +121,10 @@ public class DonacionesController {
     // Donaciones
 
     @GetMapping("/humano/obtenerDonaciones/{id}")
-    public ResponseEntity<PersonaDonanteDTO> obtenerDonacionesDeHumano(
+    public ResponseEntity<PersonaHumanaDTO> obtenerDonacionesDeHumano(
             @PathVariable Long id) {
         try {
-            PersonaDonanteDTO personaDonanteDTO = this.donacionesService.obtenerDonacionesDeHumano(id);
+            PersonaHumanaDTO personaDonanteDTO = this.donacionesService.obtenerDonacionesDeHumano(id);
             return ResponseEntity.ok(personaDonanteDTO);
         } catch (RuntimeException e) {
             System.out.println(e.getMessage());
@@ -177,10 +177,10 @@ public class DonacionesController {
 
 
     @GetMapping("/juridica/obtenerDonaciones/{id}")
-    public ResponseEntity<PersonaDonanteDTO> obtenerDonacionesDeJuridico(
+    public ResponseEntity<PersonaJuridicaDTO> obtenerDonacionesDeJuridico(
             @PathVariable Long id) {
         try {
-            PersonaDonanteDTO personaDonanteDTO = this.donacionesService.obtenerDonacionesDeJuridico(id);
+            PersonaJuridicaDTO personaDonanteDTO = this.donacionesService.obtenerDonacionesDeJuridico(id);
             return ResponseEntity.ok(personaDonanteDTO);
         } catch (RuntimeException e) {
             System.out.println(e.getMessage());

@@ -8,18 +8,22 @@ import java.util.List;
 @Getter
 public class Entrega {
     private Long id;
-    private Long donacionSegmentadaId; // referencia a donaciones-service
+    private List<Long> donacionesIds; // referencia a donaciones segementadas, de donaciones-service
     private Long entidadBeneficiariaId;
-    private Camiones camion;
     private EstadoEntrega estadoActual;
     private LocalDateTime fechaEntrega;
     private List<String> fotosUrl = new ArrayList<>(); // URLs de fotos de recepción
     private String motivoNoRecepcion;
+    private String latitud; //de la entidadBenficiaria
+    private String longitud; //de la entidadBenficiaria
+    private String direccion;  //de la entidadBenficiaria
+    private String pesoEnKg;
+    private String volumenM3;
 
-    public Entrega(Long donacionSegmentadaId, Long entidadBeneficiariaId, Camiones camion) {
-        this.donacionSegmentadaId = donacionSegmentadaId;
+
+    public Entrega(List<Long> donacionesIds, Long entidadBeneficiariaId) {
         this.entidadBeneficiariaId = entidadBeneficiariaId;
-        this.camion = camion;
+        this.donacionesIds = donacionesIds;
         this.estadoActual = EstadoEntrega.PENDIENTE;
         this.fechaEntrega = LocalDateTime.now();
     }

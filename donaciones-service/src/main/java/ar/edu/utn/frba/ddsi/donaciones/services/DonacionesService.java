@@ -8,12 +8,12 @@ import ar.edu.utn.frba.ddsi.donaciones.dto.PersonaJuridicaDTO;
 import java.util.List;
 
 public interface DonacionesService {
-    List<PersonaDonanteDTO> obtenerTodosHumanos();
-    List<PersonaDonanteDTO> obtenerTodosJuridicos();
+    List<PersonaHumanaDTO> obtenerTodosHumanos();
+    List<PersonaJuridicaDTO> obtenerTodosJuridicos();
     PersonaHumanaDTO obtenerHumanoPorId(Long id);
     PersonaJuridicaDTO obtenerJuridicoPorId(Long id);
-    PersonaDonanteDTO obtenerDonacionesDeHumano(Long id);
-    PersonaDonanteDTO obtenerDonacionesDeJuridico(Long id);
+    PersonaHumanaDTO obtenerDonacionesDeHumano(Long id);
+    PersonaJuridicaDTO obtenerDonacionesDeJuridico(Long id);
     PersonaHumanaDTO crearDonanteHumano(PersonaHumanaDTO body);
     DonacionSinSegmentarDTO crearDonacionDeJuridico(DonacionSinSegmentarDTO body, Long id);
     DonacionSinSegmentarDTO crearDonacionDeHumano(DonacionSinSegmentarDTO body, Long id);

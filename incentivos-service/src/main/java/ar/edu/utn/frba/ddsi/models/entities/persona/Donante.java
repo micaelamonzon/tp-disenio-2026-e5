@@ -18,39 +18,31 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Donante {
-    private Long id;
-    private LocalDateTime fechaDeRegistro;
-    private String cuit;
+    private Long id; //id en incentivos
+    private Long idEnDonaciones; //id en donaciones
+    private String nombre;
+    private String apellido;
     private String razonSocial;
-
+    private LocalDateTime fechaDeRegistro;
     private List<DonacionSinSegmentar> donaciones;
     private Perfil perfil;
     private List<Mision> misiones;
     private CategoriaDeDonante categoria;
-
-    private String nombre;
-    private String apellido;
-    private Integer edad;
-    private Integer DNI;
-    private String genero;
-    private String direccion;
+    private String tipoDeDonante;
 
     public Donante(Long id,String cuit,String razonSocial,String nombre,String apellido,Integer edad,Integer DNI,String genero,String direccion,List<DonacionSinSegmentar> donaciones, List<Mision> misiones, CategoriaDeDonante categoria,LocalDateTime fechaDeRegistro) {
         this.id = id;
-        this.cuit = cuit;
-        this.razonSocial = razonSocial;
-        this.nombre = nombre;
-        this.apellido = apellido;
-        this.edad = edad;
-        this.DNI = DNI;
-        this.genero=genero;
-        this.direccion=direccion;
         this.donaciones = donaciones;
         this.misiones = misiones;
         this.categoria = categoria;
         this.fechaDeRegistro = fechaDeRegistro;
 
     }
+
+    public void agregarMision(Mision mision) {
+        this.misiones.add(mision);
+    }
+
     public Integer calcularMisionesCumplidasEn(YearMonth periodo) {
         return (int) this.misiones.stream()
                 .filter(m -> m.getEstadoDeMision() == EstadoDeMision.COMPLETADA) 

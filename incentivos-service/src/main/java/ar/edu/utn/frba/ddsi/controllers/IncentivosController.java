@@ -20,11 +20,23 @@ public class IncentivosController {
         this.incentivosService = incentivosService;
     }
 
+
+    @PostMapping("donanteHumano/mision/{id}")
+    @ResponseStatus(HttpStatus.CREATED) //para devolver el 201
+    public void agregarMisionADonanteHumano(@PathVariable Long id, @RequestBody MisionDTO misionDTO){
+        incentivosService.agregarMisionADonante(id, misionDTO);
+    }
+
+    @PostMapping("donanteJuridico/mision/{id}")
+    @ResponseStatus(HttpStatus.CREATED) //para devolver el 201
+    public void agregarMisionADonanteJuridico(@PathVariable Long id, @RequestBody MisionDTO misionDTO){
+        incentivosService.agregarMisionADonante(id, misionDTO);
+    }
+
     //Obtención de las misiones completadas por una persona donante.
     @GetMapping("donanteHumano/misionesCompletadas/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED) //para devolver el 200
     public List<MisionDTO> obtenerTodasLasMisionesDeDonanteHumano(@PathVariable Long id){
-        System.out.println("Antes del GET");
         return incentivosService.obtenerDonanteHumano(id);
     }
 
@@ -54,9 +66,9 @@ public class IncentivosController {
         }
     }
 
-    @GetMapping("/verificarMision/{idPersona}")
+    @GetMapping("/verificarMision/{id}")
     //    Insignia insigniaObtenida = Insignia.COLABORADOR; // Antes del merge
-    public ResponseEntity<Void> verificarMision(@PathVariable ("idPersona") Long id){
+    public ResponseEntity<Void> verificarMision(@PathVariable ("id") Long id){
         Insignia insigniaObtenida = Insignia.DONACIONEXITOSA; // ejemplo
 
         incentivosService.publicarYDifundirInsignia(id, insigniaObtenida);
@@ -82,11 +94,11 @@ public class IncentivosController {
         }
         return ResponseEntity.ok(dto);
     }
-    @GetMapping("/ranking/posicion/{idDonante}") // busco donante por ID
-    public ResponseEntity<Integer> obtenerPosicionDonante(@PathVariable Long idDonante) {
+    @GetMapping("/ranking/posicion/{id}") // busco donante por ID
+    public ResponseEntity<Integer> obtenerPosicionDonante(@PathVariable Long id) {
         RankingMensual ranking = incentivosService.obtenerUltimoRanking();
         if (ranking == null) return ResponseEntity.noContent().build();
-        Integer posicion = ranking.getPosicionPorId(idDonante);
+        Integer posicion = ranking.getPosicionPorId(id);
         if (posicion == null) return ResponseEntity.notFound().build();
 
         return ResponseEntity.ok(posicion);

@@ -10,16 +10,9 @@ public record PersonaDonanteDTO (
         Long idHumano,
         String nombre,
         String apellido,
-        Integer DNI,
-        String genero,
-        Integer edad,
-        String direccion,
         Long idJuridico,
         List<DonacionSinSegmentarDTO> donaciones,
-        String cuit,
         String razonSocial,
-        List<MisionDTO> misiones,
-        NombreDeCategoria categoria,
         LocalDateTime fechaDeRegistro,
         MedioDeNotificacionDTO medioDeNotificacionPredeterminado
 ){}

@@ -57,25 +57,34 @@ public class IncentivosServiceImpl implements IncentivosService {
     }
 
     @Override
+    public void agregarMisionADonante(Long id, MisionDTO misionDTO){
+        //Yo como donante, elijo una mision -> el servis de incentivos me toma el id y la mision, me guarda en su repo,
+        // si no está mi id, entonces me instancia como un nuevo donante -> luego llama al servis de donaciones mandandole mi id y mi tipo (humana o juridica), para traerse las donaciones de ese id
+       Mision mision  = this.convertirMisionDTO(misionDTO);
+       Donante donante = incentivosRepository.buscarDonantePorId(id);
+       if(donante == null){
+           donante.agregarMision(mision);
+       }
+    }
+
+
+    @Override
     public List<MisionDTO> obtenerDonanteHumano(Long id) {
 
-       // URI uri = UriComponentsBuilder.fromUriString(propiedades.getUrl()).path("/donaciones/humano/{id}")
+//        URI uri = UriComponentsBuilder.fromUriString(propiedades.getUrl()).path("/humano/obtenerDonaciones/{id}")
+//                .buildAndExpand(id)
+//                .toUri();
 
-        URI uri = UriComponentsBuilder.fromUriString(propiedades.getUrl()).path("/humano/obtenerDonaciones/{id}")
-                .buildAndExpand(id)
-                .toUri();
-
-        ResponseEntity<PersonaDonanteDTO> response = restTemplate.getForEntity(uri, PersonaDonanteDTO.class);
-
-        PersonaDonanteDTO personaDonante = response.getBody();
-
-        System.out.println("Donante recibido: " + personaDonante);
-        System.out.println("Misiones recibidas: " + personaDonante.misiones());
-        System.out.println("Donaciones recibidas: " + personaDonante.donaciones().size());
+//        ResponseEntity<PersonaDonanteDTO> response = restTemplate.getForEntity(uri, PersonaDonanteDTO.class);
+//
+//        PersonaDonanteDTO personaDonante = response.getBody();
+//
+//        System.out.println("Donante recibido: " + personaDonante);
+//        System.out.println("Donaciones recibidas: " + personaDonante.donaciones().size());
 
         List<DonacionSinSegmentar> donaciones = this.convertirDonacionesDTO(personaDonante.donaciones());
 
-        List<Mision> misiones = this.convertirMisionesDTO(personaDonante.misiones());
+
 
         Donante nuevoDonante = new Donante(personaDonante.id(), null, null, personaDonante.nombre(), personaDonante.apellido(), personaDonante.edad(), personaDonante.DNI(), personaDonante.genero(), personaDonante.direccion(), donaciones, misiones, new CategoriaDeDonante(personaDonante.categoria()), personaDonante.fechaDeRegistro());
 
@@ -349,6 +358,11 @@ public class IncentivosServiceImpl implements IncentivosService {
         return insigniasDTO;
     }
 
+    public Mision convertirMisionDTO(MisionDTO misionDTO){
+        Mision mision = new Mision(misionDTO.nombre(), misionDTO.estado());
+        return mision;
+    }
+
     @Override
     public MetricasImpactoDTO obtenerMetricasDeImpacto(Long idDonante) {
 
@@ -389,6 +403,7 @@ public class IncentivosServiceImpl implements IncentivosService {
                 posicion
         );
     }
+
 
     @Override
     public String procesarLogro(Long id, Insignia insignia, boolean esHumana) {

@@ -1,9 +1,9 @@
-package ar.edu.utn.frba.ddsi.services;
+package ar.edu.utn.frba.ddsi.services.Impl;
 
 import ar.edu.utn.frba.ddsi.models.entities.DonacionesClient;
 import ar.edu.utn.frba.ddsi.dto.ConfirmarRecepcionDTO;
 import ar.edu.utn.frba.ddsi.dto.EntregaDTO;
-import ar.edu.utn.frba.ddsi.models.entities.Camiones;
+import ar.edu.utn.frba.ddsi.models.entities.Camion;
 import ar.edu.utn.frba.ddsi.models.entities.Entrega;
 import org.springframework.stereotype.Service;
 
@@ -13,21 +13,21 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Service
-public class EntregaService {
+public class EntregaServiceImpl {
 
     private final Map<Long, Entrega> entregas = new HashMap<>();
-    private final Map<String, Camiones> camiones = new HashMap<>();
+    private final Map<String, Camion> camiones = new HashMap<>();
     private final AtomicLong contador = new AtomicLong(1);
     private final DonacionesClient donacionesClient;
 
-    public EntregaService(DonacionesClient donacionesClient) {
+    public EntregaServiceImpl(DonacionesClient donacionesClient) {
         this.donacionesClient = donacionesClient;
     }
 
-    public EntregaDTO crearEntrega(Long donacionId, Long entidadId, String patente) {
-        Camiones camion = camiones.get(patente);
+    public EntregaDTO crearEntrega(List<Long> donacionesIds, Long entidadId, String patente) {
+        Camion camion = camiones.get(patente);
         if (camion == null) throw new RuntimeException("Camión no encontrado: " + patente);
-        Entrega entrega = new Entrega(donacionId, entidadId, camion);
+        Entrega entrega = new Entrega(donacionesIds, entidadId, camion);
         Long id = contador.getAndIncrement();
         entrega.setId(id);
         entregas.put(id, entrega);
@@ -67,7 +67,7 @@ public class EntregaService {
         return toDTO(entrega);
     }
 
-    public void registrarCamion(Camiones camion) {
+    public void registrarCamion(Camion camion) {
         camiones.put(camion.getPatente(), camion);
     }
 

@@ -12,7 +12,7 @@ public interface IncentivosService {
     public List<MisionDTO> obtenerDonanteHumano(Long id);
     public List<MisionDTO> obtenerDonanteJuridico(Long id);
     public List<InsigniaDTO> buscarInsigniasPorId(Long id);
-
+    public void agregarMisionADonante(Long id, MisionDTO misionesDTO);
     public MisionDTO buscarMisionActualPorId(Long id);
 
     public String publicarYDifundirInsignia(Long idPersona, Insignia insignia);

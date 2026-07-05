@@ -21,7 +21,7 @@ public class Mision {
     public Mision(String nombre, EstadoDeMision estado){
         this.nombre = nombre;
         this.progreso = 0;
-        this.distanciaDelObjetivo = 100;
+        this.distanciaDelObjetivo = 0;
         this.estadoDeMision = estado;
     }
 

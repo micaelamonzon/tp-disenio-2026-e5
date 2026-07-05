@@ -16,7 +16,7 @@ import java.util.List;
 public class Perfil {
     List<Insignia> insignias;
     Boolean insigniaPrivada;
-    String nombreDeUsuario;
+    String nombreDeUsuario; // lo sacamos del nombre y apellido del donante o de la razón social de la empresa
     CategoriaDeDonante categoria;
     Integer totalHistoricoPorPeriodo;
     List<MetricaMensual> evolucionMensual;
