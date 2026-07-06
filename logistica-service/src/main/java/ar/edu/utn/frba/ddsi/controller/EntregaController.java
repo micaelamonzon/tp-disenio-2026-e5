@@ -77,4 +77,16 @@ public class EntregaController {
             return ResponseEntity.badRequest().build();
         }
     }
+
+    // El chofer informa el comienzo de su ruta: todas las entregas pasan a En traslado
+    @PatchMapping("/ruta/iniciar")
+    public ResponseEntity<List<EntregaDTO>> iniciarRuta(
+            @RequestParam List<Long> entregaIds,
+            @RequestParam String choferId) {
+        try {
+            return ResponseEntity.ok(entregaService.iniciarRuta(entregaIds, choferId));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
 }

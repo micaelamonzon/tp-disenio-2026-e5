@@ -49,6 +49,24 @@ public class EntregaServiceImpl {
         return toDTO(entrega);
     }
 
+    // Inicio de ruta: el chofer indica que arranca su recorrido y todas las
+    // entregas asignadas a la ruta pasan a "En traslado" (requerimiento de dominio 3).
+    // Reutiliza iniciarTraslado, así cada entrega valida su transición de estado y avisa a donaciones-service
+    // TODO: cuando esté el módulo de rutas del planificador, este método va a
+    // recibir el id de la Ruta y obtener las entregas desde sus PuntosDeEntrega
+    public List<EntregaDTO> iniciarRuta(List<Long> entregaIds, String choferId) {
+        List<EntregaDTO> resultado = new java.util.ArrayList<>();
+        for (Long entregaId : entregaIds) {
+            resultado.add(this.iniciarTraslado(entregaId, choferId));
+        }
+        // Evento "Inicio de ruta": se notifica a entidades beneficiarias y donantes
+        // de las entregas incluidas, con enlace al mapa de seguimiento
+        // TODO: destinatarios hardcodeados y link del mapa provisorio
+        String aviso = "El+camion+inicio+la+ruta.+Segui+tu+entrega+en:+http://localhost:8083/mapa";
+        notificacionesPublisher.publicar("+18777804236", aviso, "SMS");
+        return resultado;
+    }
+
     public EntregaDTO confirmarRecepcion(Long entregaId, ConfirmarRecepcionDTO body,
                                          String responsableId) {
         Entrega entrega = buscar(entregaId);
@@ -80,6 +98,15 @@ public class EntregaServiceImpl {
         for (Long donacionId : entrega.getDonacionesIds()) {
             donacionesClient.marcarEntregaFallida(donacionId, body.getMotivo(), responsableId);
         }
+
+        // Evento "Entrega no satisfactoria": se notifica a la entidad, al donante
+        // y a administradores. Se publica en la cola de RabbitMQ.
+        // TODO: destinatarios hardcodeados hasta resolver como obtener los
+        // contactos reales desde donaciones-service
+        String aviso = "Entrega+nro+" + entrega.getId() + "+no+pudo+concretarse.+Motivo:+"
+                + body.getMotivo().replace(" ", "+");
+        notificacionesPublisher.publicar("+18777804236", aviso, "SMS");
+
         return toDTO(entrega);
     }
 
