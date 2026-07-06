@@ -3,7 +3,11 @@ package ar.edu.utn.frba.ddsi.services.Impl;
 import ar.edu.utn.frba.ddsi.models.entities.DonacionesClient;
 import ar.edu.utn.frba.ddsi.dto.ConfirmarRecepcionDTO;
 import ar.edu.utn.frba.ddsi.dto.EntregaDTO;
+import ar.edu.utn.frba.ddsi.dto.EntidadContactoDTO;
+import ar.edu.utn.frba.ddsi.dto.MedioDeNotificacionDTO;
+import ar.edu.utn.frba.ddsi.dto.PersonaContactoDTO;
 import ar.edu.utn.frba.ddsi.models.entities.Entrega;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ar.edu.utn.frba.ddsi.services.NotificacionesPublisher;
 import java.util.HashMap;
@@ -19,19 +23,22 @@ public class EntregaServiceImpl {
     private final AtomicLong contador = new AtomicLong(1);
     private final DonacionesClient donacionesClient;
     private final NotificacionesPublisher notificacionesPublisher;
+    private final String adminContacto;
 
     public EntregaServiceImpl(DonacionesClient donacionesClient,
-                              NotificacionesPublisher notificacionesPublisher) {
+                              NotificacionesPublisher notificacionesPublisher,
+                              @Value("${notificaciones.admin.contacto}") String adminContacto) {
         this.donacionesClient = donacionesClient;
         this.notificacionesPublisher = notificacionesPublisher;
+        this.adminContacto = adminContacto;
     }
 
     // Adopción al nuevo modelo de Entrega: ya no recibe patente ni busca camión,
     // porque la entrega no conoce al camión (la relación quedó Camion -> Ruta ->
     // PuntoDeEntrega -> Entrega, como en el diagrama de clases).
     // Ahora recibe una lista de donaciones en vez de una sola
-    public EntregaDTO crearEntrega(List<Long> donacionesIds, Long entidadId) {
-        Entrega entrega = new Entrega(donacionesIds, entidadId);
+    public EntregaDTO crearEntrega(List<Long> donacionesIds, Long entidadId, Long donanteId) {
+        Entrega entrega = new Entrega(donacionesIds, entidadId, donanteId);
         Long id = contador.getAndIncrement();
         entrega.setId(id);
         entregas.put(id, entrega);
@@ -59,11 +66,12 @@ public class EntregaServiceImpl {
         for (Long entregaId : entregaIds) {
             resultado.add(this.iniciarTraslado(entregaId, choferId));
         }
-        // Evento "Inicio de ruta": se notifica a entidades beneficiarias y donantes
-        // de las entregas incluidas, con enlace al mapa de seguimiento
-        // TODO: destinatarios hardcodeados y link del mapa provisorio
-        String aviso = "El+camion+inicio+la+ruta.+Segui+tu+entrega+en:+http://localhost:8083/mapa";
-        notificacionesPublisher.publicar("+18777804236", aviso, "SMS");
+        // Notificacion de inicio de ruta con enlace al seguimiento del camion
+        String aviso = "El+camion+inicio+la+ruta.+Segui+tu+entrega+en:+"
+                + "http://localhost:8083/logistica-service/camiones/monitoreo/ruta/camion/1/recorrido";
+        for (Long entregaId : entregaIds) {
+            notificarInteresados(buscar(entregaId), aviso);
+        }
         return resultado;
     }
 
@@ -76,16 +84,11 @@ public class EntregaServiceImpl {
             donacionesClient.confirmarEntrega(donacionId, responsableId);
         }
 
-        // Evento "Entrega realizada con éxito": se publica en la cola de RabbitMQ
-        // para que el servicio de notificaciones envíe el comprobante en forma
-        // asincrónica, como pide la entrega (integración por cola de mensajes)
-        // TODO: destinatario hardcodeado hasta resolver como obtener los medios de
-        // contacto del donante y la entidad desde donaciones-service
-        // TODO: falta el camión responsable en el comprobante, el dato saldra
-        // de la Ruta cuando se implemente iniciarRuta
+        // Comprobante de entrega para la entidad y el donante
+        // TODO: agregar el camion responsable cuando este ok el modulo de rutas
         String comprobante = "Entrega+realizada+con+exito.+Fecha:+" + entrega.getFechaEntrega()
                 + ".+Entrega+nro+" + entrega.getId();
-        notificacionesPublisher.publicar("+18777804236", comprobante, "SMS");
+        notificarInteresados(entrega, comprobante);
 
         return toDTO(entrega);
     }
@@ -99,13 +102,11 @@ public class EntregaServiceImpl {
             donacionesClient.marcarEntregaFallida(donacionId, body.getMotivo(), responsableId);
         }
 
-        // Evento "Entrega no satisfactoria": se notifica a la entidad, al donante
-        // y a administradores. Se publica en la cola de RabbitMQ.
-        // TODO: destinatarios hardcodeados hasta resolver como obtener los
-        // contactos reales desde donaciones-service
+        // Aviso de entrega no satisfactoria a entidad, donante y administradores
         String aviso = "Entrega+nro+" + entrega.getId() + "+no+pudo+concretarse.+Motivo:+"
                 + body.getMotivo().replace(" ", "+");
-        notificacionesPublisher.publicar("+18777804236", aviso, "SMS");
+        notificarInteresados(entrega, aviso);
+        notificacionesPublisher.publicar(adminContacto, aviso, "SMS");
 
         return toDTO(entrega);
     }
@@ -119,6 +120,33 @@ public class EntregaServiceImpl {
     // Eliminamos el Map de camiones y registrarCamion(): solo se usaban para
     // asociar el camión al crear la entrega, y eso ya no corresponde con el
     // nuevo modelo. Los camiones ahora se gestionan desde RepositoryCamiones
+
+    // Consulta los contactos a donaciones-service y publica la notificacion en la
+    // cola para cada interesado - si un contacto falla no se corta la operacion
+    private void notificarInteresados(Entrega entrega, String mensaje) {
+        try {
+            EntidadContactoDTO entidad = donacionesClient.obtenerEntidad(entrega.getEntidadBeneficiariaId());
+            if (entidad != null && entidad.representantes() != null
+                    && !entidad.representantes().isEmpty()
+                    && !entidad.representantes().get(0).mediosDeNotificacion().isEmpty()) {
+                MedioDeNotificacionDTO medio = entidad.representantes().get(0).mediosDeNotificacion().get(0);
+                notificacionesPublisher.publicar(medio.datoDeContacto(), mensaje, medio.tipoDeNotificacion());
+            }
+        } catch (Exception e) {
+            System.out.println("No se pudo notificar a la entidad: " + e.getMessage());
+        }
+        if (entrega.getDonanteId() != null) {
+            try {
+                PersonaContactoDTO donante = donacionesClient.obtenerDonanteHumano(entrega.getDonanteId());
+                if (donante != null && donante.medioDeNotificacionPredeterminado() != null) {
+                    MedioDeNotificacionDTO medio = donante.medioDeNotificacionPredeterminado();
+                    notificacionesPublisher.publicar(medio.datoDeContacto(), mensaje, medio.tipoDeNotificacion());
+                }
+            } catch (Exception e) {
+                System.out.println("No se pudo notificar al donante: " + e.getMessage());
+            }
+        }
+    }
 
     private Entrega buscar(Long id) {
         Entrega e = entregas.get(id);

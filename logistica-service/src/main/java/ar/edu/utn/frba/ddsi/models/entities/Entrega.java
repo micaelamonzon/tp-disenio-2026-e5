@@ -10,6 +10,7 @@ public class Entrega {
     private Long id;
     private List<Long> donacionesIds; // referencia a donaciones segementadas, de donaciones-service
     private Long entidadBeneficiariaId;
+    private Long donanteId; // referencia al donante, de donaciones-service
     private EstadoEntrega estadoActual;
     private LocalDateTime fechaEntrega;
     private List<String> fotosUrl = new ArrayList<>(); // URLs de fotos de recepción
@@ -21,9 +22,10 @@ public class Entrega {
     private String volumenM3;
 
 
-    public Entrega(List<Long> donacionesIds, Long entidadBeneficiariaId) {
+    public Entrega(List<Long> donacionesIds, Long entidadBeneficiariaId, Long donanteId) {
         this.entidadBeneficiariaId = entidadBeneficiariaId;
         this.donacionesIds = donacionesIds;
+        this.donanteId = donanteId;
         this.estadoActual = EstadoEntrega.PENDIENTE;
         this.fechaEntrega = LocalDateTime.now();
     }
@@ -38,6 +40,7 @@ public class Entrega {
     public void confirmarRecepcion(List<String> fotos) {
         estadoActual.validarTransicion(EstadoEntrega.ENTREGADA);
         this.fotosUrl = fotos;
+        this.fechaEntrega = LocalDateTime.now();
         this.estadoActual = EstadoEntrega.ENTREGADA;
     }
 
