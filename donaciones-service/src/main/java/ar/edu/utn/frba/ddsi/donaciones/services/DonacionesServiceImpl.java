@@ -3,7 +3,6 @@ import ar.edu.utn.frba.ddsi.donaciones.config.NotificacionesProperties;
 import ar.edu.utn.frba.ddsi.donaciones.dto.BienDTO;
 import ar.edu.utn.frba.ddsi.donaciones.dto.CategoriaDTO;
 import ar.edu.utn.frba.ddsi.donaciones.dto.DonacionSinSegmentarDTO;
-import ar.edu.utn.frba.ddsi.donaciones.dto.MisionDTO;
 import ar.edu.utn.frba.ddsi.donaciones.dto.PersonaDonanteDTO;
 import ar.edu.utn.frba.ddsi.donaciones.dto.PersonaHumanaDTO;
 import ar.edu.utn.frba.ddsi.donaciones.dto.PersonaJuridicaDTO;

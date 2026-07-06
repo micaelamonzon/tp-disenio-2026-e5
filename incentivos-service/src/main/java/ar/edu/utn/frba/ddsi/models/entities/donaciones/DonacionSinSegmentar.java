@@ -12,17 +12,13 @@ public class DonacionSinSegmentar {
     private List<Bien> bienes;
     private LocalDateTime fechaDeIngreso;
     private Boolean donacionEntregada;
-    private Long organizacionId;
+    private Long entidadBeneficiariaId;
 
-    public DonacionSinSegmentar(List<Bien> bienes,LocalDateTime fechaDeIngreso,Boolean donacionEntregada,Long organizacionId){
+    public DonacionSinSegmentar(List<Bien> bienes,LocalDateTime fechaDeIngreso,Boolean donacionEntregada,Long entidadBeneficiariaId){
         this.bienes = bienes;
         this.fechaDeIngreso = fechaDeIngreso;
         this.donacionEntregada = donacionEntregada;
-        this.organizacionId = organizacionId;
+        this.entidadBeneficiariaId = entidadBeneficiariaId;
     }
-    public void agregarBien(Bien bien){
-        this.bienes.add(bien);
-    }
-
 
 }

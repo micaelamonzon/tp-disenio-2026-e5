@@ -27,7 +27,6 @@ public class Racha extends Mision{
         // pedirle al servicio de donaciones,
         // todas las donaciones de la persona donante y que se hayan hecho durante los x meses consecutivos
 
-        this.setProgreso(0);
         //por lo menos una donacion tiene que haber sido donada al mes siguiente
         int mesI = this.mesInicial;
         int mesF = this.mesFinal;
@@ -36,12 +35,18 @@ public class Racha extends Mision{
             int finalMesI = mesI;
             boolean cumple = donaciones.stream().map(DonacionSinSegmentar::getFechaDeIngreso).
                     anyMatch( f ->  f.getMonthValue() == finalMesI);
-            if(!cumple){
-                int distanciaRestante = 100 - this.getProgreso();
+
+            if(cumple){
+                Integer progreso = (int)Math.min(1 / meses, 1.0);
+                Integer progresoActual = progreso * 100;
+                this.setProgreso(progresoActual);
+
+                Integer distanciaRestante = meses - this.getProgreso();
                 this.setDistanciaDelObjetivo(Math.max(0, distanciaRestante));
-                this.bajarProgreso();
-            }else {
-                this.subirProgreso();
+            }else{
+                Integer progreso = (int)Math.min(1.0/ meses, 1.0);
+                Integer progresoActual = progreso * 100;
+                this.setProgreso(getProgreso() - progresoActual);
             }
             mesI += 1;
         }
@@ -55,10 +60,5 @@ public class Racha extends Mision{
             return Boolean.FALSE;
         }
     }
-    public void subirProgreso(){
-        super.subirProgreso(this.meses);
-    }
-    public void bajarProgreso(){
-        super.bajarProgreso(this.meses);
-    }
+
 }

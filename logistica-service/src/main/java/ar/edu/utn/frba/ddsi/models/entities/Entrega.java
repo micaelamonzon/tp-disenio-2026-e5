@@ -18,8 +18,6 @@ public class Entrega {
     private String latitud; //de la entidadBenficiaria
     private String longitud; //de la entidadBenficiaria
     private String direccion;  //de la entidadBenficiaria
-    private String pesoEnKg;
-    private String volumenM3;
 
 
     public Entrega(List<Long> donacionesIds, Long entidadBeneficiariaId, Long donanteId) {

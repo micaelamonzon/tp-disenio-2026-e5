@@ -1,9 +1,10 @@
 package ar.edu.utn.frba.ddsi.models.entities.persona;
 
-import ar.edu.utn.frba.ddsi.models.entities.categorias.CategoriaDeDonante;
+
 import ar.edu.utn.frba.ddsi.models.entities.donaciones.DonacionSinSegmentar;
 import ar.edu.utn.frba.ddsi.models.entities.misiones.EstadoDeMision;
 import ar.edu.utn.frba.ddsi.models.entities.misiones.Mision;
+import ar.edu.utn.frba.ddsi.models.entities.misiones.MisionEnCurso;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -27,16 +28,19 @@ public class Donante {
     private List<DonacionSinSegmentar> donaciones;
     private Perfil perfil;
     private List<Mision> misiones;
-    private CategoriaDeDonante categoria;
-    private String tipoDeDonante;
+    private TipoDeDonante tipoDeDonante;
+    private MedioDeNotificacion medioDeNotificacionPredeterminado;
+    private MisionEnCurso misionEnCurso;
 
-    public Donante(Long id,String cuit,String razonSocial,String nombre,String apellido,Integer edad,Integer DNI,String genero,String direccion,List<DonacionSinSegmentar> donaciones, List<Mision> misiones, CategoriaDeDonante categoria,LocalDateTime fechaDeRegistro) {
+    public Donante(Long id,String nombre,String apellido,String razonSocial, List<DonacionSinSegmentar> donaciones,LocalDateTime fechaDeRegistro, MedioDeNotificacion medioDeNotificacionPredeterminado, TipoDeDonante tipo) {
         this.id = id;
+        this.nombre = nombre;
+        this.apellido = apellido;
+        this.razonSocial = razonSocial;
         this.donaciones = donaciones;
-        this.misiones = misiones;
-        this.categoria = categoria;
         this.fechaDeRegistro = fechaDeRegistro;
-
+        this.medioDeNotificacionPredeterminado = medioDeNotificacionPredeterminado;
+        this.tipoDeDonante = tipo;
     }
 
     public void agregarMision(Mision mision) {
@@ -110,7 +114,7 @@ public class Donante {
         }
 
         return (int) this.donaciones.stream()
-                .map(DonacionSinSegmentar::getOrganizacionId)
+                .map(DonacionSinSegmentar::getEntidadBeneficiariaId)
                 .filter(java.util.Objects::nonNull)
                 .distinct()
                 .count();

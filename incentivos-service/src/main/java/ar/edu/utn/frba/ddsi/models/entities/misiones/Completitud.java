@@ -11,18 +11,19 @@ import java.util.List;
 @Data
 public class Completitud extends Mision {
 
-    private List<Categoria> categorias;
+    private Integer objetivoDeCategoriasDistintas;
 
-    public Completitud(String nombre,List<Categoria> categorias){
+
+    public Completitud(String nombre,Integer numeroDeCategoriasDistintas){
         this.setNombre(nombre);
-        this.categorias = categorias;
+        this.objetivoDeCategoriasDistintas = numeroDeCategoriasDistintas;
         setInsigniaGanadora(Insignia.COMPLETITUD);
     }
 
     //Completitud: realizar donaciones de X categorías distintas
     @Override
     public Boolean seCompletoLaMision(List<DonacionSinSegmentar> donaciones) {
-        this.setProgreso(0);
+
         List<Categoria> todasLasCategorias = donaciones.stream()
                 .flatMap(d -> d.getBienes().stream())
                 .map(bien -> bien.getSubcategoria().getCategoria())
@@ -32,25 +33,24 @@ public class Completitud extends Mision {
                 .distinct()
                 .count();
 
-        boolean todasSonDistintas = todasLasCategorias.size() == categoriasUnicas;
+        Integer progreso =(int) Math.min(categoriasUnicas / objetivoDeCategoriasDistintas, 1.0);
+        Integer progresoActual = progreso * 100;
+        this.setProgreso(progresoActual);
 
-        int distanciaRestante = 100 - this.getProgreso();
+        boolean cumple = categoriasUnicas >= objetivoDeCategoriasDistintas ;
+
+        Integer distanciaRestante = objetivoDeCategoriasDistintas - this.getProgreso();
         this.setDistanciaDelObjetivo(Math.max(0, distanciaRestante));
 
-        if (todasSonDistintas) {
+        if (cumple) {
             this.setEstadoDeMision(EstadoDeMision.COMPLETADA);
             this.setFechaCompletada(java.time.LocalDate.now());
-            this.subirProgreso(donaciones.size());
             return Boolean.TRUE;
         }
 
         this.setEstadoDeMision(EstadoDeMision.BLOQUEADA);
         return Boolean.FALSE;
 
-    }
-
-    public void subirProgreso(Integer cantDonaciones){
-       super.subirProgreso(cantDonaciones);
     }
 
 

@@ -17,9 +17,6 @@ public class repositorioEnMemoria implements IncentivosRepository {
     private final List<RankingMensual> historialRankings = new ArrayList<>();
     @Override
     public void guardarDonante(Donante donante){
-        donantes.removeIf(d -> d.getId()
-                != null && d.getId()
-                .equals(donante.getId()));
         Long id = Long.valueOf(this.donantes.size());
         donante.setId(id);
         donantes.add(donante);

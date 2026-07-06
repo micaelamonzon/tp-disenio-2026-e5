@@ -2,7 +2,6 @@ package ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante;
 
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.Bien;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.mediosDeNotificacion.MedioDeNotificacion;
-import ar.edu.utn.frba.ddsi.donaciones.models.entities.mision.Mision;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.DonacionSegmentada;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.DonacionSinSegmentar;
 import lombok.Data;
@@ -24,8 +23,7 @@ public class PersonaHumana{
     private List<MedioDeNotificacion> mediosDeNotificacion = new ArrayList<>();
     private MedioDeNotificacion medioDeNotificacionPredeterminado;
     private List<DonacionSinSegmentar> donaciones = new ArrayList<>(); //al acceder a esta donacion sabremoscuales salieron
-    private List<Mision> misiones = new ArrayList<>();
-    private CategoriaDeDonante categoria;
+
 
     public PersonaHumana(String nombre,String apellido,Integer edad,Integer numeroDeDocumento,String genero,String direccion) {
         this.nombre = nombre;
@@ -42,9 +40,6 @@ public class PersonaHumana{
         this.mediosDeNotificacion.add(unMedio);
     }
 
-    public void agregarMision(Mision mision){
-        this.misiones.add(mision);
-    }
 
     public void agregarDonacion(DonacionSinSegmentar donacion){
         this.donaciones.add(donacion);

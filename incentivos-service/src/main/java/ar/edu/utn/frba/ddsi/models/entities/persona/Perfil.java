@@ -1,11 +1,9 @@
 package ar.edu.utn.frba.ddsi.models.entities.persona;
-
-
-import ar.edu.utn.frba.ddsi.models.entities.categorias.CategoriaDeDonante;
-import ar.edu.utn.frba.ddsi.models.entities.donaciones.DonacionSinSegmentar;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ar.edu.utn.frba.ddsi.models.entities.categorias.Categoria;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,23 +15,15 @@ public class Perfil {
     List<Insignia> insignias;
     Boolean insigniaPrivada;
     String nombreDeUsuario; // lo sacamos del nombre y apellido del donante o de la razón social de la empresa
-    CategoriaDeDonante categoria;
+    Categoria categoria;
     Integer totalHistoricoPorPeriodo;
     List<MetricaMensual> evolucionMensual;
 
-    public Perfil ( String nombreDeUsuario, CategoriaDeDonante categoria) {
+    public Perfil (String nombreDeUsuario, Categoria categoria) {
         this.insignias = new ArrayList<>();
         this.insigniaPrivada = false;
         this.nombreDeUsuario = nombreDeUsuario;
         this.categoria = categoria;
-    }
-
-    public void subirDeCategoria(CategoriaDeDonante categoria, List<DonacionSinSegmentar> donaciones){
-        if(categoria.pasaSiguienteCategoria(donaciones)){
-            this.categoria = categoria;
-        }else{
-            throw new RuntimeException("Ya no podes subir de categoria, estas en la ultima categoria");
-        }
     }
 
     public void agregarInsignia(Insignia insignia){

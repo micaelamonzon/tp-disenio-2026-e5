@@ -5,9 +5,12 @@ import ar.edu.utn.frba.ddsi.models.entities.persona.Insignia;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Objects;
+
 @Data
 public class DonacionesExitosas extends Mision{
     private Integer cantidadDeDonaciones;
+    private Long entidadBeneficiariaId;
 
     public DonacionesExitosas(String nombre,Integer cantidadDeDonaciones){
         this.setNombre(nombre);
@@ -17,16 +20,19 @@ public class DonacionesExitosas extends Mision{
     //lograr X donaciones que sean recibidas exitosamente por una entidad beneficiaria.
     @Override
     public Boolean seCompletoLaMision(List<DonacionSinSegmentar> donaciones) {
-        this.setProgreso(0);
+
         int cantInicial = 0;
 
         for(int i = 0; i< donaciones.size(); i++){
-            if(donaciones.get(i).getDonacionEntregada()){
+            if(donaciones.get(i).getDonacionEntregada() && Objects.equals(entidadBeneficiariaId, donaciones.get(i).getEntidadBeneficiariaId())){
                 cantInicial ++;
-                subirProgreso(donaciones.size());
-                int distanciaRestante = 100 - this.getProgreso();
-                this.setDistanciaDelObjetivo(Math.max(0, distanciaRestante));
 
+                Integer progreso =(int) Math.min(cantInicial / cantidadDeDonaciones, 1.0);
+                Integer progresoActual = progreso * 100;
+                this.setProgreso(progresoActual);
+
+                Integer distanciaRestante = cantidadDeDonaciones - this.getProgreso();
+                this.setDistanciaDelObjetivo(Math.max(0, distanciaRestante));
             }
         }
         if(cantInicial >= cantidadDeDonaciones){
@@ -40,10 +46,4 @@ public class DonacionesExitosas extends Mision{
 
 
     }
-
-    public void subirProgreso(Integer cantDonaciones){
-        super.subirProgreso(cantDonaciones);
-    }
-
-
 }

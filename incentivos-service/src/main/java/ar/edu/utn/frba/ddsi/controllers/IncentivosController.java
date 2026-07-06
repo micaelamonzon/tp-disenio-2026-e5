@@ -20,7 +20,11 @@ public class IncentivosController {
         this.incentivosService = incentivosService;
     }
 
-
+    @GetMapping("/donantes")
+    @ResponseStatus(HttpStatus.ACCEPTED) //para devolver el 200
+    public void pedirTodosLosDonantesADonanciones(){
+        incentivosService.pedirDonantesAServiceDonaciones();
+    }
     @PostMapping("donanteHumano/mision/{id}")
     @ResponseStatus(HttpStatus.CREATED) //para devolver el 201
     public void agregarMisionADonanteHumano(@PathVariable Long id, @RequestBody MisionDTO misionDTO){
@@ -33,18 +37,18 @@ public class IncentivosController {
         incentivosService.agregarMisionADonante(id, misionDTO);
     }
 
-    //Obtención de las misiones completadas por una persona donante.
-    @GetMapping("donanteHumano/misionesCompletadas/{id}")
-    @ResponseStatus(HttpStatus.ACCEPTED) //para devolver el 200
-    public List<MisionDTO> obtenerTodasLasMisionesDeDonanteHumano(@PathVariable Long id){
-        return incentivosService.obtenerDonanteHumano(id);
-    }
-
-    @GetMapping("donanteJuridico/misionesCompletadas/{id}")
-    @ResponseStatus(HttpStatus.ACCEPTED) //para devolver el 200
-    public List<MisionDTO> obtenerTodasLasMisionesDeDonanteJuridico(@PathVariable Long id){
-        return incentivosService.obtenerDonanteJuridico(id);
-    }
+//    //Obtención de las misiones completadas por una persona donante.
+//    @GetMapping("donanteHumano/misionesCompletadas/{id}")
+//    @ResponseStatus(HttpStatus.ACCEPTED) //para devolver el 200
+//    public List<MisionDTO> obtenerTodasLasMisionesDeDonanteHumano(@PathVariable Long id){
+//        return incentivosService.obtenerDonanteHumano(id);
+//    }
+//
+//    @GetMapping("donanteJuridico/misionesCompletadas/{id}")
+//    @ResponseStatus(HttpStatus.ACCEPTED) //para devolver el 200
+//    public List<MisionDTO> obtenerTodasLasMisionesDeDonanteJuridico(@PathVariable Long id){
+//        return incentivosService.obtenerDonanteJuridico(id);
+//    }
     //Obtención de las insignias para una persona donante.
     @GetMapping("{id}/insignias")
     @ResponseStatus(HttpStatus.ACCEPTED)

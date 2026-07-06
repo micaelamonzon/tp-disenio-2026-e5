@@ -22,8 +22,8 @@ public class HabilDonador extends Mision{
 
     @Override
     public Boolean seCompletoLaMision(List<DonacionSinSegmentar> donaciones) {
+
         //donación que supere X cantidad de bienes.
-        this.setProgreso(0);
        DonacionSinSegmentar donacionQueCumple = donaciones.stream().filter(d -> d.getBienes().size() > this.cantidadDeBienes).findFirst().orElse(null);
 
            if(donacionQueCumple != null){

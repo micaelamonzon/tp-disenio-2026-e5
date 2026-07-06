@@ -1,5 +1,4 @@
 package ar.edu.utn.frba.ddsi.services.impl;
-
 import ar.edu.utn.frba.ddsi.config.NotificacionesProperties;
 import ar.edu.utn.frba.ddsi.config.RestProperties;
 import ar.edu.utn.frba.ddsi.dto.DonacionSinSegmentarDTO;
@@ -7,23 +6,16 @@ import ar.edu.utn.frba.ddsi.dto.InsigniaDTO;
 import ar.edu.utn.frba.ddsi.dto.MisionDTO;
 import ar.edu.utn.frba.ddsi.dto.PersonaDonanteDTO;
 import ar.edu.utn.frba.ddsi.exceptions.ResourceNotFoundException;
-import ar.edu.utn.frba.ddsi.models.entities.categorias.CategoriaDeDonante;
 import ar.edu.utn.frba.ddsi.dto.*;
 import ar.edu.utn.frba.ddsi.models.entities.donaciones.DonacionSinSegmentar;
-import ar.edu.utn.frba.ddsi.models.entities.misiones.Completitud;
-import ar.edu.utn.frba.ddsi.models.entities.misiones.DonacionesExitosas;
-import ar.edu.utn.frba.ddsi.models.entities.misiones.EstadoDeMision;
-import ar.edu.utn.frba.ddsi.models.entities.misiones.HabilDonador;
 import ar.edu.utn.frba.ddsi.models.entities.misiones.Mision;
 import ar.edu.utn.frba.ddsi.models.entities.misiones.Racha;
 import ar.edu.utn.frba.ddsi.models.entities.persona.*;
 import ar.edu.utn.frba.ddsi.repositories.IncentivosRepository;
 import ar.edu.utn.frba.ddsi.services.IncentivosService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import java.net.URLEncoder;
@@ -41,8 +33,8 @@ import java.util.List;
 public class IncentivosServiceImpl implements IncentivosService {
 
     private final IncentivosRepository incentivosRepository;
-    private final RestTemplate restTemplate;
-    private final RestProperties propiedades;
+    private  final RestTemplate restTemplate;
+    private  final RestProperties propiedades;
     private final InsigniaPublicadorService publicadorService;
     private RankingMensual ultimoRanking;
     private List<Donante> rankingCompletoOrdenado = new ArrayList<>();
@@ -62,79 +54,100 @@ public class IncentivosServiceImpl implements IncentivosService {
         // si no está mi id, entonces me instancia como un nuevo donante -> luego llama al servis de donaciones mandandole mi id y mi tipo (humana o juridica), para traerse las donaciones de ese id
        Mision mision  = this.convertirMisionDTO(misionDTO);
        Donante donante = incentivosRepository.buscarDonantePorId(id);
-       if(donante == null){
+       if(donante != null){
            donante.agregarMision(mision);
        }
     }
 
+    public void pedirDonantesAServiceDonaciones(){
+
+        URI uri = UriComponentsBuilder
+                .fromUriString(propiedades.getUrl())
+                .path("/obtenerDonantes")
+                .build()
+                .toUri();
+
+        ResponseEntity<PersonaDonanteDTO[]> response = restTemplate.getForEntity(uri, PersonaDonanteDTO[].class);
+        PersonaDonanteDTO[] arrayDeDonantes = response.getBody();
+
+        if (arrayDeDonantes == null || arrayDeDonantes.length == 0){
+            throw new RuntimeException("No se pudo traer a los donantes del servicio de donaciones");
+        }
+
+
+        for (PersonaDonanteDTO personaDonante : arrayDeDonantes) {
+
+            List<DonacionSinSegmentar> donaciones = this.convertirDonacionesDTO(personaDonante.donaciones());
+
+            MedioDeNotificacion medioDeNotificacionPredeterminado = this.convertirMedioDeNotificacionDTO(personaDonante.medioDeNotificacionPredeterminado());
+
+            if(personaDonante.idHumano() != null){
+                Donante nuevoDonante = new Donante(
+                                        null,
+                                        personaDonante.nombre(),
+                                        personaDonante.apellido(),
+                                        null,
+                                        donaciones,
+                                        null,
+                                        medioDeNotificacionPredeterminado,
+                                        TipoDeDonante.HUMANO);
+
+                this.incentivosRepository.guardarDonante(nuevoDonante);
+
+                String nombreDeUsuario = nuevoDonante.getNombre() + " " + nuevoDonante.getApellido();
+                nuevoDonante.setPerfil(new Perfil(nombreDeUsuario,null));
+
+            }else if(personaDonante.idJuridico() != null){
+                Donante nuevoDonante = new Donante(
+                        null,
+                        null,
+                        null,
+                        personaDonante.razonSocial(),
+                        donaciones,
+                        null,
+                        medioDeNotificacionPredeterminado,
+                        TipoDeDonante.JURIDICO);
+
+                this.incentivosRepository.guardarDonante(nuevoDonante);
+
+                String nombreDeUsuario = nuevoDonante.getRazonSocial();
+                nuevoDonante.setPerfil(new Perfil(nombreDeUsuario,null));
+            }
+        }
+    }
 
     @Override
-    public List<MisionDTO> obtenerDonanteHumano(Long id) {
+    public List<MisionDTO> obtenerMisionesCompletadas(Long id) {
 
-//        URI uri = UriComponentsBuilder.fromUriString(propiedades.getUrl()).path("/humano/obtenerDonaciones/{id}")
-//                .buildAndExpand(id)
-//                .toUri();
+        Donante donante = this.incentivosRepository.buscarDonantePorId(id);
 
-//        ResponseEntity<PersonaDonanteDTO> response = restTemplate.getForEntity(uri, PersonaDonanteDTO.class);
-//
-//        PersonaDonanteDTO personaDonante = response.getBody();
-//
-//        System.out.println("Donante recibido: " + personaDonante);
-//        System.out.println("Donaciones recibidas: " + personaDonante.donaciones().size());
-
-        List<DonacionSinSegmentar> donaciones = this.convertirDonacionesDTO(personaDonante.donaciones());
-
-
-
-        Donante nuevoDonante = new Donante(personaDonante.id(), null, null, personaDonante.nombre(), personaDonante.apellido(), personaDonante.edad(), personaDonante.DNI(), personaDonante.genero(), personaDonante.direccion(), donaciones, misiones, new CategoriaDeDonante(personaDonante.categoria()), personaDonante.fechaDeRegistro());
-
-        this.incentivosRepository.guardarDonante(nuevoDonante);
-
-        nuevoDonante.setPerfil(new Perfil(nuevoDonante.getNombre(),nuevoDonante.getCategoria()));
-
-        // Establece la categoría siguiente para poder detectar cambios de categoría
-        nuevoDonante.getCategoria().establecerCategoriaSiguiente();
-        // Fix temporal: si nombreDeCategoriaActual tiene siguiente, lo seteamos manualmente
-        if (nuevoDonante.getCategoria().getNombreDeCategoriaActual() != null &&
-                nuevoDonante.getCategoria().getNombreDeCategoriaActual().obtenerSiguiente() != null) {
-            nuevoDonante.getCategoria().setCategoriaSiguiente(
-                    new CategoriaDeDonante(nuevoDonante.getCategoria().getNombreDeCategoriaActual().obtenerSiguiente())
-            );
+        if(donante == null){
+            throw new RuntimeException("No se encontro el donante con id: " + id);
         }
 
-        //defino el tipo de mision que es
-        List<Mision> misionesDefinidas = this.definirMisiones(misiones);
-
-        if(misionesDefinidas!=null){
-            misionesDefinidas.forEach(m->nuevoDonante.getCategoria().agregarMision(m));
-        }else{
-            throw new RuntimeException("No hay misiones definidas para esta persona");
-        }
-
-        List<Mision> misionesCompletadas = nuevoDonante.getCategoria().obtenerMisionesCompletadas(nuevoDonante.getDonaciones());
-        this.agregarInsignias(nuevoDonante, misionesCompletadas);
+        List<Mision> misionesCompletadas = donante.getMisiones();
 
         // Evento 4: Notificar al donante que cumplió una misión
         if (misionesCompletadas != null && !misionesCompletadas.isEmpty()) {
             String nombreMision = misionesCompletadas.get(0).getNombre();
             // Usamos el email del donante obtenido del servicio de donaciones
-            if (personaDonante.medioDeNotificacionPredeterminado() != null) {
+            if (donante.getMedioDeNotificacionPredeterminado() != null) {
                 notificar(
-                        personaDonante.medioDeNotificacionPredeterminado().datoDeContacto(),
+                        donante.getMedioDeNotificacionPredeterminado().getDatoDeContacto(),
                         "Felicitaciones!+Completaste+la+mision+" + nombreMision,
-                        personaDonante.medioDeNotificacionPredeterminado().tipoDeNotificacion()
+                        donante.getMedioDeNotificacionPredeterminado().getDatoDeContacto()
                 );
             }
         }
 
         // Evento 5: Notificar al donante que cambió de categoría
-        if (nuevoDonante.getCategoria().pasaSiguienteCategoria(nuevoDonante.getDonaciones())) {
-            if (personaDonante.medioDeNotificacionPredeterminado() != null) {
-                String nuevaCategoria = nuevoDonante.getCategoria().getNombreDeCategoriaActual().obtenerSiguiente().name();
+        if (donante.getMisionEnCurso().pasaSiguienteCategoria(donante.getDonaciones())) {
+            if (donante.getMedioDeNotificacionPredeterminado() != null) {
+                String nuevaCategoria = donante.getMisionEnCurso().getCategoriaActual().toString();
                 notificar(
-                        personaDonante.medioDeNotificacionPredeterminado().datoDeContacto(),
+                        donante.getMedioDeNotificacionPredeterminado().getDatoDeContacto(),
                         "Subiste+de+categoria!+Ahora+sos+donante+" + nuevaCategoria,
-                        personaDonante.medioDeNotificacionPredeterminado().tipoDeNotificacion()
+                        donante.getMedioDeNotificacionPredeterminado().getTipoDeNotificacion()
                 );
             }
         }
@@ -149,55 +162,8 @@ public class IncentivosServiceImpl implements IncentivosService {
             misionesCompletadas.forEach(m->{nuevoDonante.getPerfil().agregarInsignia(m.getInsigniaGanadora());});
         }
     }
-    @Override
-    public List<MisionDTO> obtenerDonanteJuridico(Long id) {
 
-        URI uri = UriComponentsBuilder.fromUriString(propiedades.getUrl()).path("/juridica/obtenerDonaciones/{id}")
-                .buildAndExpand(id)
-                .toUri();
 
-        ResponseEntity<PersonaDonanteDTO> response = restTemplate.getForEntity(uri, PersonaDonanteDTO.class);
-
-        PersonaDonanteDTO personaDonante = response.getBody();
-
-        List<DonacionSinSegmentar> donaciones = this.convertirDonacionesDTO(personaDonante.donaciones());
-
-        List<Mision> misiones = this.convertirMisionesDTO(personaDonante.misiones());
-
-        Donante nuevoDonante = new Donante(personaDonante.id(), personaDonante.cuit(), personaDonante.razonSocial(), null, null, null, null, null, null, donaciones, misiones, new CategoriaDeDonante(personaDonante.categoria()), personaDonante.fechaDeRegistro());
-
-        this.incentivosRepository.guardarDonante(nuevoDonante);
-
-        nuevoDonante.setPerfil(new Perfil(nuevoDonante.getNombre(),nuevoDonante.getCategoria()));
-        //defino el tipo de mision que es
-        List<Mision> misionesDefinidas = this.definirMisiones(misiones);
-            if(misionesDefinidas!=null){
-                misionesDefinidas.forEach(m->nuevoDonante.getCategoria().agregarMision(m));
-            }else{
-                throw new RuntimeException("No hay misiones definidas para esta persona");
-            }
-
-        List<Mision> misionesCompletadas = nuevoDonante.getCategoria().obtenerMisionesCompletadas(nuevoDonante.getDonaciones());
-        List <MisionDTO> misionesCompletadasDTO = this.obtenerMisionDTO(misionesCompletadas);
-        this.agregarInsignias(nuevoDonante, misionesCompletadas);
-        return  misionesCompletadasDTO;
-    }
-
-    List<Mision> definirMisiones( List<Mision>  misionesSinDefinir){
-        return misionesSinDefinir.stream().map(m -> {
-            if(m.getNombre().equals("Racha")){
-                return new Racha(m.getNombre(),2, 2, 3);
-            } else if (m.getNombre().equals("HabilDonador")) {
-                return new HabilDonador(m.getNombre(), 10);
-            } else if (m.getNombre().equals("DonacionesExitosas")) {
-                return new DonacionesExitosas(m.getNombre(), 2);
-            } else  if (m.getNombre().equals("Completitud")) {
-                return new Completitud(m.getNombre(), List.of(new Categoria("Alimentos"), new Categoria("Ropa"), new Categoria("Juguetes")));
-            }
-            return null;
-        }).toList();
-
-    }
 
     @Override
     public List<InsigniaDTO> buscarInsigniasPorId(Long id) {
@@ -216,14 +182,10 @@ public class IncentivosServiceImpl implements IncentivosService {
         if (donante == null) {
             throw new RuntimeException("No se encontro el donante con id: " + id);
         }
-        Mision misionActual = donante.getMisiones().stream().filter(m -> m.getEstadoDeMision() == EstadoDeMision.ACTUAL)
-                .findFirst()
-                .orElse(null);
-        if (misionActual == null) {
-            throw new RuntimeException("No se encontro una mision actual para el donante con id: " + id);
-        }
-        MisionDTO misionActualDTO = new MisionDTO(misionActual.getNombre(), misionActual.getEstadoDeMision(), misionActual.getFechaCompletada());
 
+        MisionDTO misionActualDTO = new MisionDTO(donante.getMisionEnCurso().getMisionActual().getNombre(),
+                                                    donante.getMisionEnCurso().getMisionActual().getEstadoDeMision(),
+                                                    donante.getMisionEnCurso().getCategoriaActual());
         return misionActualDTO;
     }
 
@@ -273,19 +235,40 @@ public class IncentivosServiceImpl implements IncentivosService {
         YearMonth mesPasado = YearMonth.now().minusMonths(1);
 
         List<Donante> donantes = Arrays.stream(array).map(dto -> {
-            List<Mision> misionesLocales = dto.misiones().stream()
-                    .map(misionDTO -> {
-                        Mision m = new Mision(misionDTO.nombre(), misionDTO.estado());
-                        m.setFechaCompletada(misionDTO.fechaCompletada());
-                        return m;
-                    }).toList();
 
-            return new Donante(
-                    dto.id(), null, null,
-                    dto.nombre(), dto.apellido(),
-                    null, null, null, null,
-                    null, misionesLocales, null, null
-            );
+            List<DonacionSinSegmentar> donaciones = this.convertirDonacionesDTO(dto.donaciones());
+
+            MedioDeNotificacion medioDeNotificacionPredeterminado = this.convertirMedioDeNotificacionDTO(dto.medioDeNotificacionPredeterminado());
+
+            if(dto.idHumano() != null){
+
+                Donante nuevoDonante = new Donante(
+                        null,
+                        dto.nombre(),
+                        dto.apellido(),
+                        null,
+                        donaciones,
+                       null,
+                        medioDeNotificacionPredeterminado,
+                        TipoDeDonante.HUMANO);
+
+                return nuevoDonante;
+
+            }else if(dto.idJuridico() != null){
+                Donante nuevoDonante = new Donante(
+                        null,
+                        null,
+                        null,
+                        dto.razonSocial(),
+                        donaciones,
+                        null,
+                        medioDeNotificacionPredeterminado,
+                        TipoDeDonante.JURIDICO);
+
+                return nuevoDonante;
+            }
+
+            return null;
         }).toList();
 
         this.rankingCompletoOrdenado = donantes.stream()
@@ -350,7 +333,9 @@ public class IncentivosServiceImpl implements IncentivosService {
     }
 
     public List<MisionDTO> obtenerMisionDTO(List<Mision> misiones) {
-        return misiones.stream().map(m -> new MisionDTO(m.getNombre(), m.getEstadoDeMision(), m.getFechaCompletada())).toList();
+        List<MisionDTO> misionesDTO = new ArrayList<>();
+        misiones.forEach(m -> misionesDTO.add(new MisionDTO(m.getNombre(), m.getEstadoDeMision(), m.getCategoria())));
+        return misionesDTO;
     }
 
     public List<InsigniaDTO> obtenerInsigniasDTO(Donante donante) {
@@ -363,15 +348,22 @@ public class IncentivosServiceImpl implements IncentivosService {
         return mision;
     }
 
+    public MedioDeNotificacion convertirMedioDeNotificacionDTO(MedioDeNotificacionDTO medioDeNotificacionPredeterminadoDTO){
+
+        MedioDeNotificacion medioDeNotificacionPredeterminado = new MedioDeNotificacion(medioDeNotificacionPredeterminadoDTO.tipoDeNotificacion(), medioDeNotificacionPredeterminadoDTO.datoDeContacto());
+
+        return medioDeNotificacionPredeterminado;
+    }
+
     @Override
     public MetricasImpactoDTO obtenerMetricasDeImpacto(Long idDonante) {
 
         Donante donante = incentivosRepository.buscarDonantePorId(idDonante);
-
-        if (donante == null) {
-            obtenerDonanteHumano(idDonante);
-            donante = incentivosRepository.buscarDonantePorId(idDonante);
-        }
+//
+//        if (donante == null) {
+//            obtenerDonanteHumano(idDonante);
+//            donante = incentivosRepository.buscarDonantePorId(idDonante);
+//        }
 
         if (donante == null) {
             throw new RuntimeException("Donante no encontrado: " + idDonante);
@@ -408,14 +400,14 @@ public class IncentivosServiceImpl implements IncentivosService {
     @Override
     public String procesarLogro(Long id, Insignia insignia, boolean esHumana) {
         Donante donante = incentivosRepository.buscarDonantePorId(id);
-        if (donante == null) {
-            if (esHumana) {
-                obtenerDonanteHumano(id);
-            } else {
-                obtenerDonanteJuridico(id);
-            }
-            donante = incentivosRepository.buscarDonantePorId(id);
-        }
+//        if (donante == null) {
+//            if (esHumana) {
+//                obtenerDonanteHumano(id);
+//            } else {
+//                obtenerDonanteJuridico(id);
+//            }
+//            donante = incentivosRepository.buscarDonantePorId(id);
+//        }
 
         String nombre = donante.getNombre() != null
                 ? donante.getNombre() + " " + donante.getApellido()

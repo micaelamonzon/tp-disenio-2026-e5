@@ -9,13 +9,13 @@ import java.util.List;
 public interface IncentivosService {
 
 
-    public List<MisionDTO> obtenerDonanteHumano(Long id);
-    public List<MisionDTO> obtenerDonanteJuridico(Long id);
+
     public List<InsigniaDTO> buscarInsigniasPorId(Long id);
     public void agregarMisionADonante(Long id, MisionDTO misionesDTO);
     public MisionDTO buscarMisionActualPorId(Long id);
-
+    public void pedirDonantesAServiceDonaciones();
     public String publicarYDifundirInsignia(Long idPersona, Insignia insignia);
+    public List<MisionDTO> obtenerMisionesCompletadas(Long id);
 
     RankingMensual obtenerUltimoRanking();
     void calcularYGuardarRanking();
