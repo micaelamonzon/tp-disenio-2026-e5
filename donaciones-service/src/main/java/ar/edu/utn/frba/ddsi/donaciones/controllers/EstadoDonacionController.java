@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/servicioDeDonaciones")
 public class EstadoDonacionController {
@@ -103,4 +105,13 @@ public class EstadoDonacionController {
             return ResponseEntity.badRequest().build();
         }
     }
+
+    //Para que logística pueda consultar donaciones según estado
+    @GetMapping("/donaciones")
+    public ResponseEntity<List<DonacionSegmentada>> buscarPorEstado(@RequestParam String estado) {
+        List<DonacionSegmentada> encontradas = estadoDonacionService.findByEstado(estado);
+        return ResponseEntity.ok(encontradas);
+    }
+
+
 }

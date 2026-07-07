@@ -1,20 +1,19 @@
 package ar.edu.utn.frba.ddsi.services.Impl;
 
 import ar.edu.utn.frba.ddsi.config.LogisticaProperties;
-import ar.edu.utn.frba.ddsi.config.N8NProperties;
 import ar.edu.utn.frba.ddsi.dto.*;
 import ar.edu.utn.frba.ddsi.models.entities.Camion;
-import ar.edu.utn.frba.ddsi.models.entities.Entrega;
+import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+@Service
 public class PlanificacionRutas {
 
     private static final int MAXIMO_DONACIONES = 100;
@@ -66,8 +65,8 @@ public class PlanificacionRutas {
         return new DeliveryDTO(
                 donacion.codigo(),
                 entidadBeneficiaria.latitud(),
-                entidadBeneficiaria().longitud(),
-                entidadBeneficiaria().direccion(),
+                entidadBeneficiaria.longitud(),
+                entidadBeneficiaria.direccion(),
                 donacion.pesoKg(),
                 donacion.volumenM3()
         );

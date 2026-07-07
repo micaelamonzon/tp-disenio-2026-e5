@@ -1,19 +1,27 @@
 package ar.edu.utn.frba.ddsi.models.entities;
 
+import ar.edu.utn.frba.ddsi.dto.DonacionDTO;
+
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import ar.edu.utn.frba.ddsi.dto.EntidadContactoDTO;
 import ar.edu.utn.frba.ddsi.dto.PersonaContactoDTO;
+
+import java.util.Arrays;
+import java.util.List;
 
 @Component
 public class DonacionesClient {
 
     private final RestTemplate restTemplate;
     private final String donacionesUrl;
+    private final String BASE_URL = "http://localhost:8081/servicioDeDonaciones"; //TODO ver cual es el puerto
 
     public DonacionesClient(RestTemplate restTemplate,
-                            @Value("${donaciones.service.url}") String donacionesUrl) {
+                            @Value("${donaciones.service.url}") String donacionesUrl){
         this.restTemplate = restTemplate;
         this.donacionesUrl = donacionesUrl;
     }
@@ -56,5 +64,16 @@ public class DonacionesClient {
     public PersonaContactoDTO obtenerDonanteHumano(Long donanteId) {
         String url = donacionesUrl + "/servicioDeDonaciones/humano/" + donanteId;
         return restTemplate.getForObject(url, PersonaContactoDTO.class);
+    }
+
+    public List<DonacionDTO> obtenerDonacionesAsignadas() {
+        String url = BASE_URL + "/donaciones?estado=ASIGNACION_REALIZADA";
+        DonacionDTO[] response = restTemplate.getForObject(url, DonacionDTO[].class);
+        return response != null ? Arrays.asList(response) : List.of();
+    }
+
+    public void marcarComoListaParaEntregar(Long donacionId) {
+        String url = BASE_URL + "/donacion/" + donacionId + "/listaParaEntregar?responsableId=SISTEMA_LOGISTICA";
+        restTemplate.exchange(url, HttpMethod.PATCH, HttpEntity.EMPTY, Void.class);
     }
 }
