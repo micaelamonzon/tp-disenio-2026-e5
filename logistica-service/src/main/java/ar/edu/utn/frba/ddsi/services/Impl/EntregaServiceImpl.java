@@ -33,10 +33,6 @@ public class EntregaServiceImpl {
         this.adminContacto = adminContacto;
     }
 
-    // Adopción al nuevo modelo de Entrega: ya no recibe patente ni busca camión,
-    // porque la entrega no conoce al camión (la relación quedó Camion -> Ruta ->
-    // PuntoDeEntrega -> Entrega, como en el diagrama de clases).
-    // Ahora recibe una lista de donaciones en vez de una sola
     public EntregaDTO crearEntrega(List<Long> donacionesIds, Long entidadId, Long donanteId) {
         Entrega entrega = new Entrega(donacionesIds, entidadId, donanteId);
         Long id = contador.getAndIncrement();
@@ -56,11 +52,7 @@ public class EntregaServiceImpl {
         return toDTO(entrega);
     }
 
-    // Inicio de ruta: el chofer indica que arranca su recorrido y todas las
-    // entregas asignadas a la ruta pasan a "En traslado" (requerimiento de dominio 3).
-    // Reutiliza iniciarTraslado, así cada entrega valida su transición de estado y avisa a donaciones-service
-    // TODO: cuando esté el módulo de rutas del planificador, este método va a
-    // recibir el id de la Ruta y obtener las entregas desde sus PuntosDeEntrega
+    // Este método va a recibir el id de la Ruta y obtener las entregas desde sus PuntosDeEntrega
     public List<EntregaDTO> iniciarRuta(List<Long> entregaIds, String choferId) {
         List<EntregaDTO> resultado = new java.util.ArrayList<>();
         for (Long entregaId : entregaIds) {
@@ -85,7 +77,7 @@ public class EntregaServiceImpl {
         }
 
         // Comprobante de entrega para la entidad y el donante
-        // TODO: agregar el camion responsable cuando este ok el modulo de rutas
+        // Agregar el camion responsable
         String comprobante = "Entrega+realizada+con+exito.+Fecha:+" + entrega.getFechaEntrega()
                 + ".+Entrega+nro+" + entrega.getId();
         notificarInteresados(entrega, comprobante);
