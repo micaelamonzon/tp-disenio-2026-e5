@@ -61,19 +61,20 @@ public class PlanificacionRutas {
         restTemplate.postForObject(uri,solicitud,String.class);
     }
 
-    private DeliveryDTO convertirADelivery(DonacionDTO donacion, EntidadBeneficiariaDTO entidadBeneficiaria){
+    private DeliveryDTO convertirADelivery(DonacionDTO donacion){
         return new DeliveryDTO(
                 donacion.codigo(),
-                entidadBeneficiaria.latitud(),
-                entidadBeneficiaria.longitud(),
-                entidadBeneficiaria.direccion(),
                 donacion.pesoKg(),
-                donacion.volumenM3()
+                donacion.volumenM3(),
+                donacion.direccionEntidad(),
+                donacion.latitudEntidad(),
+                donacion.longitudEntidad()
         );
     }
 
     private TruckDTO convertirATruck(Camion camion) {
         return new TruckDTO(
+                null,
                 camion.getPatente(),
                 camion.getCapacidadCarga(),
                 camion.getVolumen()

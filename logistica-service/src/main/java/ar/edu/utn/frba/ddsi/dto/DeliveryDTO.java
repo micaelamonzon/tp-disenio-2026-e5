@@ -1,7 +1,7 @@
 package ar.edu.utn.frba.ddsi.dto;
 
 public record DeliveryDTO(
-        String deliveryCode,
+        Integer deliveryCode,
         Double latitude,
         Double longitude,
         String address,

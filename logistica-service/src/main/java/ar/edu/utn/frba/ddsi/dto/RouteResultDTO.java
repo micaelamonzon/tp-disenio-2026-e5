@@ -7,8 +7,8 @@ public record RouteResultDTO (
         String assignedRouteId,
         String estimatedStartTime,
         String estimatedEndTime,
-        double totalDistance,
-        double totalDurationMins,
+        Double totalDistanceKm,
+        Integer totalDurationMins,
         List<StopDTO> stops
 
 ) {
