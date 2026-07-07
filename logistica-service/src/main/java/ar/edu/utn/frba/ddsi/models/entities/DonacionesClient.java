@@ -47,9 +47,8 @@ public class DonacionesClient {
     public void marcarEntregaFallida(Long donacionId, String motivo, String responsableId) {
         String url = donacionesUrl + "/servicioDeDonaciones/donacion/"
                 + donacionId + "/fallarEntrega?responsableId=" + responsableId;
-        // El endpoint de donaciones espera la justificación en el body
-        // (CambioEstadoRequestDTO con campo "justificacion")
-        java.util.Map<String, String> body = java.util.Map.of("justificacion", motivo);
+        String motivoSeguro = motivo != null ? motivo : "Sin motivo especificado";
+        java.util.Map<String, String> body = java.util.Map.of("justificacion", motivoSeguro);
         restTemplate.patchForObject(url, body, String.class);
     }
 
