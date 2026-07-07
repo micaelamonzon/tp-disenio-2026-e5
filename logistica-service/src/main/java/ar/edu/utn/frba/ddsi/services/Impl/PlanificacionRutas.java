@@ -88,4 +88,15 @@ public class PlanificacionRutas {
         }
         return lotes;
     }
+
+    //Método para el GET por ID
+    public PlanningResultDTO obtenerPlanificacionPorId(String planId) {
+        String urlCompleta = properties.getUrlPlanificador() + "/" + planId;
+
+        try {
+            return restTemplate.getForObject(urlCompleta, PlanningResultDTO.class);
+        } catch (Exception e) {
+            throw new RuntimeException("Error al consultar la planificación " + planId + " en la API externa", e);
+        }
+    }
 }
