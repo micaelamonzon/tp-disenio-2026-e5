@@ -3,6 +3,7 @@ package ar.edu.utn.frba.ddsi.services.Impl;
 import ar.edu.utn.frba.ddsi.dto.DonacionDTO;
 import ar.edu.utn.frba.ddsi.models.entities.Camion;
 import ar.edu.utn.frba.ddsi.models.entities.DonacionesClient;
+import ar.edu.utn.frba.ddsi.services.CamionService;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 

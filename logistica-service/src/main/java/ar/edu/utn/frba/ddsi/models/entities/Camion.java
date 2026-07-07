@@ -18,7 +18,10 @@ public class Camion {
     private List<Posicion> posiciones;
     Boolean disponible;
 
-    public void Camion(String patente, Double volumen, Double altura, Double capacidadCarga, Boolean disponible){
+    public Camion() {
+    }
+
+    public Camion(String patente, Double volumen, Double altura, Double capacidadCarga, Boolean disponible){
         this.patente = patente;
         this.volumen = volumen;
         this.altura = altura;
