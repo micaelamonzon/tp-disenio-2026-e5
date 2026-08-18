@@ -33,7 +33,6 @@ public class MonitoreoServiceImpl implements MonitoreoService {
 
     }
 
-
     @Override
     public List<PosicionDTO> obtenerRecorrido(Long idCamion){
         Camion camion = this.repositoryCamiones.findById(idCamion);
@@ -42,6 +41,7 @@ public class MonitoreoServiceImpl implements MonitoreoService {
 
         return posicionesDTO;
     }
+
     public PosicionDTO mapPoscionDTO(Posicion posicion){
         PosicionDTO posicionDTO = new PosicionDTO(posicion.getLatitud(), posicion.getLongitud());
 
