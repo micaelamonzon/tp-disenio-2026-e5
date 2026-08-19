@@ -10,4 +10,5 @@ import org.springframework.stereotype.Component;
 public class LogisticaProperties {
     private String urlPlanificador;
     private String clientSecret;
+    private String callbackUrl;
 }

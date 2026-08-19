@@ -3,7 +3,9 @@ package ar.edu.utn.frba.ddsi.services.Impl;
 import ar.edu.utn.frba.ddsi.config.LogisticaProperties;
 import ar.edu.utn.frba.ddsi.dto.*;
 import ar.edu.utn.frba.ddsi.models.entities.Camion;
-import org.springframework.stereotype.Service;
+import ar.edu.utn.frba.ddsi.models.entities.SolicitudPlanificacion;
+import ar.edu.utn.frba.ddsi.repository.impl.SolicitudPlanificacionRepository;
+import jakarta.persistence.*;import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -21,22 +23,28 @@ public class PlanificacionRutas {
     private static final double WAREHOUSE_LAT = -34.3556;
     private static final double WAREHOUSE_LON = -58.42015;
 
+    private  final SolicitudPlanificacionRepository solicitudRepository;
     private final RestTemplate restTemplate;
     private final LogisticaProperties properties;
+    private final SolicitudPlanificacionServiceImpl servicePlani;
 
-    public PlanificacionRutas(RestTemplate restTemplate, LogisticaProperties properties){
+    public PlanificacionRutas(RestTemplate restTemplate, LogisticaProperties properties, SolicitudPlanificacionRepository solicitudRepository, SolicitudPlanificacionServiceImpl servicePlani) {
         this.restTemplate = restTemplate;
         this.properties = properties;
+        this.solicitudRepository = solicitudRepository;
+        this.servicePlani = servicePlani;
     }
 
-    public void solicitarPlanificacion(List<Camion> camiones, List<DonacionDTO> donaciones){
+    public void solicitarPlanificacion(List<Camion> camiones, List<DonacionDTO> donaciones) {
         List<List<DonacionDTO>> lotes = dividirEnLotes(donaciones, MAXIMO_DONACIONES);
 
-        lotes.forEach(lote -> enviarLote(lote,camiones));
+        lotes.forEach(lote -> enviarLote(lote, camiones));
     }
 
-    private void enviarLote(List<DonacionDTO> lote, List<Camion>camiones){
+    private void enviarLote(List<DonacionDTO> lote, List<Camion> camiones) {
         String requestId = UUID.randomUUID().toString();
+
+        solicitudRepository.save(new SolicitudPlanificacion(requestId));
 
         LocalDateTime mañana = LocalDateTime.now().plusDays(1)
                 .withHour(9).withMinute(0).withSecond(0);
@@ -48,9 +56,10 @@ public class PlanificacionRutas {
                         mañana.toString() + "Z",
                         fin.toString() + "Z"
                 ),
-                new WarehouseDTO(WAREHOUSE_LAT,WAREHOUSE_LON,WAREHOUSE_ADRESS),
+                new WarehouseDTO(WAREHOUSE_LAT, WAREHOUSE_LON, WAREHOUSE_ADRESS),
                 lote.stream().map(this::convertirADelivery).toList(),
-                camiones.stream().map(this::convertirATruck).toList()
+                camiones.stream().map(this::convertirATruck).toList(),
+                properties.getCallbackUrl()
         );
 
         URI uri = UriComponentsBuilder
@@ -58,10 +67,12 @@ public class PlanificacionRutas {
                 .build()
                 .toUri();
 
-        restTemplate.postForObject(uri,solicitud,String.class);
+        servicePlani.registrarSolicitud(requestId);
+
+        restTemplate.postForObject(uri, solicitud, String.class);
     }
 
-    private DeliveryDTO convertirADelivery(DonacionDTO donacion){
+    private DeliveryDTO convertirADelivery(DonacionDTO donacion) {
         return new DeliveryDTO(
                 donacion.codigo(),
                 donacion.pesoKg(),
@@ -81,23 +92,12 @@ public class PlanificacionRutas {
         );
     }
 
-    private List<List< DonacionDTO>> dividirEnLotes(List<DonacionDTO> donaciones, int tamañoLote){
+    private List<List<DonacionDTO>> dividirEnLotes(List<DonacionDTO> donaciones, int tamañoLote) {
         List<List<DonacionDTO>> lotes = new ArrayList<>();
-        for(int i=0; i < donaciones.size(); i += tamañoLote){
+        for (int i = 0; i < donaciones.size(); i += tamañoLote) {
             lotes.add(donaciones.subList(i,
                     Math.min(i + tamañoLote, donaciones.size())));
         }
         return lotes;
-    }
-
-    //Método para el GET por ID
-    public PlanningResultDTO obtenerPlanificacionPorId(String planId) {
-        String urlCompleta = properties.getUrlPlanificador() + "/" + planId;
-
-        try {
-            return restTemplate.getForObject(urlCompleta, PlanningResultDTO.class);
-        } catch (Exception e) {
-            throw new RuntimeException("Error al consultar la planificación " + planId + " en la API externa", e);
-        }
     }
 }

@@ -7,6 +7,7 @@ public record PlanRouteDTO (
         TimeWindowDTO timeWindow,
         WarehouseDTO warehouse,
         List<DeliveryDTO> deliveries,
-        List<TruckDTO> trucks
+        List<TruckDTO> trucks,
+        String callbackUrl
 ) {
 }
