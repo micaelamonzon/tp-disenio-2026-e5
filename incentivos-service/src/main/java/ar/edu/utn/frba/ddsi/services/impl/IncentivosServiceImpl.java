@@ -141,7 +141,7 @@ public class IncentivosServiceImpl implements IncentivosService {
         }
 
         // Evento 5: Notificar al donante que cambió de categoría
-        if (donante.getMisionEnCurso().pasaSiguienteCategoria(donante.getDonaciones())) {
+        if (donante.getMisionEnCurso().getCategoriaActual().pasaSiguienteCategoria(donante.getDonaciones())) {
             if (donante.getMedioDeNotificacionPredeterminado() != null) {
                 String nuevaCategoria = donante.getMisionEnCurso().getCategoriaActual().toString();
                 notificar(
@@ -164,7 +164,6 @@ public class IncentivosServiceImpl implements IncentivosService {
     }
 
 
-
     @Override
     public List<InsigniaDTO> buscarInsigniasPorId(Long id) {
         Donante donante = this.incentivosRepository.buscarDonantePorId(id);
@@ -185,7 +184,7 @@ public class IncentivosServiceImpl implements IncentivosService {
 
         MisionDTO misionActualDTO = new MisionDTO(donante.getMisionEnCurso().getMisionActual().getNombre(),
                                                     donante.getMisionEnCurso().getMisionActual().getEstadoDeMision(),
-                                                    donante.getMisionEnCurso().getCategoriaActual());
+                                                    donante.getMisionEnCurso().getCategoriaActual().getTipo());
         return misionActualDTO;
     }
 

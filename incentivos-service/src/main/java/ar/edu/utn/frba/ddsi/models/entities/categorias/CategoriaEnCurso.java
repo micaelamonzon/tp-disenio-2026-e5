@@ -2,17 +2,20 @@ package ar.edu.utn.frba.ddsi.models.entities.categorias;
 import ar.edu.utn.frba.ddsi.models.entities.donaciones.DonacionSinSegmentar;
 import ar.edu.utn.frba.ddsi.models.entities.misiones.EstadoDeMision;
 import ar.edu.utn.frba.ddsi.models.entities.misiones.Mision;
+import lombok.Data;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Data
 public class CategoriaEnCurso {
-    TipoCategoria categoria; //nombre de categoria
+    TipoCategoria tipo; //tipo de categoria
     ArrayList<Mision> misiones; //lista de misiones consecutivas a cumplir -> se llena en el servis de incentivos
     TipoCategoria categoriaSiguiente;
 
-    public CategoriaEnCurso(TipoCategoria categoria, TipoCategoria categoriaSiguiente) {
-        this.categoria = categoria;
+    public CategoriaEnCurso(TipoCategoria tipo, TipoCategoria categoriaSiguiente) {
+        this.tipo = tipo;
         this.misiones = new ArrayList<>();
         this.categoriaSiguiente = categoriaSiguiente;
     }
