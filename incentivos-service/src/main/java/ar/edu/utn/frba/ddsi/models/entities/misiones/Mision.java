@@ -1,6 +1,6 @@
 package ar.edu.utn.frba.ddsi.models.entities.misiones;
 
-import ar.edu.utn.frba.ddsi.models.entities.categorias.Categoria;
+import ar.edu.utn.frba.ddsi.models.entities.categorias.TipoCategoria;
 import ar.edu.utn.frba.ddsi.models.entities.donaciones.DonacionSinSegmentar;
 import ar.edu.utn.frba.ddsi.models.entities.persona.Insignia;
 import lombok.Data;
@@ -19,11 +19,12 @@ public class Mision {
     private EstadoDeMision estadoDeMision;
     private Insignia insigniaGanadora;
     private LocalDate fechaCompletada;
-    private Categoria categoria;
+    private TipoCategoria categoria;
 
     public Mision(String nombre, EstadoDeMision estadoDeMision) {
         this.nombre = nombre;
         this.estadoDeMision = estadoDeMision;
+        this.definirInsigniaGanadora();
     }
 
     public void definirInsigniaGanadora(){

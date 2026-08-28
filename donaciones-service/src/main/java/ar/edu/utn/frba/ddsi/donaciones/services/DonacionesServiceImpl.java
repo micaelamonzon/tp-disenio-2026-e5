@@ -12,13 +12,18 @@ import ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante.PersonaJuridica;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.Bien;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.Categoria;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.Subcategoria;
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.importadorDeCSV.ImportadorDeCSV;
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.importadorDeCSV.ResultadoImportacion;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.mediosDeNotificacion.MedioDeNotificacion;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.DonacionSinSegmentar;
 import ar.edu.utn.frba.ddsi.donaciones.repositories.DonacionesRepository;
 import ar.edu.utn.frba.ddsi.donaciones.repositories.DonantesRepository;
+import com.opencsv.exceptions.CsvValidationException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import ar.edu.utn.frba.ddsi.donaciones.dto.MedioDeNotificacionDTO;
+
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,12 +50,32 @@ public class DonacionesServiceImpl implements DonacionesService {
     }
 
     @Override
+    public void arrancarImportacionDeCSV(String file){
+        ImportadorDeCSV importador = new ImportadorDeCSV();
+        String home = System.getProperty("user.home"); /* user.home te da automáticamente C:\\Users\\<usuario-actual>*/
+        String ruta = home + file; /*file sería la ubicación exacta, ej: "\\Desktop\\donantes_import_20000_UTF8_BOM.csv"*/
+        try {
+            ResultadoImportacion resultado = importador.importarCsv(ruta); /*ruta: "C:\\Users\\Analía\\Desktop\\donantes_import_20000_UTF8_BOM.csv"*/
+            resultado.humanos.forEach(this.donantesRepository::saveHumana);
+            resultado.juridicos.forEach(this.donantesRepository::saveJuridica);
+
+        } catch (IOException | CsvValidationException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    @Override
    public List<PersonaHumanaDTO> obtenerTodosHumanos(){
         List<PersonaHumana> humanos = this.donantesRepository.findAllHumanos();
 
         return humanos.stream().map(persona -> {
 
             List<DonacionSinSegmentarDTO> donacionesDTO = this.obtenerDonacionesSinSegmentarDTO(persona.getDonaciones());
+            List<MedioDeNotificacionDTO> mediosDTO = this.obtenerMediosDTO(persona.getMediosDeNotificacion());
+            MedioDeNotificacionDTO medioDTO = null;
+            if(persona.getMedioDeNotificacionPredeterminado()!=null){
+                medioDTO = this.obtenerAMedioDTO(persona.getMedioDeNotificacionPredeterminado());
+            }
+
 
             return new PersonaHumanaDTO(
                     persona.getId(),
@@ -61,7 +86,9 @@ public class DonacionesServiceImpl implements DonacionesService {
                     persona.getEdad(),
                     persona.getDireccion(),
                     donacionesDTO,
-                    null
+                    mediosDTO,
+                    medioDTO
+
             );
 
         }).toList();
@@ -76,12 +103,15 @@ public class DonacionesServiceImpl implements DonacionesService {
         return juridicos.stream().map(persona -> {
 
             List<DonacionSinSegmentarDTO> donacionesDTO = this.obtenerDonacionesSinSegmentarDTO(persona.getDonaciones());
-
+            List<MedioDeNotificacionDTO> mediosDTO = this.obtenerMediosDTO(persona.getMediosDeNotificacion());
 
             return new PersonaJuridicaDTO(
                     persona.getId(),
                     persona.getCuit(),
                     persona.getRazonSocial(),
+                    persona.getRubro(),
+                    persona.getTipo(),
+                    mediosDTO,
                     donacionesDTO
             );
 
@@ -90,35 +120,12 @@ public class DonacionesServiceImpl implements DonacionesService {
     }
 
     @Override
-    public PersonaHumanaDTO obtenerDonacionesDeHumano(Long id) {
+    public  List<DonacionSinSegmentarDTO> obtenerDonacionesDeHumano(Long id) {
         PersonaHumana personaHumana = this.donantesRepository.humanoFindById(id);
         if (personaHumana != null) {
-            List<DonacionSinSegmentarDTO> donacionSinSegmentarDTOS = this.obtenerDonacionesSinSegmentarDTO(personaHumana.getDonaciones());
+            List<DonacionSinSegmentarDTO> donacionesSinSegmentarDTOS = this.obtenerDonacionesSinSegmentarDTO(personaHumana.getDonaciones());
 
-
-            // Mapper de entidad a DTO para el medio de notificación predeterminado
-            MedioDeNotificacionDTO medioDTO = null;
-            if (personaHumana.getMedioDeNotificacionPredeterminado() != null) {
-                medioDTO = new MedioDeNotificacionDTO(
-                        personaHumana.getMedioDeNotificacionPredeterminado().getTipoDeNotificacion(),
-                        personaHumana.getMedioDeNotificacionPredeterminado().getDatoDeContacto()
-                );
-            }
-
-        PersonaHumanaDTO personaDTO = new PersonaHumanaDTO(
-                                        personaHumana.getId(),
-                                        personaHumana.getNombre(),
-                                        personaHumana.getApellido(),
-                                        personaHumana.getNumeroDeDocumento(),
-                                        personaHumana.getGenero(),
-                                        personaHumana.getEdad(),
-                                        personaHumana.getDireccion(),
-                                        donacionSinSegmentarDTOS,
-                                        medioDTO
-                                        );
-
-            System.out.println(personaDTO);
-            return personaDTO;
+            return donacionesSinSegmentarDTOS;
 
         }
         throw new RuntimeException("Persona humana no encontrada");
@@ -131,15 +138,13 @@ public class DonacionesServiceImpl implements DonacionesService {
             throw new RuntimeException("Persona humana no encontrada");
         }
         List<DonacionSinSegmentarDTO> donacionesDTO = obtenerDonacionesSinSegmentarDTO(personaHumana.getDonaciones());
-
-
+        List<MedioDeNotificacionDTO> mediosDTO = this.obtenerMediosDTO(personaHumana.getMediosDeNotificacion());
         MedioDeNotificacionDTO medioDTO = null;
-        if (personaHumana.getMedioDeNotificacionPredeterminado() != null) {
-            medioDTO = new MedioDeNotificacionDTO(
-                    personaHumana.getMedioDeNotificacionPredeterminado().getTipoDeNotificacion(),
-                    personaHumana.getMedioDeNotificacionPredeterminado().getDatoDeContacto()
-            );
+        if(personaHumana.getMedioDeNotificacionPredeterminado()!=null){
+            medioDTO = this.obtenerAMedioDTO(personaHumana.getMedioDeNotificacionPredeterminado());
         }
+
+
         return new PersonaHumanaDTO(
                 personaHumana.getId(),
                 personaHumana.getNombre(),
@@ -149,6 +154,7 @@ public class DonacionesServiceImpl implements DonacionesService {
                 personaHumana.getEdad(),
                 personaHumana.getDireccion(),
                 donacionesDTO,
+                mediosDTO,
                 medioDTO
         );
     }
@@ -160,28 +166,26 @@ public class DonacionesServiceImpl implements DonacionesService {
             throw new RuntimeException("Persona juridica no encontrada");
         }
         List<DonacionSinSegmentarDTO> donacionesDTO = obtenerDonacionesSinSegmentarDTO(personaJuridica.getDonaciones());
+        List<MedioDeNotificacionDTO> mediosDTO = this.obtenerMediosDTO(personaJuridica.getMediosDeNotificacion());
+
         return new PersonaJuridicaDTO(
                 personaJuridica.getId(),
                 personaJuridica.getCuit(),
                 personaJuridica.getRazonSocial(),
+                personaJuridica.getRubro(),
+                personaJuridica.getTipo(),
+                mediosDTO,
                 donacionesDTO
         );
     }
 
     @Override
-    public PersonaJuridicaDTO obtenerDonacionesDeJuridico(Long id) {
+    public List<DonacionSinSegmentarDTO> obtenerDonacionesDeJuridico(Long id) {
         PersonaJuridica personaJuridica = this.donantesRepository.juridicaFindById(id);
         if (personaJuridica != null) {
             List<DonacionSinSegmentarDTO> donacionSinSegmentarDTOS = this.obtenerDonacionesSinSegmentarDTO(personaJuridica.getDonaciones());
 
-            PersonaJuridicaDTO personaDTO = new PersonaJuridicaDTO(
-                                            personaJuridica.getId(),
-                                            personaJuridica.getCuit(),
-                                            personaJuridica.getRazonSocial(),
-                                            donacionSinSegmentarDTOS
-                                            );
-
-            return personaDTO;
+            return donacionSinSegmentarDTOS;
         }
         throw new RuntimeException("Persona juridica no encontrada");
     }
@@ -201,8 +205,10 @@ public class DonacionesServiceImpl implements DonacionesService {
         List<DonacionSinSegmentar> donaciones = this.convertirDonacionesDTO(body.donaciones());
         nuevaPersona.setDonaciones(donaciones);
 
+        // Mapper de DTO a entidad para el medio de notificación predeterminado y para la lista de medios
 
-        // Mapper de DTO a entidad para el medio de notificación predeterminado
+        this.setearMediosDeNotificacion(body.mediosDeNotificacion(),nuevaPersona.getMediosDeNotificacion());
+
         if (body.medioDeNotificacionPredeterminado() != null) {
             MedioDeNotificacion medio = new MedioDeNotificacion(
                     body.medioDeNotificacionPredeterminado().tipoDeNotificacion(),
@@ -214,7 +220,8 @@ public class DonacionesServiceImpl implements DonacionesService {
 
         PersonaHumana humano= this.donantesRepository.saveHumana(nuevaPersona);
 
-        // Mapper de entidad a DTO para el medio de notificación predeterminado
+        // Mapper de entidad a DTO para el medio de notificación predeterminado y los medios
+
         MedioDeNotificacionDTO medioDTO = null;
         if (humano.getMedioDeNotificacionPredeterminado() != null) {
             medioDTO = new MedioDeNotificacionDTO(
@@ -222,6 +229,10 @@ public class DonacionesServiceImpl implements DonacionesService {
                     humano.getMedioDeNotificacionPredeterminado().getDatoDeContacto()
             );
         }
+
+        List<MedioDeNotificacionDTO> mediosDTO = this.obtenerMediosDTO(humano.getMediosDeNotificacion());
+
+
 
         List<DonacionSinSegmentarDTO> donacionesDTO = obtenerDonacionesSinSegmentarDTO(humano.getDonaciones());
         PersonaHumanaDTO nuevaPersonaDTO = new PersonaHumanaDTO(
@@ -233,6 +244,7 @@ public class DonacionesServiceImpl implements DonacionesService {
                 humano.getEdad(),
                 humano.getDireccion(),
                 donacionesDTO,
+                mediosDTO,
                 medioDTO
                 );
 
@@ -405,6 +417,10 @@ public class DonacionesServiceImpl implements DonacionesService {
         }
     }
 
+    public void setearMediosDeNotificacion(List<MedioDeNotificacionDTO> mediosDTO, List<MedioDeNotificacion> medios){
+        mediosDTO.forEach(dto -> medios.add(new MedioDeNotificacion(dto.tipoDeNotificacion(), dto.datoDeContacto())));
+
+    }
 
     public List<DonacionSinSegmentarDTO> obtenerDonacionesSinSegmentarDTO(List<DonacionSinSegmentar> donacionesSinSegmentar){
 
@@ -484,6 +500,15 @@ public class DonacionesServiceImpl implements DonacionesService {
         )).toList();
         return bienes;
     }
+
+    public List<MedioDeNotificacionDTO> obtenerMediosDTO(List<MedioDeNotificacion> mediosDeNotificacion){
+        List<MedioDeNotificacionDTO> mediosDTO = new ArrayList<>();
+        mediosDeNotificacion.forEach(m -> mediosDTO.add(this.obtenerAMedioDTO(m)));
+        return mediosDTO;
+    }
+    public MedioDeNotificacionDTO obtenerAMedioDTO(MedioDeNotificacion medio){
+        return new MedioDeNotificacionDTO(medio.getTipoDeNotificacion(), medio.getDatoDeContacto());
+    }
     public List<PersonaDonanteDTO> obtenerTodosLosDonantesUnificados() {
         List<PersonaHumana> humanas = donacionesRepository.findAllHumanos();
         List<PersonaJuridica> juridicas = donacionesRepository.findAllJuridicos();
@@ -513,7 +538,9 @@ public class DonacionesServiceImpl implements DonacionesService {
         // 1. Crear la entidad de dominio
         PersonaJuridica nuevaPersona = new PersonaJuridica(
                 request.cuit(),
-                request.razonSocial()
+                request.razonSocial(),
+                request.tipo(),
+                request.rubro()
         );
 
         if (request.donaciones() != null && !request.donaciones().isEmpty()) {
@@ -525,11 +552,15 @@ public class DonacionesServiceImpl implements DonacionesService {
 
         List<DonacionSinSegmentarDTO> donacionesDTO = obtenerDonacionesSinSegmentarDTO(
                 juridica.getDonaciones());
+        List<MedioDeNotificacionDTO> mediosDTO = obtenerMediosDTO(juridica.getMediosDeNotificacion());
 
         return new PersonaJuridicaDTO(
                 juridica.getId(),
                 juridica.getCuit(),
                 juridica.getRazonSocial(),
+                juridica.getRubro(),
+                juridica.getTipo(),
+                mediosDTO,
                 donacionesDTO
         );
     }
@@ -548,10 +579,13 @@ public class DonacionesServiceImpl implements DonacionesService {
         if (request.DNI() != null) personaHumana.setNumeroDeDocumento(request.DNI());
         if (request.genero() != null) personaHumana.setGenero(request.genero());
         if (request.direccion() != null) personaHumana.setDireccion(request.direccion());
-
+        if(request.mediosDeNotificacion() != null && !request.mediosDeNotificacion().isEmpty()){
+            this.cambiarMediosDeNotificacion(request.mediosDeNotificacion(),personaHumana.getMediosDeNotificacion());
+        }
         List<DonacionSinSegmentarDTO> donacionesDTO = obtenerDonacionesSinSegmentarDTO(
                 personaHumana.getDonaciones());
 
+        List<MedioDeNotificacionDTO> mediosDTO = this.obtenerMediosDTO(personaHumana.getMediosDeNotificacion());
 
         MedioDeNotificacionDTO medioDTO = null;
         if (personaHumana.getMedioDeNotificacionPredeterminado() != null) {
@@ -570,8 +604,18 @@ public class DonacionesServiceImpl implements DonacionesService {
                 personaHumana.getEdad(),
                 personaHumana.getDireccion(),
                 donacionesDTO,
+                mediosDTO,
                 medioDTO
         );
+    }
+
+    public void cambiarMediosDeNotificacion(List<MedioDeNotificacionDTO> nuevos, List<MedioDeNotificacion> viejos){
+        nuevos.forEach(dto -> {
+            viejos.stream()
+                    .filter(viejo -> viejo.getTipoDeNotificacion().equals(dto.tipoDeNotificacion()))
+                    .findFirst()
+                    .ifPresent(medioViejo -> medioViejo.setDatoDeContacto(dto.datoDeContacto()));
+        });
     }
     @Override
     public PersonaJuridicaDTO modificarDonanteJuridico(Long id, PersonaJuridicaDTO request) {
@@ -582,14 +626,20 @@ public class DonacionesServiceImpl implements DonacionesService {
 
         if (request.cuit() != null) personaJuridica.setCuit(request.cuit());
         if (request.razonSocial() != null) personaJuridica.setRazonSocial(request.razonSocial());
+        if (request.rubro() != null) personaJuridica.setRubro(request.rubro());
+        if (request.tipo() != null) personaJuridica.setTipo(request.tipo());
 
         List<DonacionSinSegmentarDTO> donacionesDTO = obtenerDonacionesSinSegmentarDTO(
                 personaJuridica.getDonaciones());
+        List<MedioDeNotificacionDTO> mediosDTO = this.obtenerMediosDTO(personaJuridica.getMediosDeNotificacion());
 
         return new PersonaJuridicaDTO(
                 personaJuridica.getId(),
                 personaJuridica.getCuit(),
                 personaJuridica.getRazonSocial(),
+                personaJuridica.getRubro(),
+                personaJuridica.getTipo(),
+                mediosDTO,
                 donacionesDTO
         );
     }

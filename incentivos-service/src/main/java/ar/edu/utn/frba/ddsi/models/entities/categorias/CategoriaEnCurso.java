@@ -7,13 +7,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class CategoriaEnCurso {
-    Categoria categoria; //nombre de categoria
-    List<Mision> misiones; //lista de misiones consecutivas a cumplir -> se llena en el servis de incentivos
-    Categoria categoriaSiguiente;
+    TipoCategoria categoria; //nombre de categoria
+    ArrayList<Mision> misiones; //lista de misiones consecutivas a cumplir -> se llena en el servis de incentivos
+    TipoCategoria categoriaSiguiente;
 
-    public CategoriaEnCurso(Categoria categoria,Categoria categoriaSiguiente) {
+    public CategoriaEnCurso(TipoCategoria categoria, TipoCategoria categoriaSiguiente) {
         this.categoria = categoria;
-        this.misiones = new ArrayList<>();;
+        this.misiones = new ArrayList<>();
         this.categoriaSiguiente = categoriaSiguiente;
     }
 
@@ -28,8 +28,8 @@ public class CategoriaEnCurso {
         return false;
     }
 
-    public List<Mision> obtenerMisionesCompletadas(List<DonacionSinSegmentar> donaciones){
-        return this.misiones.stream().filter( m -> m.seCompletoLaMision(donaciones) == Boolean.TRUE).collect(Collectors.toList());
+    public ArrayList<Mision> obtenerMisionesCompletadas(List<DonacionSinSegmentar> donaciones){
+        return this.misiones.stream().filter( m -> m.seCompletoLaMision(donaciones) == Boolean.TRUE).collect(Collectors.toCollection(ArrayList::new));
     }
     public void desbloquearMisiones(List<DonacionSinSegmentar> donaciones){
         for(int i = 0; i < misiones.size(); i++){

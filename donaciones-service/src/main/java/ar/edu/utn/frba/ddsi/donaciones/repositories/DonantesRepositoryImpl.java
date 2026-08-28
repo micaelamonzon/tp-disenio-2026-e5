@@ -45,6 +45,8 @@ public class DonantesRepositoryImpl implements DonantesRepository {
 
                 return donante;
             }
+
+            return null;
         }
         Long id = Long.valueOf(juridicos.size() + 1);
         donante.setId(id);
@@ -61,6 +63,8 @@ public class DonantesRepositoryImpl implements DonantesRepository {
 
                 return donante;
             }
+
+            return null;
         }
         Long id = Long.valueOf(humanos.size() + 1);
         donante.setId(id);

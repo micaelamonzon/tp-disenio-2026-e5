@@ -1,18 +1,17 @@
 package ar.edu.utn.frba.ddsi.models.entities.misiones;
 
-import ar.edu.utn.frba.ddsi.models.entities.categorias.Categoria;
+import ar.edu.utn.frba.ddsi.models.entities.categorias.TipoCategoria;
 import ar.edu.utn.frba.ddsi.models.entities.donaciones.DonacionSinSegmentar;
 import lombok.Data;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @Data
 public class MisionEnCurso {
     Mision misionActual;
-    Categoria categoriaActual;
+    TipoCategoria categoriaActual;
 
-    public MisionEnCurso( Mision misionActual, Categoria categoriaActual) {
+    public MisionEnCurso( Mision misionActual, TipoCategoria categoriaActual) {
         this.misionActual = misionActual;
         this.categoriaActual = categoriaActual;
     }
@@ -28,12 +27,12 @@ public class MisionEnCurso {
     }
 
     public void  avanzarCategoria() {
-        if (categoriaActual == Categoria.COLABORADOR) {
-            categoriaActual = Categoria.SOSTENEDOR;
-        } else if (categoriaActual == Categoria.SOSTENEDOR) {
-            categoriaActual = Categoria.TRANSFORMADOR;
-        } else if (categoriaActual == Categoria.TRANSFORMADOR) {
-            categoriaActual = Categoria.TRANSFORMADOR;
+        if (categoriaActual == TipoCategoria.COLABORADOR) {
+            categoriaActual = TipoCategoria.SOSTENEDOR;
+        } else if (categoriaActual == TipoCategoria.SOSTENEDOR) {
+            categoriaActual = TipoCategoria.TRANSFORMADOR;
+        } else if (categoriaActual == TipoCategoria.TRANSFORMADOR) {
+            categoriaActual = TipoCategoria.TRANSFORMADOR;
 
         }
     }

@@ -36,6 +36,7 @@ public class DonacionesRepositoryImpl implements DonacionesRepository{
     @Override
     public List<PersonaJuridica> findAllJuridicos(){
         return new ArrayList<>(juridicos); }
+
     public Long guardar(DonacionSegmentada donacion) {
         Long id = contador.getAndIncrement();
         donaciones.put(id, donacion);
