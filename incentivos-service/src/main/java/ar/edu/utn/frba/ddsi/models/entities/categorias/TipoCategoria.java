@@ -1,6 +1,6 @@
 package ar.edu.utn.frba.ddsi.models.entities.categorias;
 
-public enum Categoria {
+public enum TipoCategoria {
     COLABORADOR,
     SOSTENEDOR,
     TRANSFORMADOR;

@@ -24,7 +24,7 @@ public class ImportadorDeCSV{
     private ArrayList<PersonaHumana> donantesHumanos = new ArrayList<>();
     private ArrayList<PersonaJuridica> donantesJuridicos = new ArrayList<>();
 
-   public Void importarCsv(String path) throws IOException, CsvValidationException{
+   public ResultadoImportacion importarCsv(String path) throws IOException, CsvValidationException{
 
        CSVParser csvParser = new CSVParserBuilder().withSeparator(',').withIgnoreQuotations(true).build();
        CSVReader reader = new CSVReaderBuilder(new FileReader(path)).withSkipLines(1).withCSVParser(csvParser).build();
@@ -83,7 +83,10 @@ public class ImportadorDeCSV{
             }
        }
 
-       return null;
+       System.out.println("Cantidad donantes humanos " + donantesHumanos.size());
+       System.out.println("Cantidad donantes juridicos " + donantesJuridicos.size());
+       ResultadoImportacion resultado = new ResultadoImportacion(donantesHumanos,donantesJuridicos);
+       return resultado;
    }
 
     public Tipo identificarTipo(String nombreDeLaEmpresa){

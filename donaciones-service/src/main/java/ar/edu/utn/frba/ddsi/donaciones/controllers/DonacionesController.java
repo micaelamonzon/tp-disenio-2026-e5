@@ -6,6 +6,8 @@ import ar.edu.utn.frba.ddsi.donaciones.services.MatchmakingService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.util.List;
 
 @RestController
@@ -29,9 +31,15 @@ public class DonacionesController {
         return "Hola desde el servicio de Donaciones!!";
     }
 
-    @GetMapping("/obtenerDonantes")
+    @GetMapping("/donantes")
     public ResponseEntity<List<PersonaDonanteDTO>> obtenerTodosLosDonantesUnificados() {
         return ResponseEntity.ok(donacionesService.obtenerTodosLosDonantesUnificados());
+    }
+    /*ESTE ENDPOINT ES PROVISORIO, MÁS ADELANTE SERÁ REEMPLAZADO PARA QUE ADMITA UN ARCHIVO POSTA, EN VEZ DE LA RUTA*/
+    @PostMapping("/importadorCSV")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public void importadorCSV(@RequestParam("file") String file) {
+        donacionesService.arrancarImportacionDeCSV(file);
     }
     // Matching
 
@@ -57,35 +65,35 @@ public class DonacionesController {
     }
 
     // Donantes
-    @GetMapping("/obtenerDonantesJuridicos")
+    @GetMapping("donantes/juridicos")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public List<PersonaJuridicaDTO> obtenerDonantesJuridicos() {
         List<PersonaJuridicaDTO> donantesDTOS = this.donacionesService.obtenerTodosJuridicos();
         return donantesDTOS;
     }
 
-    @GetMapping("/obtenerDonantesHumanos")
+    @GetMapping("donantes/humanos")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public List<PersonaHumanaDTO> obtenerDonantesHumanos() {
         List<PersonaHumanaDTO> donantesDTOS = this.donacionesService.obtenerTodosHumanos();
         return donantesDTOS;
     }
 
-    @PostMapping("/crearDonanteHumano")
+    @PostMapping("donante/humano")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public PersonaHumanaDTO crearDonanteHumano(@RequestBody PersonaHumanaDTO request) {
         PersonaHumanaDTO personaHumanaDTO = this.donacionesService.crearDonanteHumano(request);
         return personaHumanaDTO;
     }
 
-    @PostMapping("/crearDonanteJuridico")
+    @PostMapping("/donante/juridico")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public PersonaJuridicaDTO crearDonanteJuridico(@RequestBody PersonaJuridicaDTO request) {
         PersonaJuridicaDTO personaJuridicaDTO = this.donacionesService.crearDonanteJuridico(request);
         return personaJuridicaDTO;
     }
 
-    @PutMapping("/modificarDonanteHumano/{id}")
+    @PutMapping("/donante/humano/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public PersonaHumanaDTO modificarDonanteHumano(
             @PathVariable Long id,
@@ -94,7 +102,7 @@ public class DonacionesController {
         return personaHumanaDTO;
     }
 
-    @PutMapping("/modificarDonanteJuridico/{id}")
+    @PutMapping("/donante/juridico/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public PersonaJuridicaDTO modificarDonanteJuridico(
             @PathVariable Long id,
@@ -103,36 +111,42 @@ public class DonacionesController {
         return personaJuridicaDTO;
     }
 
-    @DeleteMapping("/eliminarDonanteHumano/{id}")
+    @DeleteMapping("/donante/humano/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public void eliminarDonanteHumano(@PathVariable Long id) {
         this.donacionesService.eliminarDonanteHumano(id);
     }
 
-    @DeleteMapping("/eliminarDonanteJuridico/{id}")
+    @DeleteMapping("/donante/juridico/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public void eliminarDonanteJuridico(@PathVariable Long id) {
         this.donacionesService.eliminarDonanteJuridico(id);
     }
-    @GetMapping("/humano/{id}")
+
+    @GetMapping("donante/humano/{id}")
     public ResponseEntity<PersonaHumanaDTO> obtenerHumanoPorId(@PathVariable Long id) {
         return ResponseEntity.ok(this.donacionesService.obtenerHumanoPorId(id));
     }
-    // Donaciones
 
-    @GetMapping("/humano/obtenerDonaciones/{id}")
-    public ResponseEntity<PersonaHumanaDTO> obtenerDonacionesDeHumano(
+    @GetMapping("donante/juridico/{id}")
+    public ResponseEntity<PersonaJuridicaDTO> obtenerJuridicoPorId(@PathVariable Long id) {
+        return ResponseEntity.ok(this.donacionesService.obtenerJuridicoPorId(id));
+    }
+
+    // Donaciones
+    @GetMapping("donaciones/humano/{id}")
+    public ResponseEntity< List<DonacionSinSegmentarDTO>> obtenerDonacionesDeHumano(
             @PathVariable Long id) {
         try {
-            PersonaHumanaDTO personaDonanteDTO = this.donacionesService.obtenerDonacionesDeHumano(id);
-            return ResponseEntity.ok(personaDonanteDTO);
+         List<DonacionSinSegmentarDTO> donaciones= this.donacionesService.obtenerDonacionesDeHumano(id);
+            return ResponseEntity.ok(donaciones);
         } catch (RuntimeException e) {
             System.out.println(e.getMessage());
             return ResponseEntity.notFound().build();
         }
     }
 
-    @PostMapping("/humana/CrearDonacion/{id}")
+    @PostMapping("/humano/donacion/{id}")
     public ResponseEntity<DonacionSinSegmentarDTO> crearDonacionDeHumano(
             @RequestBody DonacionSinSegmentarDTO request,
             @PathVariable Long id) {
@@ -145,7 +159,7 @@ public class DonacionesController {
         }
     }
 
-    @PutMapping("/humana/ModificarDonacion/{idHumano}/{idDonacion}/{idBien}")
+    @PutMapping("/humano/donacion/{idHumano}/{idDonacion}/{idBien}")
     public ResponseEntity<List<DonacionSinSegmentarDTO>> modificarDonacionDeHumano(
             @RequestBody DonacionSinSegmentarDTO request,
             @PathVariable Long idHumano,
@@ -160,7 +174,7 @@ public class DonacionesController {
         }
     }
 
-    @DeleteMapping("/humana/EliminarDonacion/{idHumano}/{idDonacion}")
+    @DeleteMapping("/humano/donacion/{idHumano}/{idDonacion}")
     public ResponseEntity<List<DonacionSinSegmentarDTO>> eliminarDonacionDeHumano(
             @PathVariable Long idHumano,
             @PathVariable Long idDonacion) {
@@ -176,19 +190,19 @@ public class DonacionesController {
     }
 
 
-    @GetMapping("/juridica/obtenerDonaciones/{id}")
-    public ResponseEntity<PersonaJuridicaDTO> obtenerDonacionesDeJuridico(
+    @GetMapping("donaciones/juridica/{id}")
+    public ResponseEntity<List<DonacionSinSegmentarDTO>> obtenerDonacionesDeJuridico(
             @PathVariable Long id) {
         try {
-            PersonaJuridicaDTO personaDonanteDTO = this.donacionesService.obtenerDonacionesDeJuridico(id);
-            return ResponseEntity.ok(personaDonanteDTO);
+            List<DonacionSinSegmentarDTO>  donacionesDTO = this.donacionesService.obtenerDonacionesDeJuridico(id);
+            return ResponseEntity.ok(donacionesDTO);
         } catch (RuntimeException e) {
             System.out.println(e.getMessage());
             return ResponseEntity.notFound().build();
         }
     }
 
-    @PostMapping("/juridica/CrearDonacion/{id}")
+    @PostMapping("/juridica/donacion/{id}")
     public ResponseEntity<DonacionSinSegmentarDTO> crearDonacionDeJuridico(
             @RequestBody DonacionSinSegmentarDTO request,
             @PathVariable Long id) {
@@ -201,7 +215,7 @@ public class DonacionesController {
         }
     }
 
-    @PutMapping("/juridico/ModificarDonacion/{idJuridico}/{idDonacion}/{idBien}")
+    @PutMapping("/juridico/donacion/{idJuridico}/{idDonacion}/{idBien}")
     public ResponseEntity<List<DonacionSinSegmentarDTO>> modificarDonacionDeJuridico(
             @RequestBody DonacionSinSegmentarDTO request,
             @PathVariable Long idJuridico,
@@ -216,7 +230,7 @@ public class DonacionesController {
         }
     }
 
-    @DeleteMapping("/juridico/EliminarDonacion/{idJuridico}/{idDonacion}")
+    @DeleteMapping("/juridico/donacion/{idJuridico}/{idDonacion}")
     public ResponseEntity<List<DonacionSinSegmentarDTO>> eliminarDonacionDeJuridico(
             @PathVariable Long idJuridico,
             @PathVariable Long idDonacion) {

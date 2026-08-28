@@ -12,9 +12,10 @@ public interface DonacionesService {
     List<PersonaJuridicaDTO> obtenerTodosJuridicos();
     PersonaHumanaDTO obtenerHumanoPorId(Long id);
     PersonaJuridicaDTO obtenerJuridicoPorId(Long id);
-    PersonaHumanaDTO obtenerDonacionesDeHumano(Long id);
-    PersonaJuridicaDTO obtenerDonacionesDeJuridico(Long id);
+    List<DonacionSinSegmentarDTO>  obtenerDonacionesDeHumano(Long id);
+    List<DonacionSinSegmentarDTO>  obtenerDonacionesDeJuridico(Long id);
     PersonaHumanaDTO crearDonanteHumano(PersonaHumanaDTO body);
+    PersonaJuridicaDTO crearDonanteJuridico(PersonaJuridicaDTO request);
     DonacionSinSegmentarDTO crearDonacionDeJuridico(DonacionSinSegmentarDTO body, Long id);
     DonacionSinSegmentarDTO crearDonacionDeHumano(DonacionSinSegmentarDTO body, Long id);
     List<DonacionSinSegmentarDTO> modificarDonacionDeHumano(DonacionSinSegmentarDTO body, Long idHumano, Long idDonacion, Long idBien);
@@ -24,8 +25,10 @@ public interface DonacionesService {
     List<PersonaDonanteDTO> obtenerTodosLosDonantesUnificados();
 
     void eliminarDonanteJuridico(Long id);
-    PersonaJuridicaDTO crearDonanteJuridico(PersonaJuridicaDTO request);
     PersonaHumanaDTO modificarDonanteHumano(Long id, PersonaHumanaDTO request);
     PersonaJuridicaDTO modificarDonanteJuridico(Long id, PersonaJuridicaDTO request);
     void eliminarDonanteHumano(Long id);
+
+
+    public void arrancarImportacionDeCSV( String file);
 }
