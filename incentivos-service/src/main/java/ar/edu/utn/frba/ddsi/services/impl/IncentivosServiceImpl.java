@@ -7,15 +7,17 @@ import ar.edu.utn.frba.ddsi.dto.MisionDTO;
 import ar.edu.utn.frba.ddsi.dto.PersonaDonanteDTO;
 import ar.edu.utn.frba.ddsi.exceptions.ResourceNotFoundException;
 import ar.edu.utn.frba.ddsi.dto.*;
-import ar.edu.utn.frba.ddsi.models.entities.donaciones.DonacionSinSegmentar;
+import ar.edu.utn.frba.ddsi.models.entities.categorias.CategoriaMision;
+import ar.edu.utn.frba.ddsi.models.entities.categorias.TipoCategoria;
+import ar.edu.utn.frba.ddsi.models.entities.donaciones.DonacionSegmentada;
+import ar.edu.utn.frba.ddsi.models.entities.misiones.DonacionesExitosas;
 import ar.edu.utn.frba.ddsi.models.entities.misiones.Mision;
-import ar.edu.utn.frba.ddsi.models.entities.misiones.Racha;
+import ar.edu.utn.frba.ddsi.models.entities.misiones.MisionEnCurso;
 import ar.edu.utn.frba.ddsi.models.entities.persona.*;
 import ar.edu.utn.frba.ddsi.repositories.IncentivosRepository;
 import ar.edu.utn.frba.ddsi.services.IncentivosService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import java.net.URLEncoder;
@@ -48,22 +50,11 @@ public class IncentivosServiceImpl implements IncentivosService {
         this.notificacionesProperties = notificacionesProperties;
     }
 
-    @Override
-    public void agregarMisionADonante(Long id, MisionDTO misionDTO){
-        //Yo como donante, elijo una mision -> el servis de incentivos me toma el id y la mision, me guarda en su repo,
-        // si no está mi id, entonces me instancia como un nuevo donante -> luego llama al servis de donaciones mandandole mi id y mi tipo (humana o juridica), para traerse las donaciones de ese id
-       Mision mision  = this.convertirMisionDTO(misionDTO);
-       Donante donante = incentivosRepository.buscarDonantePorId(id);
-       if(donante != null){
-           donante.agregarMision(mision);
-       }
-    }
-
     public void pedirDonantesAServiceDonaciones(){
 
         URI uri = UriComponentsBuilder
                 .fromUriString(propiedades.getUrl())
-                .path("/obtenerDonantes")
+                .path("/donantes")
                 .build()
                 .toUri();
 
@@ -74,23 +65,22 @@ public class IncentivosServiceImpl implements IncentivosService {
             throw new RuntimeException("No se pudo traer a los donantes del servicio de donaciones");
         }
 
-
         for (PersonaDonanteDTO personaDonante : arrayDeDonantes) {
 
-            List<DonacionSinSegmentar> donaciones = this.convertirDonacionesDTO(personaDonante.donaciones());
+          List<DonacionSegmentada> donaciones = this.convertirDonacionesDTO(personaDonante.donaciones());
 
             MedioDeNotificacion medioDeNotificacionPredeterminado = this.convertirMedioDeNotificacionDTO(personaDonante.medioDeNotificacionPredeterminado());
 
             if(personaDonante.idHumano() != null){
                 Donante nuevoDonante = new Donante(
-                                        null,
-                                        personaDonante.nombre(),
-                                        personaDonante.apellido(),
-                                        null,
-                                        donaciones,
-                                        null,
-                                        medioDeNotificacionPredeterminado,
-                                        TipoDeDonante.HUMANO);
+                        personaDonante.idHumano(),
+                        personaDonante.nombre(),
+                        personaDonante.apellido(),
+                        null,
+                        null,
+                        medioDeNotificacionPredeterminado,
+                        donaciones,
+                        TipoDeDonante.HUMANO);
 
                 this.incentivosRepository.guardarDonante(nuevoDonante);
 
@@ -99,33 +89,78 @@ public class IncentivosServiceImpl implements IncentivosService {
 
             }else if(personaDonante.idJuridico() != null){
                 Donante nuevoDonante = new Donante(
-                        null,
+                        personaDonante.idJuridico(),
                         null,
                         null,
                         personaDonante.razonSocial(),
-                        donaciones,
                         null,
                         medioDeNotificacionPredeterminado,
+                        donaciones,
                         TipoDeDonante.JURIDICO);
 
                 this.incentivosRepository.guardarDonante(nuevoDonante);
 
                 String nombreDeUsuario = nuevoDonante.getRazonSocial();
                 nuevoDonante.setPerfil(new Perfil(nombreDeUsuario,null));
+
             }
         }
+
+        System.out.println("La cantidad de donantes en el service de incentivos es " + this.incentivosRepository.findAllDonantes().size());
+
+
     }
 
     @Override
-    public List<MisionDTO> obtenerMisionesCompletadas(Long id) {
+    public void agregarMisionADonante(Long id, String tipoDeDonante,String tipoCategoria, MisionDTO misionDTO){
+        //Yo como donante, elijo una mision -> el servis de incentivos me toma el id y la mision, me guarda en su repo,
+        // luego llama al servis de donaciones mandandole mi id y mi tipo (humana o juridica), para traerse las donaciones de ese id
+       Mision mision  = this.convertirMisionDTO(misionDTO);
+       CategoriaMision categoria = new CategoriaMision(TipoCategoria.valueOf(tipoCategoria), TipoCategoria.obtenerCategoriaSiguiente(tipoCategoria));
+       categoria.agregarMision(mision);
+       Donante donante = incentivosRepository.buscarDonantePorIdEnDonaciones(id,tipoDeDonante);
+       if(donante != null){
+           donante.agregarMision(mision);
+           donante.setMisionEnCurso(new MisionEnCurso(mision,categoria));
+           return;
+       }
+        throw new RuntimeException("No se encontro el donante con id: " + id + " tipo " + tipoDeDonante);
 
-        Donante donante = this.incentivosRepository.buscarDonantePorId(id);
+    }
+
+    @Override
+    public List<MisionDTO> obtenerMisionesCompletadas(Long id,String tipoDeDonante) {
+
+        Donante donante = this.incentivosRepository.buscarDonantePorIdEnDonaciones(id,tipoDeDonante);
 
         if(donante == null){
-            throw new RuntimeException("No se encontro el donante con id: " + id);
+            throw new RuntimeException("No se encontro el donante con id: " + id + " tipo " + tipoDeDonante);
         }
 
-        List<Mision> misionesCompletadas = donante.getMisiones();
+        //actualizo las donaciones que hizo recientemente el donante
+
+        if(tipoDeDonante.equals(TipoDeDonante.HUMANO.toString())){
+            URI uri = UriComponentsBuilder
+                    .fromUriString(propiedades.getUrl())
+                    .path("/donaciones/humano/"+ donante.getIdEnDonaciones())
+                    .build()
+                    .toUri();
+
+            if (traerNuevasDonaciones(donante, uri)) return null;
+
+        }else{
+            URI uri = UriComponentsBuilder
+                    .fromUriString(propiedades.getUrl())
+                    .path("/donaciones/juridico/"+ donante.getIdEnDonaciones())
+                    .build()
+                    .toUri();
+
+            if (traerNuevasDonaciones(donante, uri)) return null;
+
+        }
+
+
+        List<Mision> misionesCompletadas = donante.obtenerMisionesCompletadas();
 
         // Evento 4: Notificar al donante que cumplió una misión
         if (misionesCompletadas != null && !misionesCompletadas.isEmpty()) {
@@ -157,6 +192,18 @@ public class IncentivosServiceImpl implements IncentivosService {
         return misionesCompletadasDTO;
     }
 
+    private boolean traerNuevasDonaciones(Donante donante, URI uri) {
+        ResponseEntity<DonacionSegmentadaDTO[]> response = restTemplate.getForEntity(uri, DonacionSegmentadaDTO[].class);
+        DonacionSegmentadaDTO[] arrayDeDonaciones = response.getBody();
+
+        if(arrayDeDonaciones == null) return true;
+
+        List<DonacionSegmentadaDTO> donacionesActualizdasDTO = new ArrayList<>(Arrays.asList(arrayDeDonaciones));
+
+        donante.setDonaciones(convertirDonacionesDTO(donacionesActualizdasDTO));
+        return false;
+    }
+
     public void agregarInsignias(Donante nuevoDonante, List<Mision> misionesCompletadas){
         if(misionesCompletadas != null && !misionesCompletadas.isEmpty()){
             misionesCompletadas.forEach(m->{nuevoDonante.getPerfil().agregarInsignia(m.getInsigniaGanadora());});
@@ -165,10 +212,10 @@ public class IncentivosServiceImpl implements IncentivosService {
 
 
     @Override
-    public List<InsigniaDTO> buscarInsigniasPorId(Long id) {
-        Donante donante = this.incentivosRepository.buscarDonantePorId(id);
+    public List<InsigniaDTO> buscarInsigniasPorId(Long id,String tipoDeDonante) {
+        Donante donante = this.incentivosRepository.buscarDonantePorIdEnDonaciones(id, tipoDeDonante);
         if (donante == null) {
-            throw new RuntimeException("No se encontro el donante con id: " + id);
+            throw new RuntimeException("No se encontro el donante con id: " + id + " tipo " + tipoDeDonante);
         }
         List<InsigniaDTO> insigniasDTO = this.obtenerInsigniasDTO(donante);
 
@@ -176,10 +223,10 @@ public class IncentivosServiceImpl implements IncentivosService {
     }
 
     @Override
-    public MisionDTO buscarMisionActualPorId(Long id) {
-        Donante donante = this.incentivosRepository.buscarDonantePorId(id);
+    public MisionDTO buscarMisionActualPorId(Long id, String tipoDeDonante) {
+        Donante donante = this.incentivosRepository.buscarDonantePorIdEnDonaciones(id, tipoDeDonante);
         if (donante == null) {
-            throw new RuntimeException("No se encontro el donante con id: " + id);
+            throw new RuntimeException("No se encontro el donante con id: " + id + "tipo " + tipoDeDonante);
         }
 
         MisionDTO misionActualDTO = new MisionDTO(donante.getMisionEnCurso().getMisionActual().getNombre(),
@@ -188,9 +235,11 @@ public class IncentivosServiceImpl implements IncentivosService {
         return misionActualDTO;
     }
 
+    //TODO: Hacer que tome el query param de tipoDeDonante para que tambien pubique y difunda  insignias para los donantes juridicos
+
     @Override
     public String publicarYDifundirInsignia(Long id, Insignia insignia) {
-        Donante donante = incentivosRepository.buscarDonantePorId(id);
+        Donante donante = incentivosRepository.buscarDonantePorId(id); // usar incentivosRepository.buscarDonantePorIdEnDonaciones(id,tipoDeDonante);
         if (donante == null) {
             System.out.println("Donante " + id + " no encontrado localmente. Sincronizando...");
 
@@ -223,7 +272,7 @@ public class IncentivosServiceImpl implements IncentivosService {
     public void calcularYGuardarRanking() {
         URI uri = UriComponentsBuilder
                 .fromUriString(propiedades.getUrl())
-                .path("/obtenerDonantes")
+                .path("/donantes")
                 .build()
                 .toUri();
 
@@ -235,33 +284,33 @@ public class IncentivosServiceImpl implements IncentivosService {
 
         List<Donante> donantes = Arrays.stream(array).map(dto -> {
 
-            List<DonacionSinSegmentar> donaciones = this.convertirDonacionesDTO(dto.donaciones());
+        List<DonacionSegmentada> donaciones = this.convertirDonacionesDTO(dto.donaciones());
 
-            MedioDeNotificacion medioDeNotificacionPredeterminado = this.convertirMedioDeNotificacionDTO(dto.medioDeNotificacionPredeterminado());
+        MedioDeNotificacion medioDeNotificacionPredeterminado = this.convertirMedioDeNotificacionDTO(dto.medioDeNotificacionPredeterminado());
 
             if(dto.idHumano() != null){
 
                 Donante nuevoDonante = new Donante(
-                        null,
+                        dto.idHumano(),
                         dto.nombre(),
                         dto.apellido(),
                         null,
-                        donaciones,
                        null,
                         medioDeNotificacionPredeterminado,
+                        donaciones,
                         TipoDeDonante.HUMANO);
 
                 return nuevoDonante;
 
             }else if(dto.idJuridico() != null){
                 Donante nuevoDonante = new Donante(
-                        null,
+                        dto.idJuridico(),
                         null,
                         null,
                         dto.razonSocial(),
-                        donaciones,
                         null,
                         medioDeNotificacionPredeterminado,
+                        donaciones,
                         TipoDeDonante.JURIDICO);
 
                 return nuevoDonante;
@@ -290,9 +339,9 @@ public class IncentivosServiceImpl implements IncentivosService {
     }
 
 
-    public List<DonacionSinSegmentar> convertirDonacionesDTO(List<DonacionSinSegmentarDTO> donacionesDTO) {
+    public List<DonacionSegmentada> convertirDonacionesDTO(List<DonacionSegmentadaDTO> donacionesDTO) {
 
-        List<DonacionSinSegmentar> donaciones = donacionesDTO.stream().map(
+        List<DonacionSegmentada> donaciones = donacionesDTO.stream().map(
                 donacion -> {
                     List<Bien> bienes =
                             donacion.bienes().stream()
@@ -313,7 +362,7 @@ public class IncentivosServiceImpl implements IncentivosService {
                                     ))
                                     .toList();
 
-                    return new DonacionSinSegmentar(
+                    return new DonacionSegmentada(
                             bienes,
                             donacion.fechaDeIngreso(),
                             donacion.donacionEntregada(),
@@ -354,10 +403,12 @@ public class IncentivosServiceImpl implements IncentivosService {
         return medioDeNotificacionPredeterminado;
     }
 
+
+    //TODO: Hacer que tome el query param de tipoDeDonante para que tambien obtenga las metricas de juridico
     @Override
     public MetricasImpactoDTO obtenerMetricasDeImpacto(Long idDonante) {
 
-        Donante donante = incentivosRepository.buscarDonantePorId(idDonante);
+        Donante donante = incentivosRepository.buscarDonantePorId(idDonante); // usar incentivosRepository.buscarDonantePorIdEnDonaciones(id,tipoDeDonante);
 //
 //        if (donante == null) {
 //            obtenerDonanteHumano(idDonante);
@@ -397,8 +448,8 @@ public class IncentivosServiceImpl implements IncentivosService {
 
 
     @Override
-    public String procesarLogro(Long id, Insignia insignia, boolean esHumana) {
-        Donante donante = incentivosRepository.buscarDonantePorId(id);
+    public String procesarLogro(Long id, Insignia insignia, String tipoDeDonante) {
+        Donante donante = incentivosRepository.buscarDonantePorIdEnDonaciones(id,tipoDeDonante);
 //        if (donante == null) {
 //            if (esHumana) {
 //                obtenerDonanteHumano(id);

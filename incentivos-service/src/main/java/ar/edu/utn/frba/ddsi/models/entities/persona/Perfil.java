@@ -1,5 +1,5 @@
 package ar.edu.utn.frba.ddsi.models.entities.persona;
-import ar.edu.utn.frba.ddsi.models.entities.categorias.CategoriaEnCurso;
+import ar.edu.utn.frba.ddsi.models.entities.categorias.CategoriaMision;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,11 +14,11 @@ public class Perfil {
     ArrayList<Insignia> insignias;
     Boolean insigniaPrivada;
     String nombreDeUsuario; // lo sacamos del nombre y apellido del donante o de la razón social de la empresa
-    CategoriaEnCurso categoria; //dentro de categoriaEnCurso tengo al tipo de categoria
+    CategoriaMision categoria;
     Integer totalHistoricoPorPeriodo;
     ArrayList<MetricaMensual> evolucionMensual;
 
-    public Perfil (String nombreDeUsuario, CategoriaEnCurso categoria) {
+    public Perfil (String nombreDeUsuario, CategoriaMision categoria) {
         this.insignias = new ArrayList<>();
         this.insigniaPrivada = false;
         this.nombreDeUsuario = nombreDeUsuario;

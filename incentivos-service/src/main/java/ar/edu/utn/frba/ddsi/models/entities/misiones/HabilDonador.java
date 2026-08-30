@@ -1,12 +1,10 @@
 package ar.edu.utn.frba.ddsi.models.entities.misiones;
 
-import ar.edu.utn.frba.ddsi.models.entities.donaciones.DonacionSinSegmentar;
-import ar.edu.utn.frba.ddsi.models.entities.persona.Bien;
+import ar.edu.utn.frba.ddsi.models.entities.donaciones.DonacionSegmentada;
 import ar.edu.utn.frba.ddsi.models.entities.persona.Insignia;
 import lombok.Data;
 
 import java.util.List;
-import java.util.Optional;
 
 @Data
 public class HabilDonador extends Mision{
@@ -21,10 +19,10 @@ public class HabilDonador extends Mision{
 
 
     @Override
-    public Boolean seCompletoLaMision(List<DonacionSinSegmentar> donaciones) {
+    public Boolean seCompletoLaMision(List<DonacionSegmentada> donaciones) {
 
         //donación que supere X cantidad de bienes.
-       DonacionSinSegmentar donacionQueCumple = donaciones.stream().filter(d -> d.getBienes().size() > this.cantidadDeBienes).findFirst().orElse(null);
+       DonacionSegmentada donacionQueCumple = donaciones.stream().filter(d -> d.getBienes().size() > this.cantidadDeBienes).findFirst().orElse(null);
 
            if(donacionQueCumple != null){
                this.setProgreso(100);

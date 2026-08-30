@@ -1,7 +1,10 @@
 package ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador;
 
+import lombok.Data;
+
 import java.util.Set;
 import java.util.Map;
+
 
 public enum EstadoDonacion {
     EN_DEPOSITO,

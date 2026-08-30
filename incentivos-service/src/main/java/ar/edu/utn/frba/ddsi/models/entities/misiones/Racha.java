@@ -1,12 +1,11 @@
 package ar.edu.utn.frba.ddsi.models.entities.misiones;
 
-import ar.edu.utn.frba.ddsi.models.entities.donaciones.DonacionSinSegmentar;
+import ar.edu.utn.frba.ddsi.models.entities.donaciones.DonacionSegmentada;
 import ar.edu.utn.frba.ddsi.models.entities.persona.Insignia;
 import lombok.Data;
 
 import java.util.List;
-import java.time.LocalDateTime;
-import java.time.Month;
+
 @Data
 public class Racha extends Mision{
     private Integer meses; //minimo 2 meses y maximo 12 meses
@@ -23,7 +22,7 @@ public class Racha extends Mision{
     }
 
     @Override
-    public Boolean seCompletoLaMision(List<DonacionSinSegmentar> donaciones) {
+    public Boolean seCompletoLaMision(List<DonacionSegmentada> donaciones) {
         // pedirle al servicio de donaciones,
         // todas las donaciones de la persona donante y que se hayan hecho durante los x meses consecutivos
 
@@ -33,7 +32,7 @@ public class Racha extends Mision{
 
         while(mesI <= mesF){
             int finalMesI = mesI;
-            boolean cumple = donaciones.stream().map(DonacionSinSegmentar::getFechaDeIngreso).
+            boolean cumple = donaciones.stream().map(DonacionSegmentada::getFechaDeIngreso).
                     anyMatch( f ->  f.getMonthValue() == finalMesI);
 
             if(cumple){

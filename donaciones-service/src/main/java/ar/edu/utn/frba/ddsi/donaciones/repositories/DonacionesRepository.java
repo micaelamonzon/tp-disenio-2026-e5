@@ -2,11 +2,13 @@ package ar.edu.utn.frba.ddsi.donaciones.repositories;
 
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante.PersonaHumana;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante.PersonaJuridica;
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante.TipoDonante;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.donacion.Donacion;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.donacion.Estado;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.DonacionSegmentada;
 import org.springframework.stereotype.Repository;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 public interface DonacionesRepository {
@@ -23,4 +25,7 @@ public interface DonacionesRepository {
     PersonaHumana saveHumana(PersonaHumana donante);
     void deleteJuridica(PersonaJuridica donante);
     void deleteHumana(PersonaHumana donante);
+    public DonacionSegmentada guardarDonacion(DonacionSegmentada donacion);
+
+    public List<DonacionSegmentada> findDonacionesPorIdyTipo(Long idDeDonante, TipoDonante tipoDonante);
 }

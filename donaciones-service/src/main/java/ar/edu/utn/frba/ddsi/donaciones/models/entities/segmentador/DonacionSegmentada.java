@@ -1,21 +1,30 @@
 package ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador;
 
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante.TipoDonante;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.Bien;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.Subcategoria;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.CambioEstado;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.EstadoDonacion;
 import lombok.Getter;
+import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Getter
+@Setter
 public class DonacionSegmentada {
     private Long id;
+    private Long idDelDonante;
+    private TipoDonante tipoDonante;
     private ArrayList<Bien> bienesDelMismoTipo = new ArrayList<>();
     private Subcategoria subcategoria;
     private EstadoDonacion estadoActual;
     private List<CambioEstado> historial = new ArrayList<>();
+    private LocalDateTime fechaDeIngreso;
+    private Boolean donacionEntregada;
+    private Long organizacionId;
 
     public DonacionSegmentada(Subcategoria subcategoria) {
         this.subcategoria = subcategoria;
@@ -24,7 +33,7 @@ public class DonacionSegmentada {
                 "Donación registrada en depósito", "SISTEMA"));
     }
 
-    public void setId(Long id) { this.id = id; }
+
 
     public void agregarBien(Bien bien) {
         this.bienesDelMismoTipo.add(bien);
@@ -36,7 +45,5 @@ public class DonacionSegmentada {
         this.estadoActual = nuevo;
     }
 
-    public String getNombreEstadoActual() {
-        return estadoActual.name();
-    }
+
 }
