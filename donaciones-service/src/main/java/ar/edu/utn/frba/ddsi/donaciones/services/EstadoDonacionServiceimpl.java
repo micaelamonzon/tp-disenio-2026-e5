@@ -1,6 +1,10 @@
 package ar.edu.utn.frba.ddsi.donaciones.services;
+import ar.edu.utn.frba.ddsi.donaciones.dto.BienDTO;
 import ar.edu.utn.frba.ddsi.donaciones.dto.CambioEstadoDTO;
+import ar.edu.utn.frba.ddsi.donaciones.dto.CategoriaDTO;
 import ar.edu.utn.frba.ddsi.donaciones.dto.DonacionSegmentadaDTO;
+import ar.edu.utn.frba.ddsi.donaciones.dto.SubcategoriaDTO;
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.Bien;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.donacion.Estado;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.DonacionSegmentada;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.EstadoDonacion;
@@ -73,7 +77,7 @@ public class EstadoDonacionServiceimpl {
 
     public List<DonacionSegmentada> findByEstado(String nombreEstado) {
         return donaciones.values().stream()
-                .filter(d -> d.getNombreEstadoActual().equals(nombreEstado))
+                .filter(d -> d.getEstadoActual().toString().equals(nombreEstado))
                 .toList();
     }
 
@@ -102,8 +106,36 @@ public class EstadoDonacionServiceimpl {
 
         return new DonacionSegmentadaDTO(
                 d.getId(),
-                d.getNombreEstadoActual(),
-                historialDTO
+                d.getEstadoActual().toString(),
+                historialDTO,
+                this.obtenerBienesDTO(d.getBienesDelMismoTipo()),
+                d.getFechaDeIngreso(),
+                d.getDonacionEntregada(),
+                d.getOrganizacionId()
         );
+    }
+
+    public List<BienDTO> obtenerBienesDTO(List<Bien> bienes){
+        List<BienDTO> bienesDTO = bienes.stream()
+                .map(b -> new BienDTO(
+                        b.getNombre(),
+                        b.getDescripcion(),
+                        new SubcategoriaDTO(
+                                b.getSubcategoria().getNombre(),
+                                b.getSubcategoria().getEsPerecedero(),
+                                new CategoriaDTO(
+                                        b.getSubcategoria()
+                                                .getCategoria()
+                                                .getNombre()
+                                )
+                        ),
+                        b.getFechaDeVencimiento(),
+                        b.getEsUsado(),
+                        b.getTipoUnidad(),
+                        b.getCantidad()
+                ))
+                .toList();
+
+        return bienesDTO;
     }
 }

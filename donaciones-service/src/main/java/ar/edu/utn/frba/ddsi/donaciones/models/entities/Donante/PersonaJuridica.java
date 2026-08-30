@@ -16,8 +16,8 @@ public class PersonaJuridica{
     private String rubro;
     private List<Representante> personasRepresentantes = new ArrayList<>();
     private List<MedioDeNotificacion> mediosDeNotificacion = new ArrayList<>();
+    private MedioDeNotificacion medioDeNotificacionPredeterminado;
     private List<DonacionSinSegmentar> donaciones = new ArrayList<>();
-
 
     public PersonaJuridica(String cuit,String razonSocial,Tipo tipo, String rubro) {
         this.cuit = cuit;
@@ -25,8 +25,6 @@ public class PersonaJuridica{
         this.tipo = tipo;
         this.rubro= rubro;
     }
-
-
 
     public void agregarMedioDeNotificacion(MedioDeNotificacion unMedio) {
         this.mediosDeNotificacion.add(unMedio);

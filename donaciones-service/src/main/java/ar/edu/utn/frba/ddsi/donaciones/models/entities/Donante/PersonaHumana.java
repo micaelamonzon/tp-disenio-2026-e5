@@ -22,7 +22,7 @@ public class PersonaHumana{
     private String direccion;
     private List<MedioDeNotificacion> mediosDeNotificacion = new ArrayList<>();
     private MedioDeNotificacion medioDeNotificacionPredeterminado;
-    private List<DonacionSinSegmentar> donaciones = new ArrayList<>(); //al acceder a esta donacion sabremoscuales salieron
+    private List<DonacionSinSegmentar> donaciones = new ArrayList<>(); //al acceder a esta donacion sabremos que donaciones segmentadas salieron
 
 
     public PersonaHumana(String nombre,String apellido,Integer edad,Integer numeroDeDocumento,String genero,String direccion) {

@@ -2,6 +2,7 @@ package ar.edu.utn.frba.ddsi.donaciones.repositories;
 
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante.PersonaHumana;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante.PersonaJuridica;
+import ar.edu.utn.frba.ddsi.donaciones.utils.GeneradorIdSecuencial;
 import lombok.Data;
 import org.springframework.stereotype.Repository;
 

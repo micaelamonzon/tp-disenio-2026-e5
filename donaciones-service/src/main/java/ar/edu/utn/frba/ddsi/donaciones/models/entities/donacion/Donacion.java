@@ -28,6 +28,7 @@ public class Donacion {
 
     private LocalDate fechaEntrega;
 
+    //TODO: Porque está  PersonaDonanteDTO acá??
     public Donacion(String descripcion, PersonaDonanteDTO donante, Bien bien, LocalDate fechaEntrega) {
         this.descripcion = descripcion;
         this.donante = donante;

@@ -1,6 +1,6 @@
 package ar.edu.utn.frba.ddsi.models.entities.misiones;
 
-import ar.edu.utn.frba.ddsi.models.entities.donaciones.DonacionSinSegmentar;
+import ar.edu.utn.frba.ddsi.models.entities.donaciones.DonacionSegmentada;
 import ar.edu.utn.frba.ddsi.models.entities.persona.Insignia;
 import lombok.Data;
 
@@ -15,11 +15,11 @@ public class DonacionesExitosas extends Mision{
     public DonacionesExitosas(String nombre,Integer cantidadDeDonaciones){
         this.setNombre(nombre);
         this.cantidadDeDonaciones = cantidadDeDonaciones;
-        setInsigniaGanadora(Insignia.DONACIONEXITOSA);
+        this.setInsigniaGanadora(Insignia.DONACIONEXITOSA);
     }
     //lograr X donaciones que sean recibidas exitosamente por una entidad beneficiaria.
     @Override
-    public Boolean seCompletoLaMision(List<DonacionSinSegmentar> donaciones) {
+    public Boolean seCompletoLaMision(List<DonacionSegmentada> donaciones) {
 
         int cantInicial = 0;
 

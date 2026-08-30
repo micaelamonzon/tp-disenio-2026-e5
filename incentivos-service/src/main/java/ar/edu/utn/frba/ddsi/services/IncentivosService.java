@@ -10,19 +10,19 @@ public interface IncentivosService {
 
 
 
-    public List<InsigniaDTO> buscarInsigniasPorId(Long id);
-    public void agregarMisionADonante(Long id, MisionDTO misionesDTO);
-    public MisionDTO buscarMisionActualPorId(Long id);
+    public List<InsigniaDTO> buscarInsigniasPorId(Long id,String tipoDeDonante);
+    public void agregarMisionADonante(Long id, String tipoDeDonante,String tipoCategoria,MisionDTO misionDTO);
+    public MisionDTO buscarMisionActualPorId(Long id, String tipoDeDonante);
     public void pedirDonantesAServiceDonaciones();
     public String publicarYDifundirInsignia(Long idPersona, Insignia insignia);
-    public List<MisionDTO> obtenerMisionesCompletadas(Long id);
+    public List<MisionDTO> obtenerMisionesCompletadas(Long id,String tipoDeDonante);
 
     RankingMensual obtenerUltimoRanking();
     void calcularYGuardarRanking();
 
     MetricasImpactoDTO obtenerMetricasDeImpacto(Long idDonante);
 
-    public String procesarLogro(Long id, Insignia insignia, boolean esHumana);
+    public String procesarLogro(Long id, Insignia insignia, String tipoDeDonante);
 
     MetricasSistemaDTO obtenerMetricasDelSistema();
 

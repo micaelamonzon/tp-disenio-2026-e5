@@ -39,7 +39,7 @@ public class DonacionSinSegmentar {
   public void verificarSiDonacionFueEntregada() {
     this.setDonacionEntregada(
             donacionesSegmentadas.stream()
-                    .allMatch(m -> m.getNombreEstadoActual().equals("ENTREGADA"))
+                    .allMatch(m -> m.getEstadoActual().toString().equals("ENTREGADA"))
     );
   }
 

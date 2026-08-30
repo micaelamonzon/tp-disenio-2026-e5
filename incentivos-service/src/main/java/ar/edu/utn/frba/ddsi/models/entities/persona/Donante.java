@@ -1,7 +1,7 @@
 package ar.edu.utn.frba.ddsi.models.entities.persona;
 
 
-import ar.edu.utn.frba.ddsi.models.entities.donaciones.DonacionSinSegmentar;
+import ar.edu.utn.frba.ddsi.models.entities.donaciones.DonacionSegmentada;
 import ar.edu.utn.frba.ddsi.models.entities.misiones.EstadoDeMision;
 import ar.edu.utn.frba.ddsi.models.entities.misiones.Mision;
 import ar.edu.utn.frba.ddsi.models.entities.misiones.MisionEnCurso;
@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.time.YearMonth;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -25,15 +26,15 @@ public class Donante {
     private String apellido;
     private String razonSocial;
     private LocalDateTime fechaDeRegistro;
-    private List<DonacionSinSegmentar> donaciones;
+    private List<DonacionSegmentada> donaciones;
     private Perfil perfil;
-    private List<Mision> misiones;
+    private List<Mision> misiones; //historial de misiones tanto en curso como pasadas
     private TipoDeDonante tipoDeDonante;
     private MedioDeNotificacion medioDeNotificacionPredeterminado;
     private MisionEnCurso misionEnCurso;
 
-    public Donante(Long id,String nombre,String apellido,String razonSocial, List<DonacionSinSegmentar> donaciones,LocalDateTime fechaDeRegistro, MedioDeNotificacion medioDeNotificacionPredeterminado, TipoDeDonante tipo) {
-        this.id = id;
+    public Donante(Long idEnDonaciones,String nombre, String apellido, String razonSocial, LocalDateTime fechaDeRegistro, MedioDeNotificacion medioDeNotificacionPredeterminado, List<DonacionSegmentada> donaciones ,TipoDeDonante tipo) {
+        this.idEnDonaciones = idEnDonaciones;
         this.nombre = nombre;
         this.apellido = apellido;
         this.razonSocial = razonSocial;
@@ -46,6 +47,7 @@ public class Donante {
     public void agregarMision(Mision mision) {
         this.misiones.add(mision);
     }
+
 
     public Integer calcularMisionesCumplidasEn(YearMonth periodo) {
         return (int) this.misiones.stream()
@@ -67,6 +69,12 @@ public class Donante {
                 .orElse(null);
     }
 
+
+    public List<Mision> obtenerMisionesCompletadas(){
+
+       List<Mision> misionesCompletadasDeLaCategoria = this.getMisionEnCurso().getCategoriaActual().obtenerMisionesCompletadas(this.getDonaciones());
+        return this.misiones.stream().filter(m -> m.getEstadoDeMision() == EstadoDeMision.COMPLETADA).collect(Collectors.toList()) ;
+    }
 
     public long cantidadDonacionesEnMes(YearMonth mes) {
         return donaciones.stream()
@@ -114,7 +122,7 @@ public class Donante {
         }
 
         return (int) this.donaciones.stream()
-                .map(DonacionSinSegmentar::getEntidadBeneficiariaId)
+                .map(DonacionSegmentada::getEntidadBeneficiariaId)
                 .filter(java.util.Objects::nonNull)
                 .distinct()
                 .count();

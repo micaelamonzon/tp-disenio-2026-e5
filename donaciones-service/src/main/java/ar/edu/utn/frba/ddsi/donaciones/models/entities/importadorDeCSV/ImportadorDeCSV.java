@@ -58,6 +58,8 @@ public class ImportadorDeCSV{
                     nuevoDonante.agregarMedioDeNotificacion(medioMail);
                     nuevoDonante.agregarMedioDeNotificacion(medioTelefono);
                     nuevoDonante.agregarMedioDeNotificacion(medioWhatsapp);
+
+                    nuevoDonante.setMedioDeNotificacionPredeterminado(medioWhatsapp);
                     donantesHumanos.add(nuevoDonante);
                 }
                 if(linea[0].equals(esJuridica)){
@@ -77,6 +79,8 @@ public class ImportadorDeCSV{
                     nuevoDonante.agregarMedioDeNotificacion(medioMail);
                     nuevoDonante.agregarMedioDeNotificacion(medioTelefono);
                     nuevoDonante.agregarMedioDeNotificacion(medioWhatsapp);
+
+                    nuevoDonante.setMedioDeNotificacionPredeterminado(medioWhatsapp);
 
                     donantesJuridicos.add(nuevoDonante);
                 }

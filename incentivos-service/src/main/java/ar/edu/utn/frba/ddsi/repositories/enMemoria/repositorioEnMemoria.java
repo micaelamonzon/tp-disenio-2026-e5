@@ -2,6 +2,7 @@ package ar.edu.utn.frba.ddsi.repositories.enMemoria;
 
 import ar.edu.utn.frba.ddsi.models.entities.persona.Donante;
 import ar.edu.utn.frba.ddsi.models.entities.persona.RankingMensual;
+import ar.edu.utn.frba.ddsi.models.entities.persona.TipoDeDonante;
 import ar.edu.utn.frba.ddsi.repositories.IncentivosRepository;
 import org.springframework.stereotype.Repository;
 
@@ -30,6 +31,10 @@ public class repositorioEnMemoria implements IncentivosRepository {
     @Override
     public Donante buscarDonantePorId(Long id){
         return donantes.stream().filter(d -> d.getId().equals(id)).findFirst().orElse(null);
+    }
+    @Override
+    public Donante buscarDonantePorIdEnDonaciones(Long idEnDonaciones, String tipoDeDonante){
+        return donantes.stream().filter(d -> d.getIdEnDonaciones().equals(idEnDonaciones) && d.getTipoDeDonante().toString().equals(tipoDeDonante)).findFirst().orElse(null);
     }
 
     @Override

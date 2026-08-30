@@ -22,39 +22,29 @@ public class IncentivosController {
 
     @GetMapping("/donantes")
     @ResponseStatus(HttpStatus.ACCEPTED) //para devolver el 200
-    public void pedirTodosLosDonantesADonanciones(){
+    public void pedirTodosLosDonantesADonanciones() {
         incentivosService.pedirDonantesAServiceDonaciones();
     }
+
     @PostMapping("donanteHumano/mision/{id}")
     @ResponseStatus(HttpStatus.CREATED) //para devolver el 201
-    public void agregarMisionADonanteHumano(@PathVariable Long id, @RequestBody MisionDTO misionDTO){
-        incentivosService.agregarMisionADonante(id, misionDTO);
+    public void agregarMisionADonante(@PathVariable Long id, @RequestParam String tipoDeDonante,@RequestParam String tipoCategoria, @RequestBody MisionDTO misionDTO) {
+        incentivosService.agregarMisionADonante(id, tipoDeDonante,tipoCategoria,misionDTO); //sirve tanto para humano como para juridico
     }
 
-    @PostMapping("donanteJuridico/mision/{id}")
-    @ResponseStatus(HttpStatus.CREATED) //para devolver el 201
-    public void agregarMisionADonanteJuridico(@PathVariable Long id, @RequestBody MisionDTO misionDTO){
-        incentivosService.agregarMisionADonante(id, misionDTO);
+    //Obtención de las misiones completadas por una persona donante.
+    @GetMapping("donanteHumano/misionesCompletadas/{id}")
+    @ResponseStatus(HttpStatus.ACCEPTED) //para devolver el 200
+    public List<MisionDTO> obtenerTodasLasMisionesDeDonanteHumano(@PathVariable Long id, @RequestParam String tipoDeDonante){
+        return incentivosService.obtenerMisionesCompletadas(id, tipoDeDonante);
     }
 
-//    //Obtención de las misiones completadas por una persona donante.
-//    @GetMapping("donanteHumano/misionesCompletadas/{id}")
-//    @ResponseStatus(HttpStatus.ACCEPTED) //para devolver el 200
-//    public List<MisionDTO> obtenerTodasLasMisionesDeDonanteHumano(@PathVariable Long id){
-//        return incentivosService.obtenerDonanteHumano(id);
-//    }
-//
-//    @GetMapping("donanteJuridico/misionesCompletadas/{id}")
-//    @ResponseStatus(HttpStatus.ACCEPTED) //para devolver el 200
-//    public List<MisionDTO> obtenerTodasLasMisionesDeDonanteJuridico(@PathVariable Long id){
-//        return incentivosService.obtenerDonanteJuridico(id);
-//    }
     //Obtención de las insignias para una persona donante.
     @GetMapping("{id}/insignias")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public List<InsigniaDTO> obtenerInsignias(@PathVariable Long id){
+    public List<InsigniaDTO> obtenerInsignias(@PathVariable Long id, @RequestParam String tipoDeDonante){
         try{
-            return incentivosService.buscarInsigniasPorId(id);
+            return incentivosService.buscarInsigniasPorId(id, tipoDeDonante);
         }catch(RuntimeException e){
             throw new RuntimeException("Error al obtener las insignias porque " + e.getMessage());
         }
@@ -62,9 +52,9 @@ public class IncentivosController {
     }
     @GetMapping("{id}/misionActual")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public MisionDTO obtenerMisionEnCurso(@PathVariable Long id){
+    public MisionDTO obtenerMisionEnCurso(@PathVariable Long id, @RequestParam String tipoDeDonante){
         try{
-            return incentivosService.buscarMisionActualPorId(id);
+            return incentivosService.buscarMisionActualPorId(id, tipoDeDonante);
         }catch(RuntimeException e){
             throw new RuntimeException("Error al obtener la mision actual porque " + e.getMessage());
         }

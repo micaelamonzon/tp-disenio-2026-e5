@@ -1,23 +1,27 @@
 package ar.edu.utn.frba.ddsi.donaciones.services;
 
+import ar.edu.utn.frba.ddsi.donaciones.dto.DonacionSegmentadaDTO;
 import ar.edu.utn.frba.ddsi.donaciones.dto.DonacionSinSegmentarDTO;
 import ar.edu.utn.frba.ddsi.donaciones.dto.PersonaDonanteDTO;
 import ar.edu.utn.frba.ddsi.donaciones.dto.PersonaHumanaDTO;
 import ar.edu.utn.frba.ddsi.donaciones.dto.PersonaJuridicaDTO;
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante.TipoDonante;
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.DonacionSegmentada;
 
 import java.util.List;
 
 public interface DonacionesService {
+
     List<PersonaHumanaDTO> obtenerTodosHumanos();
     List<PersonaJuridicaDTO> obtenerTodosJuridicos();
     PersonaHumanaDTO obtenerHumanoPorId(Long id);
     PersonaJuridicaDTO obtenerJuridicoPorId(Long id);
-    List<DonacionSinSegmentarDTO>  obtenerDonacionesDeHumano(Long id);
-    List<DonacionSinSegmentarDTO>  obtenerDonacionesDeJuridico(Long id);
+    List<DonacionSegmentadaDTO>  obtenerDonacionesDeHumano(Long id);
+    List<DonacionSegmentadaDTO>  obtenerDonacionesDeJuridico(Long id);
     PersonaHumanaDTO crearDonanteHumano(PersonaHumanaDTO body);
     PersonaJuridicaDTO crearDonanteJuridico(PersonaJuridicaDTO request);
-    DonacionSinSegmentarDTO crearDonacionDeJuridico(DonacionSinSegmentarDTO body, Long id);
-    DonacionSinSegmentarDTO crearDonacionDeHumano(DonacionSinSegmentarDTO body, Long id);
+    List<DonacionSegmentadaDTO> crearDonacionDeJuridico(DonacionSinSegmentarDTO body, Long id);
+    List<DonacionSegmentadaDTO> crearDonacionDeHumano(DonacionSinSegmentarDTO body, Long id);
     List<DonacionSinSegmentarDTO> modificarDonacionDeHumano(DonacionSinSegmentarDTO body, Long idHumano, Long idDonacion, Long idBien);
     public List<DonacionSinSegmentarDTO> modificarDonacionDeJuridica(DonacionSinSegmentarDTO body, Long idJuridica, Long idDonacion, Long idBien);
     List<DonacionSinSegmentarDTO> eliminarDonacionDeHumano(Long idHumano, Long idDonacion);
@@ -31,4 +35,6 @@ public interface DonacionesService {
 
 
     public void arrancarImportacionDeCSV( String file);
+
+
 }

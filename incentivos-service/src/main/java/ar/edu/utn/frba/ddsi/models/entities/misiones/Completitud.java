@@ -1,7 +1,6 @@
 package ar.edu.utn.frba.ddsi.models.entities.misiones;
 
-import ar.edu.utn.frba.ddsi.models.entities.donaciones.DonacionSinSegmentar;
-import ar.edu.utn.frba.ddsi.models.entities.persona.Bien;
+import ar.edu.utn.frba.ddsi.models.entities.donaciones.DonacionSegmentada;
 import ar.edu.utn.frba.ddsi.models.entities.persona.Categoria;
 import ar.edu.utn.frba.ddsi.models.entities.persona.Insignia;
 import lombok.Data;
@@ -22,7 +21,7 @@ public class Completitud extends Mision {
 
     //Completitud: realizar donaciones de X categorías distintas
     @Override
-    public Boolean seCompletoLaMision(List<DonacionSinSegmentar> donaciones) {
+    public Boolean seCompletoLaMision(List<DonacionSegmentada> donaciones) {
 
         List<Categoria> todasLasCategorias = donaciones.stream()
                 .flatMap(d -> d.getBienes().stream())

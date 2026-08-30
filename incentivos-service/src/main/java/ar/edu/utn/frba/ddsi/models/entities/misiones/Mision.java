@@ -1,7 +1,7 @@
 package ar.edu.utn.frba.ddsi.models.entities.misiones;
 
 import ar.edu.utn.frba.ddsi.models.entities.categorias.TipoCategoria;
-import ar.edu.utn.frba.ddsi.models.entities.donaciones.DonacionSinSegmentar;
+import ar.edu.utn.frba.ddsi.models.entities.donaciones.DonacionSegmentada;
 import ar.edu.utn.frba.ddsi.models.entities.persona.Insignia;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -42,7 +42,7 @@ public class Mision {
         }
     }
 
-    public Boolean seCompletoLaMision(List<DonacionSinSegmentar> donaciones){
+    public Boolean seCompletoLaMision(List<DonacionSegmentada> donaciones){
         //lo reescriben las clases hijas
         return Boolean.FALSE;
     }
