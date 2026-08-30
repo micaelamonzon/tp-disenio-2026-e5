@@ -26,21 +26,21 @@ public class IncentivosController {
         incentivosService.pedirDonantesAServiceDonaciones();
     }
 
-    @PostMapping("donanteHumano/mision/{id}")
+    @PostMapping("donante/mision/{id}")
     @ResponseStatus(HttpStatus.CREATED) //para devolver el 201
     public void agregarMisionADonante(@PathVariable Long id, @RequestParam String tipoDeDonante,@RequestParam String tipoCategoria, @RequestBody MisionDTO misionDTO) {
         incentivosService.agregarMisionADonante(id, tipoDeDonante,tipoCategoria,misionDTO); //sirve tanto para humano como para juridico
     }
 
     //Obtención de las misiones completadas por una persona donante.
-    @GetMapping("donanteHumano/misionesCompletadas/{id}")
+    @GetMapping("donante/misionesCompletadas/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED) //para devolver el 200
     public List<MisionDTO> obtenerTodasLasMisionesDeDonanteHumano(@PathVariable Long id, @RequestParam String tipoDeDonante){
         return incentivosService.obtenerMisionesCompletadas(id, tipoDeDonante);
     }
 
     //Obtención de las insignias para una persona donante.
-    @GetMapping("{id}/insignias")
+    @GetMapping("donante/insignias/{id}/")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public List<InsigniaDTO> obtenerInsignias(@PathVariable Long id, @RequestParam String tipoDeDonante){
         try{
@@ -50,7 +50,7 @@ public class IncentivosController {
         }
 
     }
-    @GetMapping("{id}/misionActual")
+    @GetMapping("donante/misionActual/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public MisionDTO obtenerMisionEnCurso(@PathVariable Long id, @RequestParam String tipoDeDonante){
         try{
@@ -60,7 +60,7 @@ public class IncentivosController {
         }
     }
 
-    @GetMapping("/verificarMision/{id}")
+    @GetMapping("donante/verificarMision/{id}")
     //    Insignia insigniaObtenida = Insignia.COLABORADOR; // Antes del merge
     public ResponseEntity<Void> verificarMision(@PathVariable ("id") Long id){
         Insignia insigniaObtenida = Insignia.DONACIONEXITOSA; // ejemplo
