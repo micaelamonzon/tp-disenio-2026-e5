@@ -1,19 +1,19 @@
 package ar.edu.utn.frba.ddsi.notificaciones.models.entities.ServicioDeNotificaciones;
 
-import ar.edu.utn.frba.ddsi.notificaciones.adapters.TwilioSMSAdapter;
+import ar.edu.utn.frba.ddsi.notificaciones.adapters.SmsAdapter;
 import org.springframework.stereotype.Component;
 
 @Component
 public class SMS implements MedioDeNotificacion {
 
-  private final TwilioSMSAdapter twilioSMSAdapter;
+  private final SmsAdapter smsAdapter;
 
-  public SMS(TwilioSMSAdapter twilioSMSAdapter) {
-    this.twilioSMSAdapter = twilioSMSAdapter;
+  public SMS(SmsAdapter smsAdapter) {
+    this.smsAdapter = smsAdapter;
   }
 
   @Override
   public void notificar(String destinatario, Notificacion notificacion) {
-    twilioSMSAdapter.enviar(destinatario, notificacion.getMensaje());
+    smsAdapter.enviar(destinatario, notificacion.getMensaje());
   }
 }

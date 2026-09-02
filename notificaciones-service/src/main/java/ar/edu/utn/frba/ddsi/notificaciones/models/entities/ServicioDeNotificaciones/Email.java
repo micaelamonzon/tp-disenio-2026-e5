@@ -1,19 +1,19 @@
 package ar.edu.utn.frba.ddsi.notificaciones.models.entities.ServicioDeNotificaciones;
 
-import ar.edu.utn.frba.ddsi.notificaciones.adapters.SendGridEmailAdapter;
+import ar.edu.utn.frba.ddsi.notificaciones.adapters.EmailAdapter;
 import org.springframework.stereotype.Component;
 
 @Component
 public class Email implements MedioDeNotificacion {
 
-  private final SendGridEmailAdapter sendGridAdapter;
+  private final EmailAdapter emailAdapter;
 
-  public Email(SendGridEmailAdapter sendGridAdapter) {
-    this.sendGridAdapter = sendGridAdapter;
+  public Email(EmailAdapter emailAdapter) {
+    this.emailAdapter = emailAdapter;
   }
 
   @Override
   public void notificar(String destinatario, Notificacion notificacion) {
-    sendGridAdapter.enviar(destinatario, notificacion.getMensaje());
+    emailAdapter.enviar(destinatario, notificacion.getMensaje());
   }
 }

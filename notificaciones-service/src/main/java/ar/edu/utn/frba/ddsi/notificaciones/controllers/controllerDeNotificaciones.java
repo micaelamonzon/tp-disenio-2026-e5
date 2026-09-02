@@ -5,6 +5,7 @@ import ar.edu.utn.frba.ddsi.notificaciones.models.entities.ServicioDeNotificacio
 import ar.edu.utn.frba.ddsi.notificaciones.models.entities.ServicioDeNotificaciones.Email;
 import ar.edu.utn.frba.ddsi.notificaciones.models.entities.ServicioDeNotificaciones.SMS;
 import ar.edu.utn.frba.ddsi.notificaciones.models.entities.ServicioDeNotificaciones.WhatsApp;
+import ar.edu.utn.frba.ddsi.notificaciones.models.repositories.NotificacionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -19,12 +20,15 @@ public class controllerDeNotificaciones {
     private final Email email;
     private final SMS sms;
     private final WhatsApp whatsApp;
+    private final NotificacionRepository notificacionRepository;
 
     @Autowired
-    public controllerDeNotificaciones(Email email, SMS sms, WhatsApp whatsApp) {
+    public controllerDeNotificaciones(Email email, SMS sms, WhatsApp whatsApp,
+                                      NotificacionRepository notificacionRepository) {
         this.email = email;
         this.sms = sms;
         this.whatsApp = whatsApp;
+        this.notificacionRepository = notificacionRepository;
     }
 
     @PostMapping("/notificar")
@@ -55,6 +59,7 @@ public class controllerDeNotificaciones {
 
         notificacion.setMedioDeNotificacion(medioDeNotificacion);
         notificacion.enviar();
+        notificacionRepository.save(notificacion); // persiste la notificación con su estado final
 
         return "Notificacion enviada por " + medio;
     }
