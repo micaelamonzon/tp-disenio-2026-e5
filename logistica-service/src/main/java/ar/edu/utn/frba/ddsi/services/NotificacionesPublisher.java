@@ -4,6 +4,7 @@ import ar.edu.utn.frba.ddsi.dto.NotificacionMensajeDTO;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import java.util.UUID;
 
 // Publica notificaciones en la cola de RabbitMQ en lugar de llamar
 // directamente al servicio de notificaciones por HTTP.
@@ -23,8 +24,9 @@ public class NotificacionesPublisher {
 
     public void publicar(String destinatario, String mensaje, String medio) {
         try {
+            String idEvento = UUID.randomUUID().toString();
             NotificacionMensajeDTO notificacion =
-                    new NotificacionMensajeDTO(destinatario, mensaje, medio);
+                    new NotificacionMensajeDTO(idEvento, destinatario, mensaje, medio);
             rabbitTemplate.convertAndSend(queueName, notificacion);
         } catch (Exception e) {
             // Si falla la publicación no queremos que se caiga la operación

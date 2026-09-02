@@ -1,19 +1,19 @@
 package ar.edu.utn.frba.ddsi.notificaciones.models.entities.ServicioDeNotificaciones;
 
-import ar.edu.utn.frba.ddsi.notificaciones.adapters.TwilioWhatsAppAdapter;
+import ar.edu.utn.frba.ddsi.notificaciones.adapters.WhatsAppAdapter;
 import org.springframework.stereotype.Component;
 
 @Component
 public class WhatsApp implements MedioDeNotificacion {
 
-  private final TwilioWhatsAppAdapter twilioWhatsAppAdapter;
+  private final WhatsAppAdapter whatsAppAdapter;
 
-  public WhatsApp(TwilioWhatsAppAdapter twilioWhatsAppAdapter) {
-    this.twilioWhatsAppAdapter = twilioWhatsAppAdapter;
+  public WhatsApp(WhatsAppAdapter whatsAppAdapter) {
+    this.whatsAppAdapter = whatsAppAdapter;
   }
 
   @Override
   public void notificar(String destinatario, Notificacion notificacion) {
-    twilioWhatsAppAdapter.enviar(destinatario, notificacion.getMensaje());
+    whatsAppAdapter.enviar(destinatario, notificacion.getMensaje());
   }
 }
