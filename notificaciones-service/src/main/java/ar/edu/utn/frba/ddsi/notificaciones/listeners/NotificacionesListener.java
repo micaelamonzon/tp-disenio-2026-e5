@@ -9,6 +9,10 @@ import ar.edu.utn.frba.ddsi.notificaciones.models.entities.ServicioDeNotificacio
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 // Consume los mensajes que los servicios de dominio (logística)
 // publican en la cola de RabbitMQ. Es la contraparte asincrónica del
 // controller: recibe los mismos datos pero desde la cola en vez de HTTP,
@@ -20,6 +24,11 @@ public class NotificacionesListener {
     private final SMS sms;
     private final WhatsApp whatsApp;
 
+    // guarda los ids de eventos ya procesados, para descartar reentregas duplicadas de RabbitMQ (idempotencia)
+    // manejamos el tamaño acotado con LinkedHashSet + eliminacion del mas viejo para no crecer indefinidamente en memoria
+    private final Set<String> eventosProcesados = Collections.synchronizedSet(new LinkedHashSet<>());
+    private static final int MAX_EVENTOS_RECORDADOS = 1000;
+
     public NotificacionesListener(Email email, SMS sms, WhatsApp whatsApp) {
         this.email = email;
         this.sms = sms;
@@ -28,6 +37,17 @@ public class NotificacionesListener {
 
     @RabbitListener(queues = "${notificaciones.queue.name}")
     public void recibirNotificacion(NotificacionMensajeDTO dto) {
+        synchronized (eventosProcesados) {
+            if (eventosProcesados.contains(dto.idEvento())) {
+                System.out.println("Evento duplicado ignorado: " + dto.idEvento());
+                return;
+            }
+            eventosProcesados.add(dto.idEvento());
+            if (eventosProcesados.size() > MAX_EVENTOS_RECORDADOS) {
+                eventosProcesados.remove(eventosProcesados.iterator().next());
+            }
+        }
+
         System.out.println("Mensaje recibido de la cola: destinatario=[" + dto.destinatario()
                 + "] medio=[" + dto.medio() + "]");
 
