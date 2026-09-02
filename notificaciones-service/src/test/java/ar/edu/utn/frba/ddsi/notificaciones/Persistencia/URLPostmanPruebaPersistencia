@@ -1,0 +1,6 @@
+Postman:
+POST
+http://localhost:8081/servicioDeNotificaciones/notificar?destinatario=eperezarevalos@frba.utn.edu.ar&mensaje=Prueba+de+persistencia&medio=EMAIL
+
+Workbench:
+SELECT * FROM db_notificaciones.notificacion ORDER BY id DESC;
