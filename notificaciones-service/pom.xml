@@ -97,6 +97,13 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!-- H2: base de datos en memoria solo para tests, no afecta MySQL -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
 </project>

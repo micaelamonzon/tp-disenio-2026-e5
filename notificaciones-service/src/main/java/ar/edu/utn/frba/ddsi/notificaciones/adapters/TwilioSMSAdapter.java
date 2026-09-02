@@ -4,12 +4,14 @@ import ar.edu.utn.frba.ddsi.notificaciones.config.TwilioConfig;
 import com.twilio.Twilio;
 import com.twilio.rest.api.v2010.account.Message;
 import com.twilio.type.PhoneNumber;
+import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 // Adapter que adapta la interfaz de Twilio SMS a la interfaz del sistema
 @Component
-public class TwilioSMSAdapter {
+@Profile("!test")
+public class TwilioSMSAdapter implements SmsAdapter {
 
     private final TwilioConfig twilioConfig;
 

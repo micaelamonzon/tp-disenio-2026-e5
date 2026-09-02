@@ -4,12 +4,14 @@ import ar.edu.utn.frba.ddsi.notificaciones.config.TwilioConfig;
 import com.sendgrid.*;
 import com.sendgrid.helpers.mail.Mail;
 import com.sendgrid.helpers.mail.objects.Content;
+import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 // Adapter que adapta la interfaz de SendGrid a la interfaz del sistema
 @Component
-public class SendGridEmailAdapter {
+@Profile("!test")
+public class SendGridEmailAdapter implements EmailAdapter {
 
     private final TwilioConfig twilioConfig;
 
