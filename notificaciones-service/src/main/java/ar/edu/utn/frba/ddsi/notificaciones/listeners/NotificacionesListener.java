@@ -6,6 +6,7 @@ import ar.edu.utn.frba.ddsi.notificaciones.models.entities.ServicioDeNotificacio
 import ar.edu.utn.frba.ddsi.notificaciones.models.entities.ServicioDeNotificaciones.Notificacion;
 import ar.edu.utn.frba.ddsi.notificaciones.models.entities.ServicioDeNotificaciones.SMS;
 import ar.edu.utn.frba.ddsi.notificaciones.models.entities.ServicioDeNotificaciones.WhatsApp;
+import ar.edu.utn.frba.ddsi.notificaciones.models.repositories.NotificacionRepository;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
@@ -13,26 +14,29 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-// Consume los mensajes que los servicios de dominio (logística)
-// publican en la cola de RabbitMQ. Es la contraparte asincrónica del
+// consume los mensajes que los servicios de dominio (logistica)
+// publican en la cola de RabbitMQ. Es la contraparte asincronica del
 // controller: recibe los mismos datos pero desde la cola en vez de HTTP,
-// y reutiliza el mismo mecanismo de envío (Notificacion + medio)
+// y reutiliza el mismo mecanismo de envio (notificacion + medio)
 @Component
 public class NotificacionesListener {
 
     private final Email email;
     private final SMS sms;
     private final WhatsApp whatsApp;
+    private final NotificacionRepository notificacionRepository;
 
     // guarda los ids de eventos ya procesados, para descartar reentregas duplicadas de RabbitMQ (idempotencia)
     // manejamos el tamaño acotado con LinkedHashSet + eliminacion del mas viejo para no crecer indefinidamente en memoria
     private final Set<String> eventosProcesados = Collections.synchronizedSet(new LinkedHashSet<>());
     private static final int MAX_EVENTOS_RECORDADOS = 1000;
 
-    public NotificacionesListener(Email email, SMS sms, WhatsApp whatsApp) {
+    public NotificacionesListener(Email email, SMS sms, WhatsApp whatsApp,
+                                  NotificacionRepository notificacionRepository) {
         this.email = email;
         this.sms = sms;
         this.whatsApp = whatsApp;
+        this.notificacionRepository = notificacionRepository;
     }
 
     @RabbitListener(queues = "${notificaciones.queue.name}")
@@ -64,5 +68,6 @@ public class NotificacionesListener {
 
         notificacion.setMedioDeNotificacion(medioDeNotificacion);
         notificacion.enviar();
+        notificacionRepository.save(notificacion); // persiste la notificación consumida de la cola
     }
 }
