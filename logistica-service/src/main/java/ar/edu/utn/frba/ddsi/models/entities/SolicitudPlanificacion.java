@@ -1,11 +1,14 @@
 package ar.edu.utn.frba.ddsi.models.entities;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
-
-@Entity
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Document(collection = "solicitudes_planificacion")
 public class SolicitudPlanificacion {
 
     @Getter
@@ -13,20 +16,16 @@ public class SolicitudPlanificacion {
     private String requestId;
 
     @Getter
-    @Enumerated(EnumType.STRING)
     private EstadoPlanificacion estado;
 
     private LocalDateTime fechaSolicitud;
     private LocalDateTime fechaRespuesta;
 
     @Getter
-    @Lob
     private String resultadoJson;
 
     @Getter
     private String mensajeError;
-
-    protected SolicitudPlanificacion() {}
 
     public SolicitudPlanificacion(String requestId) {
         this.requestId = requestId;
