@@ -24,9 +24,8 @@ import java.util.List;
 public abstract class Necesidad {
 
     private Long id;
-    private EntidadBeneficiaria entidadBeneficiaria;
+    private EntidadBeneficiaria entidadBeneficiaria; //cambair por id
     private Subcategoria subcategoria;
-
     private String descripcion;
     private boolean estaSatisfecha;
 

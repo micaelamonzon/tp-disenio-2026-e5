@@ -1,16 +1,14 @@
 package ar.edu.utn.frba.ddsi.services.impl;
 import ar.edu.utn.frba.ddsi.config.NotificacionesProperties;
 import ar.edu.utn.frba.ddsi.config.RestProperties;
-import ar.edu.utn.frba.ddsi.dto.DonacionSinSegmentarDTO;
 import ar.edu.utn.frba.ddsi.dto.InsigniaDTO;
 import ar.edu.utn.frba.ddsi.dto.MisionDTO;
 import ar.edu.utn.frba.ddsi.dto.PersonaDonanteDTO;
 import ar.edu.utn.frba.ddsi.exceptions.ResourceNotFoundException;
 import ar.edu.utn.frba.ddsi.dto.*;
-import ar.edu.utn.frba.ddsi.models.entities.categorias.CategoriaMision;
+import ar.edu.utn.frba.ddsi.models.entities.categorias.CategoriaDeMision;
 import ar.edu.utn.frba.ddsi.models.entities.categorias.TipoCategoria;
 import ar.edu.utn.frba.ddsi.models.entities.donaciones.DonacionSegmentada;
-import ar.edu.utn.frba.ddsi.models.entities.misiones.DonacionesExitosas;
 import ar.edu.utn.frba.ddsi.models.entities.misiones.Mision;
 import ar.edu.utn.frba.ddsi.models.entities.misiones.MisionEnCurso;
 import ar.edu.utn.frba.ddsi.models.entities.persona.*;
@@ -116,7 +114,7 @@ public class IncentivosServiceImpl implements IncentivosService {
         //Yo como donante, elijo una mision -> el servis de incentivos me toma el id y la mision, me guarda en su repo,
         // luego llama al servis de donaciones mandandole mi id y mi tipo (humana o juridica), para traerse las donaciones de ese id
        Mision mision  = this.convertirMisionDTO(misionDTO);
-       CategoriaMision categoria = new CategoriaMision(TipoCategoria.valueOf(tipoCategoria), TipoCategoria.obtenerCategoriaSiguiente(tipoCategoria));
+       CategoriaDeMision categoria = new CategoriaDeMision(TipoCategoria.valueOf(tipoCategoria), TipoCategoria.obtenerCategoriaSiguiente(tipoCategoria));
        categoria.agregarMision(mision);
        Donante donante = incentivosRepository.buscarDonantePorIdEnDonaciones(id,tipoDeDonante);
        if(donante != null){
@@ -230,7 +228,7 @@ public class IncentivosServiceImpl implements IncentivosService {
         }
 
         MisionDTO misionActualDTO = new MisionDTO(donante.getMisionEnCurso().getMisionActual().getNombre(),
-                                                    donante.getMisionEnCurso().getMisionActual().getEstadoDeMision(),
+                                                    donante.getMisionEnCurso().getMisionActual().getEstado(),
                                                     donante.getMisionEnCurso().getCategoriaActual().getTipo());
         return misionActualDTO;
     }
@@ -382,7 +380,7 @@ public class IncentivosServiceImpl implements IncentivosService {
 
     public List<MisionDTO> obtenerMisionDTO(List<Mision> misiones) {
         List<MisionDTO> misionesDTO = new ArrayList<>();
-        misiones.forEach(m -> misionesDTO.add(new MisionDTO(m.getNombre(), m.getEstadoDeMision(), m.getCategoria())));
+        misiones.forEach(m -> misionesDTO.add(new MisionDTO(m.getNombre(), m.getEstado(), m.getCategoria())));
         return misionesDTO;
     }
 

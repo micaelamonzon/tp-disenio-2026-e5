@@ -1,16 +1,16 @@
 package ar.edu.utn.frba.ddsi.models.entities.misiones;
 
-import ar.edu.utn.frba.ddsi.models.entities.categorias.CategoriaMision;
+import ar.edu.utn.frba.ddsi.models.entities.categorias.CategoriaDeMision;
 import lombok.Data;
 
 @Data
 public class MisionEnCurso {
     Mision misionActual;
-    CategoriaMision categoriaActual;
+    CategoriaDeMision categoriaActual;
 
-    public MisionEnCurso( Mision misionActual, CategoriaMision categoriaActual) {
+    public MisionEnCurso(Mision misionActual, CategoriaDeMision categoriaActual) {
         this.misionActual = misionActual;
-        this.categoriaActual = categoriaActual;
+        this.categoriaActual = misionActual.get;
     }
 
 }

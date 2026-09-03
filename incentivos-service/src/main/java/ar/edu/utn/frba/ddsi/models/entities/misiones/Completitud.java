@@ -42,12 +42,12 @@ public class Completitud extends Mision {
         this.setDistanciaDelObjetivo(Math.max(0, distanciaRestante));
 
         if (cumple) {
-            this.setEstadoDeMision(EstadoDeMision.COMPLETADA);
+            this.setEstado(EstadoDeMision.COMPLETADA);
             this.setFechaCompletada(java.time.LocalDate.now());
             return Boolean.TRUE;
         }
 
-        this.setEstadoDeMision(EstadoDeMision.BLOQUEADA);
+        this.setEstado(EstadoDeMision.BLOQUEADA);
         return Boolean.FALSE;
 
     }

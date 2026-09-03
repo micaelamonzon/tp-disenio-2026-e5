@@ -13,7 +13,8 @@ public enum EstadoDonacion {
     EN_TRASLADO,
     ENTREGADA,
     ENTREGA_FALLIDA,
-    VENCIDA;
+    VENCIDA,
+    INICIO;
 
     //Transiciones validas seteadas
     private static final Map<EstadoDonacion, Set<EstadoDonacion>> TRANSICIONES_VALIDAS = Map.of(

@@ -111,7 +111,7 @@ public class EstadoDonacionServiceimpl {
                 this.obtenerBienesDTO(d.getBienesDelMismoTipo()),
                 d.getFechaDeIngreso(),
                 d.getDonacionEntregada(),
-                d.getOrganizacionId()
+                d.getEntidadBeneficiariaId()
         );
     }
 

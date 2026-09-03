@@ -51,11 +51,11 @@ public class Racha extends Mision{
         }
 
         if (this.getProgreso() == 100) {
-            this.setEstadoDeMision(EstadoDeMision.COMPLETADA);
+            this.setEstado(EstadoDeMision.COMPLETADA);
             this.setFechaCompletada(java.time.LocalDate.now());
             return Boolean.TRUE;
         } else {
-            this.setEstadoDeMision(EstadoDeMision.BLOQUEADA);
+            this.setEstado(EstadoDeMision.BLOQUEADA);
             return Boolean.FALSE;
         }
     }

@@ -12,7 +12,7 @@ public class EntidadBeneficiaria {
     private Long id;
     private String razonSocial;
     private String direccion;
-    private Integer telefono;
+    private String telefono;
     private List<Representante> representantes;
     private List<Necesidad> necesidades;
 
