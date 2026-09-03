@@ -8,8 +8,9 @@ import java.util.List;
 
 @Data
 public class Representante {
+    private Long id;
     private String nombre;
     private String apellido;
-    private Integer numeroDeDocumento;
+    private Integer DNI;
     private List<MedioDeNotificacion> mediosDeNotificacion = new ArrayList<>();
 }

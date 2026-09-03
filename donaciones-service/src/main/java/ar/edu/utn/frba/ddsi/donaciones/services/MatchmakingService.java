@@ -103,7 +103,7 @@ public class MatchmakingService {
                     .getRepresentantes().get(0)
                     .getMediosDeNotificacion().get(0);
             notificar(
-                    medio.getDatoDeContacto(),
+                    medio.getContacto(),
                     "Se+le+asigno+una+nueva+donacion+a+su+entidad+beneficiaria",
                     medio.getTipoDeNotificacion().name()
             );

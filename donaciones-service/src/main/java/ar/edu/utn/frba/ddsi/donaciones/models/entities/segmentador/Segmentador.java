@@ -24,7 +24,7 @@ public class Segmentador {
             DonacionSegmentada donacionSegmentada = new DonacionSegmentada(subcategoria);
             donacionSegmentada.setFechaDeIngreso(LocalDateTime.now());
             donacionSegmentada.setDonacionEntregada(false);
-            donacionSegmentada.setOrganizacionId(null);
+            donacionSegmentada.setEntidadBeneficiariaId(null);
             listaBienes.forEach(donacionSegmentada::agregarBien); //es lo mismo que setBienesDelMismoTipo
             nuevasDonacionesSegmentadas.add(donacionSegmentada);
             donacionSinSegmentar.agregarDonacionSegmentada(donacionSegmentada);

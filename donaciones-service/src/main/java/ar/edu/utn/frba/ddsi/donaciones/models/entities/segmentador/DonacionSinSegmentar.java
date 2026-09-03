@@ -19,15 +19,15 @@ public class DonacionSinSegmentar {
   private List<Bien> bienes = new ArrayList<>();
   private List<DonacionSegmentada> donacionesSegmentadas = new ArrayList<>();
   private LocalDateTime fechaDeIngreso;
-  private Boolean donacionEntregada = false;
-  private Long organizacionId;
 
 
-  public DonacionSinSegmentar(List<Bien> bienes,LocalDateTime fechaDeIngreso,Boolean donacionEntregada, Long organizacionId){
+  private Long donante_id;
+
+
+  public DonacionSinSegmentar(List<Bien> bienes,LocalDateTime fechaDeIngreso,Boolean donacionEntregada){
     this.bienes = bienes;
     this.fechaDeIngreso = fechaDeIngreso;
-    this.donacionEntregada = donacionEntregada;
-    this.organizacionId = organizacionId;
+
   }
 
   public void agregarBien(Bien bien){
@@ -36,14 +36,5 @@ public class DonacionSinSegmentar {
   public void agregarDonacionSegmentada(DonacionSegmentada donacion) {
     this.donacionesSegmentadas.add(donacion);
   }
-  public void verificarSiDonacionFueEntregada() {
-    this.setDonacionEntregada(
-            donacionesSegmentadas.stream()
-                    .allMatch(m -> m.getEstadoActual().toString().equals("ENTREGADA"))
-    );
-  }
 
-  public Long getOrganizacionId() {
-    return this.organizacionId;
-  }
 }

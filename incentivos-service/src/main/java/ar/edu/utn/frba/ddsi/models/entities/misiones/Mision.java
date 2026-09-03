@@ -1,5 +1,6 @@
 package ar.edu.utn.frba.ddsi.models.entities.misiones;
 
+import ar.edu.utn.frba.ddsi.models.entities.categorias.CategoriaDeMision;
 import ar.edu.utn.frba.ddsi.models.entities.categorias.TipoCategoria;
 import ar.edu.utn.frba.ddsi.models.entities.donaciones.DonacionSegmentada;
 import ar.edu.utn.frba.ddsi.models.entities.persona.Insignia;
@@ -13,17 +14,21 @@ import java.util.Objects;
 @Data
 @NoArgsConstructor
 public class Mision {
+    private Long id;
     private String nombre;
-    private Integer distanciaDelObjetivo = 0;
-    private Integer progreso = 0;
-    private EstadoDeMision estadoDeMision;
+    private Integer distanciaDelObjetivo = 0; //no va
+    private Integer progreso = 0; // no va
+    private EstadoDeMision estado; // no va
     private Insignia insigniaGanadora;
+    private LocalDate fechaUltimoAvance;
     private LocalDate fechaCompletada;
-    private TipoCategoria categoria;
+    //id de categoria a la que pertenece la mision
+    private CategoriaDeMision categoria;
+    private Integer ordenSecuencial; //orden de la mision dentro de la categoria
 
-    public Mision(String nombre, EstadoDeMision estadoDeMision) {
+    public Mision(String nombre, EstadoDeMision estado) {
         this.nombre = nombre;
-        this.estadoDeMision = estadoDeMision;
+        this. estado = estado;
         this.definirInsigniaGanadora();
     }
 

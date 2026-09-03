@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.time.YearMonth;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -22,14 +21,14 @@ import java.util.stream.Collectors;
 public class Donante {
     private Long id; //id en incentivos
     private Long idEnDonaciones; //id en donaciones
+    private TipoDeDonante tipoDeDonante;
     private String nombre;
     private String apellido;
     private String razonSocial;
     private LocalDateTime fechaDeRegistro;
     private List<DonacionSegmentada> donaciones;
     private Perfil perfil;
-    private List<Mision> misiones; //historial de misiones tanto en curso como pasadas
-    private TipoDeDonante tipoDeDonante;
+    private List<Mision> misiones; //historial de misiones tanto en curso como pasada
     private MedioDeNotificacion medioDeNotificacionPredeterminado;
     private MisionEnCurso misionEnCurso;
 
@@ -51,7 +50,7 @@ public class Donante {
 
     public Integer calcularMisionesCumplidasEn(YearMonth periodo) {
         return (int) this.misiones.stream()
-                .filter(m -> m.getEstadoDeMision() == EstadoDeMision.COMPLETADA) 
+                .filter(m -> m.getEstado() == EstadoDeMision.COMPLETADA)
                 .filter(m -> m.getFechaCompletada() != null)
                 .filter(m -> YearMonth.from(m.getFechaCompletada()).equals(periodo))
                 .count();
@@ -73,7 +72,7 @@ public class Donante {
     public List<Mision> obtenerMisionesCompletadas(){
 
        List<Mision> misionesCompletadasDeLaCategoria = this.getMisionEnCurso().getCategoriaActual().obtenerMisionesCompletadas(this.getDonaciones());
-        return this.misiones.stream().filter(m -> m.getEstadoDeMision() == EstadoDeMision.COMPLETADA).collect(Collectors.toList()) ;
+        return this.misiones.stream().filter(m -> m.getEstado() == EstadoDeMision.COMPLETADA).collect(Collectors.toList()) ;
     }
 
     public long cantidadDonacionesEnMes(YearMonth mes) {

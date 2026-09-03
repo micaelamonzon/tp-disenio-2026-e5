@@ -27,14 +27,14 @@ public class HabilDonador extends Mision{
            if(donacionQueCumple != null){
                this.setProgreso(100);
                this.setDistanciaDelObjetivo(0);
-               this.setEstadoDeMision(EstadoDeMision.COMPLETADA);
+               this.setEstado(EstadoDeMision.COMPLETADA);
                this.setFechaCompletada(java.time.LocalDate.now());
                return Boolean.TRUE;
            }
 
            this.setProgreso(0);
            this.setDistanciaDelObjetivo(100);
-           this.setEstadoDeMision(EstadoDeMision.BLOQUEADA);
+           this.setEstado(EstadoDeMision.BLOQUEADA);
            return Boolean.FALSE;
     }
 

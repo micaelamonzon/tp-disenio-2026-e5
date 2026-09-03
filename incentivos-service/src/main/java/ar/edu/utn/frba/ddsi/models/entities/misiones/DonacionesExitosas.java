@@ -10,7 +10,7 @@ import java.util.Objects;
 @Data
 public class DonacionesExitosas extends Mision{
     private Integer cantidadDeDonaciones;
-    private Long entidadBeneficiariaId;
+    private Long entidadBeneficiariaId; //sacar esto
 
     public DonacionesExitosas(String nombre,Integer cantidadDeDonaciones){
         this.setNombre(nombre);
@@ -36,11 +36,11 @@ public class DonacionesExitosas extends Mision{
             }
         }
         if(cantInicial >= cantidadDeDonaciones){
-            this.setEstadoDeMision(EstadoDeMision.COMPLETADA);
+            this.setEstado(EstadoDeMision.COMPLETADA);
             this.setFechaCompletada(java.time.LocalDate.now());
             return Boolean.TRUE;
         }else{
-            this.setEstadoDeMision(EstadoDeMision.BLOQUEADA);
+            this.setEstado(EstadoDeMision.BLOQUEADA);
             return Boolean.FALSE;
         }
 

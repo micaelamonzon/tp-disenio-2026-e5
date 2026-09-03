@@ -9,12 +9,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Data
-public class CategoriaMision {
+public class CategoriaDeMision {
+    Long id;
     TipoCategoria tipo; //tipo o nombre de categoria
     List<Mision> misiones; //lista de misiones consecutivas a cumplir -> se llena en el servis de incentivos
     TipoCategoria categoriaSiguiente;
 
-    public CategoriaMision(TipoCategoria tipo, TipoCategoria categoriaSiguiente) {
+    public CategoriaDeMision(TipoCategoria tipo, TipoCategoria categoriaSiguiente) {
         this.tipo = tipo;
         this.misiones = new ArrayList<>();
         this.categoriaSiguiente = categoriaSiguiente;
@@ -37,7 +38,7 @@ public class CategoriaMision {
     public void desbloquearMisiones(List<DonacionSegmentada> donaciones){
         for(int i = 0; i < misiones.size(); i++){
             if(misiones.get(i).seCompletoLaMision(donaciones) == Boolean.TRUE && i+1 < misiones.size()){
-                misiones.get(i+1).setEstadoDeMision(EstadoDeMision.DESBLOQUEADA);
+                misiones.get(i+1).setEstado(EstadoDeMision.DESBLOQUEADA);
             }
         }
     }

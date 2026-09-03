@@ -1,6 +1,8 @@
 package ar.edu.utn.frba.ddsi.models.entities.donaciones;
 
+import ar.edu.utn.frba.ddsi.models.entities.categorias.CategoriaDeMision;
 import ar.edu.utn.frba.ddsi.models.entities.persona.Bien;
+import ar.edu.utn.frba.ddsi.models.entities.persona.Categoria;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -13,6 +15,8 @@ public class DonacionSegmentada {
     private LocalDateTime fechaDeIngreso;
     private Boolean donacionEntregada;
     private Long entidadBeneficiariaId;
+    private Integer cantidadDeBienes;
+    private Categoria categoria;
 
     public DonacionSegmentada(List<Bien> bienes, LocalDateTime fechaDeIngreso, Boolean donacionEntregada, Long entidadBeneficiariaId){
         this.bienes = bienes;

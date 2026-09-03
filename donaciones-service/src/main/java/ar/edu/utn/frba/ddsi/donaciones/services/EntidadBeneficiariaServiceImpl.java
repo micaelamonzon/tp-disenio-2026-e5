@@ -27,7 +27,7 @@ public class EntidadBeneficiariaServiceImpl implements EntidadBeneficiariaServic
                     .map(r -> new RepresentanteDTO(
                             r.getNombre(),
                             r.getApellido(),
-                            String.valueOf(r.getNumeroDeDocumento()),
+                            String.valueOf(r.getDNI()),
                             r.getMediosDeNotificacion()
                     ))
                     .toList();
@@ -51,7 +51,7 @@ public class EntidadBeneficiariaServiceImpl implements EntidadBeneficiariaServic
                     .map(r -> new RepresentanteDTO(
                             r.getNombre(),
                             r.getApellido(),
-                            String.valueOf(r.getNumeroDeDocumento()),
+                            String.valueOf(r.getDNI()),
                             r.getMediosDeNotificacion()
                     ))
                     .toList();
@@ -78,7 +78,7 @@ public class EntidadBeneficiariaServiceImpl implements EntidadBeneficiariaServic
                     Representante r = new Representante();
                     r.setNombre(dto.nombre());
                     r.setApellido(dto.apellido());
-                    r.setNumeroDeDocumento(Integer.parseInt(dto.numeroDeDocumento()));
+                    r.setDNI(Integer.parseInt(dto.numeroDeDocumento()));
                     r.setMediosDeNotificacion(dto.mediosDeNotificacion());
                     return r;
                 })

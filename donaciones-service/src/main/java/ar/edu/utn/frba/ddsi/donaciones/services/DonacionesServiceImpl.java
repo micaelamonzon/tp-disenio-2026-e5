@@ -142,9 +142,8 @@ public class DonacionesServiceImpl implements DonacionesService {
                     persona.getId(),
                     persona.getNombre(),
                     persona.getApellido(),
-                    persona.getNumeroDeDocumento(),
+                    persona.getDNI(),
                     persona.getGenero(),
-                    persona.getEdad(),
                     persona.getDireccion(),
                     donacionesDTO,
                     mediosDTO,
@@ -217,7 +216,7 @@ public class DonacionesServiceImpl implements DonacionesService {
                             this.obtenerBienesDTO(d.getBienesDelMismoTipo()),
                             d.getFechaDeIngreso(),
                             d.getDonacionEntregada(),
-                            d.getOrganizacionId()
+                            d.getEntidadBeneficiariaId()
                     )
                 );
             }
@@ -244,9 +243,8 @@ public class DonacionesServiceImpl implements DonacionesService {
                 personaHumana.getId(),
                 personaHumana.getNombre(),
                 personaHumana.getApellido(),
-                personaHumana.getNumeroDeDocumento(),
+                personaHumana.getDNI(),
                 personaHumana.getGenero(),
-                personaHumana.getEdad(),
                 personaHumana.getDireccion(),
                 donacionesDTO,
                 mediosDTO,
@@ -282,7 +280,6 @@ public class DonacionesServiceImpl implements DonacionesService {
         PersonaHumana nuevaPersona = new PersonaHumana(
                 body.nombre(),
                 body.apellido(),
-                body.edad(),
                 body.DNI(),
                 body.genero(),
                 body.direccion()
@@ -309,7 +306,7 @@ public class DonacionesServiceImpl implements DonacionesService {
         if (humano.getMedioDeNotificacionPredeterminado() != null) {
             medioDTO = new MedioDeNotificacionDTO(
                     humano.getMedioDeNotificacionPredeterminado().getTipoDeNotificacion(),
-                    humano.getMedioDeNotificacionPredeterminado().getDatoDeContacto()
+                    humano.getMedioDeNotificacionPredeterminado().getContacto()
             );
         }
 
@@ -322,9 +319,8 @@ public class DonacionesServiceImpl implements DonacionesService {
                 humano.getId(),
                 humano.getNombre(),
                 humano.getApellido(),
-                humano.getNumeroDeDocumento(),
+                humano.getDNI(),
                 humano.getGenero(),
-                humano.getEdad(),
                 humano.getDireccion(),
                 donacionesDTO,
                 mediosDTO,
@@ -373,7 +369,7 @@ public class DonacionesServiceImpl implements DonacionesService {
         }
 
         List<Bien> bienes = this.convertirBienesDTO(body.bienes());
-        DonacionSinSegmentar nuevaDonacion = new DonacionSinSegmentar(bienes, LocalDateTime.now(),false,null);
+        DonacionSinSegmentar nuevaDonacion = new DonacionSinSegmentar(bienes, LocalDateTime.now(),false);
 
         personaHumana.agregarDonacion(nuevaDonacion);
 
@@ -391,7 +387,7 @@ public class DonacionesServiceImpl implements DonacionesService {
         // Notificar al donante que su donación fue registrada
         if (personaHumana.getMedioDeNotificacionPredeterminado() != null) {
             this.notificar(
-                    personaHumana.getMedioDeNotificacionPredeterminado().getDatoDeContacto(),
+                    personaHumana.getMedioDeNotificacionPredeterminado().getContacto(),
                     "Tu+donacion+fue+registrada+exitosamente",
                     personaHumana.getMedioDeNotificacionPredeterminado().getTipoDeNotificacion().name()
             );
@@ -410,7 +406,7 @@ public class DonacionesServiceImpl implements DonacionesService {
         }
 
         List<Bien> bienes = this.convertirBienesDTO(body.bienes());
-        DonacionSinSegmentar nuevaDonacion = new DonacionSinSegmentar(bienes, LocalDateTime.now(),false,null);
+        DonacionSinSegmentar nuevaDonacion = new DonacionSinSegmentar(bienes, LocalDateTime.now(),false);
 
         personaJuridica.agregarDonacion(nuevaDonacion);
 
@@ -428,7 +424,7 @@ public class DonacionesServiceImpl implements DonacionesService {
         // Notificar al representante de la persona jurídica usando el primer medio disponible
         if (!personaJuridica.getMediosDeNotificacion().isEmpty()) {
             notificar(
-                    personaJuridica.getMediosDeNotificacion().get(0).getDatoDeContacto(),
+                    personaJuridica.getMediosDeNotificacion().get(0).getContacto(),
                     "Tu+donacion+fue+registrada+exitosamente",
                     personaJuridica.getMediosDeNotificacion().get(0).getTipoDeNotificacion().name()
             );
@@ -536,8 +532,7 @@ public class DonacionesServiceImpl implements DonacionesService {
         // Solo actualizamos los campos que vienen con valor
         if (request.nombre() != null) personaHumana.setNombre(request.nombre());
         if (request.apellido() != null) personaHumana.setApellido(request.apellido());
-        if (request.edad() != null) personaHumana.setEdad(request.edad());
-        if (request.DNI() != null) personaHumana.setNumeroDeDocumento(request.DNI());
+        if (request.DNI() != null) personaHumana.setDNI(request.DNI());
         if (request.genero() != null) personaHumana.setGenero(request.genero());
         if (request.direccion() != null) personaHumana.setDireccion(request.direccion());
         if(request.mediosDeNotificacion() != null && !request.mediosDeNotificacion().isEmpty()){
@@ -552,7 +547,7 @@ public class DonacionesServiceImpl implements DonacionesService {
         if (personaHumana.getMedioDeNotificacionPredeterminado() != null) {
             medioDTO = new MedioDeNotificacionDTO(
                     personaHumana.getMedioDeNotificacionPredeterminado().getTipoDeNotificacion(),
-                    personaHumana.getMedioDeNotificacionPredeterminado().getDatoDeContacto()
+                    personaHumana.getMedioDeNotificacionPredeterminado().getContacto()
             );
         }
 
@@ -560,9 +555,8 @@ public class DonacionesServiceImpl implements DonacionesService {
                 personaHumana.getId(),
                 personaHumana.getNombre(),
                 personaHumana.getApellido(),
-                personaHumana.getNumeroDeDocumento(),
+                personaHumana.getDNI(),
                 personaHumana.getGenero(),
-                personaHumana.getEdad(),
                 personaHumana.getDireccion(),
                 donacionesDTO,
                 mediosDTO,
@@ -679,8 +673,7 @@ public class DonacionesServiceImpl implements DonacionesService {
                     return new DonacionSinSegmentar(
                             bienes,
                             donacion.fechaDeIngreso(),
-                            false,
-                            null
+                            false
                     );
                 //}).toList();
                 }).collect(java.util.stream.Collectors.toCollection(ArrayList::new));
@@ -742,7 +735,7 @@ public class DonacionesServiceImpl implements DonacionesService {
                         this.obtenerBienesDTO(donacionSegmentada.getBienesDelMismoTipo()),
                         donacionSegmentada.getFechaDeIngreso(),
                         donacionSegmentada.getDonacionEntregada(),
-                        donacionSegmentada.getOrganizacionId()
+                        donacionSegmentada.getEntidadBeneficiariaId()
 
                 ))
                 .collect(Collectors.toList());
@@ -754,7 +747,7 @@ public class DonacionesServiceImpl implements DonacionesService {
     }
     public MedioDeNotificacionDTO obtenerAMedioDTO(MedioDeNotificacion medio){
         if(medio == null) return null;
-        return new MedioDeNotificacionDTO(medio.getTipoDeNotificacion(), medio.getDatoDeContacto());
+        return new MedioDeNotificacionDTO(medio.getTipoDeNotificacion(), medio.getContacto());
     }
 
     public void cambiarMediosDeNotificacion(List<MedioDeNotificacionDTO> nuevos, List<MedioDeNotificacion> viejos){
@@ -762,7 +755,7 @@ public class DonacionesServiceImpl implements DonacionesService {
             viejos.stream()
                     .filter(viejo -> viejo.getTipoDeNotificacion().equals(dto.tipoDeNotificacion()))
                     .findFirst()
-                    .ifPresent(medioViejo -> medioViejo.setDatoDeContacto(dto.datoDeContacto()));
+                    .ifPresent(medioViejo -> medioViejo.setContacto(dto.datoDeContacto()));
         });
     }
 
@@ -777,7 +770,7 @@ public class DonacionesServiceImpl implements DonacionesService {
                         this.obtenerBienesDTO(d.getBienesDelMismoTipo()),
                         d.getFechaDeIngreso(),
                         d.getDonacionEntregada(),
-                        d.getOrganizacionId()
+                        d.getEntidadBeneficiariaId()
                         ));});
         return dtos;
     }

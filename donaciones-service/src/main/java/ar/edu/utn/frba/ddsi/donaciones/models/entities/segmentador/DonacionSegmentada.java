@@ -3,8 +3,6 @@ package ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante.TipoDonante;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.Bien;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.Subcategoria;
-import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.CambioEstado;
-import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.EstadoDonacion;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -24,7 +22,7 @@ public class DonacionSegmentada {
     private List<CambioEstado> historial = new ArrayList<>();
     private LocalDateTime fechaDeIngreso;
     private Boolean donacionEntregada;
-    private Long organizacionId;
+    private Long entidadBeneficiariaId;
 
     public DonacionSegmentada(Subcategoria subcategoria) {
         this.subcategoria = subcategoria;
