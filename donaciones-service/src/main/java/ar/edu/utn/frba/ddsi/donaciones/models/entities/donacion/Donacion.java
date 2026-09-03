@@ -1,6 +1,5 @@
 package ar.edu.utn.frba.ddsi.donaciones.models.entities.donacion;
 
-import ar.edu.utn.frba.ddsi.donaciones.dto.PersonaDonanteDTO;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.Bien;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -22,13 +21,13 @@ public class Donacion {
     private Long id;
     private String descripcion;
     private Estado estado;
-    private PersonaDonanteDTO donante;
+    private Long donante;
     private Bien bien;
 
     private LocalDate fechaEntrega;
 
     //TODO: Porque está  PersonaDonanteDTO acá??
-    public Donacion(String descripcion, PersonaDonanteDTO donante, Bien bien, LocalDate fechaEntrega) {
+    public Donacion(String descripcion, Long donante, Bien bien, LocalDate fechaEntrega) {
         this.descripcion = descripcion;
         this.donante = donante;
         this.bien = bien;

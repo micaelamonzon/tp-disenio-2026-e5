@@ -10,23 +10,29 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
+import ar.edu.utn.frba.ddsi.repository.RepositoryCamiones;
+
+
 
 @Service
 public class CamionServiceImpl implements CamionService {
 
-    private final Map<Long, Camion> camiones = new HashMap<>();
-    private final AtomicLong contador = new AtomicLong(1);
+    private final RepositoryCamiones repositoryCamiones;
+
+    public CamionServiceImpl(RepositoryCamiones repositoryCamiones) {
+        this.repositoryCamiones = repositoryCamiones;
+    }
 
     @Override
     public List<Camion> obtenerCamionesDisponibles() {
-        return camiones.values().stream()
+        return repositoryCamiones.findAll().stream()
                 .filter(camion -> Boolean.TRUE.equals(camion.getDisponible()))
                 .toList();
     }
 
     @Override
     public CamionResponseDTO crearCamion(CamionRequestDTO request) {
-        boolean patenteExistente = camiones.values().stream()
+        boolean patenteExistente = repositoryCamiones.findAll().stream()
                 .anyMatch(c -> c.getPatente().equals(request.getPatente()));
         if (patenteExistente) {
             throw new IllegalStateException("Ya existe un camión con esa patente: " + request.getPatente());
@@ -40,49 +46,47 @@ public class CamionServiceImpl implements CamionService {
                 request.getCapacidadCarga(),
                 disponible
         );
-        Long id = contador.getAndIncrement();
-        camion.setId(id);
-        camiones.put(id, camion);
+        repositoryCamiones.save(camion); // ← MongoDB genera el id solo
         return toDTO(camion);
     }
 
     @Override
     public List<CamionResponseDTO> listarCamiones(Boolean disponible) {
-        return camiones.values().stream()
+        return repositoryCamiones.findAll().stream()
                 .filter(c -> disponible == null || disponible.equals(c.getDisponible()))
                 .map(this::toDTO)
                 .toList();
     }
 
     @Override
-    public CamionResponseDTO obtenerCamionPorId(Long id) {
+    public CamionResponseDTO obtenerCamionPorId(String id) {
         return toDTO(buscar(id));
     }
 
     @Override
-    public CamionResponseDTO actualizarCamion(Long id, CamionRequestDTO request) {
+    public CamionResponseDTO actualizarCamion(String id, CamionRequestDTO request) {
         Camion camion = buscar(id);
         camion.setPatente(request.getPatente());
         camion.setVolumen(request.getVolumen());
         camion.setAltura(request.getAltura());
         camion.setCapacidadCarga(request.getCapacidadCarga());
         camion.setDisponible(request.getDisponible());
+        repositoryCamiones.save(camion); // ← persiste cambios
         return toDTO(camion);
     }
 
     @Override
-    public void eliminarCamion(Long id) {
+    public void eliminarCamion(String id) {
         Camion camion = buscar(id);
-        if (camion.getRuta() != null) {
+        if (camion.getRutaId() != null) {
             throw new IllegalStateException("No se puede eliminar un camión con ruta asignada");
         }
-        camiones.remove(id);
+        repositoryCamiones.deleteById(id);
     }
 
-    private Camion buscar(Long id) {
-        Camion c = camiones.get(id);
-        if (c == null) throw new RuntimeException("Camión no encontrado: " + id);
-        return c;
+    private Camion buscar(String id) {
+        return repositoryCamiones.findById(id)
+                .orElseThrow(() -> new RuntimeException("Camión no encontrado: " + id));
     }
 
     private CamionResponseDTO toDTO(Camion camion) {
@@ -93,7 +97,7 @@ public class CamionServiceImpl implements CamionService {
                 camion.getAltura(),
                 camion.getCapacidadCarga(),
                 camion.getDisponible(),
-                camion.getRuta() != null ? camion.getRuta().id : null
+                camion.getRutaId() // ← ya es String directo
         );
     }
 }

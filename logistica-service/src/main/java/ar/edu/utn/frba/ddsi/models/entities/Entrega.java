@@ -1,34 +1,38 @@
 package ar.edu.utn.frba.ddsi.models.entities;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Getter
+@NoArgsConstructor
+@Document(collection = "entregas")
 public class Entrega {
-    private Long id;
-    private List<Long> donacionesIds; // referencia a donaciones segementadas, de donaciones-service
+    @Id
+    private String id;
+    private List<Long> donacionesIds = new ArrayList<>();
     private Long entidadBeneficiariaId;
-    private Long donanteId; // referencia al donante, de donaciones-service
+    private Long donanteId;
     private EstadoEntrega estadoActual;
     private LocalDateTime fechaEntrega;
-    private List<String> fotosUrl = new ArrayList<>(); // URLs de fotos de recepción
+    private List<String> fotosUrl = new ArrayList<>();
     private String motivoNoRecepcion;
-    private String latitud; //de la entidadBenficiaria
-    private String longitud; //de la entidadBenficiaria
-    private String direccion;  //de la entidadBenficiaria
-
+    private String latitud;
+    private String longitud;
+    private String direccion;
 
     public Entrega(List<Long> donacionesIds, Long entidadBeneficiariaId, Long donanteId) {
-        this.entidadBeneficiariaId = entidadBeneficiariaId;
         this.donacionesIds = donacionesIds;
+        this.entidadBeneficiariaId = entidadBeneficiariaId;
         this.donanteId = donanteId;
         this.estadoActual = EstadoEntrega.PENDIENTE;
         this.fechaEntrega = LocalDateTime.now();
     }
-
-    public void setId(Long id) { this.id = id; }
 
     public void iniciarTraslado() {
         estadoActual.validarTransicion(EstadoEntrega.EN_CAMINO);

@@ -36,7 +36,7 @@ public class CamionController {
     }
 
     @GetMapping("/camiones/{id}")
-    public ResponseEntity<CamionResponseDTO> obtenerCamion(@PathVariable Long id) {
+    public ResponseEntity<CamionResponseDTO> obtenerCamion(@PathVariable String id) {
         try {
             return ResponseEntity.ok(camionService.obtenerCamionPorId(id));
         } catch (RuntimeException e) {
@@ -46,7 +46,7 @@ public class CamionController {
 
     @PutMapping("/camiones/{id}")
     public ResponseEntity<CamionResponseDTO> actualizarCamion(
-            @PathVariable Long id,
+            @PathVariable String id,
             @RequestBody CamionRequestDTO request) {
         try {
             return ResponseEntity.ok(camionService.actualizarCamion(id, request));
@@ -58,7 +58,7 @@ public class CamionController {
     }
 
     @DeleteMapping("/camiones/{id}")
-    public ResponseEntity<Void> eliminarCamion(@PathVariable Long id) {
+    public ResponseEntity<Void> eliminarCamion(@PathVariable String id) {
         try {
             camionService.eliminarCamion(id);
             return ResponseEntity.noContent().build();

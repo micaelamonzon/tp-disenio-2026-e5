@@ -1,15 +1,25 @@
 package ar.edu.utn.frba.ddsi.models.entities;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
+@Data
+@NoArgsConstructor
+@Document(collection = "rutas")
 public class Ruta {
-    public String id;
-    public LocalDate fecha;
-    public List<PuntosDeEntrega> puntosDeEntrega;
-    public LocalTime horaEstimadaInicio;
-    public LocalTime horaEstimadaFin;
-    public Integer distanciaTotal;
-    public Integer duracionTotalMins;
+    @Id
+    private String id;
+    private String camionId;
+    private LocalDate fecha;
+    private List<PuntosDeEntrega> puntosDeEntrega;
+    private LocalTime horaEstimadaInicio;
+    private LocalTime horaEstimadaFin;
+    private Integer distanciaTotal;
+    private Integer duracionTotalMins;
 }

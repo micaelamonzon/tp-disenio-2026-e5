@@ -5,8 +5,9 @@ import ar.edu.utn.frba.ddsi.config.RestProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration;
 
-@SpringBootApplication
+@SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
 @EnableConfigurationProperties({RestProperties.class, NotificacionesProperties.class})
 public class LogisticaServiceAppliacion {
     public static void main ( String[] args )

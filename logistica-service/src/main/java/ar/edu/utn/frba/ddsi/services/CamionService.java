@@ -14,9 +14,9 @@ public interface CamionService {
 
     List<CamionResponseDTO> listarCamiones(Boolean disponible);
 
-    CamionResponseDTO obtenerCamionPorId(Long id);
+    CamionResponseDTO obtenerCamionPorId(String id);
 
-    CamionResponseDTO actualizarCamion(Long id, CamionRequestDTO request);
+    CamionResponseDTO actualizarCamion(String id, CamionRequestDTO request);
 
-    void eliminarCamion(Long id);
+    void eliminarCamion(String id);
 }
