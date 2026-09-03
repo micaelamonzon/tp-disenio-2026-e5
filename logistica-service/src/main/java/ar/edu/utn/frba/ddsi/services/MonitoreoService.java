@@ -8,7 +8,7 @@ import java.util.List;
 public interface MonitoreoService {
 
 
-    PosicionDTO obtenerPosicionActualDeCamion(Long id, PosicionDTO posicionDTO);
+    PosicionDTO obtenerPosicionActualDeCamion(String id, PosicionDTO posicionDTO);
 
-    List<PosicionDTO> obtenerRecorrido(Long idCamion);
+    List<PosicionDTO> obtenerRecorrido(String idCamion);
 }

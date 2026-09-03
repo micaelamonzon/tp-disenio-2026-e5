@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public record EntregaDTO(
-        Long id,
+        String id,
         List<Long> donacionesIds,        // ids de las donaciones segmentadas (donaciones-service)
         Long entidadBeneficiariaId,
         String estadoActual,

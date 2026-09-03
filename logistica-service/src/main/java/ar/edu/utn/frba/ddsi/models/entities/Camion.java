@@ -1,41 +1,43 @@
 package ar.edu.utn.frba.ddsi.models.entities;
 
 import lombok.Data;
-import lombok.Getter;
+import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Data
-@Getter
+@NoArgsConstructor
+@Document(collection = "camiones")
 public class Camion {
-    private Long id;
+    @Id
+    private String id;
+    @Indexed(unique = true)
     private String patente;
     private Double volumen;
     private Double altura;
     private Double capacidadCarga;
-    private Ruta ruta;
-    private List<Posicion> posiciones;
-    Boolean disponible;
+    private Boolean disponible;
+    private List<Posicion> posiciones = new ArrayList<>();
+    private String rutaId;
 
-    public Camion() {
-    }
-
-    public Camion(String patente, Double volumen, Double altura, Double capacidadCarga, Boolean disponible){
+    public Camion(String patente, Double volumen, Double altura, Double capacidadCarga, Boolean disponible) {
         this.patente = patente;
         this.volumen = volumen;
         this.altura = altura;
         this.capacidadCarga = capacidadCarga;
-        this.posiciones = new ArrayList<>();
         this.disponible = disponible;
+        this.posiciones = new ArrayList<>();
     }
 
-    public Posicion ultimaPosicion(){
+    public Posicion ultimaPosicion() {
         return this.posiciones.get(this.posiciones.size() - 1);
     }
 
-    public void agregarPosicion(Posicion posicion){
+    public void agregarPosicion(Posicion posicion) {
         this.posiciones.add(posicion);
     }
-    
 }
