@@ -1,54 +1,29 @@
 package ar.edu.utn.frba.ddsi.models.entities;
 
-import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Getter
 @NoArgsConstructor
-@Entity
-@Table(name = "entrega")
+@Document(collection = "entregas")
 public class Entrega {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @ElementCollection
-    @CollectionTable(name = "entrega_donacion", joinColumns = @JoinColumn(name = "entrega_id"))
-    @Column(name = "donacion_id")
+    private String id;
     private List<Long> donacionesIds = new ArrayList<>();
-
-    @Column(name = "entidad_beneficiaria_id")
     private Long entidadBeneficiariaId;
-
-    @Column(name = "donante_id")
     private Long donanteId;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "estado_actual")
     private EstadoEntrega estadoActual;
-
-    @Column(name = "fecha_entrega")
     private LocalDateTime fechaEntrega;
-
-    @ElementCollection
-    @CollectionTable(name = "entrega_fotos", joinColumns = @JoinColumn(name = "entrega_id"))
-    @Column(name = "foto_url")
     private List<String> fotosUrl = new ArrayList<>();
-
-    @Column(name = "motivo_no_recepcion")
     private String motivoNoRecepcion;
-
-    @Column(name = "latitud")
     private String latitud;
-
-    @Column(name = "longitud")
     private String longitud;
-
-    @Column(name = "direccion")
     private String direccion;
 
     public Entrega(List<Long> donacionesIds, Long entidadBeneficiariaId, Long donanteId) {

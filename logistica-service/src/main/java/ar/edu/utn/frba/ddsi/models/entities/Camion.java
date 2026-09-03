@@ -1,42 +1,28 @@
 package ar.edu.utn.frba.ddsi.models.entities;
 
-import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
+
 import java.util.ArrayList;
 import java.util.List;
 
 @Data
 @NoArgsConstructor
-@Entity
-@Table(name = "camion")
+@Document(collection = "camiones")
 public class Camion {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(name = "patente", unique = true)
+    private String id;
+    @Indexed(unique = true)
     private String patente;
-
-    @Column(name = "volumen")
     private Double volumen;
-
-    @Column(name = "altura")
     private Double altura;
-
-    @Column(name = "capacidad_carga")
     private Double capacidadCarga;
-
-    @Column(name = "disponible")
     private Boolean disponible;
-
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinColumn(name = "camion_id")
     private List<Posicion> posiciones = new ArrayList<>();
-
-    @OneToOne(mappedBy = "camion")
-    private Ruta ruta;
+    private String rutaId;
 
     public Camion(String patente, Double volumen, Double altura, Double capacidadCarga, Boolean disponible) {
         this.patente = patente;

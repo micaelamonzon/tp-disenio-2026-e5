@@ -25,7 +25,7 @@ public class MonitoreoController {
 
     //Endpoint para registrar la posición de un camión en tiempo real, es lo que recibimos del GPS.
     @PostMapping("camion/{idCamion}/posicionActual")
-    public ResponseEntity<PosicionDTO> obtenerPosicionActual(@PathVariable Long idCamion, @RequestBody PosicionDTO posicionDTO) {
+    public ResponseEntity<PosicionDTO> obtenerPosicionActual(@PathVariable String idCamion, @RequestBody PosicionDTO posicionDTO) {
 
         PosicionDTO posicionActual = monitoreoService.obtenerPosicionActualDeCamion(idCamion, posicionDTO);
         if (posicionActual == null) {
@@ -36,7 +36,7 @@ public class MonitoreoController {
 
     //Endpoint para mostrar la posición actual de un camion dado su id (Para mostrar en el mapa)
     @GetMapping("camion/{idCamion}/recorrido")
-    public ResponseEntity<List<PosicionDTO>> obtenerRecorrido(@PathVariable Long idCamion) {
+    public ResponseEntity<List<PosicionDTO>> obtenerRecorrido(@PathVariable String idCamion) {
         List<PosicionDTO> recorrido = monitoreoService.obtenerRecorrido(idCamion);
         if (recorrido == null) {
             return ResponseEntity.notFound().build();
