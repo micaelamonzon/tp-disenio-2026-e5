@@ -14,39 +14,33 @@ public class MonitoreoServiceImpl implements MonitoreoService {
 
     private final RepositoryCamiones repositoryCamiones;
 
-
     public MonitoreoServiceImpl(RepositoryCamiones repositoryCamiones) {
         this.repositoryCamiones = repositoryCamiones;
     }
 
     @Override
-    public PosicionDTO obtenerPosicionActualDeCamion(Long id, PosicionDTO posicionDTO){
-
-        Camion camion = this.repositoryCamiones.findById(id);
+    public PosicionDTO obtenerPosicionActualDeCamion(Long id, PosicionDTO posicionDTO) {
+        Camion camion = this.repositoryCamiones.findById(id)
+                .orElseThrow(() -> new RuntimeException("Camión no encontrado: " + id));
 
         Posicion nuevaPosicion = new Posicion(posicionDTO.latitud(), posicionDTO.longitud());
-
         camion.agregarPosicion(nuevaPosicion);
-
+        repositoryCamiones.save(camion); // ← persiste la nueva posición en MySQL
 
         return posicionDTO;
-
     }
 
     @Override
-    public List<PosicionDTO> obtenerRecorrido(Long idCamion){
-        Camion camion = this.repositoryCamiones.findById(idCamion);
-        List<Posicion> posiciones = camion.getPosiciones();
-        List<PosicionDTO> posicionesDTO = posiciones.stream().map(this::mapPoscionDTO).toList();
+    public List<PosicionDTO> obtenerRecorrido(Long idCamion) {
+        Camion camion = this.repositoryCamiones.findById(idCamion)
+                .orElseThrow(() -> new RuntimeException("Camión no encontrado: " + idCamion));
 
-        return posicionesDTO;
+        return camion.getPosiciones().stream()
+                .map(this::mapPoscionDTO)
+                .toList();
     }
 
-    public PosicionDTO mapPoscionDTO(Posicion posicion){
-        PosicionDTO posicionDTO = new PosicionDTO(posicion.getLatitud(), posicion.getLongitud());
-
-        return posicionDTO;
+    public PosicionDTO mapPoscionDTO(Posicion posicion) {
+        return new PosicionDTO(posicion.getLatitud(), posicion.getLongitud());
     }
-
-
 }

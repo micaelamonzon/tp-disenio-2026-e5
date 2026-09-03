@@ -93,7 +93,7 @@ public class CamionServiceImpl implements CamionService {
                 camion.getAltura(),
                 camion.getCapacidadCarga(),
                 camion.getDisponible(),
-                camion.getRuta() != null ? camion.getRuta().id : null
+                camion.getRuta() != null ? camion.getRuta().getId().toString() : null
         );
     }
 }
