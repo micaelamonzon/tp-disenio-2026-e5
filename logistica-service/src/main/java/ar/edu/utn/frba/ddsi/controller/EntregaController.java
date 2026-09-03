@@ -36,7 +36,7 @@ public class EntregaController {
     }
     @PatchMapping("/entrega/{id}/iniciarTraslado")
     public ResponseEntity<EntregaDTO> iniciarTraslado(
-            @PathVariable Long id,
+            @PathVariable String id,
             @RequestParam String responsableId) {
         try {
             return ResponseEntity.ok(entregaService.iniciarTraslado(id,responsableId));
@@ -47,7 +47,7 @@ public class EntregaController {
 
     @PatchMapping("/entrega/{id}/confirmarRecepcion")
     public ResponseEntity<EntregaDTO> confirmarRecepcion(
-            @PathVariable Long id,
+            @PathVariable String id,
             @RequestParam String responsableId,
             @RequestBody ConfirmarRecepcionDTO body) {
         try {
@@ -59,7 +59,7 @@ public class EntregaController {
     }
     @PatchMapping("/entrega/{id}/marcarNoRecibida")
     public ResponseEntity<EntregaDTO> noRecibida(
-            @PathVariable Long id,
+            @PathVariable String id,
             @RequestParam String responsableId,
             @RequestBody ConfirmarRecepcionDTO body) {
         try {
@@ -71,7 +71,7 @@ public class EntregaController {
     }
     @PatchMapping("/entrega/{id}/volverAPendiente")
     public ResponseEntity<EntregaDTO> volverAPendiente(
-            @PathVariable Long id) {
+            @PathVariable String id) {
         try {
             return ResponseEntity.ok(entregaService.volverAPendiente(id));
         } catch (IllegalStateException e) {
@@ -82,7 +82,7 @@ public class EntregaController {
     // El chofer informa el comienzo de su ruta: todas las entregas pasan a En traslado
     @PatchMapping("/ruta/iniciar")
     public ResponseEntity<List<EntregaDTO>> iniciarRuta(
-            @RequestParam List<Long> entregaIds,
+            @RequestParam List<String> entregaIds,
             @RequestParam String choferId) {
         try {
             return ResponseEntity.ok(entregaService.iniciarRuta(entregaIds, choferId));

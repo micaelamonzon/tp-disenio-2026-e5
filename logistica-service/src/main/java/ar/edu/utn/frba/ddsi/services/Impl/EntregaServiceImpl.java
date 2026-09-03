@@ -38,7 +38,7 @@ public class EntregaServiceImpl {
         return toDTO(entrega);
     }
 
-    public EntregaDTO iniciarTraslado(Long entregaId, String responsableId) {
+    public EntregaDTO iniciarTraslado(String entregaId, String responsableId) {
         Entrega entrega = buscar(entregaId);
         entrega.iniciarTraslado();
         repositoryEntregas.save(entrega);
@@ -48,20 +48,20 @@ public class EntregaServiceImpl {
         return toDTO(entrega);
     }
 
-    public List<EntregaDTO> iniciarRuta(List<Long> entregaIds, String choferId) {
+    public List<EntregaDTO> iniciarRuta(List<String> entregaIds, String choferId) {
         List<EntregaDTO> resultado = new java.util.ArrayList<>();
-        for (Long entregaId : entregaIds) {
+        for (String entregaId : entregaIds) {
             resultado.add(this.iniciarTraslado(entregaId, choferId));
         }
         String aviso = "El+camion+inicio+la+ruta.+Segui+tu+entrega+en:+"
                 + "http://localhost:8083/logistica-service/camiones/monitoreo/ruta/camion/1/recorrido";
-        for (Long entregaId : entregaIds) {
+        for (String entregaId : entregaIds) {
             notificarInteresados(buscar(entregaId), aviso);
         }
         return resultado;
     }
 
-    public EntregaDTO confirmarRecepcion(Long entregaId, ConfirmarRecepcionDTO body,
+    public EntregaDTO confirmarRecepcion(String entregaId, ConfirmarRecepcionDTO body,
                                          String responsableId) {
         Entrega entrega = buscar(entregaId);
         entrega.confirmarRecepcion(body.getFotosUrl());
@@ -75,7 +75,7 @@ public class EntregaServiceImpl {
         return toDTO(entrega);
     }
 
-    public EntregaDTO marcarNoRecibida(Long entregaId, ConfirmarRecepcionDTO body,
+    public EntregaDTO marcarNoRecibida(String entregaId, ConfirmarRecepcionDTO body,
                                        String responsableId) {
         Entrega entrega = buscar(entregaId);
         entrega.marcarNoRecibida(body.getMotivo());
@@ -90,7 +90,7 @@ public class EntregaServiceImpl {
         return toDTO(entrega);
     }
 
-    public EntregaDTO volverAPendiente(Long entregaId) {
+    public EntregaDTO volverAPendiente(String entregaId) {
         Entrega entrega = buscar(entregaId);
         entrega.volverAPendiente();
         repositoryEntregas.save(entrega);
@@ -122,7 +122,7 @@ public class EntregaServiceImpl {
         }
     }
 
-    private Entrega buscar(Long id) {
+    private Entrega buscar(String id) {
         return repositoryEntregas.findById(id)
                 .orElseThrow(() -> new RuntimeException("Entrega no encontrada: " + id));
     }

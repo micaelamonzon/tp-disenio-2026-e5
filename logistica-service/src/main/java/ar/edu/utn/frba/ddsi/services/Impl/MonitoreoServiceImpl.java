@@ -19,7 +19,7 @@ public class MonitoreoServiceImpl implements MonitoreoService {
     }
 
     @Override
-    public PosicionDTO obtenerPosicionActualDeCamion(Long id, PosicionDTO posicionDTO) {
+    public PosicionDTO obtenerPosicionActualDeCamion(String id, PosicionDTO posicionDTO) {
         Camion camion = this.repositoryCamiones.findById(id)
                 .orElseThrow(() -> new RuntimeException("Camión no encontrado: " + id));
 
@@ -31,7 +31,7 @@ public class MonitoreoServiceImpl implements MonitoreoService {
     }
 
     @Override
-    public List<PosicionDTO> obtenerRecorrido(Long idCamion) {
+    public List<PosicionDTO> obtenerRecorrido(String idCamion) {
         Camion camion = this.repositoryCamiones.findById(idCamion)
                 .orElseThrow(() -> new RuntimeException("Camión no encontrado: " + idCamion));
 
