@@ -1,7 +1,8 @@
 package ar.edu.utn.frba.ddsi.donaciones.models.entities.Necesidad;
 
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.Subcategoria;
-import ar.edu.utn.frba.ddsi.donaciones.models.entities.donacion.Donacion;
+
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.DonacionSegmentada;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -25,11 +26,12 @@ public abstract class Necesidad {
 
     private Long id;
     private EntidadBeneficiaria entidadBeneficiaria; //cambair por id
+    private DonacionSegmentada donacionQueSatisface;
     private Subcategoria subcategoria;
     private String descripcion;
     private boolean estaSatisfecha;
 
-    private List<Donacion> donacionesRecibidas = new ArrayList<>();
+    private List<DonacionSegmentada> donacionesRecibidas = new ArrayList<>();
 
     public Necesidad(Subcategoria subcategoria, String descripcion) {
         this(null, subcategoria, descripcion);

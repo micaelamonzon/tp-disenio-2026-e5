@@ -8,14 +8,21 @@ import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Data
 @Repository
 public class DonantesRepositoryImpl implements DonantesRepository {
 
+    private final GeneradorIdSecuencial generadorHumanoId;
+    private final GeneradorIdSecuencial generadorJuridicoId;
     private final List<PersonaHumana> humanos = new ArrayList<>();
     private final List<PersonaJuridica> juridicos = new ArrayList<>();
 
+    public DonantesRepositoryImpl() {
+        this.generadorHumanoId = new GeneradorIdSecuencial();
+        this.generadorJuridicoId = new GeneradorIdSecuencial();
+    }
 
     @Override
     public List<PersonaHumana> findAllHumanos(){
@@ -49,8 +56,7 @@ public class DonantesRepositoryImpl implements DonantesRepository {
 
             return null;
         }
-        Long id = Long.valueOf(juridicos.size() + 1);
-        donante.setId(id);
+        donante.setId(generadorJuridicoId.siguiente());
         this.juridicos.add(donante);
 
         return donante;
@@ -67,8 +73,7 @@ public class DonantesRepositoryImpl implements DonantesRepository {
 
             return null;
         }
-        Long id = Long.valueOf(humanos.size() + 1);
-        donante.setId(id);
+        donante.setId(generadorHumanoId.siguiente());
         this.humanos.add(donante);
 
         return donante;
