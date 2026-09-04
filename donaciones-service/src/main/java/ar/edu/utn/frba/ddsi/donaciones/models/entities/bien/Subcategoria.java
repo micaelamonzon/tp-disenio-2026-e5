@@ -1,5 +1,6 @@
 package ar.edu.utn.frba.ddsi.donaciones.models.entities.bien;
 
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.Persistente;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,11 +14,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Entity
 @Table(name = "subcategoria")
-public class Subcategoria {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
+public class Subcategoria extends Persistente {
     @Column(name = "nombre")
     private String nombre;
 
