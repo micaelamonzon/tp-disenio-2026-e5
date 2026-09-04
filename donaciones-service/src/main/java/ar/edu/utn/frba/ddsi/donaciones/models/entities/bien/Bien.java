@@ -1,5 +1,6 @@
 package ar.edu.utn.frba.ddsi.donaciones.models.entities.bien;
 
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.Persistente;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.DonacionSegmentada;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -13,14 +14,9 @@ import java.time.LocalDateTime;
 @Data
 
 @NoArgsConstructor
-@AllArgsConstructor
 @Entity
 @Table(name = "bien")
-public class Bien {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
+public class Bien extends Persistente {
     @Column(name = "nombre")
     private String nombre;
 
