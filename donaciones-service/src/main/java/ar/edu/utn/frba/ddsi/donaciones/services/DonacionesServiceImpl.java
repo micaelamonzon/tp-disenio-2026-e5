@@ -341,7 +341,7 @@ public class DonacionesServiceImpl implements DonacionesService {
         );
 
 
-        PersonaJuridica juridica = this.donacionesRepository.saveJuridica(nuevaPersona);
+        PersonaJuridica juridica = this.donantesRepository.saveJuridica(nuevaPersona);
 
         List<DonacionSinSegmentarDTO> donacionesDTO = obtenerDonacionesSinSegmentarDTO(
                 juridica.getDonaciones());
@@ -508,7 +508,7 @@ public class DonacionesServiceImpl implements DonacionesService {
         if (personaHumana == null) {
             throw new RuntimeException("Persona humana no encontrada con id: " + id);
         }
-        donacionesRepository.deleteHumana(personaHumana);
+        donantesRepository.deleteHumana(personaHumana);
     }
 
     @Override
@@ -517,7 +517,7 @@ public class DonacionesServiceImpl implements DonacionesService {
         if (personaJuridica == null) {
             throw new RuntimeException("Persona juridica no encontrada con id: " + id);
         }
-        donacionesRepository.deleteJuridica(personaJuridica);
+        donantesRepository.deleteJuridica(personaJuridica);
     }
 
 

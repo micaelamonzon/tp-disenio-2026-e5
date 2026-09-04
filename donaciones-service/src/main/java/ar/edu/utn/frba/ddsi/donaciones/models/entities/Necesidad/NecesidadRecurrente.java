@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 @Data
 @Getter
 @NoArgsConstructor
+
 public class NecesidadRecurrente extends Necesidad {
     private int cantidadObjetivoPorPeriodo;
     private int cantidadRecibidaEnPeriodo;

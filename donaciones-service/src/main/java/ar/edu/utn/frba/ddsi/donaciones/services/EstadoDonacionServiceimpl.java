@@ -96,8 +96,8 @@ public class EstadoDonacionServiceimpl {
     private DonacionSegmentadaDTO toDTO(DonacionSegmentada d) {
         List<CambioEstadoDTO> historialDTO = d.getHistorial().stream()
                 .map(c -> new CambioEstadoDTO(
-                        c.getEstadoAnterior(),
-                        c.getEstadoNuevo(),
+                        c.getEstadoAnterior().toString(),
+                        c.getEstadoNuevo().toString(),
                         c.getFecha(),
                         c.getJustificacion(),
                         c.getResponsableId()

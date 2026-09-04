@@ -6,6 +6,7 @@ import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.Subcategoria;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +24,7 @@ public class DonacionSegmentada {
     private LocalDateTime fechaDeIngreso;
     private Boolean donacionEntregada;
     private Long entidadBeneficiariaId;
+    private LocalDate fechaEntrega;
 
     public DonacionSegmentada(Subcategoria subcategoria) {
         this.subcategoria = subcategoria;
