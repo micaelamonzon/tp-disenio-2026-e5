@@ -37,12 +37,4 @@ public class repositorioEnMemoria implements IncentivosRepository {
         return donantes.stream().filter(d -> d.getIdEnDonaciones().equals(idEnDonaciones) && d.getTipoDeDonante().toString().equals(tipoDeDonante)).findFirst().orElse(null);
     }
 
-    @Override
-    public void guardarRanking(RankingMensual ranking) {
-        this.historialRankings.add(ranking);
-    }
-    @Override
-    public List<RankingMensual> findAllRankings() {
-        return new ArrayList<>(this.historialRankings);
-    }
 }

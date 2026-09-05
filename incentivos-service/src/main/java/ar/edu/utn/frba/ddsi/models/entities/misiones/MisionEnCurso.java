@@ -10,7 +10,7 @@ public class MisionEnCurso {
 
     public MisionEnCurso(Mision misionActual, CategoriaDeMision categoriaActual) {
         this.misionActual = misionActual;
-        this.categoriaActual = misionActual.get;
+        this.categoriaActual = categoriaActual;
     }
 
 }

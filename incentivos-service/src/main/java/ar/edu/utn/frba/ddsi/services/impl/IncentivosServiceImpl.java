@@ -13,6 +13,7 @@ import ar.edu.utn.frba.ddsi.models.entities.misiones.Mision;
 import ar.edu.utn.frba.ddsi.models.entities.misiones.MisionEnCurso;
 import ar.edu.utn.frba.ddsi.models.entities.persona.*;
 import ar.edu.utn.frba.ddsi.repositories.IncentivosRepository;
+import ar.edu.utn.frba.ddsi.repositories.RankingMensualRepository;
 import ar.edu.utn.frba.ddsi.services.IncentivosService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -39,13 +40,15 @@ public class IncentivosServiceImpl implements IncentivosService {
     private RankingMensual ultimoRanking;
     private List<Donante> rankingCompletoOrdenado = new ArrayList<>();
     private final NotificacionesProperties notificacionesProperties;
+    private final RankingMensualRepository rankingMensualRepository;
 
-    public IncentivosServiceImpl(IncentivosRepository incentivosRepository, RestTemplate restTemplate, RestProperties propiedades, InsigniaPublicadorService publicadorService, NotificacionesProperties notificacionesProperties) {
+    public IncentivosServiceImpl(IncentivosRepository incentivosRepository, RestTemplate restTemplate, RestProperties propiedades, InsigniaPublicadorService publicadorService, NotificacionesProperties notificacionesProperties, RankingMensualRepository rankingMensualRepository) {
         this.incentivosRepository = incentivosRepository;
         this.restTemplate = restTemplate;
         this.propiedades = propiedades;
         this.publicadorService = publicadorService;
         this.notificacionesProperties = notificacionesProperties;
+        this.rankingMensualRepository = rankingMensualRepository;
     }
 
     public void pedirDonantesAServiceDonaciones(){
@@ -274,61 +277,47 @@ public class IncentivosServiceImpl implements IncentivosService {
                 .build()
                 .toUri();
 
-        ResponseEntity<PersonaDonanteDTO[]> response = restTemplate.getForEntity(uri, PersonaDonanteDTO[].class);
+        ResponseEntity<PersonaDonanteDTO[]> response =
+                restTemplate.getForEntity(uri, PersonaDonanteDTO[].class);
         PersonaDonanteDTO[] array = response.getBody();
         if (array == null || array.length == 0) return;
 
         YearMonth mesPasado = YearMonth.now().minusMonths(1);
 
-        List<Donante> donantes = Arrays.stream(array).map(dto -> {
-
-        List<DonacionSegmentada> donaciones = this.convertirDonacionesDTO(dto.donaciones());
-
-        MedioDeNotificacion medioDeNotificacionPredeterminado = this.convertirMedioDeNotificacionDTO(dto.medioDeNotificacionPredeterminado());
-
-            if(dto.idHumano() != null){
-
-                Donante nuevoDonante = new Donante(
-                        dto.idHumano(),
-                        dto.nombre(),
-                        dto.apellido(),
-                        null,
-                       null,
-                        medioDeNotificacionPredeterminado,
-                        donaciones,
-                        TipoDeDonante.HUMANO);
-
-                return nuevoDonante;
-
-            }else if(dto.idJuridico() != null){
-                Donante nuevoDonante = new Donante(
-                        dto.idJuridico(),
-                        null,
-                        null,
-                        dto.razonSocial(),
-                        null,
-                        medioDeNotificacionPredeterminado,
-                        donaciones,
-                        TipoDeDonante.JURIDICO);
-
-                return nuevoDonante;
-            }
-
-            return null;
-        }).toList();
+        List <Donante> donantes = Arrays.stream(array)
+                .map(dto -> {
+                    if(dto.idHumano() != null){
+                        return incentivosRepository
+                                .buscarDonantePorIdEnDonaciones(
+                                        dto.idHumano(), TipoDeDonante.HUMANO.toString()
+                                );
+                    } else if (dto.idJuridico() != null){
+                        return incentivosRepository
+                                .buscarDonantePorIdEnDonaciones(
+                                        dto.idJuridico(), TipoDeDonante.JURIDICO.toString()
+                                );
+                    }
+                    return null;
+                })
+                .filter(d -> d != null)
+                .toList();
 
         this.rankingCompletoOrdenado = donantes.stream()
                 .sorted(Comparator.comparingInt(
                         (Donante d) -> -d.calcularMisionesCumplidasEn(mesPasado)))
                 .toList();
+        if(rankingCompletoOrdenado.size() < 3) return;
 
-        this.ultimoRanking = new RankingMensual(
+        RankingMensual nuevoRanking = new RankingMensual(
                 LocalDate.now().minusMonths(1),
                 rankingCompletoOrdenado.get(0),
                 rankingCompletoOrdenado.get(1),
                 rankingCompletoOrdenado.get(2),
                 rankingCompletoOrdenado
         );
+
+        rankingMensualRepository.save(nuevoRanking);
+        this.ultimoRanking = nuevoRanking;
     }
 
     @Override
@@ -380,12 +369,12 @@ public class IncentivosServiceImpl implements IncentivosService {
 
     public List<MisionDTO> obtenerMisionDTO(List<Mision> misiones) {
         List<MisionDTO> misionesDTO = new ArrayList<>();
-        misiones.forEach(m -> misionesDTO.add(new MisionDTO(m.getNombre(), m.getEstado(), m.getCategoria())));
+        misiones.forEach(m -> misionesDTO.add(new MisionDTO(m.getNombre(), m.getEstado(), m.getCategoria() != null ? m.getCategoria().getTipo() : null)));
         return misionesDTO;
     }
 
     public List<InsigniaDTO> obtenerInsigniasDTO(Donante donante) {
-        List<InsigniaDTO> insigniasDTO = donante.getPerfil().getInsignias().stream().map(i -> new InsigniaDTO(i.getNombre(), i.texto())).toList();
+        List<InsigniaDTO> insigniasDTO = donante.getPerfil().getInsignias().stream().map(i -> new InsigniaDTO(i.name(), i.texto())).toList();
         return insigniasDTO;
     }
 
@@ -553,7 +542,7 @@ public class IncentivosServiceImpl implements IncentivosService {
     }
     @Override
     public List<RankingMensualDTO> buscarRankings(Integer mes, Integer anio) {
-        List<RankingMensual> todosLosRankings = incentivosRepository.findAllRankings();
+        List<RankingMensual> todosLosRankings = rankingMensualRepository.findAll();
 
         return todosLosRankings.stream()
                 .filter(r -> (anio == null || r.getFecha().getYear() == anio))

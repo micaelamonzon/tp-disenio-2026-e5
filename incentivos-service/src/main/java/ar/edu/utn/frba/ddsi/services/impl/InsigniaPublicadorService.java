@@ -35,7 +35,7 @@ public class InsigniaPublicadorService {
 
         InsigniaWebhookRequestDTO request = new InsigniaWebhookRequestDTO(
                 nombreDonante,
-                insignia.getNombre()
+                insignia.name()
         );
         System.out.println(">>> Llamando a n8n en: " + uri);
         String respuesta = restTemplate.postForObject(uri, request, String.class);

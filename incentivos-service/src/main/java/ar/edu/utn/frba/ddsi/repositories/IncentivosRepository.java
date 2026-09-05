@@ -10,8 +10,6 @@ public interface IncentivosRepository {
     void guardarDonante(Donante donante);
     List<Donante> findAllDonantes();
     Donante buscarDonantePorId(Long id);
-    void guardarRanking(RankingMensual ranking);
-    List<RankingMensual> findAllRankings();
     public Donante buscarDonantePorIdEnDonaciones(Long idEnDonaciones, String tipoDeDonante);
 
 // tal vez esto sirva para las metricas
