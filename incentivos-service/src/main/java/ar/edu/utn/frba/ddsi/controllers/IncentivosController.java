@@ -1,9 +1,12 @@
 package ar.edu.utn.frba.ddsi.controllers;
 
 import ar.edu.utn.frba.ddsi.dto.*;
+import ar.edu.utn.frba.ddsi.models.entities.persona.Donante;
 import ar.edu.utn.frba.ddsi.models.entities.persona.Insignia;
 import ar.edu.utn.frba.ddsi.models.entities.persona.RankingMensual;
+import ar.edu.utn.frba.ddsi.repositories.IncentivosRepository;
 import ar.edu.utn.frba.ddsi.services.IncentivosService;
+import ar.edu.utn.frba.ddsi.services.impl.InsigniaPublicadorService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,10 +17,13 @@ import java.util.List;
 @RequestMapping("/incentivos-service")
 public class IncentivosController {
     private final IncentivosService incentivosService;
+    private final IncentivosRepository incentivosRepository;
+    private final InsigniaPublicadorService insigniaPublicadorService;
 
-
-    public IncentivosController(IncentivosService incentivosService) {
+    public IncentivosController(IncentivosService incentivosService, IncentivosRepository incentivosRepository, InsigniaPublicadorService insigniaPublicadorService) {
         this.incentivosService = incentivosService;
+        this.incentivosRepository = incentivosRepository;
+        this.insigniaPublicadorService = insigniaPublicadorService;
     }
 
     @GetMapping("/donantes")
@@ -62,12 +68,23 @@ public class IncentivosController {
 
     @GetMapping("donante/verificarMision/{id}")
     //    Insignia insigniaObtenida = Insignia.COLABORADOR; // Antes del merge
-    public ResponseEntity<Void> verificarMision(@PathVariable ("id") Long id){
+    public ResponseEntity<String> verificarMision(@PathVariable ("id") Long id,
+                                                @RequestParam(name = "tipoDonante", defaultValue = "HUMANO") String tipoDonante){
         Insignia insigniaObtenida = Insignia.DONACIONEXITOSA; // ejemplo
 
-        incentivosService.publicarYDifundirInsignia(id, insigniaObtenida);
+        Donante donante = incentivosRepository
+                .buscarDonantePorIdEnDonaciones(id, tipoDonante);
 
-        return ResponseEntity.ok().build();
+        if(donante == null){
+            return ResponseEntity.notFound().build(); }
+
+        String nombre = donante.getNombre() != null
+                ? donante.getNombre() + " " + donante.getApellido()
+                : donante.getRazonSocial();
+
+        String resultado = insigniaPublicadorService.publicarYDifundirInsignia(nombre, insigniaObtenida);
+
+        return ResponseEntity.ok(resultado);
     }
     @GetMapping("/admin/metricas-sistema")
     public ResponseEntity<MetricasSistemaDTO> obtenerMetricasSistema() {
