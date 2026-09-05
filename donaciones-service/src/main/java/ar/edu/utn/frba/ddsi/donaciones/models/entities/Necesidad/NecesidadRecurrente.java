@@ -1,9 +1,7 @@
 package ar.edu.utn.frba.ddsi.donaciones.models.entities.Necesidad;
 
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.Subcategoria;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,12 +10,17 @@ import lombok.NoArgsConstructor;
 @Data
 @Getter
 @NoArgsConstructor
-
+@Entity
+@Table(name = "necesidad_recurrente")
 public class NecesidadRecurrente extends Necesidad {
+    @Column(name = "cantidad_objetiva_por_periodo")
     private int cantidadObjetivoPorPeriodo;
+
+    @Column(name = "cantidad_recibida_en_periodo")
     private int cantidadRecibidaEnPeriodo;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "periodo")
     private TipoPeriodo periodo;
 
     public NecesidadRecurrente(Subcategoria subcategoria, String descripcion,
