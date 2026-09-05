@@ -1,24 +1,52 @@
 package ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante;
 
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.Persistente;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.mediosDeNotificacion.MedioDeNotificacion;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.DonacionSinSegmentar;
+import jakarta.persistence.*;
 import lombok.Data;
+import org.springframework.data.annotation.Persistent;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Data
-public class PersonaHumana{
+@Entity
+@Table(name = "persona_humana")
+public class PersonaHumana {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "nombre")
     private String nombre;
+
+    @Column(name = "apellido")
     private String apellido;
+
+    @Column(name = "fecha_de_nacimiento")
     private LocalDateTime fechaDeNaciemiento;
+
+    @Column(name = "dni")
     private Integer DNI;
+
+    @Column(name = "genero")
     private String genero;
+
+    @Column(name = "direccion")
     private String direccion;
+
+    @OneToMany
+    @JoinColumn(name = "persona_humana_id", referencedColumnName = "id")
     private List<MedioDeNotificacion> mediosDeNotificacion = new ArrayList<>();
+
+    @ManyToOne
+    @JoinColumn(name = "medio_predeterminado_id")
     private MedioDeNotificacion medioDeNotificacionPredeterminado;
+
+    @OneToMany
+    @JoinColumn(name = "persona_humana_id", referencedColumnName = "id")
     private List<DonacionSinSegmentar> donaciones = new ArrayList<>(); //al acceder a esta donacion sabremos que donaciones segmentadas salieron
 
 

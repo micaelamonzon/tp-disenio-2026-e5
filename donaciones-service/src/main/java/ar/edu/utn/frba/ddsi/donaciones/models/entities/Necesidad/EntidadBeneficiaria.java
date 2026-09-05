@@ -1,6 +1,8 @@
 package ar.edu.utn.frba.ddsi.donaciones.models.entities.Necesidad;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante.Representante;
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.Persistente;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.Subcategoria;
+import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -8,12 +10,27 @@ import java.util.List;
 import java.util.ArrayList;
 
 @Data
+@Entity
+@Table(name = "entidad_beneficiaria")
 public class EntidadBeneficiaria {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "razon_social")
     private String razonSocial;
+
+    @Column(name = "direccion")
     private String direccion;
+
+    @Column(name = "telefono")
     private String telefono;
+
+    @OneToMany
+    @JoinColumn(name = "entidad_beneficiaria_id", referencedColumnName = "id")
     private List<Representante> representantes;
+
+    @OneToMany(mappedBy = "entidadBeneficiaria")
     private List<Necesidad> necesidades;
 
 

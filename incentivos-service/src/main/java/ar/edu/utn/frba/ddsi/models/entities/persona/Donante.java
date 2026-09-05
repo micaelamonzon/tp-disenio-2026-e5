@@ -6,6 +6,7 @@ import ar.edu.utn.frba.ddsi.models.entities.misiones.EstadoDeMision;
 import ar.edu.utn.frba.ddsi.models.entities.misiones.Mision;
 import ar.edu.utn.frba.ddsi.models.entities.misiones.MisionEnCurso;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -18,18 +19,36 @@ import java.util.stream.Collectors;
 @Data
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Entity
+@Table(name = "donante")
 public class Donante {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; //id en incentivos
+
+    @Column(name = "id_en_donaciones")
     private Long idEnDonaciones; //id en donaciones
+
+    @Transient
     private TipoDeDonante tipoDeDonante;
+
+    @Column(name = "nombre")
     private String nombre;
+    @Column(name = "apellido")
     private String apellido;
+    @Column(name = "razon_social")
     private String razonSocial;
+    @Column(name = "fechaDeRegistro")
     private LocalDateTime fechaDeRegistro;
+    @Transient
     private List<DonacionSegmentada> donaciones;
+    @Transient
     private Perfil perfil;
+    @Transient
     private List<Mision> misiones; //historial de misiones tanto en curso como pasada
+    @Transient
     private MedioDeNotificacion medioDeNotificacionPredeterminado;
+    @Transient
     private MisionEnCurso misionEnCurso;
 
     public Donante(Long idEnDonaciones,String nombre, String apellido, String razonSocial, LocalDateTime fechaDeRegistro, MedioDeNotificacion medioDeNotificacionPredeterminado, List<DonacionSegmentada> donaciones ,TipoDeDonante tipo) {

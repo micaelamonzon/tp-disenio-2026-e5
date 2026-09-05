@@ -1,16 +1,10 @@
 package ar.edu.utn.frba.ddsi.donaciones.models.entities.Necesidad;
 
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.Persistente;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.Subcategoria;
 
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.DonacionSegmentada;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Inheritance;
-import jakarta.persistence.InheritanceType;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.Transient;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,15 +16,31 @@ import java.util.List;
 @Data
 @Getter
 @NoArgsConstructor
-public abstract class Necesidad {
-
+@Entity
+@Table(name = "necesidad")
+@Inheritance(strategy = InheritanceType.JOINED)
+public abstract class Necesidad{
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "entidad_beneficiaria_id")
     private EntidadBeneficiaria entidadBeneficiaria; //cambair por id
+    @Transient
     private DonacionSegmentada donacionQueSatisface;
+
+    @ManyToOne
+    @JoinColumn(name = "subcategoria_id")
     private Subcategoria subcategoria;
+
+    @Column(name = "descripcion")
     private String descripcion;
+
+    @Column(name = "esta_satisfecho")
     private boolean estaSatisfecha;
 
+    @OneToMany(mappedBy = "necesidad")
     private List<DonacionSegmentada> donacionesRecibidas = new ArrayList<>();
 
     public Necesidad(Subcategoria subcategoria, String descripcion) {
