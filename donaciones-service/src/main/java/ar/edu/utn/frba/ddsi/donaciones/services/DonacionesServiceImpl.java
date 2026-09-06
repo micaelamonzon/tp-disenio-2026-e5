@@ -708,7 +708,6 @@ public class DonacionesServiceImpl implements DonacionesService {
         List<Bien> bienes = bienesDTO.stream().map(b -> new Bien(
                 b.nombre(),
                 b.descripcion(),
-                null,
                 new Subcategoria(
                         b.subcategoria().nombre(),
                         b.subcategoria().esPerecedero(),
@@ -719,7 +718,8 @@ public class DonacionesServiceImpl implements DonacionesService {
                 b.fechaDeVencimiento(),
                 b.esUsado(),
                 b.tipoUnidad(),
-                b.cantidad()
+                b.cantidad(),
+                null
         )).toList();
         return bienes;
     }

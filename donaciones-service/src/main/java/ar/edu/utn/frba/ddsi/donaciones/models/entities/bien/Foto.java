@@ -9,9 +9,6 @@ import lombok.Setter;
 @Data
 @Getter
 @Setter
-@Entity
-@Table(name = "foto")
-public class Foto extends Persistente {
-    @Column(name = "url")
+public class Foto {
     private String url;
 }
