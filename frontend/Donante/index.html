@@ -172,12 +172,33 @@
   <!-- ===================== SEGUIMIENTO ===================== -->
   <section id="view-seguimiento" class="view">
     <div class="page-head">
-      <h1>Seguimiento</h1>
-      <p class="page-sub">Mirá el recorrido de cada donación, del retiro a la entrega</p>
+      <h1>Seguimiento de Entregas</h1>
+      <p class="page-sub">Monitorea en tiempo real la ubicación de tus donaciones</p>
     </div>
-    <div class="placeholder-card">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
-      <p>El detalle de seguimiento de cada donación en tránsito se muestra acá. Elegí una donación desde "Mis Donaciones" para ver su línea de tiempo.</p>
+
+    <div class="tracking-container">
+      <!-- MAPA INTERACTIVO -->
+      <div class="map-card" id="mapCard">
+        <div class="map-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          Seguimiento en tiempo real
+        </div>
+
+        <!-- Canvas interactivo con fondo reticulado -->
+        <div class="map-viewport" id="mapViewport">
+          <svg class="map-routes-svg" id="routesSvg"></svg>
+          <div id="mapMarkers"></div>
+        </div>
+      </div>
+
+      <!-- PANEL DE ENTREGAS ACTIVAS -->
+      <aside class="tracking-sidebar">
+        <div class="sidebar-header">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 17h4V5H10z"/><path d="M20 17h2v-7l-3-4h-3v11h4z"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>
+          Entregas Activas
+        </div>
+        <div class="deliveries-list" id="deliveriesList"></div>
+      </aside>
     </div>
   </section>
 
