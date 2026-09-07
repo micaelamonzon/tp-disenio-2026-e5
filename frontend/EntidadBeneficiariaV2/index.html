@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DonaTrack - Entidad Beneficiaria</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="topbar">
+    <div class="topbar-left">
+        <span class="logo-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                <path d="M8 12l2.5 2.5L16 9" stroke-width="1.5"/>
+            </svg>
+        </span>
+        <nav class="main-nav" aria-label="Navegación principal">
+            <a href="#" class="main-nav-link active">Home</a>
+            <a href="#" class="main-nav-link">Donaciones</a>
+            <a href="#" class="main-nav-link">Sobre nosotros</a>
+            <a href="#" class="main-nav-link">Contacto</a>
+        </nav>
+    </div>
+    <div class="topbar-right">
+        <button class="user-menu-trigger" id="userMenuTrigger" aria-haspopup="true" aria-expanded="false">
+            <div class="avatar">CG</div>
+            <div class="user-info">
+                <span class="user-name">Comedor Comunitario Los Girasoles</span>
+                <span class="user-role">Entidad Beneficiaria</span>
+            </div>
+        </button>
+        <div class="user-menu" id="userMenu" hidden>
+            <button class="user-menu-item" id="logoutBtn">Cerrar sesión</button>
+        </div>
+    </div>
+</header>
+
+<nav class="tabbar" aria-label="Secciones de entidad beneficiaria">
+    <button class="tab active" data-tab="recepcion">Recepción de Donación</button>
+    <button class="tab" data-tab="notificaciones">Notificaciones</button>
+    <button class="tab" data-tab="seguimiento">Seguimiento de Entrega</button>
+    <button class="tab" data-tab="registrar-necesidades">Registrar Necesidades</button>
+    <button class="tab" data-tab="estado-necesidades">Estado de Necesidades</button>
+</nav>
+
+<main class="page">
+
+    <section id="view-recepcion" class="view active">
+        <div class="page-head center">
+            <h1>Recepción de Donación</h1>
+        </div>
+
+        <div class="card" id="donationDetailsCard">
+            <h2 class="card-title">Detalles de la Donación</h2>
+            <div class="field-row">
+                <div class="field">
+                    <span>ID de Donación</span>
+                    <p id="donationId">#DON-2026-0415</p>
+                </div>
+                <div class="field">
+                    <span>Fecha de Asignación</span>
+                    <p id="donationAssignDate">15 de Abril, 2026</p>
+                </div>
+            </div>
+            <div class="field-row">
+                <div class="field">
+                    <span>Donante</span>
+                    <p id="donationDonor">Fundación Solidaria Buenos Aires</p>
+                </div>
+                <div class="field">
+                    <span>Tipo de Donación</span>
+                    <p id="donationType">Alimentos no perecederos</p>
+                </div>
+            </div>
+            <div class="field">
+                <span>Descripción</span>
+                <p id="donationDescription">500 kg de arroz, 300 kg de fideos, 200 litros de aceite, 150 kg de azúcar y 100 kg de harina. Todos los productos están envasados y tienen fecha de vencimiento superior a 6 meses.</p>
+            </div>
+            <div class="field-row">
+                <div class="field">
+                    <span>Cantidad estimada</span>
+                    <p id="donationQuantity">1250 kg / 200 L</p>
+                </div>
+                <div class="field">
+                    <span>Estado</span>
+                    <p id="donationStatus">Pendiente de confirmación</p>
+                </div>
+            </div>
+
+            <h2 class="card-title" style="margin-top: 24px;">Fotografías de Recepción</h2>
+            <p class="page-sub" style="margin-bottom: 12px;">Por favor, suba fotografías que muestren los productos recibidos para documentar la donación</p>
+            <div class="upload-dropzone" id="uploadDropzone">
+                <input type="file" id="donationPhotos" accept="image/png, image/jpeg" multiple hidden>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                <p><b>Click para subir fotografías</b></p>
+                <span class="page-sub">PNG, JPG (MAX. 5MB por archivo)</span>
+                <div id="uploadPreview" class="upload-preview"></div>
+            </div>
+
+            <div class="form-actions-right">
+                <button type="button" class="btn btn-outline" id="cancelReceptionBtn">Cancelar</button>
+                <button type="button" class="btn btn-submit" id="confirmReceptionBtn" disabled>Confirmar Recepción</button>
+            </div>
+        </div>
+    </section>
+
+    <section id="view-notificaciones" class="view">
+        <div class="page-head-row">
+            <h1>Notificaciones</h1>
+            <button class="link-btn" id="markAllReadBtn">Marcar todas como leídas</button>
+        </div>
+        <div class="notifications-list" id="notificationsList"></div>
+    </section>
+
+    <section id="view-seguimiento" class="view">
+        <div class="page-head center">
+            <h1>Seguimiento de Entrega</h1>
+        </div>
+
+        <div class="tracking-map" id="trackingMap">
+            <div class="tracking-map-legend">
+                <span><span class="map-dot" style="background:#ef4444"></span>Ubicación actual</span>
+                <span><span class="map-dot" style="background:#22c55e"></span>Destino</span>
+            </div>
+            <div class="tracking-map-route">
+                <div class="tracking-map-point current"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div>
+                <div class="tracking-map-line"></div>
+                <div class="tracking-map-point destination"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+            </div>
+            <div class="tracking-map-callout">
+                <strong>Última ubicación registrada</strong>
+                <p id="lastLocationAddress">Av. Corrientes 1234, Buenos Aires</p>
+                <span class="page-sub" id="lastLocationTime">Actualizado hace 2 minutos</span>
+            </div>
+        </div>
+
+        <div class="grid-two-columns" style="margin-top: 20px;">
+            <div class="card">
+                <h2 class="card-title">Información del Camión</h2>
+                <div class="field"><span>Patente</span><p id="truckPlate">ABC 123</p></div>
+                <div class="field"><span>Conductor</span><p id="truckDriver">Juan Carlos Rodríguez</p></div>
+                <div class="field"><span>Teléfono de contacto</span><p id="truckPhone">+54 11 5555-1234</p></div>
+                <div class="field"><span>Dirección de origen</span><p id="truckOrigin">Av. Libertador 5000, Buenos Aires</p></div>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title">Estado de la Entrega</h2>
+                <div class="field">
+                    <div class="field-label-row">
+                        <span>Progreso</span>
+                        <span id="deliveryProgressLabel">65%</span>
+                    </div>
+                    <div class="progress-bar"><div class="progress-bar-fill" id="deliveryProgressFill" style="width: 65%"></div></div>
+                </div>
+                <div class="field"><span>Tiempo estimado de llegada</span><p id="deliveryETA">2 horas 15 minutos</p></div>
+                <div class="field"><span>Estado actual</span><span class="status-tag status-en-proceso" id="deliveryCurrentStatus">En tránsito</span></div>
+                <div class="field">
+                    <span>Historial de ubicaciones</span>
+                    <ul class="location-history" id="locationHistory"></ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="view-registrar-necesidades" class="view">
+        <div class="page-head">
+            <h1>Registrar Necesidades</h1>
+            <p class="page-sub">Complete el formulario para registrar las necesidades materiales de su entidad</p>
+        </div>
+        <div class="grid-two-columns">
+            <div class="card">
+                <h2 class="card-title">Nueva Necesidad</h2>
+                <form id="needForm">
+                    <div class="field">
+                        <span>Categoría</span>
+                        <select id="needCategory" required>
+                            <option value="" selected disabled>Seleccionar categoría</option>
+                            <option value="Alimentos">Alimentos</option>
+                            <option value="Ropa y calzado">Ropa y calzado</option>
+                            <option value="Útiles escolares">Útiles escolares</option>
+                            <option value="Productos de higiene">Productos de higiene</option>
+                            <option value="Mobiliario">Mobiliario</option>
+                            <option value="Equipamiento">Equipamiento</option>
+                            <option value="Otro">Otro</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <span>Descripción detallada</span>
+                        <textarea id="needDescription" rows="3" required></textarea>
+                    </div>
+                    <div class="field-row">
+                        <div class="field">
+                            <span>Cantidad estimada</span>
+                            <input type="number" id="needQuantity" required>
+                        </div>
+                        <div class="field">
+                            <span>Unidad</span>
+                            <select id="needUnit" required>
+                                <option value="" selected disabled>Seleccionar</option>
+                                <option value="Kilogramos">Kilogramos</option>
+                                <option value="Litros">Litros</option>
+                                <option value="Unidades">Unidades</option>
+                                <option value="Paquetes">Paquetes</option>
+                                <option value="Cajas">Cajas</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="field-row">
+                        <div class="field">
+                            <span>Prioridad</span>
+                            <select id="needPriority" required>
+                                <option value="" selected disabled>Seleccionar prioridad</option>
+                                <option value="Alta">Alta</option>
+                                <option value="Media">Media</option>
+                                <option value="Baja">Baja</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <span>Fecha límite</span>
+                            <input type="date" id="needDeadline">
+                        </div>
+                    </div>
+                    <div class="field">
+                        <span>Observaciones adicionales (opcional)</span>
+                        <textarea id="needNotes" rows="2"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-submit">Agregar Necesidad</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title">Necesidades Registradas</h2>
+                <div class="needs-list" id="registeredNeedsList"></div>
+            </div>
+        </div>
+    </section>
+
+    <section id="view-estado-necesidades" class="view">
+        <div class="page-head center">
+            <h1>Estado de Necesidades</h1>
+        </div>
+        <div class="status-list-container" id="statusNeedsList"></div>
+    </section>
+
+</main>
+
+<script src="script.js"></script>
+</body>
+</html>
