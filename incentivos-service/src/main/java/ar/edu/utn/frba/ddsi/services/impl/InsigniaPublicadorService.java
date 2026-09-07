@@ -5,7 +5,6 @@ import ar.edu.utn.frba.ddsi.dto.InsigniaWebhookRequestDTO;
 import ar.edu.utn.frba.ddsi.models.entities.persona.Donante;
 import ar.edu.utn.frba.ddsi.models.entities.persona.Insignia;
 import ar.edu.utn.frba.ddsi.repositories.IncentivosRepository;
-import ar.edu.utn.frba.ddsi.repositories.enMemoria.repositorioEnMemoria;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;

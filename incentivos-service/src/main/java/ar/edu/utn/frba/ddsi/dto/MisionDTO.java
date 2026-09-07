@@ -5,10 +5,7 @@ import ar.edu.utn.frba.ddsi.models.entities.misiones.EstadoDeMision;
 
 
 public record MisionDTO(
-        String nombre,
-        EstadoDeMision estado,
-        TipoCategoria categoria
-
+       Long Id
 
 ) {
 }

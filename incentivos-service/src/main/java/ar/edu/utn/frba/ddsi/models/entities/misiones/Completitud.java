@@ -3,54 +3,48 @@ package ar.edu.utn.frba.ddsi.models.entities.misiones;
 import ar.edu.utn.frba.ddsi.models.entities.donaciones.DonacionSegmentada;
 import ar.edu.utn.frba.ddsi.models.entities.persona.Categoria;
 import ar.edu.utn.frba.ddsi.models.entities.persona.Insignia;
+import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Table;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Data
+@NoArgsConstructor
+@Entity
+@DiscriminatorValue("Completitud")
 public class Completitud extends Mision {
 
+    @Column
     private Integer objetivoDeCategoriasDistintas;
 
-
-    public Completitud(String nombre,Integer numeroDeCategoriasDistintas){
+    public Completitud(NombreDeMision nombre,Integer objetivoDeCategoriasDistintas){
         this.setNombre(nombre);
-        this.objetivoDeCategoriasDistintas = numeroDeCategoriasDistintas;
+        this.objetivoDeCategoriasDistintas = objetivoDeCategoriasDistintas;
         setInsigniaGanadora(Insignia.COMPLETITUD);
     }
 
     //Completitud: realizar donaciones de X categorías distintas
     @Override
-    public Boolean seCompletoLaMision(List<DonacionSegmentada> donaciones) {
+    public AvanceDeMision seCompletoLaMision(List<DonacionSegmentada> donaciones) {
 
         List<Categoria> todasLasCategorias = donaciones.stream()
-                .flatMap(d -> d.getBienes().stream())
-                .map(bien -> bien.getSubcategoria().getCategoria())
+                .map(d -> d.getCategoria())
                 .toList();
 
-        long categoriasUnicas = todasLasCategorias.stream()
+        Long categoriasUnicas = todasLasCategorias.stream()
                 .distinct()
                 .count();
 
-        Integer progreso =(int) Math.min(categoriasUnicas / objetivoDeCategoriasDistintas, 1.0);
-        Integer progresoActual = progreso * 100;
-        this.setProgreso(progresoActual);
 
-        boolean cumple = categoriasUnicas >= objetivoDeCategoriasDistintas ;
-
-        Integer distanciaRestante = objetivoDeCategoriasDistintas - this.getProgreso();
-        this.setDistanciaDelObjetivo(Math.max(0, distanciaRestante));
-
-        if (cumple) {
-            this.setEstado(EstadoDeMision.COMPLETADA);
-            this.setFechaCompletada(java.time.LocalDate.now());
-            return Boolean.TRUE;
-        }
-
-        this.setEstado(EstadoDeMision.BLOQUEADA);
-        return Boolean.FALSE;
-
+      return this.calcularProgresoyDistancia(categoriasUnicas.intValue(),this.objetivoDeCategoriasDistintas);
     }
+
+
 
 
 }

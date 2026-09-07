@@ -4,6 +4,7 @@ import ar.edu.utn.frba.ddsi.dto.*;
 import ar.edu.utn.frba.ddsi.models.entities.persona.Donante;
 import ar.edu.utn.frba.ddsi.models.entities.persona.Insignia;
 import ar.edu.utn.frba.ddsi.models.entities.persona.RankingMensual;
+import ar.edu.utn.frba.ddsi.models.entities.persona.TipoDeDonante;
 import ar.edu.utn.frba.ddsi.repositories.IncentivosRepository;
 import ar.edu.utn.frba.ddsi.services.IncentivosService;
 import ar.edu.utn.frba.ddsi.services.impl.InsigniaPublicadorService;
@@ -34,21 +35,21 @@ public class IncentivosController {
 
     @PostMapping("donante/mision/{id}")
     @ResponseStatus(HttpStatus.CREATED) //para devolver el 201
-    public void agregarMisionADonante(@PathVariable Long id, @RequestParam String tipoDeDonante,@RequestParam String tipoCategoria, @RequestBody MisionDTO misionDTO) {
-        incentivosService.agregarMisionADonante(id, tipoDeDonante,tipoCategoria,misionDTO); //sirve tanto para humano como para juridico
+    public void agregarMisionADonante(@PathVariable Long id, @RequestParam TipoDeDonante tipoDeDonante, @RequestBody MisionDTO misionDTO) {
+        incentivosService.agregarMisionADonante(id, tipoDeDonante,misionDTO); //sirve tanto para humano como para juridico
     }
 
     //Obtención de las misiones completadas por una persona donante.
     @GetMapping("donante/misionesCompletadas/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED) //para devolver el 200
-    public List<MisionDTO> obtenerTodasLasMisionesDeDonanteHumano(@PathVariable Long id, @RequestParam String tipoDeDonante){
+    public List<MisionParticularDTO>  obtenerTodasLasMisionesDeDonanteHumano(@PathVariable Long id, @RequestParam TipoDeDonante tipoDeDonante){
         return incentivosService.obtenerMisionesCompletadas(id, tipoDeDonante);
     }
 
     //Obtención de las insignias para una persona donante.
     @GetMapping("donante/insignias/{id}/")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public List<InsigniaDTO> obtenerInsignias(@PathVariable Long id, @RequestParam String tipoDeDonante){
+    public List<InsigniaDTO> obtenerInsignias(@PathVariable Long id, @RequestParam TipoDeDonante tipoDeDonante){
         try{
             return incentivosService.buscarInsigniasPorId(id, tipoDeDonante);
         }catch(RuntimeException e){
@@ -58,7 +59,7 @@ public class IncentivosController {
     }
     @GetMapping("donante/misionActual/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public MisionDTO obtenerMisionEnCurso(@PathVariable Long id, @RequestParam String tipoDeDonante){
+    public MisionParticularDTO obtenerMisionEnCurso(@PathVariable Long id, @RequestParam TipoDeDonante tipoDeDonante){
         try{
             return incentivosService.buscarMisionActualPorId(id, tipoDeDonante);
         }catch(RuntimeException e){
@@ -69,11 +70,11 @@ public class IncentivosController {
     @GetMapping("donante/verificarMision/{id}")
     //    Insignia insigniaObtenida = Insignia.COLABORADOR; // Antes del merge
     public ResponseEntity<String> verificarMision(@PathVariable ("id") Long id,
-                                                @RequestParam(name = "tipoDonante", defaultValue = "HUMANO") String tipoDonante){
+                                                @RequestParam TipoDeDonante tipoDonante){
         Insignia insigniaObtenida = Insignia.DONACIONEXITOSA; // ejemplo
 
         Donante donante = incentivosRepository
-                .buscarDonantePorIdEnDonaciones(id, tipoDonante);
+                .findByIdEnDonaciones(id, tipoDonante);
 
         if(donante == null){
             return ResponseEntity.notFound().build(); }

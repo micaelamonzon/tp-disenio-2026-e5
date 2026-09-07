@@ -4,9 +4,11 @@ package ar.edu.utn.frba.ddsi.models.entities.persona;
 import ar.edu.utn.frba.ddsi.models.entities.donaciones.DonacionSegmentada;
 import ar.edu.utn.frba.ddsi.models.entities.misiones.EstadoDeMision;
 import ar.edu.utn.frba.ddsi.models.entities.misiones.Mision;
-import ar.edu.utn.frba.ddsi.models.entities.misiones.MisionEnCurso;
+import ar.edu.utn.frba.ddsi.models.entities.misiones.MisionParticular;
+import ar.edu.utn.frba.ddsi.models.entities.persistente.Persistente;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -17,52 +19,57 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Data
-@NoArgsConstructor
-@JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
-@Table(name = "donante")
-public class Donante {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; //id en incentivos
+@Table(name = "Donante")
+public class Donante extends Persistente {
 
     @Column(name = "id_en_donaciones")
     private Long idEnDonaciones; //id en donaciones
 
-    @Transient
+    @Enumerated(EnumType.STRING)
     private TipoDeDonante tipoDeDonante;
 
     @Column(name = "nombre")
     private String nombre;
+
     @Column(name = "apellido")
     private String apellido;
+
     @Column(name = "razon_social")
     private String razonSocial;
+
     @Column(name = "fechaDeRegistro")
     private LocalDateTime fechaDeRegistro;
-    @Transient
-    private List<DonacionSegmentada> donaciones;
-    @Transient
-    private Perfil perfil;
-    @Transient
-    private List<Mision> misiones; //historial de misiones tanto en curso como pasada
-    @Transient
-    private MedioDeNotificacion medioDeNotificacionPredeterminado;
-    @Transient
-    private MisionEnCurso misionEnCurso;
 
-    public Donante(Long idEnDonaciones,String nombre, String apellido, String razonSocial, LocalDateTime fechaDeRegistro, MedioDeNotificacion medioDeNotificacionPredeterminado, List<DonacionSegmentada> donaciones ,TipoDeDonante tipo) {
+    @OneToMany(mappedBy = "donante", fetch = FetchType.LAZY)
+    private List<DonacionSegmentada> donaciones;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "perfil_id", referencedColumnName = "id")
+    private Perfil perfil;
+
+    @OneToMany(mappedBy = "donante", fetch = FetchType.LAZY)
+    private List<MisionParticular> misiones; //historial de misiones tanto en curso como pasadas
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "mision_en_curso_id", referencedColumnName = "id")
+    private MisionParticular misionEnCurso;
+
+    public Donante(Long idEnDonaciones,String nombre, String apellido, String razonSocial, LocalDateTime fechaDeRegistro, List<DonacionSegmentada> donaciones ,TipoDeDonante tipo) {
         this.idEnDonaciones = idEnDonaciones;
         this.nombre = nombre;
         this.apellido = apellido;
         this.razonSocial = razonSocial;
         this.donaciones = donaciones;
         this.fechaDeRegistro = fechaDeRegistro;
-        this.medioDeNotificacionPredeterminado = medioDeNotificacionPredeterminado;
         this.tipoDeDonante = tipo;
     }
 
-    public void agregarMision(Mision mision) {
+    public Donante() {
+
+    }
+
+    public void agregarMision(MisionParticular mision) {
         this.misiones.add(mision);
     }
 
@@ -88,9 +95,7 @@ public class Donante {
     }
 
 
-    public List<Mision> obtenerMisionesCompletadas(){
-
-       List<Mision> misionesCompletadasDeLaCategoria = this.getMisionEnCurso().getCategoriaActual().obtenerMisionesCompletadas(this.getDonaciones());
+    public List<MisionParticular> obtenerMisionesCompletadas(){
         return this.misiones.stream().filter(m -> m.getEstado() == EstadoDeMision.COMPLETADA).collect(Collectors.toList()) ;
     }
 
