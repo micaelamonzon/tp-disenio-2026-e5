@@ -14,7 +14,36 @@ const ICONS = {
   users: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
   heart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>',
   heartFilled: '<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>',
+  truck: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 17h4V5H10z"/><path d="M20 17h2v-7l-3-4h-3v11h4z"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>',
+  pin: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>',
 };
+
+const activeDeliveries = [
+  {
+    id: "DON-001",
+    truckId: "TRUCK-A1",
+    status: "En camino",
+    eta: "45 minutos",
+    progress: 45,
+    destination: "Centro Comunitario San Martín, Av. Rivadavia 1234, CABA",
+    items: ["Alimentos no perecederos", "Agua mineral", "Ropa de invierno"],
+    lastUpdate: "hace menos de 1 minuto",
+    truckPos: { x: 34, y: 42 },
+    destPos: { x: 42, y: 34 }
+  },
+  {
+    id: "DON-002",
+    truckId: "TRUCK-B2",
+    status: "Cerca del destino",
+    eta: "15 minutos",
+    progress: 90,
+    destination: "Fundación Esperanza, Calle Bolívar 567, Buenos Aires",
+    items: ["Medicamentos", "Artículos de higiene"],
+    lastUpdate: "hace menos de 1 minuto",
+    truckPos: { x: 21, y: 53 },
+    destPos: { x: 48, y: 76 }
+  }
+];
 
 const donations = [
   { qty: "6 unidades", name: "Sillas", category: "Mobiliario", subcategory: "Sillas", condition: "Usado", status: "Asignada", assignedTo: "Comedor Los Girasoles" },
@@ -324,6 +353,134 @@ function badgeCardHTML(b) {
 
 missionsGrid.innerHTML = missions.map(missionCardHTML).join("");
 badgesGrid.innerHTML = badges.map(badgeCardHTML).join("");
+
+/* ============================================================
+   SEGUIMIENTO EN TIEMPO REAL (REQUERIMIENTO IMPLEMENTADO)
+   ============================================================ */
+const routesSvg = document.getElementById("routesSvg");
+const mapMarkers = document.getElementById("mapMarkers");
+const deliveriesList = document.getElementById("deliveriesList");
+
+let activePopoverTruckId = null;
+
+function renderTrackingMap() {
+  routesSvg.innerHTML = "";
+  mapMarkers.innerHTML = "";
+
+  activeDeliveries.forEach(del => {
+    // Dibujar línea punteada entre el camión y el destino
+    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    line.setAttribute("x1", `${del.truckPos.x}%`);
+    line.setAttribute("y1", `${del.truckPos.y}%`);
+    line.setAttribute("x2", `${del.destPos.x}%`);
+    line.setAttribute("y2", `${del.destPos.y}%`);
+    line.setAttribute("class", "route-line");
+    routesSvg.appendChild(line);
+
+    // Marker Camión
+    const truckMarker = document.createElement("button");
+    truckMarker.className = "marker marker-truck";
+    truckMarker.style.left = `${del.truckPos.x}%`;
+    truckMarker.style.top = `${del.truckPos.y}%`;
+    truckMarker.innerHTML = ICONS.truck;
+    truckMarker.title = `Camión ${del.truckId}`;
+    truckMarker.onclick = (e) => {
+      e.stopPropagation();
+      activePopoverTruckId = activePopoverTruckId === del.truckId ? null : del.truckId;
+      renderTrackingMap();
+    };
+    mapMarkers.appendChild(truckMarker);
+
+    // Marker Destino
+    const destMarker = document.createElement("div");
+    destMarker.className = "marker marker-dest";
+    destMarker.style.left = `${del.destPos.x}%`;
+    destMarker.style.top = `${del.destPos.y}%`;
+    destMarker.innerHTML = ICONS.pin;
+    mapMarkers.appendChild(destMarker);
+
+    // Ventana emergente (Popover) si está activo
+    if (activePopoverTruckId === del.truckId) {
+      const popover = document.createElement("div");
+      popover.className = "map-popover";
+      popover.style.left = `${del.truckPos.x}%`;
+      popover.style.top = `${del.truckPos.y}%`;
+      popover.innerHTML = `
+        <div class="popover-title">
+          <span>${ICONS.truck} <b>${del.truckId}</b></span>
+        </div>
+        <div class="popover-row"><span>Donación:</span> <b>${del.id}</b></div>
+        <div class="popover-row"><span>Estado:</span> <span class="badge-status status-orange">${del.status}</span></div>
+        <div class="popover-row"><span>ETA:</span> <b>${del.eta}</b></div>
+        <div class="popover-dest">
+          ${ICONS.pin}
+          <div>
+            <b>Destino:</b><br>
+            ${del.destination}
+          </div>
+        </div>
+        <div class="progress-bar-container">
+          <div class="progress-bar-fill" style="width: ${del.progress}%"></div>
+        </div>
+        <div class="popover-pct">${del.progress}% completado</div>
+        <div class="popover-time">Última actualización: ${del.lastUpdate}</div>
+      `;
+      mapMarkers.appendChild(popover);
+    }
+  });
+}
+
+function renderTrackingList() {
+  deliveriesList.innerHTML = activeDeliveries.map(del => `
+    <article class="delivery-card">
+      <div class="delivery-card-head">
+        <div>
+          <span class="delivery-id">${ICONS.box} ${del.id}</span>
+          <span class="badge-status status-blue">${del.status}</span>
+        </div>
+        <div class="delivery-meta-right">
+          <span class="truck-code">${del.truckId}</span>
+          <span class="eta-text">${ICONS.clock} ${del.eta}</span>
+        </div>
+      </div>
+
+      <div class="progress-track">
+        <div class="progress-fill" style="width: ${del.progress}%"></div>
+      </div>
+      <span class="progress-label">${del.progress}% del recorrido</span>
+
+      <div class="delivery-dest">
+        ${ICONS.pin}
+        <div>
+          <b>Destino:</b><br>
+          ${del.destination}
+        </div>
+      </div>
+
+      <div class="delivery-items">
+        <span>Artículos:</span>
+        <ul>
+          ${del.items.map(item => `<li>${item}</li>`).join("")}
+        </ul>
+      </div>
+
+      <div class="delivery-footer">
+        Última actualización: ${del.lastUpdate}
+      </div>
+    </article>
+  `).join("");
+}
+
+document.addEventListener("click", () => {
+  if (activePopoverTruckId !== null) {
+    activePopoverTruckId = null;
+    renderTrackingMap();
+  }
+});
+
+renderTrackingMap();
+renderTrackingList();
+
 
 /* ============================================================
    NOTIFICACIONES

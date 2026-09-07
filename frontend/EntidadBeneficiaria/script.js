@@ -1,0 +1,206 @@
+/* ============================================================
+   DATOS (mock) — Estado inicial de necesidades
+   ============================================================ */
+
+const registeredNeeds = [
+    {
+        id: 1,
+        category: "Alimentos",
+        description: "Arroz y fideos",
+        quantity: 50,
+        unit: "kg",
+        priority: "Alta",
+        deadline: "2026-05-14",
+        notes: ""
+    }
+];
+
+const assignedDonations = [
+    {
+        id: 101,
+        title: "Alimentos no perecederos",
+        description: "Arroz, fideos, lentejas",
+        quantity: "50",
+        timeAgo: "Hace 2 días",
+        status: "Pendiente"
+    },
+    {
+        id: 102,
+        title: "Ropa de abrigo",
+        description: "Camperas y frazadas",
+        quantity: "30",
+        timeAgo: "Hace 4 días",
+        status: "En proceso"
+    },
+    {
+        id: 103,
+        title: "Calzado",
+        description: "Zapatillas para niños",
+        quantity: "20",
+        timeAgo: "Hace 1 semana",
+        status: "Entregado"
+    }
+];
+
+/* ============================================================
+   MENÚ DE USUARIO
+   ============================================================ */
+const userMenuTrigger = document.getElementById("userMenuTrigger");
+const userMenu = document.getElementById("userMenu");
+const logoutBtn = document.getElementById("logoutBtn");
+
+function closeUserMenu() {
+    userMenu.hidden = true;
+    userMenuTrigger.setAttribute("aria-expanded", "false");
+}
+
+userMenuTrigger.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const isOpen = !userMenu.hidden;
+    userMenu.hidden = isOpen;
+    userMenuTrigger.setAttribute("aria-expanded", !isOpen);
+});
+
+document.addEventListener("click", (e) => {
+    if (!userMenu.hidden && !userMenu.contains(e.target) && e.target !== userMenuTrigger) {
+        closeUserMenu();
+    }
+});
+
+logoutBtn.addEventListener("click", () => {
+    closeUserMenu();
+    alert("Sesión cerrada");
+});
+
+/* ============================================================
+   TABS
+   ============================================================ */
+const tabs = document.querySelectorAll(".tab");
+const views = document.querySelectorAll(".view");
+
+tabs.forEach(tab => {
+    tab.addEventListener("click", () => {
+        tabs.forEach(t => t.classList.remove("active"));
+        views.forEach(v => v.classList.remove("active"));
+        tab.classList.add("active");
+        document.getElementById("view-" + tab.dataset.tab).classList.add("active");
+    });
+});
+
+/* ============================================================
+   REQUERIMIENTO 1: REGISTRAR NECESIDADES
+   ============================================================ */
+const needForm = document.getElementById("needForm");
+const registeredNeedsList = document.getElementById("registeredNeedsList");
+
+function formatDate(dateStr) {
+    if (!dateStr) return "";
+    const parts = dateStr.split("-");
+    if (parts.length !== 3) return dateStr;
+    const date = new Date(parts[0], parts[1] - 1, parts[2]);
+    return date.toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" });
+}
+
+function renderRegisteredNeeds() {
+    if (registeredNeeds.length === 0) {
+        registeredNeedsList.innerHTML = `<p class="empty-state">No hay necesidades registradas aún.</p>`;
+        return;
+    }
+
+    registeredNeedsList.innerHTML = registeredNeeds.map(need => `
+    <article class="need-item-card">
+      <div class="need-item-header">
+        <h3 class="need-item-title">${need.category}</h3>
+        <button class="delete-btn" onclick="deleteNeed(${need.id})" title="Eliminar necesidad">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 6 5 6 21 6"></polyline>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+          </svg>
+        </button>
+      </div>
+      <p class="need-item-desc">${need.description}</p>
+      <div class="need-item-meta">
+        <span>Cantidad: <b>${need.quantity} ${need.unit}</b></span>
+        <span>Prioridad: <span class="badge-priority priority-${need.priority.toLowerCase()}">${need.priority}</span></span>
+      </div>
+      <div class="need-item-date">
+        Fecha límite: <b>${formatDate(need.deadline)}</b>
+      </div>
+    </article>
+  `).join("");
+}
+
+function deleteNeed(id) {
+    const index = registeredNeeds.findIndex(n => n.id === id);
+    if (index !== -1) {
+        registeredNeeds.splice(index, 1);
+        renderRegisteredNeeds();
+    }
+}
+
+needForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const newNeed = {
+        id: Date.now(),
+        category: document.getElementById("needCategory").value,
+        description: document.getElementById("needDescription").value,
+        quantity: document.getElementById("needQuantity").value,
+        unit: document.getElementById("needUnit").value,
+        priority: document.getElementById("needPriority").value,
+        deadline: document.getElementById("needDeadline").value,
+        notes: document.getElementById("needNotes").value
+    };
+
+    registeredNeeds.unshift(newNeed);
+    renderRegisteredNeeds();
+    needForm.reset();
+});
+
+/* ============================================================
+   REQUERIMIENTO 2: ESTADO DE NECESIDADES / DONACIONES ASIGNADAS
+   ============================================================ */
+const statusNeedsList = document.getElementById("statusNeedsList");
+
+function getStatusIcon(status) {
+    switch (status) {
+        case "Pendiente":
+            return `<svg class="status-icon icon-pending" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
+        case "En proceso":
+            return `<svg class="status-icon icon-process" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`;
+        case "Entregado":
+            return `<svg class="status-icon icon-delivered" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`;
+        default:
+            return "";
+    }
+}
+
+function renderStatusNeeds() {
+    if (assignedDonations.length === 0) {
+        statusNeedsList.innerHTML = `<p class="empty-state">No posee donaciones o necesidades en seguimiento.</p>`;
+        return;
+    }
+
+    statusNeedsList.innerHTML = assignedDonations.map(item => `
+    <article class="status-card">
+      <div class="status-card-left">
+        ${getStatusIcon(item.status)}
+        <div class="status-card-info">
+          <h3>${item.title}</h3>
+          <p class="status-card-sub">${item.description}</p>
+          <div class="status-card-details">
+            <span>Cantidad: ${item.quantity}</span>
+            <span>${item.timeAgo}</span>
+          </div>
+        </div>
+      </div>
+      <div class="status-card-right">
+        <span class="status-tag status-${item.status.toLowerCase().replace(" ", "-")}">${item.status}</span>
+      </div>
+    </article>
+  `).join("");
+}
+
+// Inicialización de la vista
+renderRegisteredNeeds();
+renderStatusNeeds();
