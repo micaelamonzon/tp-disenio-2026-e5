@@ -9,34 +9,8 @@ const registeredNeeds = [
         description: "Arroz fino",
         quantity: 50,
         unit: "kg",
-        priority: "Recurrente"
-    }
-];
-
-const assignedDonations = [
-    {
-        id: 101,
-        title: "Alimentos no perecederos",
-        description: "Arroz, fideos, lentejas",
-        quantity: "50",
-        timeAgo: "Hace 2 días",
-        status: "Pendiente"
-    },
-    {
-        id: 102,
-        title: "Ropa de abrigo",
-        description: "Camperas y frazadas",
-        quantity: "30",
-        timeAgo: "Hace 4 días",
-        status: "Pendiente"
-    },
-    {
-        id: 103,
-        title: "Calzado",
-        description: "Zapatillas para niños",
-        quantity: "20",
-        timeAgo: "Hace 1 semana",
-        status: "Entregado"
+        priority: "Alta",
+        deadline: "2026-05-14"
     }
 ];
 
@@ -86,7 +60,7 @@ tabs.forEach(tab => {
 });
 
 /* ============================================================
-   REQUERIMIENTO 1: REGISTRAR NECESIDADES
+   REQUERIMIENTO: REGISTRAR NECESIDADES
    ============================================================ */
 const needForm = document.getElementById("needForm");
 const registeredNeedsList = document.getElementById("registeredNeedsList");
@@ -119,9 +93,9 @@ function renderRegisteredNeeds() {
       <p class="need-item-desc">${need.description}</p>
       <div class="need-item-meta">
         <span>Cantidad: <b>${need.quantity} ${need.unit}</b></span>
-        <span>Necesidad: <span class="badge-priority priority-${need.priority.toLowerCase()}">${need.priority}</span></span>
+        <span>Prioridad: <span class="badge-priority priority-${need.priority.toLowerCase()}">${need.priority}</span></span>
       </div>
-    
+      ${need.deadline ? `<div class="need-item-date">Fecha límite: <b>${formatDate(need.deadline)}</b></div>` : ""}
     </article>
   `).join("");
 }
@@ -154,20 +128,53 @@ needForm.addEventListener("submit", (e) => {
 });
 
 /* ============================================================
-   REQUERIMIENTO 2: ESTADO DE NECESIDADES / DONACIONES ASIGNADAS
+   ÍCONOS DE ESTADO (compartidos entre Estado de Necesidades
+   y Recepción de Donación)
    ============================================================ */
-const statusNeedsList = document.getElementById("statusNeedsList");
-
 function getStatusIcon(status) {
     switch (status) {
         case "Pendiente":
-            return `<svg class="status-icon icon-pending" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`;
+            return `<svg class="status-icon icon-pending" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
+        case "En proceso":
+            return `<svg class="status-icon icon-process" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`;
         case "Entregado":
             return `<svg class="status-icon icon-delivered" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`;
         default:
             return "";
     }
 }
+
+/* ============================================================
+   REQUERIMIENTO: ESTADO DE NECESIDADES / DONACIONES ASIGNADAS
+   ============================================================ */
+const assignedDonations = [
+    {
+        id: 101,
+        title: "Alimentos no perecederos",
+        description: "Arroz, fideos, lentejas",
+        quantity: "50",
+        timeAgo: "Hace 2 días",
+        status: "Pendiente"
+    },
+    {
+        id: 102,
+        title: "Ropa de abrigo",
+        description: "Camperas y frazadas",
+        quantity: "30",
+        timeAgo: "Hace 4 días",
+        status: "En proceso"
+    },
+    {
+        id: 103,
+        title: "Calzado",
+        description: "Zapatillas para niños",
+        quantity: "20",
+        timeAgo: "Hace 1 semana",
+        status: "Entregado"
+    }
+];
+
+const statusNeedsList = document.getElementById("statusNeedsList");
 
 function renderStatusNeeds() {
     if (assignedDonations.length === 0) {
@@ -200,66 +207,219 @@ renderRegisteredNeeds();
 renderStatusNeeds();
 
 /* ============================================================
-   AGREGADO (Euge - Entidad Beneficiaria):
-   Recepción de Donación / Notificaciones / Seguimiento de Entrega
+   REQUERIMIENTO: RECEPCIÓN DE DONACIÓN
    ============================================================ */
+const donations = [
+    {
+        id: "0415",
+        donationId: "#DON-2026-0415",
+        title: "Alimentos no perecederos",
+        donor: "Fundación Solidaria Buenos Aires",
+        type: "Alimentos no perecederos",
+        assignDate: "15 de Abril, 2026",
+        description: "500 kg de arroz, 300 kg de fideos, 200 litros de aceite, 150 kg de azúcar y 100 kg de harina. Todos los productos están envasados y tienen fecha de vencimiento superior a 6 meses.",
+        quantity: "1250 kg / 200 L",
+        timeAgo: "Hace 2 horas",
+        status: "Pendiente",
+        photos: []
+    },
+    {
+        id: "0412",
+        donationId: "#DON-2026-0412",
+        title: "Ropa y calzado",
+        donor: "Corporación Ayuda Mutua",
+        type: "Ropa y calzado",
+        assignDate: "8 de Abril, 2026",
+        description: "40 camperas de abrigo y 25 pares de zapatillas para niños, todas en buen estado.",
+        quantity: "65 unidades",
+        timeAgo: "Hace 1 día",
+        status: "Pendiente",
+        photos: []
+    },
+    {
+        id: "0410",
+        donationId: "#DON-2026-0410",
+        title: "Útiles escolares",
+        donor: "Librería Central S.A.",
+        type: "Útiles escolares",
+        assignDate: "2 de Abril, 2026",
+        description: "80 cuadernos, 200 lápices y 50 cartucheras completas para inicio de clases.",
+        quantity: "330 unidades",
+        timeAgo: "Hace 5 días",
+        status: "Entregado",
+        photos: ["data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Crect width='200' height='200' fill='%23e2e8f0'/%3E%3Ctext x='50%25' y='50%25' font-family='Arial' font-size='16' fill='%2364748b' text-anchor='middle' dy='.3em'%3EFoto donaci%C3%B3n%3C/text%3E%3C/svg%3E"]
+    }
+];
 
-/* ---------- REQUERIMIENTO: RECEPCIÓN DE DONACIÓN ---------- */
-const uploadDropzone = document.getElementById("uploadDropzone");
-const donationPhotosInput = document.getElementById("donationPhotos");
-const uploadPreview = document.getElementById("uploadPreview");
-const confirmReceptionBtn = document.getElementById("confirmReceptionBtn");
-const cancelReceptionBtn = document.getElementById("cancelReceptionBtn");
+let openPhotosFor = null; // id de la donación con el panel de detalle/fotos abierto
 
-let uploadedPhotos = [];
+const pendingDonationsList = document.getElementById("pendingDonationsList");
+const confirmedDonationsList = document.getElementById("confirmedDonationsList");
 
-uploadDropzone.addEventListener("click", () => donationPhotosInput.click());
+function photoUrl(photo) {
+    return typeof photo === "string" ? photo : URL.createObjectURL(photo);
+}
 
-uploadDropzone.addEventListener("dragover", (e) => {
+function photosPanel(d) {
+    if (openPhotosFor !== d.id) return "";
+
+    const alreadyConfirmed = d.status === "Entregado";
+    const hasPhotos = d.photos.length > 0;
+
+    return `
+    <div class="photos-panel">
+      <div class="field-row">
+        <div class="field"><span>Fecha de Asignación</span><p>${d.assignDate}</p></div>
+        <div class="field"><span>Donante</span><p>${d.donor}</p></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><span>Tipo de Donación</span><p>${d.type}</p></div>
+        <div class="field"><span>Cantidad estimada</span><p>${d.quantity}</p></div>
+      </div>
+      <div class="field"><span>Descripción</span><p>${d.description}</p></div>
+
+      ${alreadyConfirmed && hasPhotos ? `
+        <div class="field">
+          <span>Fotografías de la donación</span>
+          <div class="photo-gallery">
+            ${d.photos.map(p => `<img src="${photoUrl(p)}" alt="Foto de la donación">`).join("")}
+          </div>
+        </div>
+      ` : `
+        <div class="upload-actions-row">
+          <button type="button" class="btn btn-outline btn-camera" data-role="cameraBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            Tomar foto
+          </button>
+        </div>
+        <input type="file" accept="image/*" capture="environment" data-role="cameraInput" hidden>
+        <div class="upload-dropzone" data-role="dropzone">
+          <input type="file" accept="image/png, image/jpeg" multiple hidden data-role="fileInput">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <p><b>Click para subir fotografías</b></p>
+          <span class="page-sub">PNG, JPG (MAX. 5MB)</span>
+          <div class="upload-preview" data-role="preview">${d.photos.map(p => `<img src="${photoUrl(p)}" alt="Foto">`).join("")}</div>
+        </div>
+      `}
+
+      ${d.status === "Pendiente" ? `
+        <div class="form-actions-right">
+          <button type="button" class="btn btn-outline" data-role="cancel">Cancelar</button>
+          <button type="button" class="btn btn-submit" data-role="confirm" ${d.photos.length === 0 ? "disabled" : ""}>Confirmar Recepción</button>
+        </div>
+      ` : ""}
+    </div>`;
+}
+
+function renderDonations() {
+    const pending = donations.filter(d => d.status === "Pendiente");
+    const confirmed = donations.filter(d => d.status === "Entregado");
+
+    pendingDonationsList.innerHTML = pending.length
+        ? pending.map(d => donationCard(d)).join("")
+        : `<p class="empty-state">No hay donaciones pendientes de confirmar.</p>`;
+
+    confirmedDonationsList.innerHTML = confirmed.length
+        ? confirmed.map(d => donationCard(d)).join("")
+        : `<p class="empty-state">Aún no confirmó ninguna donación.</p>`;
+}
+
+function donationCard(d) {
+    const icon = d.status === "Entregado" ? getStatusIcon("Entregado") : getStatusIcon("Pendiente");
+    return `
+    <article class="status-card donation-card" data-donation-id="${d.id}">
+      <div class="status-card-row">
+        <div class="status-card-left">
+          ${icon}
+          <div class="status-card-info">
+            <h3>${d.title} <span class="page-sub">· ${d.donationId}</span></h3>
+            <p class="status-card-sub">${d.donor}</p>
+            <div class="status-card-details">
+              <span>Cantidad: ${d.quantity}</span>
+              <span>${d.timeAgo}</span>
+              ${d.photos.length ? `<span>${d.photos.length} foto(s) adjunta(s)</span>` : ""}
+            </div>
+          </div>
+        </div>
+        <div class="status-card-right">
+          <span class="status-tag status-${d.status.toLowerCase()}">${d.status === "Entregado" ? "Entregado" : "Pendiente"}</span>
+          <button type="button" class="link-btn-secondary" data-role="togglePhotos">${openPhotosFor === d.id ? "Ocultar detalle" : "Ver detalle y fotos"}</button>
+        </div>
+      </div>
+      ${photosPanel(d)}
+    </article>`;
+}
+
+function findDonation(id) {
+    return donations.find(d => d.id === id);
+}
+
+function getCard(el) {
+    return el.closest(".donation-card");
+}
+
+document.addEventListener("click", (e) => {
+    const card = getCard(e.target);
+    if (!card) return;
+    const d = findDonation(card.dataset.donationId);
+    if (!d) return;
+
+    if (e.target.closest('[data-role="togglePhotos"]')) {
+        openPhotosFor = openPhotosFor === d.id ? null : d.id;
+        renderDonations();
+    }
+    if (e.target.closest('[data-role="dropzone"]')) {
+        card.querySelector('[data-role="fileInput"]').click();
+    }
+    if (e.target.closest('[data-role="cameraBtn"]')) {
+        card.querySelector('[data-role="cameraInput"]').click();
+    }
+    if (e.target.closest('[data-role="cancel"]')) {
+        openPhotosFor = null;
+        renderDonations();
+    }
+    if (e.target.closest('[data-role="confirm"]')) {
+        d.status = "Entregado";
+        openPhotosFor = null;
+        renderDonations();
+        alert("Recepción confirmada con " + d.photos.length + " foto(s).");
+    }
+});
+
+document.addEventListener("change", (e) => {
+    const card = getCard(e.target);
+    if (!card) return;
+    const d = findDonation(card.dataset.donationId);
+    if (!d) return;
+
+    if (e.target.matches('[data-role="fileInput"]') || e.target.matches('[data-role="cameraInput"]')) {
+        Array.from(e.target.files).forEach(file => {
+            if (file.type.startsWith("image/")) d.photos.push(file);
+        });
+        renderDonations();
+    }
+});
+
+document.addEventListener("dragover", (e) => {
+    if (e.target.closest('[data-role="dropzone"]')) e.preventDefault();
+});
+document.addEventListener("drop", (e) => {
+    const dropzone = e.target.closest('[data-role="dropzone"]');
+    if (!dropzone) return;
     e.preventDefault();
-    uploadDropzone.classList.add("dragover");
-});
-uploadDropzone.addEventListener("dragleave", () => {
-    uploadDropzone.classList.remove("dragover");
-});
-uploadDropzone.addEventListener("drop", (e) => {
-    e.preventDefault();
-    uploadDropzone.classList.remove("dragover");
-    handleFiles(e.dataTransfer.files);
-});
-
-donationPhotosInput.addEventListener("change", (e) => {
-    handleFiles(e.target.files);
-});
-
-function handleFiles(fileList) {
-    Array.from(fileList).forEach(file => {
-        if (!file.type.startsWith("image/")) return;
-        uploadedPhotos.push(file);
+    const card = getCard(e.target);
+    const d = findDonation(card.dataset.donationId);
+    Array.from(e.dataTransfer.files).forEach(file => {
+        if (file.type.startsWith("image/")) d.photos.push(file);
     });
-    renderUploadPreview();
-    confirmReceptionBtn.disabled = uploadedPhotos.length === 0;
-}
-
-function renderUploadPreview() {
-    uploadPreview.innerHTML = uploadedPhotos.map(file => {
-        const url = URL.createObjectURL(file);
-        return `<img src="${url}" alt="Foto de recepción">`;
-    }).join("");
-}
-
-confirmReceptionBtn.addEventListener("click", () => {
-    document.getElementById("donationStatus").textContent = "Entregado";
-    alert("Recepción de la donación confirmada con " + uploadedPhotos.length + " foto(s).");
+    renderDonations();
 });
 
-cancelReceptionBtn.addEventListener("click", () => {
-    uploadedPhotos = [];
-    renderUploadPreview();
-    confirmReceptionBtn.disabled = true;
-});
+renderDonations();
 
-/* ---------- REQUERIMIENTO: NOTIFICACIONES ---------- */
+/* ============================================================
+   REQUERIMIENTO: NOTIFICACIONES
+   ============================================================ */
 const notifications = [
     {
         id: 1,
@@ -355,7 +515,9 @@ markAllReadBtn.addEventListener("click", () => {
 
 renderNotifications();
 
-/* ---------- REQUERIMIENTO: SEGUIMIENTO DE ENTREGA ---------- */
+/* ============================================================
+   REQUERIMIENTO: SEGUIMIENTO DE ENTREGA
+   ============================================================ */
 const locationHistoryData = [
     { address: "Av. Corrientes 1234", time: "14:32 hs" },
     { address: "Av. Santa Fe 2800", time: "14:15 hs" },
@@ -370,3 +532,26 @@ function renderLocationHistory() {
 }
 
 renderLocationHistory();
+
+/* ---------- LIGHTBOX: ver fotos en grande ---------- */
+const photoLightbox = document.getElementById("photoLightbox");
+const lightboxImg = document.getElementById("lightboxImg");
+const lightboxClose = document.getElementById("lightboxClose");
+
+document.addEventListener("click", (e) => {
+    const img = e.target.closest(".upload-preview img, .photo-gallery img");
+    if (img) {
+        lightboxImg.src = img.src;
+        photoLightbox.hidden = false;
+    }
+});
+
+lightboxClose.addEventListener("click", () => {
+    photoLightbox.hidden = true;
+});
+
+photoLightbox.addEventListener("click", (e) => {
+    if (e.target === photoLightbox) {
+        photoLightbox.hidden = true;
+    }
+});
