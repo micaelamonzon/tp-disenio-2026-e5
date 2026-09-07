@@ -21,7 +21,7 @@ const ICONS = {
 const activeDeliveries = [
   {
     id: "DON-001",
-    truckId: "TRUCK-A1",
+    truckId: "CAMION-A1",
     status: "En camino",
     eta: "45 minutos",
     progress: 45,
@@ -33,7 +33,7 @@ const activeDeliveries = [
   },
   {
     id: "DON-002",
-    truckId: "TRUCK-B2",
+    truckId: "CAMION-B2",
     status: "Cerca del destino",
     eta: "15 minutos",
     progress: 90,
@@ -73,23 +73,16 @@ const entities = [
 ];
 
 const missions = [
-  { name: "Donar 10kg de arroz", desc: "Ayuda a alimentar familias con alimentos básicos", progress: 10, total: 10, reward: 50 },
-  { name: "Realizar 5 donaciones este mes", desc: "Mantén tu compromiso solidario activo", progress: 3, total: 5, reward: 100 },
-  { name: "Donar mobiliario en buen estado", desc: "Comparte muebles que puedan ser útiles", progress: 2, total: 3, reward: 75 },
-  { name: "Seguir a 3 entidades beneficiarias", desc: "Conecta con organizaciones y conoce su trabajo", progress: 3, total: 3, reward: 30 },
-  { name: "Donar productos de higiene", desc: "Los artículos de higiene son siempre necesarios", progress: 0, total: 5, reward: 60 },
+  { name: "Racha de 10", desc: "Dona por 10 meses consecutivos, una donación por día.", progress: 100, total: 100 },
+  { name: "Completitud de 14 ", desc: "Realizar donaciones de 14 categorías distintas.", progress: 100, total: 100 },
+  { name: "Hábil Donador de 8", desc: "Lograr que una donación supere 8 de cantidad de bienes.", progress:100 , total: 100 },
+  { name: "Donaciones Exitosas de 5", desc: "Lograr que 5 donaciones sean recibidas exitosamente por una entidad beneficiaria.", progress: 10, total: 100},
 ];
 
 const badges = [
-  { name: "Primer Paso", desc: "Completaste tu primera donación", icon: "🌱", unlocked: true },
-  { name: "Generoso", desc: "Donaste más de 50kg de alimentos", icon: "❤️", unlocked: true },
-  { name: "Comprometido", desc: "Donaste durante 3 meses consecutivos", icon: "🎯", unlocked: true },
-  { name: "Variedad", desc: "Donaste en 3 categorías diferentes", icon: "🌈", unlocked: true },
-  { name: "Líder Solidario", desc: "Alcanzaste el nivel 5", icon: "👑", unlocked: true },
-  { name: "Promotor", desc: "Invita a 5 personas a donar", icon: "📣", unlocked: false },
-  { name: "Mega Donante", desc: "Donaste más de 200kg en total", icon: "📦", unlocked: false },
-  { name: "Ángel Guardián", desc: "Completa 50 donaciones", icon: "🛡️", unlocked: false },
-  { name: "Héroe Local", desc: "Ayuda a 10 organizaciones", icon: "🏅", unlocked: false },
+  { name: "Colaborador", desc: "Completaste todas las misiones de esta categoria", icon: "🌱", unlocked: true },
+  { name: "Sostenedor ", desc: "Completa la mision actual y las que faltán para desbloquear esta categoria", icon: "🛡️", unlocked: false },
+  { name: "Transformador ", desc: "Completa todas las misiones de Sostenedor para alcanzar esta categoria", icon: "🏅", unlocked: false },
 ];
 
 const notifications = [
@@ -332,10 +325,6 @@ function missionCardHTML(m) {
           <div class="progress-fill ${done ? "done" : ""}" style="width:${pct}%"></div>
         </div>
       </div>
-      <div class="mission-reward">
-        <span>Recompensa:</span>
-        <b>${m.reward} XP</b>
-      </div>
     </article>
   `;
 }
@@ -411,7 +400,7 @@ function renderTrackingMap() {
         </div>
         <div class="popover-row"><span>Donación:</span> <b>${del.id}</b></div>
         <div class="popover-row"><span>Estado:</span> <span class="badge-status status-orange">${del.status}</span></div>
-        <div class="popover-row"><span>ETA:</span> <b>${del.eta}</b></div>
+        <div class="popover-row"><span>Tiempo estimado:</span> <b>${del.eta}</b></div>
         <div class="popover-dest">
           ${ICONS.pin}
           <div>

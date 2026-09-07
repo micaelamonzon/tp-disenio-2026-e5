@@ -5,13 +5,11 @@
 const registeredNeeds = [
     {
         id: 1,
-        category: "Alimentos",
-        description: "Arroz y fideos",
+        category: "Arroz",
+        description: "Arroz fino",
         quantity: 50,
         unit: "kg",
-        priority: "Alta",
-        deadline: "2026-05-14",
-        notes: ""
+        priority: "Recurrente"
     }
 ];
 
@@ -30,7 +28,7 @@ const assignedDonations = [
         description: "Camperas y frazadas",
         quantity: "30",
         timeAgo: "Hace 4 días",
-        status: "En proceso"
+        status: "Pendiente"
     },
     {
         id: 103,
@@ -121,11 +119,9 @@ function renderRegisteredNeeds() {
       <p class="need-item-desc">${need.description}</p>
       <div class="need-item-meta">
         <span>Cantidad: <b>${need.quantity} ${need.unit}</b></span>
-        <span>Prioridad: <span class="badge-priority priority-${need.priority.toLowerCase()}">${need.priority}</span></span>
+        <span>Necesidad: <span class="badge-priority priority-${need.priority.toLowerCase()}">${need.priority}</span></span>
       </div>
-      <div class="need-item-date">
-        Fecha límite: <b>${formatDate(need.deadline)}</b>
-      </div>
+    
     </article>
   `).join("");
 }
@@ -165,9 +161,7 @@ const statusNeedsList = document.getElementById("statusNeedsList");
 function getStatusIcon(status) {
     switch (status) {
         case "Pendiente":
-            return `<svg class="status-icon icon-pending" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
-        case "En proceso":
-            return `<svg class="status-icon icon-process" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`;
+            return `<svg class="status-icon icon-pending" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`;
         case "Entregado":
             return `<svg class="status-icon icon-delivered" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`;
         default:
@@ -204,3 +198,175 @@ function renderStatusNeeds() {
 // Inicialización de la vista
 renderRegisteredNeeds();
 renderStatusNeeds();
+
+/* ============================================================
+   AGREGADO (Euge - Entidad Beneficiaria):
+   Recepción de Donación / Notificaciones / Seguimiento de Entrega
+   ============================================================ */
+
+/* ---------- REQUERIMIENTO: RECEPCIÓN DE DONACIÓN ---------- */
+const uploadDropzone = document.getElementById("uploadDropzone");
+const donationPhotosInput = document.getElementById("donationPhotos");
+const uploadPreview = document.getElementById("uploadPreview");
+const confirmReceptionBtn = document.getElementById("confirmReceptionBtn");
+const cancelReceptionBtn = document.getElementById("cancelReceptionBtn");
+
+let uploadedPhotos = [];
+
+uploadDropzone.addEventListener("click", () => donationPhotosInput.click());
+
+uploadDropzone.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    uploadDropzone.classList.add("dragover");
+});
+uploadDropzone.addEventListener("dragleave", () => {
+    uploadDropzone.classList.remove("dragover");
+});
+uploadDropzone.addEventListener("drop", (e) => {
+    e.preventDefault();
+    uploadDropzone.classList.remove("dragover");
+    handleFiles(e.dataTransfer.files);
+});
+
+donationPhotosInput.addEventListener("change", (e) => {
+    handleFiles(e.target.files);
+});
+
+function handleFiles(fileList) {
+    Array.from(fileList).forEach(file => {
+        if (!file.type.startsWith("image/")) return;
+        uploadedPhotos.push(file);
+    });
+    renderUploadPreview();
+    confirmReceptionBtn.disabled = uploadedPhotos.length === 0;
+}
+
+function renderUploadPreview() {
+    uploadPreview.innerHTML = uploadedPhotos.map(file => {
+        const url = URL.createObjectURL(file);
+        return `<img src="${url}" alt="Foto de recepción">`;
+    }).join("");
+}
+
+confirmReceptionBtn.addEventListener("click", () => {
+    document.getElementById("donationStatus").textContent = "Entregado";
+    alert("Recepción de la donación confirmada con " + uploadedPhotos.length + " foto(s).");
+});
+
+cancelReceptionBtn.addEventListener("click", () => {
+    uploadedPhotos = [];
+    renderUploadPreview();
+    confirmReceptionBtn.disabled = true;
+});
+
+/* ---------- REQUERIMIENTO: NOTIFICACIONES ---------- */
+const notifications = [
+    {
+        id: 1,
+        type: "assigned",
+        title: "Nueva donación asignada",
+        description: "Se le ha asignado una donación de alimentos no perecederos de Fundación Solidaria Buenos Aires",
+        timeAgo: "Hace 2 horas",
+        read: false
+    },
+    {
+        id: 2,
+        type: "transit",
+        title: "Donación en tránsito",
+        description: "La donación #DON-2026-0415 está en camino. Tiempo estimado de llegada: 3 horas",
+        timeAgo: "Hace 5 horas",
+        read: false
+    },
+    {
+        id: 3,
+        type: "pending",
+        title: "Confirmación de entrega pendiente",
+        description: "Recuerde confirmar la recepción de la donación #DON-2026-0412 antes de las 18:00 hs",
+        timeAgo: "Hace 1 día",
+        read: true
+    },
+    {
+        id: 4,
+        type: "completed",
+        title: "Entrega completada",
+        description: "Se ha confirmado la entrega exitosa de la donación #DON-2026-0410",
+        timeAgo: "Hace 2 días",
+        read: true
+    },
+    {
+        id: 5,
+        type: "assigned",
+        title: "Nueva donación asignada",
+        description: "Se le ha asignado una donación de ropa y calzado de Corporación Ayuda Mutua",
+        timeAgo: "Hace 3 días",
+        read: true
+    },
+    {
+        id: 6,
+        type: "transit",
+        title: "Donación en tránsito",
+        description: "La donación #DON-2026-0408 está en camino. Conductor: Juan Pérez - Patente ABC123",
+        timeAgo: "Hace 4 días",
+        read: true
+    }
+];
+
+const notificationsList = document.getElementById("notificationsList");
+const markAllReadBtn = document.getElementById("markAllReadBtn");
+
+function getNotificationIcon(type) {
+    switch (type) {
+        case "assigned":
+            return `<svg class="notification-icon type-assigned" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>`;
+        case "transit":
+            return `<svg class="notification-icon type-transit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>`;
+        case "pending":
+            return `<svg class="notification-icon type-pending" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
+        case "completed":
+            return `<svg class="notification-icon type-completed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`;
+        default:
+            return "";
+    }
+}
+
+function renderNotifications() {
+    if (notifications.length === 0) {
+        notificationsList.innerHTML = `<p class="empty-state">No hay notificaciones.</p>`;
+        return;
+    }
+
+    notificationsList.innerHTML = notifications.map(n => `
+    <article class="notification-card ${n.read ? "" : "unread"}">
+      ${getNotificationIcon(n.type)}
+      <div>
+        <div class="notification-title">${n.title}</div>
+        <div class="notification-desc">${n.description}</div>
+        <div class="notification-time">${n.timeAgo}</div>
+      </div>
+      ${n.read ? "" : '<span class="notification-unread-dot"></span>'}
+    </article>
+  `).join("");
+}
+
+markAllReadBtn.addEventListener("click", () => {
+    notifications.forEach(n => n.read = true);
+    renderNotifications();
+});
+
+renderNotifications();
+
+/* ---------- REQUERIMIENTO: SEGUIMIENTO DE ENTREGA ---------- */
+const locationHistoryData = [
+    { address: "Av. Corrientes 1234", time: "14:32 hs" },
+    { address: "Av. Santa Fe 2800", time: "14:15 hs" },
+    { address: "Av. Libertador 5000", time: "13:45 hs" }
+];
+
+function renderLocationHistory() {
+    const locationHistory = document.getElementById("locationHistory");
+    locationHistory.innerHTML = locationHistoryData.map(loc => `
+    <li>${loc.address}<span>${loc.time}</span></li>
+  `).join("");
+}
+
+renderLocationHistory();
