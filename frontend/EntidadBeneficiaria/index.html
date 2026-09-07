@@ -41,74 +41,32 @@
 <main class="page">
 
     <section id="view-recepcion" class="view active">
-        <div class="page-head center">
+        <div class="page-head">
             <h1>Recepción de Donación</h1>
+            <p class="page-sub">Confirme la recepción de cada donación asignada, adjuntando las fotos correspondientes</p>
         </div>
 
-        <div class="card" id="donationDetailsCard">
-            <h2 class="card-title">Detalles de la Donación</h2>
-            <div class="field-row">
-                <div class="field">
-                    <span>ID de Donación</span>
-                    <p id="donationId">#DON-2026-0415</p>
-                </div>
-                <div class="field">
-                    <span>Fecha de Asignación</span>
-                    <p id="donationAssignDate">15 de Abril, 2026</p>
-                </div>
-            </div>
-            <div class="field-row">
-                <div class="field">
-                    <span>Donante</span>
-                    <p id="donationDonor">Fundación Solidaria Buenos Aires</p>
-                </div>
-                <div class="field">
-                    <span>Tipo de Donación</span>
-                    <p id="donationType">Alimentos no perecederos</p>
-                </div>
-            </div>
-            <div class="field">
-                <span>Descripción</span>
-                <p id="donationDescription">500 kg de arroz, 300 kg de fideos, 200 litros de aceite, 150 kg de azúcar y 100 kg de harina. Todos los productos están envasados y tienen fecha de vencimiento superior a 6 meses.</p>
-            </div>
-            <div class="field-row">
-                <div class="field">
-                    <span>Cantidad estimada</span>
-                    <p id="donationQuantity">1250 kg / 200 L</p>
-                </div>
-                <div class="field">
-                    <span>Estado</span>
-                    <p id="donationStatus">Pendiente de confirmación</p>
-                </div>
-            </div>
+        <div class="recepcion-container">
+            <h2 class="section-subtitle">Donaciones pendientes de confirmar</h2>
+            <div id="pendingDonationsList" class="status-list-container"></div>
 
-            <h2 class="card-title" style="margin-top: 24px;">Fotografías de Recepción</h2>
-            <p class="page-sub" style="margin-bottom: 12px;">Por favor, suba fotografías que muestren los productos recibidos para documentar la donación</p>
-            <div class="upload-dropzone" id="uploadDropzone">
-                <input type="file" id="donationPhotos" accept="image/png, image/jpeg" multiple hidden>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                <p><b>Click para subir fotografías</b></p>
-                <span class="page-sub">PNG, JPG (MAX. 5MB por archivo)</span>
-                <div id="uploadPreview" class="upload-preview"></div>
-            </div>
-
-            <div class="form-actions-right">
-                <button type="button" class="btn btn-outline" id="cancelReceptionBtn">Cancelar</button>
-                <button type="button" class="btn btn-submit" id="confirmReceptionBtn" disabled>Confirmar Recepción</button>
-            </div>
+            <h2 class="section-subtitle" style="margin-top: 32px;">Donaciones confirmadas</h2>
+            <div id="confirmedDonationsList" class="status-list-container"></div>
         </div>
     </section>
 
     <section id="view-notificaciones" class="view">
-        <div class="page-head-row">
+        <div class="page-head">
             <h1>Notificaciones</h1>
+        </div>
+        <div class="notifications-actions">
             <button class="link-btn" id="markAllReadBtn">Marcar todas como leídas</button>
         </div>
         <div class="notifications-list" id="notificationsList"></div>
     </section>
 
     <section id="view-seguimiento" class="view">
-        <div class="page-head center">
+        <div class="page-head">
             <h1>Seguimiento de Entrega</h1>
         </div>
 
@@ -173,7 +131,7 @@
                             <option value="Arroz">Arroz</option>
                             <option value="Abrigos">Abrigos</option>
                             <option value="Útiles escolares">Útiles escolares</option>
-                            <option value="Cepllios Dentales">Cepllios Dentales</option>
+                            <option value="Cepillos Dentales">Cepillos Dentales</option>
                             <option value="Mesas">Mesas</option>
                             <option value="Zapatillas">Zapatillas</option>
                             <option value="Leche">Leche</option>
@@ -181,7 +139,7 @@
                     </div>
                     <div class="field">
                         <span>Descripción detallada</span>
-                        <textarea id="needDescription" rows="3" required></textarea>
+                        <textarea id="needDescription" rows="3" placeholder="Especifique qué necesita exactamente" required></textarea>
                     </div>
                     <div class="field-row">
                         <div class="field">
@@ -200,21 +158,24 @@
                             </select>
                         </div>
                     </div>
-                    <div class="field-row">
-                        <div class="field">
-                            <span>Tipo de Necesidad</span>
-                            <select id="needPriority" required>
-                                <option value="" selected disabled>Seleccionar tipo</option>
-                                <option value="Extraordinaria">Extraordinaria</option>
-                                <option value="Recurrente">Recurrente</option>
-                            </select>
-                        </div>
-
+                    <div class="field">
+                        <span>Prioridad</span>
+                        <select id="needPriority" required>
+                            <option value="" selected disabled>Seleccionar prioridad</option>
+                            <option value="Alta">Alta</option>
+                            <option value="Media">Media</option>
+                            <option value="Baja">Baja</option>
+                        </select>
                     </div>
-                    <div class="center">
-                    <button type="submit" class="btn btn-agregar">Agregar Necesidad</button>
-                    <button type="submit" class="btn btn-submit">Enviar</button>
+                    <div class="field">
+                        <span>Fecha límite</span>
+                        <input type="date" id="needDeadline">
                     </div>
+                    <div class="field">
+                        <span>Observaciones adicionales (opcional)</span>
+                        <textarea id="needNotes" rows="2" placeholder="Información adicional relevante"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-submit">+ Agregar Necesidad</button>
                 </form>
             </div>
 
@@ -226,10 +187,12 @@
     </section>
 
     <section id="view-estado-necesidades" class="view">
-        <div class="page-head center">
+        <div class="page-head">
             <h1>Estado de Necesidades</h1>
         </div>
-        <div class="status-list-container" id="statusNeedsList"></div>
+        <div class="estado-necesidades-container">
+            <div class="status-list-container" id="statusNeedsList"></div>
+        </div>
     </section>
 
 </main>
@@ -265,6 +228,11 @@
         <p>&copy; 2026 DonaTrack - UTN Solidaria. Todos los derechos reservados.</p>
     </div>
 </footer>
+
+<div id="photoLightbox" class="lightbox" hidden>
+    <button type="button" class="lightbox-close" id="lightboxClose">&times;</button>
+    <img id="lightboxImg" src="" alt="Foto ampliada">
+</div>
 
 <script src="script.js"></script>
 </body>
