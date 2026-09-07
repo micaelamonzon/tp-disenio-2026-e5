@@ -641,10 +641,54 @@ a:hover {
     font-size: 0.9rem;
 }
 
+/* Contenedor principal de redes */
 .social-links {
-    margin-top: 1.5rem;
-    padding-top: 1rem;
-    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-top: 12px;
+}
+
+/* Estilo base de los botones cuadrangulares con bordes redondeados */
+.social-btn {
+    width: 48px;
+    height: 48px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 14px; /* Esquinas suavizadas idénticas a la imagen 1 */
+    color: #ffffff;
+    text-decoration: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+.social-btn svg {
+    width: 24px;
+    height: 24px;
+}
+
+/* Colores exactos de la primera imagen */
+.social-btn.facebook {
+    background-color: #1877f2; /* Azul Facebook */
+}
+
+.social-btn.instagram {
+    background-color: #e1306c; /* Magenta / Rosa Instagram */
+}
+
+.social-btn.twitter {
+    background-color: #00a2ed; /* Celeste Twitter */
+}
+
+.social-btn.linkedin {
+    background-color: #0a66c2; /* Azul oscuro LinkedIn */
+}
+
+/* Efecto hover interactivo */
+.social-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    filter: brightness(1.08);
 }
 
 .social-icons {
@@ -653,17 +697,6 @@ a:hover {
     margin-top: 0.5rem;
 }
 
-.social-btn {
-    width: 36px;
-    height: 36px;
-    background-color: var(--blue);
-    color: #ffffff;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-}
 
 .location-card {
     background: var(--card);
