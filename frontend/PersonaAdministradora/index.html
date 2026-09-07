@@ -372,17 +372,166 @@
         </section>
 
         <!-- ===== Placeholders para las interfaces que faltan ===== -->
+        <!-- ===================== GESTIÓN DE CAMIONES (Req 18) ===================== -->
         <section id="view-camiones" class="admin-view">
-            <div class="page-head"><h1>Gestión de Camiones</h1></div>
-            <div class="placeholder-card">Esta sección está a cargo de otra integrante del equipo.</div>
+            <div class="page-head page-head-row">
+                <div>
+                    <h1>Gestión de Camiones</h1>
+                    <p class="page-sub">Administre la flota de camiones disponibles para la distribución de donaciones.</p>
+                </div>
+                <button class="btn btn-primary" id="btnToggleCamionForm">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Agregar Camión
+                </button>
+            </div>
+
+            <div class="dashboard-stats">
+                <div class="stat-card">
+                    <div class="stat-card-head">
+                        <span>Camiones Disponibles</span>
+                        <span class="stat-icon stat-icon-green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 17h4V5H10z"/><path d="M20 17h2v-7l-3-4h-3v11h4z"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg></span>
+                    </div>
+                    <div class="stat-value" style="color: var(--green);" id="countCamionesDisponibles">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-head">
+                        <span>En Uso</span>
+                        <span class="stat-icon stat-icon-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></span>
+                    </div>
+                    <div class="stat-value" style="color: var(--blue);" id="countCamionesUso">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-head">
+                        <span>En Mantenimiento</span>
+                        <span class="stat-icon stat-icon-orange"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
+                    </div>
+                    <div class="stat-value" style="color: var(--orange);" id="countCamionesMantenimiento">0</div>
+                </div>
+            </div>
+
+            <!-- Formulario de Alta (Oculto por defecto) -->
+            <div class="form-card" id="formNuevoCamion" hidden>
+                <h2 class="form-card-title">Nuevo Camión</h2>
+                <form id="camionForm" class="fields-grid">
+                    <label class="field">
+                        <span>Patente *</span>
+                        <input type="text" id="camionPatente" required placeholder="Ej: AB 123 CD">
+                    </label>
+                    <label class="field">
+                        <span>Modelo *</span>
+                        <input type="text" id="camionModelo" required placeholder="Ej: Mercedes-Benz Sprinter">
+                    </label>
+                    <label class="field">
+                        <span>Capacidad (kg) *</span>
+                        <input type="number" id="camionCapacidad" required placeholder="Ej: 3500">
+                    </label>
+                    <label class="field">
+                        <span>Conductor</span>
+                        <input type="text" id="camionConductor" placeholder="Ej: Roberto Gómez">
+                    </label>
+                    <div class="form-actions-row field-grow">
+                        <button type="submit" class="btn btn-primary">Agregar</button>
+                        <button type="button" class="btn btn-outline" id="btnCancelarCamion">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="table-card">
+                <div class="table-title">Flota de Camiones</div>
+                <div class="table-scroll">
+                    <table class="data-table">
+                        <thead>
+                        <tr>
+                            <th>Patente</th>
+                            <th>Modelo</th>
+                            <th>Capacidad</th>
+                            <th>Conductor</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                        </thead>
+                        <tbody id="camionesTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
         </section>
+
+        <!-- ===================== RANKING DE DONANTES (Req 19) ===================== -->
         <section id="view-ranking" class="admin-view">
-            <div class="page-head"><h1>Ranking de Donantes</h1></div>
-            <div class="placeholder-card">Esta sección está a cargo de otra integrante del equipo.</div>
+            <div class="page-head page-head-row">
+                <div>
+                    <h1>Ranking de Donantes</h1>
+                    <p class="page-sub">Visualice los donantes más activos del mes y el historial de rankings anteriores.</p>
+                </div>
+            </div>
+
+            <div class="ranking-filter-card">
+                <label class="field field-inline">
+                    <span>Seleccionar Período</span>
+                    <select id="rankingPeriodo">
+                        <option value="2026-04">Abril 2026</option>
+                        <option value="2026-03">Marzo 2026</option>
+                    </select>
+                </label>
+            </div>
+
+            <div class="ranking-top-card">
+                <div class="trophy-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg></div>
+                <div class="ranking-top-info">
+                    <span class="ranking-top-label">Donante del Mes</span>
+                    <h2 id="topDonorName">María González</h2>
+                    <p id="topDonorCount">15 donaciones realizadas</p>
+                </div>
+            </div>
+
+            <div class="ranking-list" id="rankingListContainer"></div>
         </section>
+
+        <!-- ===================== IMPORTAR DONANTES (Req 20) ===================== -->
         <section id="view-importar" class="admin-view">
-            <div class="page-head"><h1>Importar Donantes</h1></div>
-            <div class="placeholder-card">Esta sección está a cargo de otra integrante del equipo.</div>
+            <div class="page-head">
+                <h1>Importar Donantes desde CSV</h1>
+                <p class="page-sub">Importe donantes registrados desde archivos CSV con más de 10.000 filas para otorgarles usuario.</p>
+            </div>
+
+            <div class="alert-info" style="margin-bottom: 24px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                <div>
+                    <b>Requisitos del archivo CSV</b>
+                    <ul>
+                        <li>El archivo debe contener las columnas: nombre, apellido, email, teléfono, DNI</li>
+                        <li>Formato de codificación: UTF-8</li>
+                        <li>Capacidad probada para procesar lotes de <b>+10.000 registros asincrónicamente</b></li>
+                        <li>Se validará que los emails sean únicos y tengan formato válido</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card" style="margin-bottom: 24px;">
+                <h2 class="card-title">Seleccionar Archivo CSV</h2>
+                <div class="upload-dropzone" id="csvDropzone">
+                    <input type="file" id="csvFileInput" accept=".csv" hidden>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    <p><b>Haga clic para seleccionar un archivo CSV</b></p>
+                    <span class="page-sub">o arrastre y suelte aquí</span>
+                </div>
+
+                <!-- Barra de progreso simulada para archivos grandes -->
+                <div id="uploadProgressContainer" hidden style="margin-top: 20px;">
+                    <div class="field-label-row">
+                        <span id="uploadStatusText">Procesando 12,450 registros...</span>
+                        <span id="uploadPctText">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-bar-fill" id="uploadProgressBar" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title">Historial de Importaciones</h2>
+                <div class="recientes-list" id="importHistoryList"></div>
+            </div>
         </section>
 
     </main>

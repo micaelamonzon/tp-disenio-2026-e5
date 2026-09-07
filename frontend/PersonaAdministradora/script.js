@@ -941,3 +941,188 @@ function renderMatchCards() {
    INICIO
    ============================================================ */
 cargarDashboard();
+
+
+/* ============================================================
+   AGREGADO: VISTAS DE GESTIÓN (Req 18, 19, 20)
+   ============================================================ */
+
+// Integrar los cargadores a la navegación existente
+Object.assign(cargadoresDeVista, {
+    camiones: renderCamiones,
+    ranking: renderRanking,
+    importar: renderImportaciones
+});
+
+/* ----------------- REQ 18: GESTIÓN DE CAMIONES ----------------- */
+const camionesMock = [
+    { patente: "AB 123 CD", modelo: "Mercedes-Benz Sprinter", capacidad: "3500", conductor: "Roberto Gómez", estado: "Disponible" },
+    { patente: "EF 456 GH", modelo: "Ford Transit", capacidad: "2500", conductor: "Laura Fernández", estado: "En uso" },
+    { patente: "IJ 789 KL", modelo: "Renault Master", capacidad: "3000", conductor: "Sin asignar", estado: "Mantenimiento" }
+];
+
+const btnToggleCamionForm = document.getElementById('btnToggleCamionForm');
+const btnCancelarCamion = document.getElementById('btnCancelarCamion');
+const formNuevoCamion = document.getElementById('formNuevoCamion');
+const camionForm = document.getElementById('camionForm');
+
+btnToggleCamionForm.addEventListener('click', () => formNuevoCamion.hidden = false);
+btnCancelarCamion.addEventListener('click', () => { formNuevoCamion.hidden = true; camionForm.reset(); });
+
+function renderCamiones() {
+    const tableBody = document.getElementById("camionesTableBody");
+
+    // Actualizar contadores del dashboard
+    document.getElementById("countCamionesDisponibles").textContent = camionesMock.filter(c => c.estado === "Disponible").length;
+    document.getElementById("countCamionesUso").textContent = camionesMock.filter(c => c.estado === "En uso").length;
+    document.getElementById("countCamionesMantenimiento").textContent = camionesMock.filter(c => c.estado === "Mantenimiento").length;
+
+    tableBody.innerHTML = camionesMock.map(c => {
+        let pillClass = c.estado === "Disponible" ? "Disponible" : (c.estado === "En uso" ? "Asignada" : "Vencida");
+        return `
+        <tr>
+            <td>${c.patente}</td>
+            <td>${c.modelo}</td>
+            <td>${c.capacidad} kg</td>
+            <td>${c.conductor}</td>
+            <td><span class="pill pill-${pillClass}">${c.estado}</span></td>
+            <td>
+                <button class="action-icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+                <button class="action-icon-btn delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+            </td>
+        </tr>`;
+    }).join("");
+}
+
+camionForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const nuevoCamion = {
+        patente: document.getElementById('camionPatente').value.toUpperCase(),
+        modelo: document.getElementById('camionModelo').value,
+        capacidad: document.getElementById('camionCapacidad').value,
+        conductor: document.getElementById('camionConductor').value || "Sin asignar",
+        estado: "Disponible"
+    };
+    camionesMock.unshift(nuevoCamion);
+    renderCamiones();
+    formNuevoCamion.hidden = true;
+    camionForm.reset();
+});
+
+/* ----------------- REQ 19: RANKING DE DONANTES ----------------- */
+const rankingData = {
+    "2026-04": [
+        { nombre: "María González", donaciones: 15, fecha: "2026-04-20", categorias: ["Alimentos", "Ropa"] },
+        { nombre: "Juan Pérez", donaciones: 12, fecha: "2026-04-18", categorias: ["Abrigo", "Alimentos"] },
+        { nombre: "Ana Martínez", donaciones: 10, fecha: "2026-04-15", categorias: ["Alimentos"] },
+        { nombre: "Carlos López", donaciones: 8, fecha: "2026-04-12", categorias: ["Ropa", "Colchones"] },
+        { nombre: "Sofía Ramírez", donaciones: 7, fecha: "2026-04-10", categorias: ["Alimentos", "Abrigo"] }
+    ],
+    "2026-03": [
+        { nombre: "Juan Pérez", donaciones: 18, fecha: "2026-03-28", categorias: ["Abrigo", "Alimentos"] },
+        { nombre: "Fundación Esperanza", donaciones: 14, fecha: "2026-03-25", categorias: ["Mobiliario"] },
+        { nombre: "María González", donaciones: 9, fecha: "2026-03-20", categorias: ["Alimentos"] }
+    ]
+};
+
+document.getElementById('rankingPeriodo').addEventListener('change', renderRanking);
+
+function renderRanking() {
+    const periodo = document.getElementById('rankingPeriodo').value;
+    const datosMes = rankingData[periodo] || [];
+    const container = document.getElementById('rankingListContainer');
+
+    if (datosMes.length > 0) {
+        document.getElementById('topDonorName').textContent = datosMes[0].nombre;
+        document.getElementById('topDonorCount').textContent = `${datosMes[0].donaciones} donaciones realizadas`;
+    }
+
+    container.innerHTML = datosMes.map((d, index) => {
+        const rank = index + 1;
+        const rankClass = rank <= 3 ? `rank-${rank}` : '';
+        const pills = d.categorias.map(c => `<span class="badge-category">${c}</span>`).join("");
+
+        return `
+        <article class="ranking-item ${rankClass}">
+            <div class="rank-circle">${rank}</div>
+            <div class="ranking-item-body">
+                <div class="ranking-item-name">${d.nombre}</div>
+                <div class="category-pills">${pills}</div>
+            </div>
+            <div class="ranking-item-stats">
+                <span class="count">${d.donaciones} donaciones</span>
+                <span class="date">Última: ${d.fecha}</span>
+            </div>
+        </article>`;
+    }).join("");
+}
+
+/* ----------------- REQ 20: IMPORTAR DONANTES CSV ----------------- */
+const importHistory = [
+    { file: "donantes_marzo_2026.csv", date: "15 de marzo de 2026, 14:30", count: "8,542", status: "Completado" },
+    { file: "donantes_febrero_2026.csv", date: "1 de febrero de 2026, 10:15", count: "12,103", status: "Completado" }
+];
+
+function renderImportaciones() {
+    const list = document.getElementById('importHistoryList');
+    list.innerHTML = importHistory.map(item => `
+        <div class="import-history-item">
+            <div>
+                <div class="import-history-file">${item.file}</div>
+                <div class="import-history-date">${item.date}</div>
+            </div>
+            <div class="import-history-stats">
+                <div class="import-history-count">${item.count} registros</div>
+                <div class="import-history-status">${item.status}</div>
+            </div>
+        </div>
+    `).join("");
+}
+
+// Simulación de carga asincrónica de >10.000 registros
+const csvDropzone = document.getElementById('csvDropzone');
+const csvFileInput = document.getElementById('csvFileInput');
+const uploadProgressContainer = document.getElementById('uploadProgressContainer');
+const uploadProgressBar = document.getElementById('uploadProgressBar');
+const uploadPctText = document.getElementById('uploadPctText');
+const uploadStatusText = document.getElementById('uploadStatusText');
+
+csvDropzone.addEventListener('click', () => csvFileInput.click());
+
+csvFileInput.addEventListener('change', (e) => {
+    if (e.target.files.length > 0) {
+        simularSubidaCSV(e.target.files[0].name);
+    }
+});
+
+function simularSubidaCSV(filename) {
+    csvDropzone.hidden = true;
+    uploadProgressContainer.hidden = false;
+    uploadStatusText.textContent = `Procesando lote asincrónico: ${filename}...`;
+
+    let progress = 0;
+    const interval = setInterval(() => {
+        progress += Math.floor(Math.random() * 15) + 5;
+        if (progress > 100) progress = 100;
+
+        uploadProgressBar.style.width = `${progress}%`;
+        uploadPctText.textContent = `${progress}%`;
+
+        if (progress === 100) {
+            clearInterval(interval);
+            setTimeout(() => {
+                importHistory.unshift({
+                    file: filename,
+                    date: "Justo ahora",
+                    count: "10,000+",
+                    status: "Completado"
+                });
+                renderImportaciones();
+                csvDropzone.hidden = false;
+                uploadProgressContainer.hidden = true;
+                csvFileInput.value = "";
+                alert("Importación de +10.000 registros completada con éxito.");
+            }, 500);
+        }
+    }, 400);
+}
