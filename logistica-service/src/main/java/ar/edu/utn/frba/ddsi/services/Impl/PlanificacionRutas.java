@@ -5,7 +5,7 @@ import ar.edu.utn.frba.ddsi.dto.*;
 import ar.edu.utn.frba.ddsi.models.entities.Camion;
 import ar.edu.utn.frba.ddsi.models.entities.SolicitudPlanificacion;
 import ar.edu.utn.frba.ddsi.repository.impl.SolicitudPlanificacionRepository;
-import jakarta.persistence.*;import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
