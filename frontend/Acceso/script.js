@@ -1,7 +1,4 @@
 // ===================== MOCK DATA =====================
-// mapPosition (top/left en %) se calculó normalizando lat/lng reales de cada
-// donación dentro del rango de todas ellas, para que la ubicación en el mapa
-// estilizado no sea arbitraria.
 const ZONE_COLORS = {
     Centro: 'var(--blue)',
     Sur: 'var(--blue-dark)',
@@ -163,7 +160,6 @@ function renderMapPage() {
     const cardsContainer = document.getElementById('map-cards-container');
     if (!mapContainer || !cardsContainer) return;
 
-    // Se limpian marcadores/etiquetas de una render anterior, conservando la leyenda
     mapContainer.querySelectorAll('.map-marker, .map-tag').forEach(el => el.remove());
 
     MOCK_DONATIONS.forEach(d => {
@@ -211,6 +207,8 @@ function switchRegisterRole(role) {
     const formDonante = document.getElementById('form-registro-donante');
     const formEntidad = document.getElementById('form-registro-entidad');
 
+    if (!btnDonante || !btnEntidad || !formDonante || !formEntidad) return;
+
     if (role === 'donante') {
         btnDonante.classList.add('active');
         btnEntidad.classList.remove('active');
@@ -228,13 +226,16 @@ function switchLoginRole(role) {
     const roles = ['donante', 'entidad', 'admin'];
     roles.forEach(r => {
         const btn = document.getElementById(`login-${r}-btn`);
-        if (r === role) {
-            btn.classList.add('active');
-        } else {
-            btn.classList.remove('active');
+        if (btn) {
+            if (r === role) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
         }
     });
-    document.getElementById('login-selected-role').value = role;
+    const hiddenRoleInput = document.getElementById('login-selected-role');
+    if (hiddenRoleInput) hiddenRoleInput.value = role;
 }
 
 // ===================== FORM HANDLERS =====================
@@ -258,7 +259,8 @@ function handleRegister(event, type) {
 
 function handleLogin(event) {
     event.preventDefault();
-    const role = document.getElementById('login-selected-role').value;
+    const hiddenRoleInput = document.getElementById('login-selected-role');
+    const role = hiddenRoleInput ? hiddenRoleInput.value : 'donante';
     showLoader();
     setTimeout(() => {
         hideLoader();
@@ -273,13 +275,15 @@ function handleContactSubmit(event) {
     setTimeout(() => {
         hideLoader();
         showToast('Mensaje enviado. Nos contactaremos a la brevedad.', 'success');
-        document.getElementById('contactForm').reset();
+        const form = document.getElementById('contactForm');
+        if (form) form.reset();
     }, 500);
 }
 
 // ===================== FEEDBACK HELPERS =====================
 function showToast(message, type = 'info') {
     const container = document.getElementById('toast-container');
+    if (!container) return;
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
     toast.innerText = message;
@@ -291,16 +295,25 @@ function showToast(message, type = 'info') {
 }
 
 function showLoader() {
-    document.getElementById('global-loader').hidden = false;
+    const loader = document.getElementById('global-loader');
+    if (loader) {
+        loader.classList.remove('hidden');
+        loader.style.display = 'flex';
+    }
 }
 
 function hideLoader() {
-    document.getElementById('global-loader').hidden = true;
+    const loader = document.getElementById('global-loader');
+    if (loader) {
+        loader.classList.add('hidden');
+        loader.style.display = 'none';
+    }
 }
 
 // ===================== INITIALIZATION =====================
 document.addEventListener('DOMContentLoaded', () => {
     renderDonations();
+    hideLoader(); // Aseguramos que el loader esté oculto al iniciar
 
     const hash = window.location.hash.replace('#', '');
     if (hash) {
