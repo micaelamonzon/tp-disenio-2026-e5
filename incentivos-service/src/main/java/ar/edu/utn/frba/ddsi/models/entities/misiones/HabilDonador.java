@@ -2,16 +2,24 @@ package ar.edu.utn.frba.ddsi.models.entities.misiones;
 
 import ar.edu.utn.frba.ddsi.models.entities.donaciones.DonacionSegmentada;
 import ar.edu.utn.frba.ddsi.models.entities.persona.Insignia;
+import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Data
+@Entity
+@NoArgsConstructor
+@DiscriminatorValue("HabilDonador")
 public class HabilDonador extends Mision{
+    @Column
     private Integer cantidadDeBienes;
 
 
-    public HabilDonador(String nombre,Integer cantidadDeBienes){
+    public HabilDonador(NombreDeMision nombre,Integer cantidadDeBienes){
         this.setNombre(nombre);
         this.cantidadDeBienes = cantidadDeBienes;
         setInsigniaGanadora(Insignia.HABILDONADOR);
@@ -19,23 +27,16 @@ public class HabilDonador extends Mision{
 
 
     @Override
-    public Boolean seCompletoLaMision(List<DonacionSegmentada> donaciones) {
+    public AvanceDeMision seCompletoLaMision(List<DonacionSegmentada> donaciones) {
 
         //donación que supere X cantidad de bienes.
-       DonacionSegmentada donacionQueCumple = donaciones.stream().filter(d -> d.getBienes().size() > this.cantidadDeBienes).findFirst().orElse(null);
+       DonacionSegmentada donacionQueCumple = donaciones.stream().filter(d -> d.getCantidadDeBienes() > this.cantidadDeBienes).findFirst().orElse(null);
 
            if(donacionQueCumple != null){
-               this.setProgreso(100);
-               this.setDistanciaDelObjetivo(0);
-               this.setEstado(EstadoDeMision.COMPLETADA);
-               this.setFechaCompletada(java.time.LocalDate.now());
-               return Boolean.TRUE;
+             return new AvanceDeMision(100, 0, Boolean.TRUE);
            }
 
-           this.setProgreso(0);
-           this.setDistanciaDelObjetivo(100);
-           this.setEstado(EstadoDeMision.BLOQUEADA);
-           return Boolean.FALSE;
+            return new AvanceDeMision(0, 100, Boolean.FALSE);
     }
 
 

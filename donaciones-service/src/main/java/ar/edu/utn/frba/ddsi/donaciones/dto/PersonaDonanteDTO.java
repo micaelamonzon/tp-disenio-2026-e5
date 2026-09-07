@@ -8,8 +8,7 @@ public record PersonaDonanteDTO (
         String apellido,
         Long idJuridico,
         String razonSocial,
-        List<DonacionSegmentadaDTO> donaciones,
-        MedioDeNotificacionDTO medioDeNotificacionPredeterminado
+        List<DonacionIncentivosDTO> donaciones
 ){
 
 }

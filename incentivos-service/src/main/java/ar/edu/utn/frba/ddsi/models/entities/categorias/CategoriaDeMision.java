@@ -2,21 +2,36 @@ package ar.edu.utn.frba.ddsi.models.entities.categorias;
 import ar.edu.utn.frba.ddsi.models.entities.donaciones.DonacionSegmentada;
 import ar.edu.utn.frba.ddsi.models.entities.misiones.EstadoDeMision;
 import ar.edu.utn.frba.ddsi.models.entities.misiones.Mision;
+import ar.edu.utn.frba.ddsi.models.entities.persistente.Persistente;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Data
-public class CategoriaDeMision {
-    Long id;
-    TipoCategoria tipo; //tipo o nombre de categoria
-    List<Mision> misiones; //lista de misiones consecutivas a cumplir -> se llena en el servis de incentivos
-    TipoCategoria categoriaSiguiente;
+@Entity
+@NoArgsConstructor
+@Table(name = "CategoriaDeMision")
+public class CategoriaDeMision extends Persistente {
+    @Enumerated(EnumType.STRING)
+    private TipoCategoria nombre; //tipo o nombre de categoria
 
-    public CategoriaDeMision(TipoCategoria tipo, TipoCategoria categoriaSiguiente) {
-        this.tipo = tipo;
+    @OneToMany(mappedBy = "categoria", fetch = FetchType.LAZY)
+    private List<Mision> misiones; //lista de misiones consecutivas a cumplir -> se llena en el servis de incentivos
+
+    @Enumerated(EnumType.STRING)
+    private TipoCategoria categoriaSiguiente;
+
+    public CategoriaDeMision(TipoCategoria nombre, TipoCategoria categoriaSiguiente) {
+        this.nombre = nombre;
         this.misiones = new ArrayList<>();
         this.categoriaSiguiente = categoriaSiguiente;
     }
@@ -25,21 +40,5 @@ public class CategoriaDeMision {
         this.misiones.add(mision);
     }
 
-    public Boolean pasaSiguienteCategoria(List<DonacionSegmentada> donaciones){
-        if(this.categoriaSiguiente != null){
-            return misiones.stream().allMatch( m -> m.seCompletoLaMision(donaciones) == Boolean.TRUE);
-        }
-        return false;
-    }
 
-    public ArrayList<Mision> obtenerMisionesCompletadas(List<DonacionSegmentada> donaciones){
-        return this.misiones.stream().filter( m -> m.seCompletoLaMision(donaciones) == Boolean.TRUE).collect(Collectors.toCollection(ArrayList::new));
-    }
-    public void desbloquearMisiones(List<DonacionSegmentada> donaciones){
-        for(int i = 0; i < misiones.size(); i++){
-            if(misiones.get(i).seCompletoLaMision(donaciones) == Boolean.TRUE && i+1 < misiones.size()){
-                misiones.get(i+1).setEstado(EstadoDeMision.DESBLOQUEADA);
-            }
-        }
-    }
 }

@@ -2,6 +2,7 @@ package ar.edu.utn.frba.ddsi.donaciones.services;
 import ar.edu.utn.frba.ddsi.donaciones.config.NotificacionesProperties;
 import ar.edu.utn.frba.ddsi.donaciones.dto.BienDTO;
 import ar.edu.utn.frba.ddsi.donaciones.dto.CategoriaDTO;
+import ar.edu.utn.frba.ddsi.donaciones.dto.DonacionIncentivosDTO;
 import ar.edu.utn.frba.ddsi.donaciones.dto.DonacionSegmentadaDTO;
 import ar.edu.utn.frba.ddsi.donaciones.dto.DonacionSinSegmentarDTO;
 import ar.edu.utn.frba.ddsi.donaciones.dto.PersonaDonanteDTO;
@@ -94,11 +95,9 @@ public class DonacionesServiceImpl implements DonacionesService {
                                 h.getApellido(),
                                 null,
                                 null,
-                                this.obtenerDonacionesSegmentadasDTODePersonaDonante(h.getDonaciones()),
-                                this.obtenerAMedioDTO(h.getMedioDeNotificacionPredeterminado()
+                                this.obtenerDonacionesIncentivosDTO(h.getDonaciones())
                                 )
                         )
-                )
         );
 
         System.out.println("Cantidad donantes: " + donantes.size());
@@ -111,11 +110,9 @@ public class DonacionesServiceImpl implements DonacionesService {
                                 null,
                                 j.getId(),
                                 j.getRazonSocial(),
-                                this.obtenerDonacionesSegmentadasDTODePersonaDonante(j.getDonaciones()),
-                                this.obtenerAMedioDTO(j.getMedioDeNotificacionPredeterminado()
+                                this.obtenerDonacionesIncentivosDTO(j.getDonaciones())
                                 )
                         )
-                )
         );
 
         System.out.println("Cantidad donantes: " + donantes.size());
@@ -123,6 +120,19 @@ public class DonacionesServiceImpl implements DonacionesService {
     }
 
 
+    public List<DonacionIncentivosDTO> obtenerDonacionesIncentivosDTO(List<DonacionSinSegmentar> donaciones){
+        return donaciones.stream()
+                .flatMap(donacionSinSegmentar -> donacionSinSegmentar.getDonacionesSegmentadas().stream())
+                .map(donacionSegmentada ->
+                        new DonacionIncentivosDTO(
+                                donacionSegmentada.getDonacionEntregada(),
+                                donacionSegmentada.getEntidadBeneficiariaId(),
+                                donacionSegmentada.getFechaDeIngreso(),
+                                donacionSegmentada.getBienesDelMismoTipo().size(),
+                                donacionSegmentada.getBienesDelMismoTipo().get(0).getSubcategoria().getCategoria().getNombre()
+                        ))
+                .collect(Collectors.toList());
+    }
 
     @Override
    public List<PersonaHumanaDTO> obtenerTodosHumanos(){
