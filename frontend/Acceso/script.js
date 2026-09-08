@@ -1,86 +1,110 @@
 // ===================== MOCK DATA =====================
 const ZONE_COLORS = {
-    Centro: 'var(--blue)',
-    Sur: 'var(--blue-dark)',
-    Oeste: 'var(--purple)'
+    'Centro': '#2563eb',
+    'Sur': '#1d4ed8',
+    'Oeste': '#9333ea'
 };
 
 const MOCK_DONATIONS = [
     {
         id: 1,
-        title: "200 viandas entregadas",
-        entity: "Comedor Barrio Almagro",
-        location: "Almagro, CABA",
-        date: "15 de Abril, 2026",
-        lat: -34.6080,
-        lng: -58.4170,
-        zone: "Centro",
-        mapPosition: { top: 10, left: 54.9 },
+        title: "Entrega de Alimentos",
+        entity: "Comedor Los Chicos",
+        location: "Av. Corrientes 1234, CABA",
+        date: "02/09/2026",
+        lat: -34.6037,
+        lng: -58.3816,
         image: "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=600&q=80"
     },
     {
         id: 2,
-        title: "150 abrigos y frazadas",
-        entity: "Hogar de Niños San José",
-        location: "Caballito, CABA",
-        date: "10 de Abril, 2026",
-        lat: -34.6180,
-        lng: -58.4370,
-        zone: "Centro",
-        mapPosition: { top: 15.3, left: 35.4 },
-        image: "https://images.unsplash.com/photo-1593113598332-cd288d649433?auto=format&fit=crop&w=600&q=80"
+        title: "Ropa de Abrigo",
+        entity: "Fundación Comunidad",
+        location: "Av. Rivadavia 4500, CABA",
+        date: "28/08/2026",
+        lat: -34.6157,
+        lng: -58.4333,
+        image: "https://images.unsplash.com/photo-1578357078586-491adf1aa5ba?auto=format&fit=crop&w=600&q=80"
     },
     {
         id: 3,
-        title: "80 kg de alimentos no perecederos",
-        entity: "Hospital Gandulfo",
-        location: "Lomas de Zamora, Buenos Aires",
-        date: "5 de Abril, 2026",
-        lat: -34.7600,
+        title: "Kits Sanitarios",
+        entity: "Hogar San José",
+        location: "Calle Las Heras 2100, CABA",
+        date: "15/08/2026",
+        lat: -34.5833,
         lng: -58.4000,
-        zone: "Sur",
-        mapPosition: { top: 90, left: 71.5 },
-        image: "https://images.unsplash.com/photo-1593113646773-028c64a8f1b8?auto=format&fit=crop&w=600&q=80"
-    },
-    {
-        id: 4,
-        title: "Ropa y calzado para comunidad",
-        mapTitle: "300 prendas de ropa y calzado",
-        entity: "Centro Comunitario La Esperanza",
-        location: "Villa Lugano, CABA",
-        date: "1 de Abril, 2026",
-        lat: -34.6800,
-        lng: -58.4600,
-        zone: "Oeste",
-        mapPosition: { top: 47.9, left: 12.9 },
-        image: "https://images.unsplash.com/photo-1559027615-cd4628902d4a?auto=format&fit=crop&w=600&q=80"
-    },
-    {
-        id: 5,
-        title: "Útiles escolares para escuela",
-        mapTitle: "Útiles escolares para 120 estudiantes",
-        entity: "Escuela Primaria N°42",
-        location: "Flores, CABA",
-        date: "28 de Marzo, 2026",
-        lat: -34.6300,
-        lng: -58.4630,
-        zone: "Oeste",
-        mapPosition: { top: 21.6, left: 10 },
-        image: "https://images.unsplash.com/photo-1452860606245-08befc0ff44b?auto=format&fit=crop&w=600&q=80"
-    },
-    {
-        id: 6,
-        title: "Colchones y muebles",
-        entity: "Refugio Noche Segura",
-        location: "Constitución, CABA",
-        date: "22 de Marzo, 2026",
-        lat: -34.6280,
-        lng: -58.3810,
-        zone: "Sur",
-        mapPosition: { top: 20.5, left: 90 },
-        image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=600&q=80"
+        image: "https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=600&q=80"
     }
 ];
+
+// ===================== SESIÓN (mock, solo front) =====================
+const SESSION_KEY = 'donatrack_session';
+
+function saveSession(user) {
+    localStorage.setItem(SESSION_KEY, JSON.stringify(user));
+    updateAuthUI();
+}
+
+// Ajuste en las funciones auxiliares de lectura y limpieza de sesión
+function loadSession() {
+    const local = localStorage.getItem(SESSION_KEY);
+    if (local) return JSON.parse(local);
+    const session = sessionStorage.getItem(SESSION_KEY);
+    return session ? JSON.parse(session) : null;
+}
+
+function clearSession() {
+    localStorage.removeItem(SESSION_KEY);
+    sessionStorage.removeItem(SESSION_KEY);
+    updateAuthUI();
+}
+
+function getInitials(name) {
+    if (!name) return 'U';
+    const parts = name.trim().split(' ');
+    if (parts.length >= 2) {
+        return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    return parts[0].substring(0, 2).toUpperCase();
+}
+
+function formatRoleLabel(role) {
+    if (role === 'donante') return 'Persona Donante';
+    if (role === 'entidad') return 'Entidad Beneficiaria';
+    if (role === 'admin') return 'Administrador';
+    return role || 'Persona Donante';
+}
+
+function updateAuthUI() {
+    const authArea = document.getElementById('auth-area');
+    if (!authArea) return;
+
+    const user = loadSession();
+
+    if (user) {
+        const initials = getInitials(user.nombre);
+        const roleLabel = formatRoleLabel(user.role);
+
+        authArea.innerHTML = `
+            <div class="user-profile-widget" onclick="handleLogout()" title="Cerrar sesión">
+                <div class="avatar">${initials}</div>
+                <div class="user-info">
+                    <span class="user-name">${user.nombre}</span>
+                    <span class="user-role">${roleLabel}</span>
+                </div>
+            </div>`;
+    } else {
+        authArea.innerHTML = `<button class="btn btn-outline" onclick="navigateTo('login')">Iniciar sesión</button>`;
+    }
+}
+
+function handleLogout() {
+    clearSession();
+    showToast('Sesión cerrada.', 'info');
+    navigateTo('home');
+}
+
 
 // ===================== NAVIGATION CONTROLLER =====================
 function navigateTo(pageId) {
@@ -155,70 +179,176 @@ function renderDonations() {
 }
 
 // ===================== MAPA ESTILIZADO =====================
+let mapInstance = null;
+
 function renderMapPage() {
     const mapContainer = document.getElementById('map');
     const cardsContainer = document.getElementById('map-cards-container');
-    if (!mapContainer || !cardsContainer) return;
+    if (!mapContainer || typeof L === 'undefined') return;
 
-    mapContainer.querySelectorAll('.map-marker, .map-tag').forEach(el => el.remove());
+    mapContainer.style.background = 'none';
 
+    const oldLegend = mapContainer.querySelector('.map-legend, .leyenda');
+    if (oldLegend) oldLegend.style.display = 'none';
+
+    if (mapInstance) {
+        mapInstance.remove();
+    }
+
+    // Inicializar mapa centrado en Buenos Aires
+    mapInstance = L.map('map').setView([-34.6037, -58.4000], 12);
+
+    // Servidor oficial y gratuito de OpenStreetMap
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(mapInstance);
+
+    // Renderizar marcadores con datos reales
     MOCK_DONATIONS.forEach(d => {
-        const marker = document.createElement('div');
-        marker.className = 'map-marker';
-        marker.style.top = d.mapPosition.top + '%';
-        marker.style.left = d.mapPosition.left + '%';
-        marker.style.background = ZONE_COLORS[d.zone] || 'var(--blue)';
-        marker.setAttribute('role', 'button');
-        marker.setAttribute('tabindex', '0');
-        marker.setAttribute('aria-label', `${d.mapTitle || d.title} — ${d.entity}`);
-        marker.addEventListener('click', () => showMapTag(mapContainer, d));
-        marker.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') showMapTag(mapContainer, d);
+        const popupContent = `
+            <div style="font-family: sans-serif; padding: 4px; min-width: 180px;">
+                <h4 style="margin: 0 0 6px 0; color: #1e293b; font-size: 15px;">${d.mapTitle || d.title}</h4>
+                <p style="margin: 3px 0; font-size: 13px; color: #475569;">📦 <strong>${d.entity}</strong></p>
+                <p style="margin: 3px 0; font-size: 12px; color: #64748b;">📍 ${d.location}</p>
+                <p style="margin: 3px 0; font-size: 12px; color: #64748b;">📅 ${d.date}</p>
+            </div>
+        `;
+
+        const marker = L.marker([d.lat, d.lng]).addTo(mapInstance);
+        marker.bindPopup(popupContent);
+
+        marker.on('click', () => {
+            if (cardsContainer) {
+                const card = document.getElementById(`map-card-${d.id}`);
+                if (card) {
+                    card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    card.style.outline = '2px solid #2563eb';
+                    setTimeout(() => card.style.outline = 'none', 2000);
+                }
+            }
         });
-        mapContainer.appendChild(marker);
     });
 
-    cardsContainer.innerHTML = MOCK_DONATIONS.map(d => `
-    <article class="mapa-donation-card">
-      <h3 style="color:${ZONE_COLORS[d.zone] || 'var(--blue)'}">${d.mapTitle || d.title}</h3>
-      <div class="donation-meta">
-        <span>📦 ${d.entity}</span>
-        <span>📍 ${d.location}</span>
-        <span>📅 ${d.date}</span>
-      </div>
-    </article>
-  `).join('');
+    if (cardsContainer) {
+        cardsContainer.innerHTML = MOCK_DONATIONS.map(d => `
+            <article class="mapa-donation-card" id="map-card-${d.id}" style="padding: 12px; margin-bottom: 10px; background: #fff; border-radius: 8px; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.04);">
+                <h3 style="color: #2563eb; margin: 0 0 6px 0; font-size: 16px;">${d.mapTitle || d.title}</h3>
+                <div class="donation-meta" style="display: flex; gap: 12px; font-size: 13px; color: #64748b; flex-wrap: wrap;">
+                    <span>📦 ${d.entity}</span>
+                    <span>📍 ${d.location}</span>
+                    <span>📅 ${d.date}</span>
+                </div>
+            </article>
+        `).join('');
+    }
+
+    setTimeout(() => {
+        if (mapInstance) mapInstance.invalidateSize();
+    }, 200);
 }
 
-function showMapTag(mapContainer, donation) {
-    const prev = mapContainer.querySelector('.map-tag');
+// Función auxiliar para seleccionar y mostrar detalle de donación
+function selectDonation(mapContainer, cardsContainer, d, marker) {
+    // Cerrar popups anteriores
+    mapContainer.querySelectorAll('.map-popup').forEach(el => el.remove());
+
+    // Crear la tarjeta flotante sobre el marcador
+    const popup = document.createElement('div');
+    popup.className = 'map-popup';
+    popup.style.position = 'absolute';
+    popup.style.top = `calc(${d.mapPosition ? d.mapPosition.top : 50}% - 10px)`;
+    popup.style.left = `${d.mapPosition ? d.mapPosition.left : 50}%`;
+    popup.style.transform = 'translate(-50%, -100%)';
+    popup.style.background = '#ffffff';
+    popup.style.padding = '12px';
+    popup.style.borderRadius = '8px';
+    popup.style.boxShadow = '0 4px 15px rgba(0,0,0,0.15)';
+    popup.style.zIndex = '10';
+    popup.style.minWidth = '200px';
+
+    popup.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <strong style="color: #1e293b; font-size: 14px;">${d.mapTitle || d.title}</strong>
+            <button onclick="this.parentElement.parentElement.remove()" style="background:none; border:none; cursor:pointer; font-weight:bold; color:#94a3b8;">&times;</button>
+        </div>
+        <p style="margin:2px 0; font-size:12px; color:#475569;"><strong>Entidad:</strong> ${d.entity}</p>
+        <p style="margin:2px 0; font-size:12px; color:#475569;"><strong>Ubicación:</strong> ${d.location}</p>
+        <p style="margin:2px 0; font-size:12px; color:#475569;"><strong>Fecha:</strong> ${d.date}</p>
+    `;
+
+    mapContainer.appendChild(popup);
+
+    // Desplazar hacia la tarjeta inferior si existe
+    if (cardsContainer) {
+        const card = document.getElementById(`map-card-${d.id}`);
+        if (card) {
+            card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            card.style.outline = '2px solid var(--blue, #2563eb)';
+            setTimeout(() => card.style.outline = 'none', 2000);
+        }
+    }
+}
+
+function selectDonation(mapContainer, cardsContainer, donation, markerEl) {
+    mapContainer.querySelectorAll('.map-marker').forEach(m => m.classList.remove('active'));
+    cardsContainer.querySelectorAll('.mapa-donation-card').forEach(c => c.classList.remove('active'));
+
+    markerEl.classList.add('active');
+
+    const card = document.getElementById(`map-card-${donation.id}`);
+    if (card) {
+        card.classList.add('active');
+        card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    showMapPopup(mapContainer, donation);
+}
+
+function showMapPopup(mapContainer, donation) {
+    const prev = mapContainer.querySelector('.map-popup');
     if (prev) prev.remove();
 
-    const tag = document.createElement('div');
-    tag.className = 'map-tag';
-    tag.textContent = `${donation.mapTitle || donation.title} — ${donation.location}`;
-    mapContainer.appendChild(tag);
+    const popup = document.createElement('div');
+    popup.className = 'map-popup';
+    popup.innerHTML = `
+        <button class="map-popup-close" onclick="this.parentElement.remove()" aria-label="Cerrar">&times;</button>
+        <img src="${donation.image}" alt="${donation.title}">
+        <div class="map-popup-body">
+            <h4>${donation.mapTitle || donation.title}</h4>
+            <p>📦 ${donation.entity}</p>
+            <p>📍 ${donation.location}</p>
+            <p>📅 ${donation.date}</p>
+        </div>
+    `;
+    mapContainer.appendChild(popup);
 }
 
 // ===================== ROLE SWITCHERS =====================
 function switchRegisterRole(role) {
     const btnDonante = document.getElementById('role-donante-btn');
     const btnEntidad = document.getElementById('role-entidad-btn');
-    const formDonante = document.getElementById('form-registro-donante');
+    const formDonante = document.getElementById('form-registro');
     const formEntidad = document.getElementById('form-registro-entidad');
 
     if (!btnDonante || !btnEntidad || !formDonante || !formEntidad) return;
 
-    if (role === 'donante') {
-        btnDonante.classList.add('active');
-        btnEntidad.classList.remove('active');
-        formDonante.classList.remove('hidden');
-        formEntidad.classList.add('hidden');
-    } else {
+    if (role === 'entidad') {
+        // Activar botón Entidad
         btnEntidad.classList.add('active');
         btnDonante.classList.remove('active');
+
+        // Mostrar formulario de Entidad y ocultar Donante
         formEntidad.classList.remove('hidden');
         formDonante.classList.add('hidden');
+    } else {
+        // Activar botón Donante
+        btnDonante.classList.add('active');
+        btnEntidad.classList.remove('active');
+
+        // Mostrar formulario de Donante y ocultar Entidad
+        formDonante.classList.remove('hidden');
+        formEntidad.classList.add('hidden');
     }
 }
 
@@ -239,34 +369,98 @@ function switchLoginRole(role) {
 }
 
 // ===================== FORM HANDLERS =====================
-function handleRegister(event, type) {
+function handleRegister(event) {
     event.preventDefault();
 
-    const form = event.target;
-    const passwordInputs = form.querySelectorAll('input[type="password"]');
-    if (passwordInputs.length === 2 && passwordInputs[0].value !== passwordInputs[1].value) {
-        showToast('Las contraseñas no coinciden.', 'error');
+    // Obtener elementos directamente por su ID
+    const nombreInput = document.getElementById('reg-nombre');
+    const emailInput = document.getElementById('reg-email');
+    const phoneInput = document.getElementById('reg-phone');
+    const passInput = document.getElementById('reg-password');
+    const confirmPassInput = document.getElementById('reg-confirm-password');
+    const termsCheck = document.getElementById('reg-terms');
+
+    // Obtener los valores reales al hacer click
+    const passValue = passInput ? passInput.value : '';
+    const confirmValue = confirmPassInput ? confirmPassInput.value : '';
+
+    // --- REVISIÓN EN CONSOLA (Abre F12 para verificar qué lee el navegador) ---
+    console.log("Contraseña leída:", passValue);
+    console.log("Largo leído:", passValue.length);
+    console.log("Confirmación leída:", confirmValue);
+
+    // 1. Validar coincidencia de contraseñas
+    if (passValue !== confirmValue) {
+        showToast('Las contraseñas no coinciden. Por favor, verifícalas.', 'error');
+        if (confirmPassInput) confirmPassInput.focus();
         return;
     }
 
-    showLoader();
-    setTimeout(() => {
-        hideLoader();
-        showToast(`¡Registro de ${type === 'donante' ? 'Donante' : 'Entidad'} exitoso! Ya puedes iniciar sesión.`, 'success');
-        navigateTo('login');
-    }, 600);
-}
+    // 2. Validar longitud (mínimo 8 caracteres)
+    if (passValue.length < 8) {
+        showToast('La contraseña debe tener al menos 8 caracteres.', 'error');
+        if (passInput) passInput.focus();
+        return;
+    }
 
+    // 3. Validar teléfono
+    const phoneValue = phoneInput ? phoneInput.value.trim() : '';
+    const cleanPhone = phoneValue.replace(/[\s\-\(\)]/g, '');
+    const phoneRegex = /^\+?[0-9]{7,15}$/;
+    if (!phoneRegex.test(cleanPhone)) {
+        showToast('Por favor, ingresa un número de teléfono válido.', 'error');
+        if (phoneInput) phoneInput.focus();
+        return;
+    }
+
+    // 4. Validar Términos
+    if (termsCheck && !termsCheck.checked) {
+        showToast('Debes aceptar los Términos y Condiciones para registrarte.', 'error');
+        return;
+    }
+
+    // Si todo coincide y es >= 8 caracteres, se procesa el registro
+    const nombreValue = nombreInput ? nombreInput.value.trim() : 'Micaela Monzon';
+    const emailValue = emailInput ? emailInput.value.trim() : '';
+
+    const user = { nombre: nombreValue, email: emailValue, phone: phoneValue, role: 'donante' };
+    localStorage.setItem('registered_user', JSON.stringify(user));
+    sessionStorage.setItem(SESSION_KEY, JSON.stringify(user));
+
+    updateAuthUI();
+    showToast(`¡Bienvenida, ${nombreValue}! Registro exitoso.`, 'success');
+    navigateTo('home');
+}
 function handleLogin(event) {
     event.preventDefault();
+
+    const emailInput = document.getElementById('login-email');
+    const emailVal = emailInput ? emailInput.value : '';
     const hiddenRoleInput = document.getElementById('login-selected-role');
     const role = hiddenRoleInput ? hiddenRoleInput.value : 'donante';
-    showLoader();
-    setTimeout(() => {
-        hideLoader();
-        showToast(`Sesión iniciada correctamente como ${role.toUpperCase()}.`, 'success');
-        navigateTo('home');
-    }, 600);
+
+    // Buscar si el usuario ya se había registrado con ese nombre
+    const savedUser = JSON.parse(localStorage.getItem('registered_user') || '{}');
+    let nombre = 'Soledad Romero'; // Nombre fallback si no existe registro previo
+
+    if (savedUser.email === emailVal && savedUser.nombre) {
+        nombre = savedUser.nombre;
+    }
+
+    const rememberCheck = document.getElementById('login-remember');
+    const rememberMe = rememberCheck ? rememberCheck.checked : false;
+
+    const user = { nombre, email: emailVal, role };
+
+    if (rememberMe) {
+        localStorage.setItem(SESSION_KEY, JSON.stringify(user));
+    } else {
+        sessionStorage.setItem(SESSION_KEY, JSON.stringify(user));
+    }
+
+    updateAuthUI();
+    showToast(`Sesión iniciada correctamente.`, 'success');
+    navigateTo('home');
 }
 
 function handleContactSubmit(event) {
@@ -310,13 +504,36 @@ function hideLoader() {
     }
 }
 
+function renderFeaturedDonations() {
+    const container = document.getElementById('featured-donations-container'); // O el ID que use tu contenedor
+    if (!container) return;
+
+    container.innerHTML = MOCK_DONATIONS.map(d => `
+        <article class="card-donacion" style="background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+            <div style="width: 100%; height: 180px; background: #e2e8f0; overflow: hidden;">
+                ${d.image ? `
+                    <img src="${d.image}" 
+                         alt="${d.title}" 
+                         style="width: 100%; height: 100%; object-fit: cover;" 
+                         onerror="this.style.display='none'">
+                ` : ''}
+            </div>
+            <div style="padding: 16px;">
+                <h3 style="margin: 0 0 8px 0; font-size: 18px; color: #0f172a;">${d.title}</h3>
+                <p style="margin: 4px 0; font-size: 14px; color: #64748b;">📦 ${d.entity}</p>
+                <p style="margin: 4px 0; font-size: 14px; color: #64748b;">📍 ${d.location}</p>
+                <p style="margin: 4px 0; font-size: 14px; color: #64748b;">📅 ${d.date}</p>
+            </div>
+        </article>
+    `).join('');
+}
+
 // ===================== INITIALIZATION =====================
 document.addEventListener('DOMContentLoaded', () => {
     renderDonations();
-    hideLoader(); // Aseguramos que el loader esté oculto al iniciar
+    updateAuthUI();
+    hideLoader();
 
     const hash = window.location.hash.replace('#', '');
-    if (hash) {
-        navigateTo(hash);
-    }
+    if (hash) navigateTo(hash);
 });
