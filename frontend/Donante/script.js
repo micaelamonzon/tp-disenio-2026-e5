@@ -22,7 +22,7 @@ const activeDeliveries = [
   {
     id: "DON-001",
     truckId: "CAMION-A1",
-    status: "En camino",
+    status: "En traslado",
     eta: "45 minutos",
     progress: 45,
     destination: "Centro Comunitario San Martín, Av. Rivadavia 1234, CABA",
@@ -34,7 +34,7 @@ const activeDeliveries = [
   {
     id: "DON-002",
     truckId: "CAMION-B2",
-    status: "Cerca del destino",
+    status: "En traslado",
     eta: "15 minutos",
     progress: 90,
     destination: "Fundación Esperanza, Calle Bolívar 567, Buenos Aires",
@@ -389,17 +389,15 @@ function renderTrackingMap() {
         </div>
         <div class="popover-row"><span>Donación:</span> <b>${del.id}</b></div>
         <div class="popover-row"><span>Estado:</span> <span class="badge-status status-orange">${del.status}</span></div>
-        <div class="popover-row"><span>Tiempo estimado:</span> <b>${del.eta}</b></div>
+
         <div class="popover-dest">
           ${ICONS.pin}
-          <div>
+        <div>
             <b>Destino:</b><br>
             ${del.destination}
           </div>
         </div>
-        <div class="progress-bar-container">
-          <div class="progress-bar-fill" style="width: ${del.progress}%"></div>
-        </div>
+     
         <div class="popover-pct">${del.progress}% completado</div>
         <div class="popover-time">Última actualización: ${del.lastUpdate}</div>
       `;
@@ -418,14 +416,11 @@ function renderTrackingList() {
         </div>
         <div class="delivery-meta-right">
           <span class="truck-code">${del.truckId}</span>
-          <span class="eta-text">${ICONS.clock} ${del.eta}</span>
+         
         </div>
       </div>
 
-      <div class="progress-track">
-        <div class="progress-fill" style="width: ${del.progress}%"></div>
-      </div>
-      <span class="progress-label">${del.progress}% del recorrido</span>
+   
 
       <div class="delivery-dest">
         ${ICONS.pin}
@@ -436,7 +431,7 @@ function renderTrackingList() {
       </div>
 
       <div class="delivery-items">
-        <span>Artículos:</span>
+        <span>Donaciones:</span>
         <ul>
           ${del.items.map(item => `<li>${item}</li>`).join("")}
         </ul>
