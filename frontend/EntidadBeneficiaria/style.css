@@ -28,7 +28,6 @@
 html, body {
     margin: 0;
     padding: 0;
-    background: var(--bg);
     color: var(--text);
     font-family: var(--font);
     -webkit-font-smoothing: antialiased;
@@ -900,4 +899,8 @@ svg { width: 18px; height: 18px; flex-shrink: 0; }
     margin: 0;
     font-size: 0.85rem;
     color: #8892a0;
+}
+
+.notification-unread-dot {
+    cursor: pointer;
 }

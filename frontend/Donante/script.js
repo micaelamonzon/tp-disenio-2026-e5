@@ -87,12 +87,12 @@ const badges = [
 
 const notifications = [
   { type: "asignada", title: "Donación asignada", desc: "Tus 100 paquetes de fideos secos fueron asignados a Fundación Esperanza", time: "Hace 10 minutos", unread: true },
-  { type: "mision", title: "Misión cumplida", desc: '¡Completaste la misión "Donar 10kg de arroz"! Ganaste 50 XP', time: "Hace 2 horas", unread: true },
+  { type: "mision", title: "Misión cumplida", desc: '¡Completaste la misión Racha de 10!', time: "Hace 2 horas", unread: true },
   { type: "recibida", title: "Donación recibida por la entidad", desc: "Comedor Los Girasoles confirmó la recepción de tus 6 sillas", time: "Hace 5 horas", unread: true },
-  { type: "categoria", title: "Subida de categoría", desc: "¡Felicitaciones! Alcanzaste el Nivel 5 - Donante Comprometido", time: "Ayer", unread: false },
+  { type: "categoria", title: "Subida de categoría", desc: "¡Felicitaciones! Alcanzaste Transformador", time: "Ayer", unread: false },
   { type: "asignada", title: "Donación asignada", desc: "Tu donación de 3 mesas fue asignada a Centro Comunitario San Martín", time: "Ayer", unread: false },
   { type: "recibida", title: "Donación recibida por la entidad", desc: "Casa del Niño recibió tus 15 pantalones y agradeció tu generosidad", time: "Hace 2 días", unread: false },
-  { type: "mision", title: "Misión cumplida", desc: 'Completaste "Seguir a 3 entidades beneficiarias". +30 XP', time: "Hace 3 días", unread: false },
+  { type: "mision", title: "Misión cumplida", desc: '¡Completaste la misión de Habil Donador!', time: "Hace 3 días", unread: false },
 ];
 
 /* ============================================================
@@ -477,19 +477,34 @@ function notifIconHTML(type) {
   }
 }
 
-function notifCardHTML(n) {
+function notifCardHTML(n, index) {
   return `
-    <article class="notif-card">
+    <article class="notif-card" data-index="${index}">
       <span class="notif-icon ${n.type}">${notifIconHTML(n.type)}</span>
       <div class="notif-body">
         <h3 class="notif-title">${n.title}</h3>
         <p class="notif-desc">${n.desc}</p>
         <span class="notif-time">${ICONS.clock} ${n.time}</span>
       </div>
-      ${n.unread ? '<span class="notif-unread-dot"></span>' : ""}
+      ${n.unread ? '<span class="notif-unread-dot" data-role="markRead" title="Marcar como leída"></span>' : ""}
     </article>
   `;
 }
+notificationsList.addEventListener("click", (e) => {
+  const dot = e.target.closest('[data-role="markRead"]');
+  if (!dot) return;
+
+  const card = dot.closest(".notif-card");
+  const index = Number(card.dataset.index);
+  const notification = notifications[index];
+
+  if (notification) {
+    notification.unread = false;
+    renderNotifications();
+  }
+});
+
+renderNotifications();
 
 function renderNotifications() {
   notificationsList.innerHTML = notifications.map(notifCardHTML).join("");
