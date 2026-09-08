@@ -156,29 +156,29 @@ const assignedDonations = [
     {
         id: 101,
         title: "Leche fresca",
-        description: "Se necesitan 100 paquetes de leche fresca.",
+        description: " 100 paquetes de leche fresca.",
         quantity: "100",
         timeAgo: "Hace 2 días",
         status: "Pendiente",
-        tipo:"Recurrente"
+        tipo:""
     },
     {
         id: 102,
         title: "Camperas",
-        description: "Se necesitan 30 camperas de invierno.",
+        description: "30 camperas de invierno.",
         quantity: "30",
         timeAgo: "Hace 4 días",
         status: "Pendiente",
-        tipo:"Extraordinaria"
+        tipo:""
     },
     {
         id: 103,
         title: "Zapatillas",
-        description: "Se necesitan 20 zapatillas para niños.",
+        description: "20 zapatillas para niños.",
         quantity: "20",
         timeAgo: "Hace 1 semana",
         status: "Entregado",
-        tipo:"Recurrente"
+        tipo:""
     }
 ];
 
@@ -199,7 +199,6 @@ function renderStatusNeeds() {
           <p class="status-card-sub">${item.description}</p>
           <div class="status-card-details">
             <span>Cantidad: ${item.quantity}</span>
-            <span>Tipo: ${item.tipo}</span>
             <span>${item.timeAgo}</span>
           </div>
         </div>
