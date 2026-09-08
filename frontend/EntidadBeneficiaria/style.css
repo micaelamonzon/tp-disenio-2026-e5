@@ -431,7 +431,7 @@ svg { width: 18px; height: 18px; flex-shrink: 0; }
     align-self: flex-start;
 }
 .status-pendiente  { background: var(--red-bg); color: var(--red-text); }
-.status-en-proceso { background: var(--amber-bg); color: var(--amber-text); }
+.status-en-proceso { background: var(--red-bg); color: var(--red-text); }
 .status-entregado  { background: var(--green-bg); color: var(--green-text); }
 
 .empty-state {
