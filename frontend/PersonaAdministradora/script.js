@@ -955,59 +955,150 @@ Object.assign(cargadoresDeVista, {
 });
 
 /* ----------------- REQ 18: GESTIÓN DE CAMIONES ----------------- */
-const camionesMock = [
+let camionesMock = [
     { patente: "AB 123 CD", modelo: "Mercedes-Benz Sprinter", capacidad: "3500", conductor: "Roberto Gómez", estado: "Disponible" },
     { patente: "EF 456 GH", modelo: "Ford Transit", capacidad: "2500", conductor: "Laura Fernández", estado: "En uso" },
     { patente: "IJ 789 KL", modelo: "Renault Master", capacidad: "3000", conductor: "Sin asignar", estado: "Mantenimiento" }
 ];
 
+let camionEditandoIndex = null; // Variable para saber si estamos creando o editando
+
 const btnToggleCamionForm = document.getElementById('btnToggleCamionForm');
 const btnCancelarCamion = document.getElementById('btnCancelarCamion');
 const formNuevoCamion = document.getElementById('formNuevoCamion');
 const camionForm = document.getElementById('camionForm');
+const formTitulo = formNuevoCamion.querySelector('.form-card-title');
+const btnSubmitCamion = camionForm.querySelector('button[type="submit"]');
 
-btnToggleCamionForm.addEventListener('click', () => formNuevoCamion.hidden = false);
-btnCancelarCamion.addEventListener('click', () => { formNuevoCamion.hidden = true; camionForm.reset(); });
+// Abrir formulario para Nuevo Camión
+btnToggleCamionForm.addEventListener('click', () => {
+    camionEditandoIndex = null;
+    formTitulo.textContent = "Nuevo Camión";
+    btnSubmitCamion.textContent = "Agregar";
+    camionForm.reset();
+    formNuevoCamion.hidden = false;
+});
 
+// Cancelar formulario
+btnCancelarCamion.addEventListener('click', () => {
+    formNuevoCamion.hidden = true;
+    camionForm.reset();
+});
+
+// Función principal para dibujar la tabla
 function renderCamiones() {
     const tableBody = document.getElementById("camionesTableBody");
 
-    // Actualizar contadores del dashboard
+    // Actualizar contadores
     document.getElementById("countCamionesDisponibles").textContent = camionesMock.filter(c => c.estado === "Disponible").length;
     document.getElementById("countCamionesUso").textContent = camionesMock.filter(c => c.estado === "En uso").length;
     document.getElementById("countCamionesMantenimiento").textContent = camionesMock.filter(c => c.estado === "Mantenimiento").length;
 
-    tableBody.innerHTML = camionesMock.map(c => {
-        let pillClass = c.estado === "Disponible" ? "Disponible" : (c.estado === "En uso" ? "Asignada" : "Vencida");
+    tableBody.innerHTML = camionesMock.map((c, index) => {
+        // Formatear la clase CSS sacando espacios (ej: "En uso" -> "En-uso")
+        const cssClass = c.estado.replace(" ", "-");
+
         return `
         <tr>
             <td>${c.patente}</td>
             <td>${c.modelo}</td>
             <td>${c.capacidad} kg</td>
             <td>${c.conductor}</td>
-            <td><span class="pill pill-${pillClass}">${c.estado}</span></td>
             <td>
-                <button class="action-icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
-                <button class="action-icon-btn delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+                <select class="select-pill ${cssClass}" data-index="${index}">
+                    <option value="Disponible" ${c.estado === 'Disponible' ? 'selected' : ''}>Disponible</option>
+                    <option value="En uso" ${c.estado === 'En uso' ? 'selected' : ''}>En uso</option>
+                    <option value="Mantenimiento" ${c.estado === 'Mantenimiento' ? 'selected' : ''}>Mantenimiento</option>
+                </select>
+            </td>
+            <td>
+                <button class="action-icon-btn btn-edit" data-index="${index}" title="Editar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                </button>
+                <button class="action-icon-btn delete btn-delete" data-index="${index}" title="Eliminar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                </button>
             </td>
         </tr>`;
     }).join("");
+
+    asignarEventosTablaCamiones();
 }
 
-camionForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const nuevoCamion = {
-        patente: document.getElementById('camionPatente').value.toUpperCase(),
-        modelo: document.getElementById('camionModelo').value,
-        capacidad: document.getElementById('camionCapacidad').value,
-        conductor: document.getElementById('camionConductor').value || "Sin asignar",
-        estado: "Disponible"
-    };
-    camionesMock.unshift(nuevoCamion);
-    renderCamiones();
-    formNuevoCamion.hidden = true;
-    camionForm.reset();
+// --- LÓGICA DEL MODAL DE ELIMINACIÓN (A prueba de fallos) ---
+let camionAEliminarIndex = null;
+
+// Escuchamos los clics en todo el documento para atrapar los del modal
+document.addEventListener('click', (e) => {
+    // Si tocan Cancelar
+    if (e.target.id === 'btnCancelDelete') {
+        const modal = document.getElementById('deleteConfirmModal');
+        if (modal) modal.hidden = true;
+        camionAEliminarIndex = null;
+    }
+    // Si tocan Eliminar (Confirmar)
+    if (e.target.id === 'btnConfirmDelete') {
+        if (camionAEliminarIndex !== null) {
+            camionesMock.splice(camionAEliminarIndex, 1);
+            renderCamiones();
+            const modal = document.getElementById('deleteConfirmModal');
+            if (modal) modal.hidden = true;
+            camionAEliminarIndex = null;
+        }
+    }
 });
+
+// --- ACTUALIZACIÓN DE EVENTOS EN LA TABLA ---
+function asignarEventosTablaCamiones() {
+    // Cambiar estado desde el select
+    document.querySelectorAll('.select-pill').forEach(select => {
+        select.addEventListener('change', (e) => {
+            const index = e.target.getAttribute('data-index');
+            camionesMock[index].estado = e.target.value;
+            renderCamiones();
+        });
+    });
+
+    // Abrir modal de confirmación al tocar el tachito
+    document.querySelectorAll('.btn-delete').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const index = e.currentTarget.getAttribute('data-index');
+            const patente = camionesMock[index].patente;
+
+            const modal = document.getElementById('deleteConfirmModal');
+            const modalText = document.getElementById('deleteModalText');
+
+            // Si falta el HTML, te avisa en vez de romperse
+            if (!modal || !modalText) {
+                alert("Falta agregar el HTML del modal en el index.html");
+                return;
+            }
+
+            camionAEliminarIndex = index;
+            modalText.innerHTML = `¿Estás seguro que querés eliminar el camión con patente <b>${patente}</b>?<br>Esta acción no se puede deshacer.`;
+            modal.hidden = false;
+        });
+    });
+
+    // Editar camión
+    document.querySelectorAll('.btn-edit').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const index = e.currentTarget.getAttribute('data-index');
+            const camion = camionesMock[index];
+
+            document.getElementById('camionPatente').value = camion.patente;
+            document.getElementById('camionModelo').value = camion.modelo;
+            document.getElementById('camionCapacidad').value = camion.capacidad;
+            document.getElementById('camionConductor').value = camion.conductor === "Sin asignar" ? "" : camion.conductor;
+
+            camionEditandoIndex = index;
+            formTitulo.textContent = "Editar Camión";
+            btnSubmitCamion.textContent = "Guardar Cambios";
+            formNuevoCamion.hidden = false;
+            formNuevoCamion.scrollIntoView({ behavior: "smooth", block: "center" });
+        });
+    });
+}
 
 /* ----------------- REQ 19: RANKING DE DONANTES ----------------- */
 const rankingData = {
