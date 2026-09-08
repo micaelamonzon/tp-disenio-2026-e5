@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DonaTrack - UTN Solidaria</title>
     <link rel="stylesheet" href="style.css">
+    <!-- Leaflet CSS y JS para el mapa libre -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 <body>
 
@@ -23,7 +26,7 @@
             <a href="#contacto" class="main-nav-link" data-page="contacto" onclick="navigateTo('contacto'); return false;">Contacto</a>
         </nav>
     </div>
-    <div class="topbar-right">
+    <div class="topbar-right" id="auth-area">
         <button class="btn btn-outline" id="btnIrLogin" onclick="navigateTo('login')">Iniciar sesión</button>
     </div>
 </header>
@@ -91,9 +94,11 @@
             <div class="grid-3" id="featured-donations"></div>
         </section>
 
+        <!-- SECCIÓN DE ACCESOS RÁPIDOS ACTUALIZADA -->
         <section class="section container">
             <h2 class="section-title">Accesos rápidos</h2>
             <div class="grid-3">
+                <!-- Card 1: Galería -->
                 <div class="quick-access-card" onclick="navigateTo('galeria')">
                     <div class="quick-icon">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
@@ -101,13 +106,17 @@
                     <h3>Galería de Donaciones</h3>
                     <p>Visualiza fotos de donaciones entregadas sin necesidad de iniciar sesión.</p>
                 </div>
-                <div class="quick-access-card" onclick="navigateTo('mapa')">
+
+                <!-- Card 2: Información Legal y Privacidad (Reemplaza al Mapa) -->
+                <div class="quick-access-card" onclick="navigateTo('legal')">
                     <div class="quick-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                     </div>
-                    <h3>Mapa Interactivo</h3>
-                    <p>Explora en un mapa las donaciones entregadas a diferentes entidades beneficiarias.</p>
+                    <h3>Información Legal y Privacidad</h3>
+                    <p>Consulta nuestras políticas de privacidad, términos y condiciones del sistema.</p>
                 </div>
+
+                <!-- Card 3: Registro -->
                 <div class="quick-access-card" onclick="navigateTo('registro')">
                     <div class="quick-icon">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>
@@ -117,6 +126,7 @@
                 </div>
             </div>
         </section>
+
 
         <section class="cta-banner">
             <h2>¿Listo para hacer la diferencia?</h2>
@@ -423,48 +433,64 @@
                     </button>
                 </div>
 
-                <form id="form-registro-donante" onsubmit="handleRegister(event, 'donante')">
+                <form id="form-registro" onsubmit="handleRegister(event)">
                     <div class="form-group">
                         <label>Nombre Completo</label>
                         <div class="input-icon-wrapper">
-                            <span class="input-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/></svg></span>
-                            <input type="text" required placeholder="Juan Pérez">
+                                <span class="input-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                </span>
+                            <input type="text" id="reg-nombre" required placeholder="Ej. Micaela Monzon Garcia">
                         </div>
                     </div>
+
                     <div class="form-group">
                         <label>Email</label>
                         <div class="input-icon-wrapper">
-                            <span class="input-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 6 10 7 10-7"/></svg></span>
-                            <input type="email" required placeholder="email@ejemplo.com">
+                                <span class="input-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 6 10 7 10-7"/></svg>
+                                </span>
+                            <input type="email" id="reg-email" required placeholder="email@ejemplo.com">
                         </div>
                     </div>
+
                     <div class="form-group">
                         <label>Teléfono</label>
                         <div class="input-icon-wrapper">
-                            <span class="input-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></span>
-                            <input type="tel" placeholder="+54 11 1234-5678">
+                                <span class="input-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                                </span>
+                            <input type="tel" id="reg-phone" required placeholder="+54 11 1234-5678">
                         </div>
                     </div>
+
                     <div class="form-group">
                         <label>Contraseña</label>
                         <div class="input-icon-wrapper">
-                            <span class="input-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
-                            <input type="password" required minlength="8" placeholder="Mínimo 8 caracteres">
+                                    <span class="input-icon">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                    </span>
+                            <input type="password" id="reg-password" required placeholder="Mínimo 8 caracteres">
                         </div>
                     </div>
+
                     <div class="form-group">
                         <label>Confirmar Contraseña</label>
                         <div class="input-icon-wrapper">
-                            <span class="input-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
-                            <input type="password" required minlength="8" placeholder="Confirma tu contraseña">
+                                     <span class="input-icon">
+                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                </span>
+                            <input type="password" id="reg-confirm-password" required placeholder="Repite tu contraseña">
                         </div>
                     </div>
+
                     <label class="terms-check">
-                        <input type="checkbox" required>
-                        <span>Acepto los <a href="#legal" onclick="navigateTo('legal'); return false;">Términos y Condiciones</a> y la <a href="#legal" onclick="navigateTo('legal'); return false;">Política de Privacidad</a></span>
+                        <input type="checkbox" id="reg-terms" required>
+                        <span>Acepto los <a href="#legal" onclick="navigateTo('legal'); return false;">Términos y Condiciones</a></span>
                     </label>
-                    <button type="submit" class="btn btn-primary btn-block">Crear Cuenta</button>
-                    <p class="auth-switch-link">¿Ya tienes una cuenta? <a href="#login" onclick="navigateTo('login'); return false;">Inicia Sesión</a></p>
+
+                    <button type="submit" class="btn btn-primary btn-block">Registrarse</button>
+                    <p class="auth-switch-link">¿Ya tienes una cuenta? <a href="#login" onclick="navigateTo('login'); return false;">Inicia sesión</a></p>
                 </form>
 
                 <form id="form-registro-entidad" class="hidden" onsubmit="handleRegister(event, 'entidad')">
@@ -472,57 +498,57 @@
                         <label>Razón Social</label>
                         <div class="input-icon-wrapper">
                             <span class="input-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="1"/><line x1="9" y1="6" x2="9" y2="6.01"/><line x1="15" y1="6" x2="15" y2="6.01"/><line x1="9" y1="10" x2="9" y2="10.01"/><line x1="15" y1="10" x2="15" y2="10.01"/><line x1="9" y1="18" x2="15" y2="18"/></svg></span>
-                            <input type="text" required placeholder="Fundación Ejemplo">
+                            <input type="text" id="reg-entidad-nombre" required placeholder="Fundación Ejemplo">
                         </div>
                     </div>
                     <div class="form-group">
                         <label>Email</label>
                         <div class="input-icon-wrapper">
                             <span class="input-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 6 10 7 10-7"/></svg></span>
-                            <input type="email" required placeholder="email@ejemplo.com">
+                            <input type="email" id="reg-entidad-email" required placeholder="email@ejemplo.com">
                         </div>
                     </div>
                     <div class="form-group">
                         <label>Teléfono</label>
                         <div class="input-icon-wrapper">
                             <span class="input-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></span>
-                            <input type="tel" required placeholder="+54 11 1234-5678">
+                            <input type="tel" id="reg-entidad-phone" required placeholder="+54 11 1234-5678">
                         </div>
                     </div>
                     <div class="form-group">
                         <label>CUIT</label>
                         <div class="input-icon-wrapper">
                             <span class="input-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></span>
-                            <input type="text" required placeholder="20-12345678-9">
+                            <input type="text" id="reg-entidad-cuit" required placeholder="20-12345678-9">
                         </div>
                     </div>
                     <div class="form-group">
                         <label>Dirección</label>
                         <div class="input-icon-wrapper">
                             <span class="input-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span>
-                            <input type="text" required placeholder="Av. Medrano 951, CABA">
+                            <input type="text" id="reg-entidad-direccion" required placeholder="Av. Medrano 951, CABA">
                         </div>
                     </div>
                     <div class="form-group">
                         <label>Descripción de la organización</label>
-                        <textarea rows="3" required placeholder="Describe brevemente la misión y actividades de tu organización..."></textarea>
+                        <textarea id="reg-entidad-desc" rows="3" required placeholder="Describe brevemente la misión y actividades de tu organización..."></textarea>
                     </div>
                     <div class="form-group">
                         <label>Contraseña</label>
                         <div class="input-icon-wrapper">
                             <span class="input-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
-                            <input type="password" required minlength="8" placeholder="Mínimo 8 caracteres">
+                            <input type="password" id="reg-entidad-pass" required minlength="8" placeholder="Mínimo 8 caracteres">
                         </div>
                     </div>
                     <div class="form-group">
                         <label>Confirmar Contraseña</label>
                         <div class="input-icon-wrapper">
                             <span class="input-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
-                            <input type="password" required minlength="8" placeholder="Confirma tu contraseña">
+                            <input type="password" id="reg-entidad-confirm-pass" required minlength="8" placeholder="Confirma tu contraseña">
                         </div>
                     </div>
                     <label class="terms-check">
-                        <input type="checkbox" required>
+                        <input type="checkbox" id="reg-entidad-terms" required>
                         <span>Acepto los <a href="#legal" onclick="navigateTo('legal'); return false;">Términos y Condiciones</a> y la <a href="#legal" onclick="navigateTo('legal'); return false;">Política de Privacidad</a></span>
                     </label>
                     <button type="submit" class="btn btn-primary btn-block">Crear Cuenta</button>
@@ -556,24 +582,35 @@
 
                 <form id="form-login" onsubmit="handleLogin(event)">
                     <input type="hidden" id="login-selected-role" value="donante">
+
                     <div class="form-group">
                         <label>Email</label>
                         <div class="input-icon-wrapper">
-                            <span class="input-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 6 10 7 10-7"/></svg></span>
-                            <input type="email" required placeholder="email@ejemplo.com">
+            <span class="input-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 6 10 7 10-7"/></svg>
+            </span>
+                            <input type="email" id="login-email" required placeholder="email@ejemplo.com">
                         </div>
                     </div>
+
                     <div class="form-group">
                         <label>Contraseña</label>
                         <div class="input-icon-wrapper">
-                            <span class="input-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+                            <span class="input-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                            </span>
                             <input type="password" required placeholder="Ingresa tu contraseña">
                         </div>
                     </div>
+
+                    <!-- Checkbox de Recordarme con id -->
                     <div class="form-row-between">
-                        <label class="remember-check"><input type="checkbox"> Recordarme</label>
+                        <label class="remember-check">
+                            <input type="checkbox" id="login-remember"> Recordarme
+                        </label>
                         <a href="#" onclick="return false;">¿Olvidaste tu contraseña?</a>
                     </div>
+
                     <button type="submit" class="btn btn-primary btn-block">Iniciar Sesión</button>
                     <p class="auth-switch-link">¿No tienes cuenta? <a href="#registro" onclick="navigateTo('registro'); return false;">Regístrate</a></p>
                 </form>
