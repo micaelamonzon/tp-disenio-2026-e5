@@ -60,7 +60,7 @@ tabs.forEach(tab => {
 });
 
 /* ============================================================
-   REQUERIMIENTO: REGISTRAR NECESIDADES
+   REQUERIMIENTO 1: REGISTRAR NECESIDADES
    ============================================================ */
 const needForm = document.getElementById("needForm");
 const registeredNeedsList = document.getElementById("registeredNeedsList");
@@ -134,9 +134,7 @@ needForm.addEventListener("submit", (e) => {
 function getStatusIcon(status) {
     switch (status) {
         case "Pendiente":
-            return `<svg class="status-icon icon-pending" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
-        case "En proceso":
-            return `<svg class="status-icon icon-process" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`;
+            return `<svg class="status-icon icon-pending" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`;
         case "Entregado":
             return `<svg class="status-icon icon-delivered" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`;
         default:
@@ -145,7 +143,7 @@ function getStatusIcon(status) {
 }
 
 /* ============================================================
-   REQUERIMIENTO: ESTADO DE NECESIDADES / DONACIONES ASIGNADAS
+   REQUERIMIENTO 2: ESTADO DE NECESIDADES / DONACIONES ASIGNADAS
    ============================================================ */
 const assignedDonations = [
     {
@@ -162,7 +160,7 @@ const assignedDonations = [
         description: "Camperas y frazadas",
         quantity: "30",
         timeAgo: "Hace 4 días",
-        status: "En proceso"
+        status: "Pendiente"
     },
     {
         id: 103,
@@ -207,8 +205,11 @@ renderRegisteredNeeds();
 renderStatusNeeds();
 
 /* ============================================================
-   REQUERIMIENTO: RECEPCIÓN DE DONACIÓN
+   AGREGADO (Euge - Entidad Beneficiaria):
+   Recepción de Donación / Notificaciones / Seguimiento de Entrega
    ============================================================ */
+
+/* ---------- REQUERIMIENTO: RECEPCIÓN DE DONACIÓN ---------- */
 const donations = [
     {
         id: "0415",
@@ -247,7 +248,7 @@ const donations = [
         quantity: "330 unidades",
         timeAgo: "Hace 5 días",
         status: "Entregado",
-        photos: ["data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Crect width='200' height='200' fill='%23e2e8f0'/%3E%3Ctext x='50%25' y='50%25' font-family='Arial' font-size='16' fill='%2364748b' text-anchor='middle' dy='.3em'%3EFoto donaci%C3%B3n%3C/text%3E%3C/svg%3E"]
+        photos: ["utiles-escolares.jpg"]
     }
 ];
 
@@ -417,9 +418,7 @@ document.addEventListener("drop", (e) => {
 
 renderDonations();
 
-/* ============================================================
-   REQUERIMIENTO: NOTIFICACIONES
-   ============================================================ */
+/* ---------- REQUERIMIENTO: NOTIFICACIONES ---------- */
 const notifications = [
     {
         id: 1,
@@ -515,9 +514,7 @@ markAllReadBtn.addEventListener("click", () => {
 
 renderNotifications();
 
-/* ============================================================
-   REQUERIMIENTO: SEGUIMIENTO DE ENTREGA
-   ============================================================ */
+/* ---------- REQUERIMIENTO: SEGUIMIENTO DE ENTREGA ---------- */
 const locationHistoryData = [
     { address: "Av. Corrientes 1234", time: "14:32 hs" },
     { address: "Av. Santa Fe 2800", time: "14:15 hs" },
