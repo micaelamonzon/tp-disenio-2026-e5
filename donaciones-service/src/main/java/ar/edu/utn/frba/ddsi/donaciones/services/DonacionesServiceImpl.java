@@ -1,16 +1,9 @@
 package ar.edu.utn.frba.ddsi.donaciones.services;
 import ar.edu.utn.frba.ddsi.donaciones.config.NotificacionesProperties;
-import ar.edu.utn.frba.ddsi.donaciones.dto.BienDTO;
-import ar.edu.utn.frba.ddsi.donaciones.dto.CategoriaDTO;
-import ar.edu.utn.frba.ddsi.donaciones.dto.DonacionIncentivosDTO;
-import ar.edu.utn.frba.ddsi.donaciones.dto.DonacionSegmentadaDTO;
-import ar.edu.utn.frba.ddsi.donaciones.dto.DonacionSinSegmentarDTO;
-import ar.edu.utn.frba.ddsi.donaciones.dto.PersonaDonanteDTO;
-import ar.edu.utn.frba.ddsi.donaciones.dto.PersonaHumanaDTO;
-import ar.edu.utn.frba.ddsi.donaciones.dto.PersonaJuridicaDTO;
-import ar.edu.utn.frba.ddsi.donaciones.dto.SubcategoriaDTO;
+import ar.edu.utn.frba.ddsi.donaciones.dto.*;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante.PersonaHumana;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante.PersonaJuridica;
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante.Representante;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante.TipoDonante;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.Bien;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.Categoria;
@@ -26,7 +19,6 @@ import ar.edu.utn.frba.ddsi.donaciones.repositories.DonantesRepository;
 import com.opencsv.exceptions.CsvValidationException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import ar.edu.utn.frba.ddsi.donaciones.dto.MedioDeNotificacionDTO;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -45,7 +37,7 @@ public class DonacionesServiceImpl implements DonacionesService {
     private final RestTemplate restTemplate;
     private final NotificacionesProperties notificacionesProperties;
 
-    //segementador
+    //segmentador
     private final Segmentador segmentador;
 
     public DonacionesServiceImpl(DonantesRepository donantesRepository,
@@ -152,6 +144,7 @@ public class DonacionesServiceImpl implements DonacionesService {
                     persona.getId(),
                     persona.getNombre(),
                     persona.getApellido(),
+                    persona.getEdad(),
                     persona.getDNI(),
                     persona.getGenero(),
                     persona.getDireccion(),
@@ -173,6 +166,7 @@ public class DonacionesServiceImpl implements DonacionesService {
 
             List<DonacionSinSegmentarDTO> donacionesDTO = this.obtenerDonacionesSinSegmentarDTO(persona.getDonaciones());
             List<MedioDeNotificacionDTO> mediosDTO = this.obtenerMediosDTO(persona.getMediosDeNotificacion());
+            List<RepresentanteDTO> representantesDTO = this.obtenerRepresentantesDTO(persona.getPersonasRepresentantes());
 
             return new PersonaJuridicaDTO(
                     persona.getId(),
@@ -180,6 +174,7 @@ public class DonacionesServiceImpl implements DonacionesService {
                     persona.getRazonSocial(),
                     persona.getRubro(),
                     persona.getTipo(),
+                    representantesDTO,
                     mediosDTO,
                     donacionesDTO
             );
@@ -253,6 +248,7 @@ public class DonacionesServiceImpl implements DonacionesService {
                 personaHumana.getId(),
                 personaHumana.getNombre(),
                 personaHumana.getApellido(),
+                personaHumana.getEdad(),
                 personaHumana.getDNI(),
                 personaHumana.getGenero(),
                 personaHumana.getDireccion(),
@@ -270,6 +266,7 @@ public class DonacionesServiceImpl implements DonacionesService {
         }
         List<DonacionSinSegmentarDTO> donacionesDTO = obtenerDonacionesSinSegmentarDTO(personaJuridica.getDonaciones());
         List<MedioDeNotificacionDTO> mediosDTO = this.obtenerMediosDTO(personaJuridica.getMediosDeNotificacion());
+        List<RepresentanteDTO> representantesDTO = this.obtenerRepresentantesDTO(personaJuridica.getPersonasRepresentantes());
 
         return new PersonaJuridicaDTO(
                 personaJuridica.getId(),
@@ -277,6 +274,7 @@ public class DonacionesServiceImpl implements DonacionesService {
                 personaJuridica.getRazonSocial(),
                 personaJuridica.getRubro(),
                 personaJuridica.getTipo(),
+                representantesDTO,
                 mediosDTO,
                 donacionesDTO
         );
@@ -294,6 +292,7 @@ public class DonacionesServiceImpl implements DonacionesService {
                 body.genero(),
                 body.direccion()
                 );
+        nuevaPersona.setEdad(body.edad());
 
 
         // Mapper de DTO a entidad para el medio de notificación predeterminado y para la lista de medios
@@ -329,6 +328,7 @@ public class DonacionesServiceImpl implements DonacionesService {
                 humano.getId(),
                 humano.getNombre(),
                 humano.getApellido(),
+                humano.getEdad(),
                 humano.getDNI(),
                 humano.getGenero(),
                 humano.getDireccion(),
@@ -349,13 +349,15 @@ public class DonacionesServiceImpl implements DonacionesService {
                 request.tipo(),
                 request.rubro()
         );
-
+        this.setearMediosDeNotificacion(request.mediosDeNotificacion(), nuevaPersona.getMediosDeNotificacion());
+        this.setearRepresentantes(request.representantes(), nuevaPersona.getPersonasRepresentantes());
 
         PersonaJuridica juridica = this.donantesRepository.saveJuridica(nuevaPersona);
 
         List<DonacionSinSegmentarDTO> donacionesDTO = obtenerDonacionesSinSegmentarDTO(
                 juridica.getDonaciones());
         List<MedioDeNotificacionDTO> mediosDTO = obtenerMediosDTO(juridica.getMediosDeNotificacion());
+        List<RepresentanteDTO> representantesDTO = obtenerRepresentantesDTO(juridica.getPersonasRepresentantes());
 
         return new PersonaJuridicaDTO(
                 juridica.getId(),
@@ -363,6 +365,7 @@ public class DonacionesServiceImpl implements DonacionesService {
                 juridica.getRazonSocial(),
                 juridica.getRubro(),
                 juridica.getTipo(),
+                representantesDTO,
                 mediosDTO,
                 donacionesDTO
         );
@@ -379,7 +382,7 @@ public class DonacionesServiceImpl implements DonacionesService {
         }
 
         List<Bien> bienes = this.convertirBienesDTO(body.bienes());
-        DonacionSinSegmentar nuevaDonacion = new DonacionSinSegmentar(bienes, LocalDateTime.now(),false);
+        DonacionSinSegmentar nuevaDonacion = new DonacionSinSegmentar(body.descripcionGeneral(), bienes, LocalDateTime.now());
 
         personaHumana.agregarDonacion(nuevaDonacion);
 
@@ -416,7 +419,7 @@ public class DonacionesServiceImpl implements DonacionesService {
         }
 
         List<Bien> bienes = this.convertirBienesDTO(body.bienes());
-        DonacionSinSegmentar nuevaDonacion = new DonacionSinSegmentar(bienes, LocalDateTime.now(),false);
+        DonacionSinSegmentar nuevaDonacion = new DonacionSinSegmentar(body.descripcionGeneral(), bienes, LocalDateTime.now());
 
         personaJuridica.agregarDonacion(nuevaDonacion);
 
@@ -542,6 +545,7 @@ public class DonacionesServiceImpl implements DonacionesService {
         // Solo actualizamos los campos que vienen con valor
         if (request.nombre() != null) personaHumana.setNombre(request.nombre());
         if (request.apellido() != null) personaHumana.setApellido(request.apellido());
+        if (request.edad() != null) personaHumana.setEdad(request.edad());
         if (request.DNI() != null) personaHumana.setDNI(request.DNI());
         if (request.genero() != null) personaHumana.setGenero(request.genero());
         if (request.direccion() != null) personaHumana.setDireccion(request.direccion());
@@ -565,6 +569,7 @@ public class DonacionesServiceImpl implements DonacionesService {
                 personaHumana.getId(),
                 personaHumana.getNombre(),
                 personaHumana.getApellido(),
+                personaHumana.getEdad(),
                 personaHumana.getDNI(),
                 personaHumana.getGenero(),
                 personaHumana.getDireccion(),
@@ -589,6 +594,8 @@ public class DonacionesServiceImpl implements DonacionesService {
         List<DonacionSinSegmentarDTO> donacionesDTO = obtenerDonacionesSinSegmentarDTO(
                 personaJuridica.getDonaciones());
         List<MedioDeNotificacionDTO> mediosDTO = this.obtenerMediosDTO(personaJuridica.getMediosDeNotificacion());
+        List<RepresentanteDTO> representantesDTO = this.obtenerRepresentantesDTO(personaJuridica.getPersonasRepresentantes());
+
 
         return new PersonaJuridicaDTO(
                 personaJuridica.getId(),
@@ -596,6 +603,7 @@ public class DonacionesServiceImpl implements DonacionesService {
                 personaJuridica.getRazonSocial(),
                 personaJuridica.getRubro(),
                 personaJuridica.getTipo(),
+                representantesDTO,
                 mediosDTO,
                 donacionesDTO
         );
@@ -604,6 +612,10 @@ public class DonacionesServiceImpl implements DonacionesService {
 
 
     public void modificarDonacion(DonacionSinSegmentar donacionAModificada,DonacionSinSegmentarDTO body, Long idBien){
+
+        if(body.descripcionGeneral() != null){
+            donacionAModificada.setDescripcionGeneral(body.descripcionGeneral());
+        }
 
         if(body.fechaDeIngreso() != null){
             donacionAModificada.setFechaDeIngreso(body.fechaDeIngreso());
@@ -667,6 +679,7 @@ public class DonacionesServiceImpl implements DonacionesService {
 
 
                     return new DonacionSinSegmentarDTO(
+                            donacion.getDescripcionGeneral(),
                             bienesDTO,
                             donacion.getFechaDeIngreso()
                     );
@@ -681,9 +694,9 @@ public class DonacionesServiceImpl implements DonacionesService {
                     List<Bien> bienes = this.convertirBienesDTO(donacion.bienes());
 
                     return new DonacionSinSegmentar(
+                            donacion.descripcionGeneral(),
                             bienes,
-                            donacion.fechaDeIngreso(),
-                            false
+                            donacion.fechaDeIngreso()
                     );
                 //}).toList();
                 }).collect(java.util.stream.Collectors.toCollection(ArrayList::new));
@@ -758,6 +771,30 @@ public class DonacionesServiceImpl implements DonacionesService {
     public MedioDeNotificacionDTO obtenerAMedioDTO(MedioDeNotificacion medio){
         if(medio == null) return null;
         return new MedioDeNotificacionDTO(medio.getTipoDeNotificacion(), medio.getContacto());
+    }
+
+    public List<RepresentanteDTO> obtenerRepresentantesDTO(List<Representante> representantes){
+        return representantes.stream()
+                .map(r -> new RepresentanteDTO(
+                        r.getNombre(),
+                        r.getApellido(),
+                        r.getDNI(),
+                        this.obtenerMediosDTO(r.getMediosDeNotificacion())
+                ))
+                .toList();
+    }
+
+    public void setearRepresentantes(List<RepresentanteDTO> representantesDTO, List<Representante> representantes){
+        if (representantesDTO == null) return;
+        representantesDTO.forEach(dto -> {
+            Representante nuevoRepresentante = new Representante(
+                    dto.nombre(),
+                    dto.apellido(),
+                    dto.numeroDeDocumento()
+            );
+            this.setearMediosDeNotificacion(dto.mediosDeNotificacion(), nuevoRepresentante.getMediosDeNotificacion());
+            representantes.add(nuevoRepresentante);
+        });
     }
 
     public void cambiarMediosDeNotificacion(List<MedioDeNotificacionDTO> nuevos, List<MedioDeNotificacion> viejos){

@@ -30,11 +30,11 @@ public class PersonaJuridica {
     @Column(name = "rubro")
     private String rubro;
 
-    @OneToMany
+    @OneToMany (cascade = CascadeType.ALL)
     @JoinColumn(name = "persona_juridica_id", referencedColumnName = "id")
     private List<Representante> personasRepresentantes = new ArrayList<>();
 
-    @OneToMany
+    @OneToMany (cascade = CascadeType.ALL)
     @JoinColumn(name = "persona_juridica_id", referencedColumnName = "id")
     private List<MedioDeNotificacion> mediosDeNotificacion = new ArrayList<>();
 

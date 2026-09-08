@@ -27,6 +27,9 @@ public class DonacionSinSegmentar extends Persistente {
   @JoinColumn(name = "donacionSinSegmentar_id", referencedColumnName = "id")
   private List<DonacionSegmentada> donacionesSegmentadas = new ArrayList<>();
 
+  @Column(name = "descripcion_general")
+  private String descripcionGeneral;
+
   @Column(name = "fecha_de_ingreso")
   private LocalDateTime fechaDeIngreso;
 
@@ -34,10 +37,15 @@ public class DonacionSinSegmentar extends Persistente {
   private Long donante_id;
 
 
-  public DonacionSinSegmentar(List<Bien> bienes,LocalDateTime fechaDeIngreso,Boolean donacionEntregada){
+  public DonacionSinSegmentar(List<Bien> bienes, List<DonacionSegmentada> donacionesSegmentadas, String descripcionGeneral, LocalDateTime fechaDeIngreso, Long donante_id) {
     this.bienes = bienes;
+    this.donacionesSegmentadas = donacionesSegmentadas;
+    this.descripcionGeneral = descripcionGeneral;
     this.fechaDeIngreso = fechaDeIngreso;
+    this.donante_id = donante_id;
+  }
 
+  public DonacionSinSegmentar(String s, List<Bien> bienes, LocalDateTime now) {
   }
 
   public void agregarBien(Bien bien){

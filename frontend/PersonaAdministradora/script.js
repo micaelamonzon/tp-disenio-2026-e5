@@ -39,7 +39,7 @@ async function apiPatch(path, body) {
 }
 
 // Responsable de la acción (persona administradora logueada).
-// AJUSTAR cuando exista login real / servicio de autenticación (Entrega 5).
+// REVISAR cuando exista login real / servicio de autenticación (Entrega 5).
 const RESPONSABLE_ACTUAL_ID = "admin-demo";
 
 /* ============================================================
@@ -107,7 +107,8 @@ sidebarOverlay.addEventListener("click", () => adminShell.classList.remove("side
 
 /* ============================================================
    ADAPTADORES DE DATOS
-   ============================================================ */
+   ============================================================
+*/
 
 let donantesCache = null;
 
@@ -159,12 +160,6 @@ function mapDonacion(raw, cacheDonantes) {
     };
 }
 
-//TODO: Necesidad.java no tiene @JsonTypeInfo, así que Jackson
-// va a serializar los campos propios de la subclase real, pero no hay
-// garantía de un discriminador explícito ("tipo"/"@type"); por eso está
-// inferido el tipo mirando qué campos aparecen. Si el equipo agrega un
-// @JsonTypeInfo o un getter "getTipo()" en Necesidad, esto se puede
-// simplificar bastante.
 function mapNecesidad(raw) {
     const entidad = raw.entidadBeneficiaria || {};
     const esExtraordinaria = raw.cantidadRequerida !== undefined;
@@ -245,8 +240,15 @@ donorModeRadios.forEach(radio => {
 });
 
 // Búsqueda de donante existente contra GET /servicioDeDonaciones/donantes
-// (obtenerTodosLosDonantesUnificados): sin
-// endpoint dedicado, trayendo todo y filtrando en el navegador.
+// (obtenerTodosLosDonantesUnificados), sin endpoint dedicado, trayendo todo y filtrando en el navegador.
+
+//   record PersonaDonanteDTO(Long idHumano, String nombre, String apellido,
+//                             Long idJuridico, String razonSocial,
+//                             List<DonacionIncentivosDTO> donaciones)
+// No trae email, documento, ni un id/tipo unificado. Por eso la búsqueda
+// solo puede filtrar por nombre / apellido / razón social (ver también
+// la nota en el HTML, arriba del input). Si más adelante hace falta
+// buscar por email o documento, ese dato tiene que agregarse al DTO.
 
 donorSearchBtn.addEventListener("click", async () => {
     const query = donorSearchInput.value.trim().toLowerCase();
@@ -316,17 +318,8 @@ const CATEGORIAS = {
 const CATEGORIAS_CON_ESTADO = ["Mobiliario", "Vestimenta"];
 const CATEGORIAS_PERECEDERAS = ["Alimentos"];
 
-// TODO (gap real de backend, no solo de nombres): Unidad.java
-// solo define KILOGRAMOS, LITROS, CENTIMETROS, METROS. No existe un valor
-// para contar unidades discretas (sillas, paquetes, prendas), aunque la
-// consigna dice textualmente "se deberá contabilizar la cantidad ... en
-// una unidad determinada (kilogramos, unidades o según corresponda)" y los
-// ejemplos del enunciado son justamente "6 sillas" y "100 paquetes de
-// fideos". Hasta que el equipo agregue algo como UNIDADES al enum, dejo
-// solo las 4 opciones que el backend realmente acepta; para bienes que se
-// cuentan por unidad (sillas, paquetes, prendas) no hay forma correcta de
-// mandar la unidad todavía.
 const UNIDADES = [
+    { value: "UNIDADES", label: "unidades" },
     { value: "KILOGRAMOS", label: "kilogramos" },
     { value: "LITROS", label: "litros" },
     { value: "CENTIMETROS", label: "centímetros" },
@@ -377,7 +370,6 @@ function crearBienRow() {
       <label class="field">
         <span>Unidad</span>
         <select class="bien-unidad">${unidadOptionsHTML()}</select>
-        <span class="field-pending-note">⚠ Falta un valor para "unidades" sueltas (sillas, paquetes, prendas) en el enum Unidad del backend.</span>
       </label>
       <label class="field bien-condicion-field" hidden>
         <span>Condición</span>
@@ -441,7 +433,7 @@ function mostrarErrorFormulario(msg) {
     registrarError.scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
-// --- Helpers de mapeo hacia los DTOs reales ---
+// --- Helpers de mapeo hacia los DTOs  ---
 
 const TIPO_NOTIFICACION = { email: "EMAIL", telefono: "SMS", whatsapp: "WHATSAPP" };
 
@@ -460,8 +452,8 @@ function mapTipoPersonaJuridica(valorSelect) {
     return normalizado || null;
 }
 
-// Convierte "yyyy-mm-dd" (input type=date) a un LocalDateTime ISO que
-// Jackson pueda parsear ("yyyy-mm-ddT00:00:00").
+// Convertimos "yyyy-mm-dd" (input type=date) a un LocalDateTime ISO que
+// Jackson puede parsear ("yyyy-mm-ddT00:00:00").
 function fechaInputALocalDateTime(fechaStr) {
     if (!fechaStr) return null;
     return `${fechaStr}T00:00:00`;
@@ -474,16 +466,6 @@ registrarForm.addEventListener("submit", async (e) => {
 
     const modoExistente = document.querySelector('input[name="donorMode"]:checked').value === "existente";
     const esJuridica = tipoPersonaSelect.value === "juridica";
-
-    // Arma cada bien con la forma real de BienDTO:
-    //   record BienDTO(String nombre, String descripcion, SubcategoriaDTO subcategoria,
-    //                   LocalDateTime fechaDeVencimiento, EstadoDeUso esUsado,
-    //                   Unidad tipoUnidad, Integer cantidad)
-    // BienDTO pide "nombre" Y "descripcion" por separado, pero el formulario
-    // solo tiene un campo de texto libre; uso ese texto para los dos. El
-    // algoritmo de matchmaking (CompatibilidadSemantica) compara la
-    // subcategoría de la donación contra la necesidad, no el nombre del
-    // bien, así que esto no afecta el matching.
     const bienes = [];
     for (const row of bienesList.children) {
         const descripcionLibre = row.querySelector(".bien-descripcion").value.trim();
@@ -545,17 +527,25 @@ registrarForm.addEventListener("submit", async (e) => {
                 const cuit = document.getElementById("jurCuit").value.trim();
                 if (!razonSocial) throw new Error("La razón social es obligatoria.");
                 if (!cuit) throw new Error("El CUIT es obligatorio.");
-                // record PersonaJuridicaDTO(Long id, String cuit, String razonSocial, String rubro,
-                //                            Tipo tipo, List<MedioDeNotificacionDTO> mediosDeNotificacion,
-                //                            List<DonacionSinSegmentarDTO> donaciones)
-                // No tiene "direccion" ni forma de asociar representantes: esos
-                // datos quedan cargados en el formulario pero no se envían (ver
-                // notas en el HTML).
+                // "direccion" sigue sin existir en el DTO, así que ese campo del form todavía no se envía.
+                const repNombre = document.getElementById("jurRepresentanteNombre").value.trim();
+                const repApellido = document.getElementById("jurRepresentanteApellido").value.trim();
+                const repDni = document.getElementById("jurRepresentanteDni").value.trim();
+                const representantes = repNombre
+                    ? [{
+                        nombre: repNombre,
+                        apellido: repApellido || null,
+                        numeroDeDocumento: Number(repDni) || null,
+                        mediosDeNotificacion: [],
+                    }]
+                    : [];
+
                 nuevoDonante = await apiPost("/donante/juridico", {
                     cuit,
                     razonSocial,
                     rubro: document.getElementById("jurRubro").value.trim() || null,
                     tipo: mapTipoPersonaJuridica(document.getElementById("jurTipo").value),
+                    representantes,
                     mediosDeNotificacion,
                 });
             } else {
@@ -563,23 +553,17 @@ registrarForm.addEventListener("submit", async (e) => {
                 const apellido = document.getElementById("donApellido").value.trim();
                 const documento = document.getElementById("donDocumento").value.trim();
                 if (!nombre || !apellido || !documento) throw new Error("Nombre, apellido y documento son obligatorios.");
-                // record PersonaHumanaDTO(Long id, String nombre, String apellido, Integer DNI,
-                //                          String genero, String direccion,
-                //                          List<DonacionSinSegmentarDTO> donaciones,
-                //                          List<MedioDeNotificacionDTO> mediosDeNotificacion,
-                //                          MedioDeNotificacionDTO medioDeNotificacionPredeterminado)
-                // No tiene "edad": ese dato queda cargado en el formulario pero no
-                // se envía (ver nota en el HTML). El campo de documento es "DNI"
-                // (Integer), no "numeroDocumento".
                 const medioPredeterminadoKey = document.getElementById("donMedioPredeterminado").value; // "email"|"telefono"|"whatsapp"
                 const medioPredeterminado = mediosDeNotificacion.find(
                     m => m.tipoDeNotificacion === TIPO_NOTIFICACION[medioPredeterminadoKey]
                 ) || mediosDeNotificacion[0] || null;
+                const edad = document.getElementById("donEdad").value.trim();
 
                 nuevoDonante = await apiPost("/donante/humano", {
                     nombre,
                     apellido,
                     DNI: Number(documento) || null,
+                    edad: edad ? Number(edad) : null,
                     genero: document.getElementById("donGenero").value || null,
                     direccion: document.getElementById("donDireccion").value.trim() || null,
                     mediosDeNotificacion,
@@ -596,12 +580,8 @@ registrarForm.addEventListener("submit", async (e) => {
             ? `/juridico/donacion/${donanteId}`
             : `/humano/donacion/${donanteId}`;
 
-        // record DonacionSinSegmentarDTO(List<BienDTO> bienes, LocalDateTime fechaDeIngreso)
-        //TODO REVISAR PENDIENTE: el DTO no tiene lugar para la "descripción
-        // general" de la carga que pide la consigna (ver nota en el HTML);
-        // hay que agregarle un campo si se quiere persistir. Mientras tanto,
-        // el texto que carga la persona administradora no se envía.
         const donacionesSegmentadas = await apiPost(path, {
+            descripcionGeneral: document.getElementById("descripcionGeneral").value.trim() || null,
             bienes,
             fechaDeIngreso: fechaInputALocalDateTime(new Date().toISOString().slice(0, 10)),
         });
@@ -670,7 +650,7 @@ async function cargarInventario() {
 
 function inventoryRowHTML(item) {
     const esDisponible = item.estado === ESTADOS.EN_DEPOSITO;
-    //TODO El backend sólo expone PATCH /donacion/{id}/vencer (no existe la
+    // El backend sólo expone PATCH /donacion/{id}/vencer (no existe la
     // acción inversa), así que una vez vencida sólo se puede consultar.
     const accion = esDisponible
         ? `<button class="action-link expire" data-vencer="${item.id}">Marcar vencida</button>`
@@ -727,7 +707,7 @@ inventorySearch.addEventListener("input", renderInventory);
 inventoryFilterEstado.addEventListener("change", renderInventory);
 
 /* ============================================================
-   ASIGNACIÓN DE DONACIONES — Matchmaking
+   ASIGNACIÓN DE DONACIONES — Matchmaking (motor real del backend)
    ============================================================ */
 const matchCardsContainer = document.getElementById("matchCardsContainer");
 
@@ -749,33 +729,14 @@ async function cargarAsignacion() {
     }
 }
 
-// El backend ejecuta el matchmaking para TODAS las donaciones "En
-// Depósito" de una sola vez (MotorDeMatchmaking / MatchmakingScheduler),
-// no hay un endpoint para ejecutarlo donación por donación. Por eso el
-// botón de cada card dispara el mismo proceso batch y después busca el
-// resultado puntual de esa donación.
-//
-//TODO revisar: está asumido que el id de la PropuestaMatch generada coincide
-// con el id de la DonacionSegmentada (matcheoId === donacionId). Si el
-// backend genera un id propio para la propuesta, esto va a fallar con
-// un 404 al hacer el GET; en ese caso habría que exponer en el backend
-// alguna forma de obtener el matcheoId a partir del donacionId.
+// El backend ejecuta el matchmaking para TODAS las donaciones "En Depósito" de una sola vez
+// (MotorDeMatchmaking / MatchmakingScheduler),no hay un endpoint para ejecutarlo donación por donación.
+// Por eso el botón de cada card dispara el mismo proceso batch y después busca el resultado puntual de esa donación.
+
 async function ejecutarYObtenerPropuesta(donacionId) {
     await apiPost("/matcheos/ejecutar");
     return apiGet(`/matcheos/${donacionId}`);
 }
-
-//TODO revisar
-// GET /matcheos/{id} devuelve el objeto PropuestaMatch con las entidades
-// JPA reales adentro (Necesidad, DonacionSegmentada), no DTOs. Necesidad
-// tiene "donacionesRecibidas" (OneToMany) y DonacionSegmentada tiene
-// "necesidad" (ManyToOne) apuntándose mutuamente, sin @JsonIgnore ni
-// @JsonManagedReference/@JsonBackReference. Si alguna Necesidad ya tiene
-// donaciones recibidas asociadas, Jackson puede entrar en una recursión
-// infinita al serializar (Necesidad -> donacionesRecibidas -> necesidad ->
-// donacionesRecibidas -> ...) y el endpoint devolvería 500. Si eso pasa,
-// hay que pedirle a quien mantiene esas entidades que corte el ciclo
-// (@JsonIgnore en un lado, o exponer PropuestaMatch como DTO).
 
 function matchOptionHTML(donacionId, necesidad, rank, variant) {
     const inputName = `seleccion-${donacionId}`;
@@ -941,279 +902,3 @@ function renderMatchCards() {
    INICIO
    ============================================================ */
 cargarDashboard();
-
-
-/* ============================================================
-   AGREGADO: VISTAS DE GESTIÓN (Req 18, 19, 20)
-   ============================================================ */
-
-// Integrar los cargadores a la navegación existente
-Object.assign(cargadoresDeVista, {
-    camiones: renderCamiones,
-    ranking: renderRanking,
-    importar: renderImportaciones
-});
-
-/* ----------------- REQ 18: GESTIÓN DE CAMIONES ----------------- */
-let camionesMock = [
-    { patente: "AB 123 CD", modelo: "Mercedes-Benz Sprinter", capacidad: "3500", conductor: "Roberto Gómez", estado: "Disponible" },
-    { patente: "EF 456 GH", modelo: "Ford Transit", capacidad: "2500", conductor: "Laura Fernández", estado: "En uso" },
-    { patente: "IJ 789 KL", modelo: "Renault Master", capacidad: "3000", conductor: "Sin asignar", estado: "Mantenimiento" }
-];
-
-let camionEditandoIndex = null; // Variable para saber si estamos creando o editando
-
-const btnToggleCamionForm = document.getElementById('btnToggleCamionForm');
-const btnCancelarCamion = document.getElementById('btnCancelarCamion');
-const formNuevoCamion = document.getElementById('formNuevoCamion');
-const camionForm = document.getElementById('camionForm');
-const formTitulo = formNuevoCamion.querySelector('.form-card-title');
-const btnSubmitCamion = camionForm.querySelector('button[type="submit"]');
-
-// Abrir formulario para Nuevo Camión
-btnToggleCamionForm.addEventListener('click', () => {
-    camionEditandoIndex = null;
-    formTitulo.textContent = "Nuevo Camión";
-    btnSubmitCamion.textContent = "Agregar";
-    camionForm.reset();
-    formNuevoCamion.hidden = false;
-});
-
-// Cancelar formulario
-btnCancelarCamion.addEventListener('click', () => {
-    formNuevoCamion.hidden = true;
-    camionForm.reset();
-});
-
-// Función principal para dibujar la tabla
-function renderCamiones() {
-    const tableBody = document.getElementById("camionesTableBody");
-
-    // Actualizar contadores
-    document.getElementById("countCamionesDisponibles").textContent = camionesMock.filter(c => c.estado === "Disponible").length;
-    document.getElementById("countCamionesUso").textContent = camionesMock.filter(c => c.estado === "En uso").length;
-    document.getElementById("countCamionesMantenimiento").textContent = camionesMock.filter(c => c.estado === "Mantenimiento").length;
-
-    tableBody.innerHTML = camionesMock.map((c, index) => {
-        // Formatear la clase CSS sacando espacios (ej: "En uso" -> "En-uso")
-        const cssClass = c.estado.replace(" ", "-");
-
-        return `
-        <tr>
-            <td>${c.patente}</td>
-            <td>${c.modelo}</td>
-            <td>${c.capacidad} kg</td>
-            <td>${c.conductor}</td>
-            <td>
-                <select class="select-pill ${cssClass}" data-index="${index}">
-                    <option value="Disponible" ${c.estado === 'Disponible' ? 'selected' : ''}>Disponible</option>
-                    <option value="En uso" ${c.estado === 'En uso' ? 'selected' : ''}>En uso</option>
-                    <option value="Mantenimiento" ${c.estado === 'Mantenimiento' ? 'selected' : ''}>Mantenimiento</option>
-                </select>
-            </td>
-            <td>
-                <button class="action-icon-btn btn-edit" data-index="${index}" title="Editar">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                </button>
-                <button class="action-icon-btn delete btn-delete" data-index="${index}" title="Eliminar">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                </button>
-            </td>
-        </tr>`;
-    }).join("");
-
-    asignarEventosTablaCamiones();
-}
-
-// --- LÓGICA DEL MODAL DE ELIMINACIÓN (A prueba de fallos) ---
-let camionAEliminarIndex = null;
-
-// Escuchamos los clics en todo el documento para atrapar los del modal
-document.addEventListener('click', (e) => {
-    // Si tocan Cancelar
-    if (e.target.id === 'btnCancelDelete') {
-        const modal = document.getElementById('deleteConfirmModal');
-        if (modal) modal.hidden = true;
-        camionAEliminarIndex = null;
-    }
-    // Si tocan Eliminar (Confirmar)
-    if (e.target.id === 'btnConfirmDelete') {
-        if (camionAEliminarIndex !== null) {
-            camionesMock.splice(camionAEliminarIndex, 1);
-            renderCamiones();
-            const modal = document.getElementById('deleteConfirmModal');
-            if (modal) modal.hidden = true;
-            camionAEliminarIndex = null;
-        }
-    }
-});
-
-// --- ACTUALIZACIÓN DE EVENTOS EN LA TABLA ---
-function asignarEventosTablaCamiones() {
-    // Cambiar estado desde el select
-    document.querySelectorAll('.select-pill').forEach(select => {
-        select.addEventListener('change', (e) => {
-            const index = e.target.getAttribute('data-index');
-            camionesMock[index].estado = e.target.value;
-            renderCamiones();
-        });
-    });
-
-    // Abrir modal de confirmación al tocar el tachito
-    document.querySelectorAll('.btn-delete').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const index = e.currentTarget.getAttribute('data-index');
-            const patente = camionesMock[index].patente;
-
-            const modal = document.getElementById('deleteConfirmModal');
-            const modalText = document.getElementById('deleteModalText');
-
-            // Si falta el HTML, te avisa en vez de romperse
-            if (!modal || !modalText) {
-                alert("Falta agregar el HTML del modal en el index.html");
-                return;
-            }
-
-            camionAEliminarIndex = index;
-            modalText.innerHTML = `¿Estás seguro que querés eliminar el camión con patente <b>${patente}</b>?<br>Esta acción no se puede deshacer.`;
-            modal.hidden = false;
-        });
-    });
-
-    // Editar camión
-    document.querySelectorAll('.btn-edit').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const index = e.currentTarget.getAttribute('data-index');
-            const camion = camionesMock[index];
-
-            document.getElementById('camionPatente').value = camion.patente;
-            document.getElementById('camionModelo').value = camion.modelo;
-            document.getElementById('camionCapacidad').value = camion.capacidad;
-            document.getElementById('camionConductor').value = camion.conductor === "Sin asignar" ? "" : camion.conductor;
-
-            camionEditandoIndex = index;
-            formTitulo.textContent = "Editar Camión";
-            btnSubmitCamion.textContent = "Guardar Cambios";
-            formNuevoCamion.hidden = false;
-            formNuevoCamion.scrollIntoView({ behavior: "smooth", block: "center" });
-        });
-    });
-}
-
-/* ----------------- REQ 19: RANKING DE DONANTES ----------------- */
-const rankingData = {
-    "2026-04": [
-        { nombre: "María González", donaciones: 15, fecha: "2026-04-20", categorias: ["Alimentos", "Ropa"] },
-        { nombre: "Juan Pérez", donaciones: 12, fecha: "2026-04-18", categorias: ["Abrigo", "Alimentos"] },
-        { nombre: "Ana Martínez", donaciones: 10, fecha: "2026-04-15", categorias: ["Alimentos"] },
-        { nombre: "Carlos López", donaciones: 8, fecha: "2026-04-12", categorias: ["Ropa", "Colchones"] },
-        { nombre: "Sofía Ramírez", donaciones: 7, fecha: "2026-04-10", categorias: ["Alimentos", "Abrigo"] }
-    ],
-    "2026-03": [
-        { nombre: "Juan Pérez", donaciones: 18, fecha: "2026-03-28", categorias: ["Abrigo", "Alimentos"] },
-        { nombre: "Fundación Esperanza", donaciones: 14, fecha: "2026-03-25", categorias: ["Mobiliario"] },
-        { nombre: "María González", donaciones: 9, fecha: "2026-03-20", categorias: ["Alimentos"] }
-    ]
-};
-
-document.getElementById('rankingPeriodo').addEventListener('change', renderRanking);
-
-function renderRanking() {
-    const periodo = document.getElementById('rankingPeriodo').value;
-    const datosMes = rankingData[periodo] || [];
-    const container = document.getElementById('rankingListContainer');
-
-    if (datosMes.length > 0) {
-        document.getElementById('topDonorName').textContent = datosMes[0].nombre;
-        document.getElementById('topDonorCount').textContent = `${datosMes[0].donaciones} donaciones realizadas`;
-    }
-
-    container.innerHTML = datosMes.map((d, index) => {
-        const rank = index + 1;
-        const rankClass = rank <= 3 ? `rank-${rank}` : '';
-        const pills = d.categorias.map(c => `<span class="badge-category">${c}</span>`).join("");
-
-        return `
-        <article class="ranking-item ${rankClass}">
-            <div class="rank-circle">${rank}</div>
-            <div class="ranking-item-body">
-                <div class="ranking-item-name">${d.nombre}</div>
-                <div class="category-pills">${pills}</div>
-            </div>
-            <div class="ranking-item-stats">
-                <span class="count">${d.donaciones} donaciones</span>
-                <span class="date">Última: ${d.fecha}</span>
-            </div>
-        </article>`;
-    }).join("");
-}
-
-/* ----------------- REQ 20: IMPORTAR DONANTES CSV ----------------- */
-const importHistory = [
-    { file: "donantes_marzo_2026.csv", date: "15 de marzo de 2026, 14:30", count: "8,542", status: "Completado" },
-    { file: "donantes_febrero_2026.csv", date: "1 de febrero de 2026, 10:15", count: "12,103", status: "Completado" }
-];
-
-function renderImportaciones() {
-    const list = document.getElementById('importHistoryList');
-    list.innerHTML = importHistory.map(item => `
-        <div class="import-history-item">
-            <div>
-                <div class="import-history-file">${item.file}</div>
-                <div class="import-history-date">${item.date}</div>
-            </div>
-            <div class="import-history-stats">
-                <div class="import-history-count">${item.count} registros</div>
-                <div class="import-history-status">${item.status}</div>
-            </div>
-        </div>
-    `).join("");
-}
-
-// Simulación de carga asincrónica de >10.000 registros
-const csvDropzone = document.getElementById('csvDropzone');
-const csvFileInput = document.getElementById('csvFileInput');
-const uploadProgressContainer = document.getElementById('uploadProgressContainer');
-const uploadProgressBar = document.getElementById('uploadProgressBar');
-const uploadPctText = document.getElementById('uploadPctText');
-const uploadStatusText = document.getElementById('uploadStatusText');
-
-csvDropzone.addEventListener('click', () => csvFileInput.click());
-
-csvFileInput.addEventListener('change', (e) => {
-    if (e.target.files.length > 0) {
-        simularSubidaCSV(e.target.files[0].name);
-    }
-});
-
-function simularSubidaCSV(filename) {
-    csvDropzone.hidden = true;
-    uploadProgressContainer.hidden = false;
-    uploadStatusText.textContent = `Procesando lote asincrónico: ${filename}...`;
-
-    let progress = 0;
-    const interval = setInterval(() => {
-        progress += Math.floor(Math.random() * 15) + 5;
-        if (progress > 100) progress = 100;
-
-        uploadProgressBar.style.width = `${progress}%`;
-        uploadPctText.textContent = `${progress}%`;
-
-        if (progress === 100) {
-            clearInterval(interval);
-            setTimeout(() => {
-                importHistory.unshift({
-                    file: filename,
-                    date: "Justo ahora",
-                    count: "10,000+",
-                    status: "Completado"
-                });
-                renderImportaciones();
-                csvDropzone.hidden = false;
-                uploadProgressContainer.hidden = true;
-                csvFileInput.value = "";
-                alert("Importación de +10.000 registros completada con éxito.");
-            }, 500);
-        }
-    }, 400);
-}
