@@ -48,10 +48,14 @@
 
         <div class="recepcion-container">
             <h2 class="section-subtitle">Donaciones pendientes de confirmar</h2>
-            <div id="pendingDonationsList" class="status-list-container"></div>
+            <div id="pendingDonationsList" class="status-list-container">
+
+            </div>
 
             <h2 class="section-subtitle" style="margin-top: 32px;">Donaciones confirmadas</h2>
-            <div id="confirmedDonationsList" class="status-list-container"></div>
+            <div id="confirmedDonationsList" class="status-list-container">
+
+            </div>
         </div>
     </section>
 
@@ -108,7 +112,7 @@
                 <div class="field"><span>Tiempo estimado de llegada</span><p id="deliveryETA">2 horas 15 minutos</p></div>
                 <div class="field"><span>Estado actual</span><span class="status-tag status-en-proceso" id="deliveryCurrentStatus">En tránsito</span></div>
                 <div class="field">
-                    <span>Historial de ubicaciones</span>
+                    <span>Seguimiento de ruta</span>
                     <ul class="location-history" id="locationHistory"></ul>
                 </div>
             </div>
@@ -130,8 +134,8 @@
                             <option value="" selected disabled>Seleccionar subcategoría</option>
                             <option value="Arroz">Arroz</option>
                             <option value="Abrigos">Abrigos</option>
-                            <option value="Útiles escolares">Útiles escolares</option>
-                            <option value="Cepillos Dentales">Cepillos Dentales</option>
+                            <option value="Útiles escolares">Cuadernos escolares</option>
+                            <option value="Cepillos Dentales">Cepillos dentales</option>
                             <option value="Mesas">Mesas</option>
                             <option value="Zapatillas">Zapatillas</option>
                             <option value="Leche">Leche</option>
@@ -161,27 +165,25 @@
                     <div class="field">
                         <span>Prioridad</span>
                         <select id="needPriority" required>
-                            <option value="" selected disabled>Seleccionar prioridad</option>
-                            <option value="Alta">Alta</option>
-                            <option value="Media">Media</option>
-                            <option value="Baja">Baja</option>
+                            <option value="" selected disabled>Seleccionar tipo de necesidad</option>
+                            <option value="recurrente">Recurrente</option>
+                            <option value="extraordinaria">Extraordinaria</option>
                         </select>
                     </div>
-                    <div class="field">
-                        <span>Fecha límite</span>
-                        <input type="date" id="needDeadline">
-                    </div>
-                    <div class="field">
-                        <span>Observaciones adicionales (opcional)</span>
-                        <textarea id="needNotes" rows="2" placeholder="Información adicional relevante"></textarea>
-                    </div>
+
                     <button type="submit" class="btn btn-submit">+ Agregar Necesidad</button>
                 </form>
             </div>
 
             <div class="card">
                 <h2 class="card-title">Necesidades Registradas</h2>
-                <div class="needs-list" id="registeredNeedsList"></div>
+                <div class="needs-list" id="registeredNeedsList">
+                </div>
+                <div class="contendedor-button">
+                    <button type="button" class="btn btn-submit" id="sendNeedsBtn">
+                        Enviar Necesidades
+                    </button>
+                </div>
             </div>
         </div>
     </section>
@@ -189,6 +191,7 @@
     <section id="view-estado-necesidades" class="view">
         <div class="page-head">
             <h1>Estado de Necesidades</h1>
+            <p class="page-sub">En está sección podrá ver el estado de sus necesidades</p>
         </div>
         <div class="estado-necesidades-container">
             <div class="status-list-container" id="statusNeedsList"></div>
