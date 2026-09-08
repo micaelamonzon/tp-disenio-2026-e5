@@ -695,3 +695,63 @@ svg{ width: 18px; height: 18px; flex-shrink:0; }
 .admin-view.active {
     display: block;
 }
+
+/* --- Selects con estilo de Pill para la tabla --- */
+.select-pill {
+    appearance: none;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    padding: 4px 24px 4px 10px;
+    font-size: 12.5px;
+    font-weight: 700;
+    cursor: pointer;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    outline: none;
+}
+.select-pill.Disponible { background-color: var(--green-bg); color: var(--green); border-color: #bbf7d0; }
+.select-pill.En-uso { background-color: var(--blue-soft-bg); color: var(--blue-dark); border-color: #bfdbfe; }
+.select-pill.Mantenimiento { background-color: var(--orange-bg); color: var(--orange); border-color: #fed7aa; }
+
+/* --- Modal de Confirmación Personalizado --- */
+.modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(15, 23, 42, 0.4);
+    z-index: 9999;
+    display: flex; align-items: center; justify-content: center;
+}
+.modal-overlay[hidden] { display: none; }
+
+.modal-card {
+    background: var(--card);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    width: 90%; max-width: 400px;
+    text-align: center;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    animation: modalFadeIn 0.2s ease-out;
+}
+
+@keyframes modalFadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.modal-icon {
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    background: var(--red-bg);
+    color: var(--red);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 16px;
+}
+.modal-icon svg { width: 24px; height: 24px; }
+
+.modal-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; color: var(--text); }
+.modal-desc { font-size: 14px; color: var(--text-soft); margin-bottom: 24px; line-height: 1.5; }
+
+.modal-actions { display: flex; gap: 12px; }
+.modal-actions .btn { flex: 1; justify-content: center; }
+.btn-danger { background: var(--red); color: white; border: none; }
+.btn-danger:hover { background: #b91c1c; }
