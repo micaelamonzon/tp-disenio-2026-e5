@@ -10,6 +10,7 @@ import java.util.List;
 
 
 public record DonacionSinSegmentarDTO(
+        String descripcionGeneral,
         List<BienDTO> bienes,
         LocalDateTime fechaDeIngreso
 

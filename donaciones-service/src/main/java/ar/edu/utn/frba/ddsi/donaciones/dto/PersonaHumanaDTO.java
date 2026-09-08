@@ -11,6 +11,7 @@ public record PersonaHumanaDTO(
         Long id,
         String nombre,
         String apellido,
+        Integer edad,
         Integer DNI,
         String genero,
         String direccion,

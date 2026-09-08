@@ -4,5 +4,6 @@ public enum Unidad {
     KILOGRAMOS,
     LITROS,
     CENTIMETROS,
-    METROS
+    METROS,
+    UNIDADES
 }

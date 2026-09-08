@@ -25,6 +25,9 @@ public class PersonaHumana {
     @Column(name = "apellido")
     private String apellido;
 
+    @Column(name = "edad")
+    private Integer edad;
+
     @Column(name = "fecha_de_nacimiento")
     private LocalDateTime fechaDeNaciemiento;
 

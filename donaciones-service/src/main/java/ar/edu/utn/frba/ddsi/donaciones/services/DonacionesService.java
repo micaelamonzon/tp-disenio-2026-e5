@@ -5,8 +5,6 @@ import ar.edu.utn.frba.ddsi.donaciones.dto.DonacionSinSegmentarDTO;
 import ar.edu.utn.frba.ddsi.donaciones.dto.PersonaDonanteDTO;
 import ar.edu.utn.frba.ddsi.donaciones.dto.PersonaHumanaDTO;
 import ar.edu.utn.frba.ddsi.donaciones.dto.PersonaJuridicaDTO;
-import ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante.TipoDonante;
-import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.DonacionSegmentada;
 
 import java.util.List;
 
