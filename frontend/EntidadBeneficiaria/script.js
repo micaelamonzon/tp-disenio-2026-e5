@@ -1,15 +1,11 @@
-/* ============================================================
-   DATOS (mock) — Estado inicial de necesidades
-   ============================================================ */
-
 const registeredNeeds = [
     {
         id: 1,
         category: "Arroz",
         description: "Arroz fino",
         quantity: 50,
-        unit: "kg",
-        priority: "Alta",
+        unit: "KG",
+        priority: "Recurrente",
         deadline: "2026-05-14"
     }
 ];
@@ -95,10 +91,23 @@ function renderRegisteredNeeds() {
         <span>Cantidad: <b>${need.quantity} ${need.unit}</b></span>
         <span>Prioridad: <span class="badge-priority priority-${need.priority.toLowerCase()}">${need.priority}</span></span>
       </div>
-      ${need.deadline ? `<div class="need-item-date">Fecha límite: <b>${formatDate(need.deadline)}</b></div>` : ""}
     </article>
   `).join("");
 }
+
+const sendNeedsBtn = document.getElementById("sendNeedsBtn");
+
+sendNeedsBtn.addEventListener("click", () => {
+    if (registeredNeeds.length === 0) {
+        alert("No hay necesidades registradas para enviar.");
+        return;
+    }
+
+    alert(`Se enviaron ${registeredNeeds.length} necesidad(es) correctamente.`);
+
+    registeredNeeds.splice(0, registeredNeeds.length);
+    renderRegisteredNeeds();
+});
 
 function deleteNeed(id) {
     const index = registeredNeeds.findIndex(n => n.id === id);
@@ -117,9 +126,7 @@ needForm.addEventListener("submit", (e) => {
         description: document.getElementById("needDescription").value,
         quantity: document.getElementById("needQuantity").value,
         unit: document.getElementById("needUnit").value,
-        priority: document.getElementById("needPriority").value,
-        deadline: document.getElementById("needDeadline").value,
-        notes: document.getElementById("needNotes").value
+        priority: document.getElementById("needPriority").value
     };
 
     registeredNeeds.unshift(newNeed);
@@ -148,27 +155,30 @@ function getStatusIcon(status) {
 const assignedDonations = [
     {
         id: 101,
-        title: "Alimentos no perecederos",
-        description: "Arroz, fideos, lentejas",
-        quantity: "50",
+        title: "Leche fresca",
+        description: "Se necesitan 100 paquetes de leche fresca.",
+        quantity: "100",
         timeAgo: "Hace 2 días",
-        status: "Pendiente"
+        status: "Pendiente",
+        tipo:"Recurrente"
     },
     {
         id: 102,
-        title: "Ropa de abrigo",
-        description: "Camperas y frazadas",
+        title: "Camperas",
+        description: "Se necesitan 30 camperas de invierno.",
         quantity: "30",
         timeAgo: "Hace 4 días",
-        status: "Pendiente"
+        status: "Pendiente",
+        tipo:"Extraordinaria"
     },
     {
         id: 103,
-        title: "Calzado",
-        description: "Zapatillas para niños",
+        title: "Zapatillas",
+        description: "Se necesitan 20 zapatillas para niños.",
         quantity: "20",
         timeAgo: "Hace 1 semana",
-        status: "Entregado"
+        status: "Entregado",
+        tipo:"Recurrente"
     }
 ];
 
@@ -189,6 +199,7 @@ function renderStatusNeeds() {
           <p class="status-card-sub">${item.description}</p>
           <div class="status-card-details">
             <span>Cantidad: ${item.quantity}</span>
+            <span>Tipo: ${item.tipo}</span>
             <span>${item.timeAgo}</span>
           </div>
         </div>
@@ -213,42 +224,39 @@ renderStatusNeeds();
 const donations = [
     {
         id: "0415",
-        donationId: "#DON-2026-0415",
-        title: "Alimentos no perecederos",
-        donor: "Fundación Solidaria Buenos Aires",
-        type: "Alimentos no perecederos",
+        title: "Fideos tirabuzón",
+        donor: "Molinos San José S.A",
+        type: "Fideos",
         assignDate: "15 de Abril, 2026",
-        description: "500 kg de arroz, 300 kg de fideos, 200 litros de aceite, 150 kg de azúcar y 100 kg de harina. Todos los productos están envasados y tienen fecha de vencimiento superior a 6 meses.",
-        quantity: "1250 kg / 200 L",
+        description: "50 paquetes de fideos tirabuzón, que están bien envasados y tienen fecha de vencimiento superior a 6 meses.",
+        quantity: "50 Paquetes",
         timeAgo: "Hace 2 horas",
         status: "Pendiente",
         photos: []
     },
     {
         id: "0412",
-        donationId: "#DON-2026-0412",
-        title: "Ropa y calzado",
-        donor: "Corporación Ayuda Mutua",
-        type: "Ropa y calzado",
+        title: "Frazadas de invierno",
+        donor: "Corporación textil S.A",
+        type: "Frazadas",
         assignDate: "8 de Abril, 2026",
-        description: "40 camperas de abrigo y 25 pares de zapatillas para niños, todas en buen estado.",
-        quantity: "65 unidades",
+        description: "60 frazadas, todas en buen estado.",
+        quantity: "60 unidades",
         timeAgo: "Hace 1 día",
         status: "Pendiente",
         photos: []
     },
     {
         id: "0410",
-        donationId: "#DON-2026-0410",
-        title: "Útiles escolares",
+        title: "Cuadernos escolares",
         donor: "Librería Central S.A.",
-        type: "Útiles escolares",
+        type: "Cuadernos",
         assignDate: "2 de Abril, 2026",
-        description: "80 cuadernos, 200 lápices y 50 cartucheras completas para inicio de clases.",
-        quantity: "330 unidades",
+        description: "80 cuadernos cuadriculados.",
+        quantity: "80 unidades",
         timeAgo: "Hace 5 días",
         status: "Entregado",
-        photos: ["utiles-escolares.jpg"]
+        photos: ["cuadernos.jpg"]
     }
 ];
 
@@ -333,7 +341,7 @@ function donationCard(d) {
         <div class="status-card-left">
           ${icon}
           <div class="status-card-info">
-            <h3>${d.title} <span class="page-sub">· ${d.donationId}</span></h3>
+            <h3>${d.title}</h3>
             <p class="status-card-sub">${d.donor}</p>
             <div class="status-card-details">
               <span>Cantidad: ${d.quantity}</span>
@@ -423,16 +431,16 @@ const notifications = [
     {
         id: 1,
         type: "assigned",
-        title: "Nueva donación asignada",
-        description: "Se le ha asignado una donación de alimentos no perecederos de Fundación Solidaria Buenos Aires",
+        title: "Nueva donación asignada.",
+        description: "Se le ha asignado una donación de mesas de la Muebleria Arcos S.A",
         timeAgo: "Hace 2 horas",
         read: false
     },
     {
         id: 2,
         type: "transit",
-        title: "Donación en tránsito",
-        description: "La donación #DON-2026-0415 está en camino. Tiempo estimado de llegada: 3 horas",
+        title: "Donación en tránsito.",
+        description: "La donación de 10 cajas de azúcar está en camino.",
         timeAgo: "Hace 5 horas",
         read: false
     },
@@ -440,7 +448,7 @@ const notifications = [
         id: 3,
         type: "pending",
         title: "Confirmación de entrega pendiente",
-        description: "Recuerde confirmar la recepción de la donación #DON-2026-0412 antes de las 18:00 hs",
+        description: "Recuerde confirmar la recepción de la donación #DON-2026-04.",
         timeAgo: "Hace 1 día",
         read: true
     },
@@ -448,7 +456,7 @@ const notifications = [
         id: 4,
         type: "completed",
         title: "Entrega completada",
-        description: "Se ha confirmado la entrega exitosa de la donación #DON-2026-0410",
+        description: "Se ha confirmado la entrega exitosa de la donación #DON-2026-10.",
         timeAgo: "Hace 2 días",
         read: true
     },
@@ -456,7 +464,7 @@ const notifications = [
         id: 5,
         type: "assigned",
         title: "Nueva donación asignada",
-        description: "Se le ha asignado una donación de ropa y calzado de Corporación Ayuda Mutua",
+        description: "Se le ha asignado una donación calzado de parte de la Corporación zapatos S.A.",
         timeAgo: "Hace 3 días",
         read: true
     },
@@ -464,7 +472,7 @@ const notifications = [
         id: 6,
         type: "transit",
         title: "Donación en tránsito",
-        description: "La donación #DON-2026-0408 está en camino. Conductor: Juan Pérez - Patente ABC123",
+        description: "La donación #DON-2026-08 está en camino. Conductor: Juan Pérez - Patente ABC123.",
         timeAgo: "Hace 4 días",
         read: true
     }
@@ -480,7 +488,7 @@ function getNotificationIcon(type) {
         case "transit":
             return `<svg class="notification-icon type-transit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>`;
         case "pending":
-            return `<svg class="notification-icon type-pending" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
+            return `<svg class="notification-icon type-pending" viewBox="0 0 24 24" fill="none" stroke="red" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
         case "completed":
             return `<svg class="notification-icon type-completed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`;
         default:

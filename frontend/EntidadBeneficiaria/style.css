@@ -32,7 +32,9 @@ html, body {
     color: var(--text);
     font-family: var(--font);
     -webkit-font-smoothing: antialiased;
+
 }
+
 
 h1, h2, h3, p { margin: 0; }
 
@@ -273,7 +275,11 @@ svg { width: 18px; height: 18px; flex-shrink: 0; }
     font-weight: 600;
     color: var(--text);
 }
-
+.contendedor-button{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 .btn {
     display: inline-flex;
     align-items: center;
@@ -286,16 +292,18 @@ svg { width: 18px; height: 18px; flex-shrink: 0; }
     border: none;
     cursor: pointer;
     transition: background 0.2s;
+    margin-top: 16px;
 }
 
 .btn-submit {
-    width: 100%;
-    text-align: center;
+    width: 190px;
     background: var(--green);
     color: white;
-    margin-top: 8px;
+
 }
-.btn-submit:hover { background: var(--green-hover); }
+.btn-submit:hover {
+    background: var(--green-hover);
+}
 
 /* ===================== NECESIDADES REGISTRADAS ===================== */
 .needs-list {
@@ -358,9 +366,17 @@ svg { width: 18px; height: 18px; flex-shrink: 0; }
     font-size: 11px;
     font-weight: 600;
 }
-.priority-alta  { background: var(--red-bg);   color: var(--red-text); }
-.priority-media { background: var(--amber-bg); color: var(--amber-text); }
-.priority-baja  { background: var(--green-bg); color: var(--green-text); }
+.priority-extraordinaria{
+    background: var(--red-bg);
+    color: var(--red-text);
+    text-transform: uppercase;
+
+}
+.priority-recurrente{
+    background: var(--green-bg);
+    color: var(--green-text);
+    text-transform: uppercase;
+}
 
 /* ===================== ESTADO DE NECESIDADES / RECEPCIÓN DE DONACIÓN ===================== */
 .recepcion-container,
@@ -373,6 +389,7 @@ svg { width: 18px; height: 18px; flex-shrink: 0; }
     display: flex;
     flex-direction: column;
     gap: 16px;
+    width: 700px;
 }
 
 .status-card {
@@ -809,6 +826,7 @@ svg { width: 18px; height: 18px; flex-shrink: 0; }
     background-color: #1a2332;
     color: #cbd2dc;
     width: 100%;
+    margin-top: 90px;
 }
 
 .footer-top-bar {
