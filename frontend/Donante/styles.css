@@ -31,7 +31,6 @@
 html, body{
   margin:0;
   padding:0;
-  background: var(--bg);
   color: var(--text);
   font-family: var(--font);
   -webkit-font-smoothing: antialiased;
@@ -793,7 +792,12 @@ svg{ width: 18px; height: 18px; flex-shrink:0; }
   border-radius: 999px;
   white-space:nowrap;
 }
-
+.new-pill[hidden] {
+  display: none;
+}
+.tab-dot[hidden] {
+  display: none;
+}
 .notifications-list{
   display:flex;
   flex-direction:column;
@@ -947,4 +951,8 @@ svg{ width: 18px; height: 18px; flex-shrink:0; }
   margin: 0;
   font-size: 0.85rem;
   color: #8892a0;
+}
+
+.notif-unread-dot {
+  cursor: pointer;
 }
