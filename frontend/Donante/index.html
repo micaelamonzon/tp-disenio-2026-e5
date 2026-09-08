@@ -14,13 +14,6 @@
     <span class="logo-icon">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 14h2a2 2 0 0 0 0-4h-3c-.6 0-1.1.2-1.4.6L3 16"/><path d="m14.45 13.39 5.05-4.694C20.196 8 21 6.85 21 5.75a2.75 2.75 0 0 0-4.797-1.837.276.276 0 0 1-.406 0A2.75 2.75 0 0 0 11 5.75c0 1.2.802 2.248 1.5 2.946L16 11.95"/><path d="m2 15 6 6"/><path d="m7 20 1.6-1.4c.3-.4.8-.6 1.4-.6h4c1.1 0 2.1-.4 2.8-1.2l4.6-4.4a1 1 0 0 0-2.75-2.91"/></svg>
     </span>
-    
-    <nav class="main-nav">
-      <a href="#" class="main-nav-link active">Home</a>
-      <a href="#" class="main-nav-link">Donaciones</a>
-      <a href="#" class="main-nav-link">Sobre nosotros</a>
-      <a href="#" class="main-nav-link">Contacto</a>
-    </nav>
   </div>
   <div class="topbar-right">
     <button class="user-menu-trigger" id="userMenuTrigger" aria-haspopup="true" aria-expanded="false">
@@ -42,23 +35,18 @@
 <!-- ===================== TABS ===================== -->
 <nav class="tabbar" aria-label="Secciones de la persona donante">
   <button class="tab active" data-tab="donaciones">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41 11 3.83A2 2 0 0 0 9.59 3.24H4a1 1 0 0 0-1 1v5.59a2 2 0 0 0 .59 1.41l9.58 9.59a2 2 0 0 0 2.83 0l4.59-4.59a2 2 0 0 0 0-2.83Z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>
     Mis Donaciones
   </button>
   <button class="tab" data-tab="entidades">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 22V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v18"/><path d="M2 22h20"/><path d="M9 7h1M14 7h1M9 11h1M14 11h1M9 15h1M14 15h1"/></svg>
     Entidades Beneficiarias
   </button>
   <button class="tab" data-tab="incentivos">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-6"/><rect x="2" y="7" width="20" height="5" rx="1"/><path d="M12 22V7"/><path d="M12 7c-1.5-3-5-4-6.5-2.5S6 8 12 7Z"/><path d="M12 7c1.5-3 5-4 6.5-2.5S18 8 12 7Z"/></svg>
     Incentivos
   </button>
   <button class="tab" data-tab="seguimiento">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
     Seguimiento
   </button>
   <button class="tab" data-tab="notificaciones">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
     Notificaciones
     <span class="tab-dot" id="tabNotifDot" hidden></span>
   </button>
@@ -117,7 +105,7 @@
     </div>
 
     <div class="entities-toolbar">
-      <input type="search" id="entitySearch" placeholder="Buscar entidad por nombre o categoría..." class="search-input">
+      <input type="search" id="entitySearch" placeholder="Buscar entidad beneficiaria" class="search-input">
     </div>
 
     <div class="entities-grid" id="entitiesGrid"></div>
@@ -180,11 +168,9 @@
 
 
   <section id="view-notificaciones" class="view">
-    <div class="page-head page-head-row">
-      <div>
-        <h1>Notificaciones</h1>
-        <p class="page-sub">Mantente al día con tus actividades de donación</p>
-      </div>
+    <div class="page-head">
+      <h1>Notificaciones</h1>
+      <p class="page-sub">Mantente al día con tus actividades de donación</p>
       <span class="new-pill" id="newPill">3 nuevas</span>
     </div>
 

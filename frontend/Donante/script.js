@@ -271,9 +271,6 @@ function entityCardHTML(en) {
       </div>
       <div class="entity-actions">
         <button class="btn btn-primary">Ver perfil</button>
-        <button class="btn ${en.following ? "is-following" : "btn-follow"}" data-follow="${en.name}">
-          ${en.following ? ICONS.heartFilled : ICONS.heart} ${en.following ? "Siguiendo" : "Seguir"}
-        </button>
       </div>
     </article>
   `;
@@ -285,14 +282,6 @@ function renderEntities() {
     en.name.toLowerCase().includes(query) || en.category.toLowerCase().includes(query)
   );
   entitiesGrid.innerHTML = filtered.map(entityCardHTML).join("");
-
-  entitiesGrid.querySelectorAll("[data-follow]").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const en = entities.find(e => e.name === btn.dataset.follow);
-      en.following = !en.following;
-      renderEntities();
-    });
-  });
 }
 
 entitySearch.addEventListener("input", renderEntities);
