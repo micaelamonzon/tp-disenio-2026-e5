@@ -7,6 +7,7 @@ import org.springframework.amqp.support.converter.JacksonJsonMessageConverter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.client.RestTemplate;
 
 @Configuration
 public class RabbitMQConfig {
@@ -35,5 +36,12 @@ public class RabbitMQConfig {
         RabbitTemplate template = new RabbitTemplate(connectionFactory);
         template.setMessageConverter(converter);
         return template;
+    }
+
+    // Cliente HTTP simple para que el listener pueda resolver el contacto
+    // del donante contra donaciones-service (GET /servicioDeDonaciones/humano/{id})
+    @Bean
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
     }
 }
