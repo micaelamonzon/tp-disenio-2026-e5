@@ -67,26 +67,20 @@ public class IncentivosController {
         }
     }
 
-    @GetMapping("donante/verificarMision/{id}")
-    //    Insignia insigniaObtenida = Insignia.COLABORADOR; // Antes del merge
-    public ResponseEntity<String> verificarMision(@PathVariable ("id") Long id,
-                                                @RequestParam TipoDeDonante tipoDonante){
-        Insignia insigniaObtenida = Insignia.DONACIONEXITOSA; // ejemplo
+    @GetMapping("/verificarMision/{idPersona}")
+    public ResponseEntity<String> verificarMision(
+            @PathVariable("idPersona") Long id,
+            @RequestParam(name = "tipoDonante", defaultValue = "HUMANO")
+            String tipoDonante) {
 
-        Donante donante = incentivosRepository
-                .findByIdEnDonaciones(id, tipoDonante);
+        Insignia insigniaObtenida = Insignia.DONACIONEXITOSA;
 
-        if(donante == null){
-            return ResponseEntity.notFound().build(); }
-
-        String nombre = donante.getNombre() != null
-                ? donante.getNombre() + " " + donante.getApellido()
-                : donante.getRazonSocial();
-
-        String resultado = insigniaPublicadorService.publicarYDifundirInsignia(nombre, insigniaObtenida);
+        String resultado = incentivosService.publicarYDifundirInsignia(
+                id, insigniaObtenida, tipoDonante);
 
         return ResponseEntity.ok(resultado);
     }
+
     @GetMapping("/admin/metricas-sistema")
     public ResponseEntity<MetricasSistemaDTO> obtenerMetricasSistema() {
         return ResponseEntity.ok(incentivosService.obtenerMetricasDelSistema());
