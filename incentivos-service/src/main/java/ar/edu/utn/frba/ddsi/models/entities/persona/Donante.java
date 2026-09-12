@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.time.YearMonth;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -54,6 +55,9 @@ public class Donante extends Persistente {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "mision_en_curso_id", referencedColumnName = "id")
     private MisionParticular misionEnCurso;
+
+    @OneToMany(mappedBy = "donante")
+    private List<RankingPosicion> posicionesEnRankings = new ArrayList<>();
 
     public Donante(Long idEnDonaciones,String nombre, String apellido, String razonSocial, LocalDateTime fechaDeRegistro, List<DonacionSegmentada> donaciones ,TipoDeDonante tipo) {
         this.idEnDonaciones = idEnDonaciones;
