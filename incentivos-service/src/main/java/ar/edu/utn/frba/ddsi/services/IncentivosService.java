@@ -15,7 +15,7 @@ public interface IncentivosService {
     public void agregarMisionADonante(Long id, TipoDeDonante tipoDeDonante,MisionDTO misionDTO);
     public MisionParticularDTO buscarMisionActualPorId(Long id, TipoDeDonante tipoDeDonante);
     public void pedirDonantesAServiceDonaciones();
-    public String publicarYDifundirInsignia(Long idPersona, Insignia insignia);
+    public String publicarYDifundirInsignia(Long id, Insignia insignia, String tipoDeDonante);
     public List<MisionParticularDTO> obtenerMisionesCompletadas(Long id, TipoDeDonante tipoDeDonante);
 
     RankingMensual obtenerUltimoRanking();

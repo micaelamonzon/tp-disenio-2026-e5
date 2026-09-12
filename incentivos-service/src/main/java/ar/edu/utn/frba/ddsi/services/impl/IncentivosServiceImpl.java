@@ -259,34 +259,55 @@ public class IncentivosServiceImpl implements IncentivosService {
     //TODO: Hacer que tome el query param de tipoDeDonante para que tambien pubique y difunda  insignias para los donantes juridicos
 
     @Override
-    public String publicarYDifundirInsignia(Long id, Insignia insignia) {
-        Donante donante = incentivosRepository.findById(id).orElseThrow(); // usar incentivosRepository.buscarDonantePorIdEnDonaciones(id,tipoDeDonante);
+    public String publicarYDifundirInsignia(Long id, Insignia insignia,
+                                            String tipoDeDonante) {
+
+        TipoDeDonante tipo = TipoDeDonante.valueOf(tipoDeDonante);
+        Donante donante = incentivosRepository.findByIdEnDonaciones(id, tipo);
 
         if (donante == null) {
-            System.out.println("Donante " + id + " no encontrado localmente. Sincronizando...");
+            System.out.println("Donante " + id + " no encontrado. Sincronizando...");
 
             try {
+                String path = tipoDeDonante.equals("HUMANO")
+                        ? "/humano/obtenerDonaciones/{id}"
+                        : "/juridico/obtenerDonaciones/{id}";
+
                 URI uri = UriComponentsBuilder
-                        .fromUriString("http://localhost:8080/servicioDeDonaciones")
-                        .path("/humano/{id}")
+                        .fromUriString(propiedades.getUrl())
+                        .path(path)
                         .buildAndExpand(id)
                         .toUri();
 
-                Donante donanteImportado = restTemplate.getForObject(uri, Donante.class);
+                ResponseEntity<PersonaDonanteDTO> response =
+                        restTemplate.getForEntity(uri, PersonaDonanteDTO.class);
+                PersonaDonanteDTO dto = response.getBody();
 
-                if (donanteImportado != null) {
-                    incentivosRepository.save(donanteImportado);
-                    donante = donanteImportado;
-                    System.out.println("Sincronización exitosa: " + donante.getNombre());
+                if (dto != null) {
+                    Donante nuevo = new Donante();
+                    nuevo.setIdEnDonaciones(id);
+                    nuevo.setTipoDeDonante(tipo);
+                    nuevo.setNombre(dto.nombre());
+                    nuevo.setApellido(dto.apellido());
+                    nuevo.setRazonSocial(dto.razonSocial());
+
+                    incentivosRepository.save(nuevo);
+                    donante = nuevo;
+
                 } else {
-                    throw new ResourceNotFoundException("Donante no existe en el sistema integral: " + id);
+                    throw new RuntimeException("Donante no existe: " + id);
                 }
+
             } catch (Exception e) {
-                e.printStackTrace();
-                throw new ResourceNotFoundException("No se pudo recuperar al donante del servicio externo: " + id);
+                throw new RuntimeException("No se pudo recuperar el donante: " + id, e);
             }
         }
-        String nombre = donante.getNombre();
+
+        String nombre = donante.getNombre() != null
+                ? donante.getNombre() + " " +
+                  (donante.getApellido() != null ? donante.getApellido() : "")
+                : donante.getRazonSocial();
+
         return publicadorService.publicarYDifundirInsignia(nombre, insignia);
     }
 
