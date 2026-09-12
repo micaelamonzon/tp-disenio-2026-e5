@@ -36,10 +36,6 @@ public class DonacionSegmentada  {
     @JoinColumn(name="donanteJuridico_id", referencedColumnName = "id")
     private PersonaJuridica donanteJuridico;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "tipo_donante")
-    private TipoDonante tipoDonante;
-
     @OneToMany
     @JoinColumn(name = "donacion_segmentada_id", referencedColumnName = "id")
     private ArrayList<Bien> bienesDelMismoTipo = new ArrayList<>();
