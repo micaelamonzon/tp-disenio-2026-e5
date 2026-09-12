@@ -5,6 +5,7 @@ import ar.edu.utn.frba.ddsi.donaciones.models.entities.mediosDeNotificacion.Medi
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.DonacionSinSegmentar;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Persistent;
 
 import java.time.LocalDateTime;
@@ -12,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
+@NoArgsConstructor
 @Entity
 @Table(name = "persona_humana")
 public class PersonaHumana {
@@ -48,8 +50,7 @@ public class PersonaHumana {
     @JoinColumn(name = "medio_predeterminado_id")
     private MedioDeNotificacion medioDeNotificacionPredeterminado;
 
-    @OneToMany
-    @JoinColumn(name = "persona_humana_id", referencedColumnName = "id")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "donanteHumano")
     private List<DonacionSinSegmentar> donaciones = new ArrayList<>(); //al acceder a esta donacion sabremos que donaciones segmentadas salieron
 
 

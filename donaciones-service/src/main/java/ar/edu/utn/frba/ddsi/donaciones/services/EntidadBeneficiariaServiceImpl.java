@@ -58,7 +58,7 @@ public class EntidadBeneficiariaServiceImpl implements EntidadBeneficiariaServic
 
     @Override
     public EntidadBeneficiariaDTO obtenerPorId(Long id) {
-        EntidadBeneficiaria entidad = this.entidadBeneficiariaRepository.findById(id);
+        EntidadBeneficiaria entidad = this.entidadBeneficiariaRepository.findById(id).orElseThrow();
 
             List<RepresentanteDTO> representantesDTO = entidad.getRepresentantes()
                     .stream()
@@ -106,7 +106,7 @@ public class EntidadBeneficiariaServiceImpl implements EntidadBeneficiariaServic
     @Override
     public void eliminar(Long id) {
         EntidadBeneficiaria entidad =
-                this.entidadBeneficiariaRepository.findById(id);
+                this.entidadBeneficiariaRepository.findById(id).orElse(null);
 
         if (entidad == null) {
             throw new RuntimeException("Entidad beneficiaria no encontrada");

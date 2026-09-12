@@ -1,6 +1,9 @@
 package ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador;
 
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante.PersonaHumana;
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante.PersonaJuridica;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante.TipoDonante;
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.Necesidad.EntidadBeneficiaria;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.Necesidad.Necesidad;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.Persistente;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.Bien;
@@ -25,8 +28,13 @@ public class DonacionSegmentada  {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "id_del_donante")
-    private Long idDelDonante;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="donanteHumano_id", referencedColumnName = "id")
+   private PersonaHumana donanteHumano;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="donanteJuridico_id", referencedColumnName = "id")
+    private PersonaJuridica donanteJuridico;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "tipo_donante")
@@ -53,8 +61,9 @@ public class DonacionSegmentada  {
     @Column(name = "donacion_entregada")
     private Boolean donacionEntregada;
 
-    @Column(name = "entidad_beneficiaria_id")
-    private Long entidadBeneficiariaId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="entidadBeneficiaria_id", referencedColumnName = "id")
+    private EntidadBeneficiaria entidadBeneficiaria;
 
     @Column(name = "fecha_de_entrega")
     private LocalDate fechaEntrega;

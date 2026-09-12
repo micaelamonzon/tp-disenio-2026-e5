@@ -6,10 +6,12 @@ import ar.edu.utn.frba.ddsi.donaciones.models.entities.mediosDeNotificacion.Medi
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.DonacionSinSegmentar;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
 @Data
+@NoArgsConstructor
 @Entity
 @Table(name = "persona_juridica")
 public class PersonaJuridica {
@@ -42,8 +44,7 @@ public class PersonaJuridica {
     @JoinColumn(name = "medio_predeterminado_id")
     private MedioDeNotificacion medioDeNotificacionPredeterminado;
 
-    @OneToMany
-    @JoinColumn(name = "persona_juridica_id", referencedColumnName = "id")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "donanteJuridico")
     private List<DonacionSinSegmentar> donaciones = new ArrayList<>();
 
     public PersonaJuridica(String cuit,String razonSocial,Tipo tipo, String rubro) {

@@ -4,6 +4,7 @@ import ar.edu.utn.frba.ddsi.donaciones.models.entities.Necesidad.Necesidad;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.donacion.*;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.mediosDeNotificacion.MedioDeNotificacion;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.DonacionSegmentada;
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.EstadoDonacion;
 import ar.edu.utn.frba.ddsi.donaciones.repositories.DonacionesRepository;
 import ar.edu.utn.frba.ddsi.donaciones.repositories.MatchRepository;
 import ar.edu.utn.frba.ddsi.donaciones.repositories.NecesidadesRepository;
@@ -38,7 +39,7 @@ public class MatchmakingService {
     }
 
     public void ejecutarProcesoMatchmaking() {
-        List<DonacionSegmentada> donacionesPendientes = donacionesRepository.findByEstado("EN_DEPOSITO");
+        List<DonacionSegmentada> donacionesPendientes = donacionesRepository.findByEstado(EstadoDonacion.EN_DEPOSITO);
         List<Necesidad> necesidadesActivas = necesidadesRepository.findByEstaSatisfechaFalse();
 
         if (donacionesPendientes.isEmpty() || necesidadesActivas.isEmpty() || estrategiasActivas.isEmpty()) {

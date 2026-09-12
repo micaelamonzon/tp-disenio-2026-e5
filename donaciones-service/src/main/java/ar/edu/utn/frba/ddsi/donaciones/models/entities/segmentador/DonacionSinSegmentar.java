@@ -8,6 +8,7 @@ import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.Bien;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.springframework.cglib.core.Local;
 
 import java.time.LocalDateTime;
@@ -16,6 +17,7 @@ import java.util.List;
 
 @Data
 @Getter
+@NoArgsConstructor
 @Entity
 @Table(name = "donacion_sin_segmentar")
 public class DonacionSinSegmentar extends Persistente {
@@ -33,16 +35,20 @@ public class DonacionSinSegmentar extends Persistente {
   @Column(name = "fecha_de_ingreso")
   private LocalDateTime fechaDeIngreso;
 
-  @Column(name = "donante_id")
-  private Long donante_id;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name="donanteHumano_id", referencedColumnName = "id")
+  private PersonaHumana donanteHumano;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name="donanteJuridico_id", referencedColumnName = "id")
+  private PersonaJuridica donanteJuridico;
 
 
-  public DonacionSinSegmentar(List<Bien> bienes, List<DonacionSegmentada> donacionesSegmentadas, String descripcionGeneral, LocalDateTime fechaDeIngreso, Long donante_id) {
+  public DonacionSinSegmentar(List<Bien> bienes, List<DonacionSegmentada> donacionesSegmentadas, String descripcionGeneral, LocalDateTime fechaDeIngreso) {
     this.bienes = bienes;
     this.donacionesSegmentadas = donacionesSegmentadas;
     this.descripcionGeneral = descripcionGeneral;
     this.fechaDeIngreso = fechaDeIngreso;
-    this.donante_id = donante_id;
   }
 
   public DonacionSinSegmentar(String s, List<Bien> bienes, LocalDateTime now) {
