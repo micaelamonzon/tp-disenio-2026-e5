@@ -1,7 +1,6 @@
-package ar.edu.utn.frba.ddsi.donaciones.models.entities.donacion;
+package ar.edu.utn.frba.ddsi.donaciones.models.entities.algoritmos;
 
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.Necesidad.Necesidad;
-import jakarta.persistence.*;
 import lombok.Data;
 
 import java.util.ArrayList;

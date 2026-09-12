@@ -1,7 +1,7 @@
 package ar.edu.utn.frba.ddsi.donaciones.services;
 
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.Necesidad.Necesidad;
-import ar.edu.utn.frba.ddsi.donaciones.models.entities.donacion.*;
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.algoritmos.*;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.mediosDeNotificacion.MedioDeNotificacion;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.DonacionSegmentada;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.EstadoDonacion;
@@ -35,7 +35,7 @@ public class MatchmakingService {
     private final NotificacionesProperties notificacionesProperties;
 
     public PropuestaMatch obtenerPropuestaPorId(Long matcheoId ) {
-        return matchRepository.findById(matcheoId);
+        return matchRepository.findById(matcheoId).orElseThrow();
     }
 
     public void ejecutarProcesoMatchmaking() {
@@ -84,10 +84,10 @@ public class MatchmakingService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Debe indicar una necesidadId");
         }
 
-        PropuestaMatch propuesta = matchRepository.findById(matcheoId);
+        PropuestaMatch propuesta = matchRepository.findById(matcheoId).orElseThrow();
 
 
-        Necesidad necesidad = necesidadesRepository.findById(necesidadId);
+        Necesidad necesidad = necesidadesRepository.findById(necesidadId).orElseThrow();
 
         if (!perteneceAAlgunRanking(propuesta, necesidadId)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La necesidad seleccionada no pertenece a los rankings generados");
