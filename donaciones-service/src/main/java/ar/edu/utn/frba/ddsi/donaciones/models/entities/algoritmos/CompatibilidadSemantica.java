@@ -1,10 +1,9 @@
-package ar.edu.utn.frba.ddsi.donaciones.models.entities.donacion;
+package ar.edu.utn.frba.ddsi.donaciones.models.entities.algoritmos;
 
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.Necesidad.Necesidad;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.Necesidad.NecesidadExtraordinaria;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.Necesidad.NecesidadRecurrente;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.DonacionSegmentada;
-import lombok.AllArgsConstructor;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
 import org.apache.commons.text.similarity.LevenshteinDistance;

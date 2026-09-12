@@ -403,7 +403,6 @@ public class DonacionesServiceImpl implements DonacionesService {
 
         donacionesSegmentadas.forEach(d -> {
             d.setDonanteHumano(personaHumana);
-            d.setTipoDonante(TipoDonante.HUMANO);
             this.donacionesRepository.save(d);
         } );
 
@@ -440,7 +439,6 @@ public class DonacionesServiceImpl implements DonacionesService {
 
         donacionesSegmentadas.forEach(d -> {
             d.setDonanteJuridico(personaJuridica);
-            d.setTipoDonante(TipoDonante.JURIDICO);
             this.donacionesRepository.save(d);
         } );
 

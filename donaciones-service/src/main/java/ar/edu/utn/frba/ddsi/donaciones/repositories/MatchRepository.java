@@ -1,15 +1,10 @@
 package ar.edu.utn.frba.ddsi.donaciones.repositories;
 
-import ar.edu.utn.frba.ddsi.donaciones.models.entities.donacion.PropuestaMatch;
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.algoritmos.PropuestaMatch;
 
-import org.springframework.stereotype.Repository;
-
-import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 
-public interface MatchRepository  {
-    PropuestaMatch findById(Long matcheoId);
+public interface MatchRepository extends JpaRepository<PropuestaMatch, Long> {
 
-    PropuestaMatch save(PropuestaMatch propuesta);
-    // Hereda automáticamente .save(propuesta) para persistir en la base de datos
 }

@@ -5,7 +5,7 @@ import ar.edu.utn.frba.ddsi.donaciones.dto.CategoriaDTO;
 import ar.edu.utn.frba.ddsi.donaciones.dto.DonacionSegmentadaDTO;
 import ar.edu.utn.frba.ddsi.donaciones.dto.SubcategoriaDTO;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.Bien;
-import ar.edu.utn.frba.ddsi.donaciones.models.entities.donacion.Estado;
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.algoritmos.Estado;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.DonacionSegmentada;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.EstadoDonacion;
 import org.springframework.stereotype.Service;

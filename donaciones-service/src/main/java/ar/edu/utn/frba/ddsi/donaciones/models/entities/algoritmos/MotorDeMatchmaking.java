@@ -1,10 +1,9 @@
-package ar.edu.utn.frba.ddsi.donaciones.models.entities.donacion;
+package ar.edu.utn.frba.ddsi.donaciones.models.entities.algoritmos;
 
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.Necesidad.Necesidad;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.DonacionSegmentada;
 
 import lombok.Data;
-import lombok.Setter;
 import org.springframework.stereotype.Component;
 
 import java.util.Comparator;
