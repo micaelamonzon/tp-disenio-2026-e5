@@ -51,7 +51,10 @@ public class DonacionSinSegmentar extends Persistente {
     this.fechaDeIngreso = fechaDeIngreso;
   }
 
-  public DonacionSinSegmentar(String s, List<Bien> bienes, LocalDateTime now) {
+  public DonacionSinSegmentar(String descripcionGeneral, List<Bien> bienes, LocalDateTime fechaDeIngreso) {
+    this.descripcionGeneral = descripcionGeneral;
+    this.bienes = new ArrayList<>(bienes);
+    this.fechaDeIngreso = fechaDeIngreso;
   }
 
   public void agregarBien(Bien bien){

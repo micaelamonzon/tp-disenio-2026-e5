@@ -42,7 +42,7 @@ public class PersonaHumana {
     @Column(name = "direccion")
     private String direccion;
 
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "persona_humana_id", referencedColumnName = "id")
     private List<MedioDeNotificacion> mediosDeNotificacion = new ArrayList<>();
 

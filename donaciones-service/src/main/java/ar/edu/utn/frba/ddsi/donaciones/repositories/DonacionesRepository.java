@@ -9,9 +9,9 @@ import java.util.List;
 
 
 public interface DonacionesRepository extends JpaRepository<DonacionSegmentada, Long> {
-    @Query("SELECT ds FROM DonacionSegmentada  ds WHERE ds.donanteHumano = :idDeHumano")
+    @Query("SELECT ds FROM DonacionSegmentada  ds WHERE ds.donanteHumano.id = :idDeHumano")
     List<DonacionSegmentada> findDonacionesPorIdHumano(Long idDeHumano);
-    @Query("SELECT ds FROM DonacionSegmentada  ds WHERE ds.donanteJuridico = :idDeJuridico")
+    @Query("SELECT ds FROM DonacionSegmentada  ds WHERE ds.donanteJuridico.id = :idDeJuridico")
     List<DonacionSegmentada> findDonacionesPorIdJuridico(Long idDeJuridico);
     @Query("SELECT ds FROM DonacionSegmentada  ds WHERE ds.estadoActual = :estado")
     List<DonacionSegmentada> findByEstado(EstadoDonacion estado);
