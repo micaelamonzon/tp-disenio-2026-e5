@@ -29,6 +29,11 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.stream.Collectors;
 
+import ar.edu.utn.frba.ddsi.donaciones.repositories.CategoriaRepository;
+import ar.edu.utn.frba.ddsi.donaciones.repositories.SubcategoriaRepository;
+import java.util.HashMap;
+import java.util.Map;
+
 @Service
 public class DonacionesServiceImpl implements DonacionesService {
     private final DonantesHumanosRepository donantesHumanosRepository;
@@ -42,19 +47,25 @@ public class DonacionesServiceImpl implements DonacionesService {
 
     //segmentador
     private final Segmentador segmentador;
+    private final SubcategoriaRepository subcategoriaRepository;
+    private final CategoriaRepository categoriaRepository;
 
     public DonacionesServiceImpl(DonantesHumanosRepository donantesRepository,
                                  DonantesJuridicosRepository donantesJuridicosRepository,
                                  RestTemplate restTemplate,
                                  NotificacionesProperties notificacionesProperties,
                                  DonacionesRepository donacionesRepository,
-                                 Segmentador segmentador) {
+                                 Segmentador segmentador,
+                                 SubcategoriaRepository subcategoriaRepository,
+                                 CategoriaRepository categoriaRepository) {
         this.segmentador = segmentador;
         this.donantesHumanosRepository = donantesRepository;
         this.restTemplate = restTemplate;
         this.notificacionesProperties = notificacionesProperties;
         this.donacionesRepository = donacionesRepository;
         this.donantesJuridicosRepository = donantesJuridicosRepository;
+        this.subcategoriaRepository = subcategoriaRepository;
+        this.categoriaRepository = categoriaRepository;
     }
 
 
@@ -231,7 +242,7 @@ public class DonacionesServiceImpl implements DonacionesService {
                             this.obtenerBienesDTO(d.getBienesDelMismoTipo()),
                             d.getFechaDeIngreso(),
                             d.getDonacionEntregada(),
-                            d.getEntidadBeneficiaria().getId()
+                            d.getEntidadBeneficiaria() != null ? d.getEntidadBeneficiaria().getId() : null
                     )
                 );
             }
@@ -738,24 +749,31 @@ public class DonacionesServiceImpl implements DonacionesService {
 
         return bienesDTO;
     }
-    public List<Bien> convertirBienesDTO(List<BienDTO> bienesDTO){
-        List<Bien> bienes = bienesDTO.stream().map(b -> new Bien(
+    public List<Bien> convertirBienesDTO(List<BienDTO> bienesDTO) {
+        // Mismo nombre de subcategoría -> misma instancia, para que el Segmentador las agrupe
+        Map<String, Subcategoria> resueltas = new HashMap<>();
+
+        return bienesDTO.stream().map(b -> new Bien(
                 b.nombre(),
                 b.descripcion(),
-                new Subcategoria(
-                        b.subcategoria().nombre(),
-                        b.subcategoria().esPerecedero(),
-                        new Categoria(
-                                b.subcategoria().categoria().nombre()
-                        )
-                ),
+                resueltas.computeIfAbsent(
+                        b.subcategoria().nombre().trim().toLowerCase(),
+                        k -> obtenerOCrearSubcategoria(b.subcategoria())),
                 b.fechaDeVencimiento(),
                 b.esUsado(),
                 b.tipoUnidad(),
                 b.cantidad(),
                 null
-        )).toList();
-        return bienes;
+        )).collect(Collectors.toCollection(ArrayList::new));
+    }
+    private Subcategoria obtenerOCrearSubcategoria(SubcategoriaDTO dto) {
+        return subcategoriaRepository.findByNombreIgnoreCase(dto.nombre().trim())
+                .orElseGet(() -> {
+                    Categoria categoria = categoriaRepository.findByNombreIgnoreCase(dto.categoria().nombre().trim())
+                            .orElseGet(() -> categoriaRepository.save(new Categoria(dto.categoria().nombre().trim())));
+                    return subcategoriaRepository.save(
+                            new Subcategoria(dto.nombre().trim(), dto.esPerecedero(), categoria));
+                });
     }
 
     public List<DonacionSegmentadaDTO> obtenerDonacionesSegmentadasDTODePersonaDonante(List<DonacionSinSegmentar> donacionesSinSegmentar){
@@ -828,7 +846,7 @@ public class DonacionesServiceImpl implements DonacionesService {
                         this.obtenerBienesDTO(d.getBienesDelMismoTipo()),
                         d.getFechaDeIngreso(),
                         d.getDonacionEntregada(),
-                        d.getEntidadBeneficiaria().getId()
+                        d.getEntidadBeneficiaria() != null ? d.getEntidadBeneficiaria().getId() : null
                         ));});
         return dtos;
     }

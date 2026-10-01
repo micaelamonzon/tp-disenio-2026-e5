@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:fragment="layout(titulo, estilos, encabezado, navegacion, contenido, scripts)">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:replace="${titulo}">DonaTrack</title>
+    <th:block th:replace="${estilos}"></th:block>
+</head>
+<body>
+<th:block th:replace="${encabezado}"></th:block>
+<th:block th:replace="${navegacion}"></th:block>
+<th:block th:replace="${contenido}"></th:block>
+<footer th:replace="~{layout/fragmentos :: footer}"></footer>
+<th:block th:replace="${scripts}"></th:block>
+</body>
+</html>

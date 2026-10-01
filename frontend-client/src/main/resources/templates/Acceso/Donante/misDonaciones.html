@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(
+          titulo=~{::title},
+          estilos=~{::link},
+          encabezado=~{layout/fragmentos :: topbar('Donante #' + ${idDonante}, 'Persona Donante')},
+          navegacion=~{},
+          contenido=~{::main},
+          scripts=~{})}">
+<head>
+    <title>Mis Donaciones - DonaTrack</title>
+    <link rel="stylesheet" th:href="@{/css/donante.css}">
+</head>
+<body>
+
+<main class="page">
+    <section class="view active" aria-labelledby="titulo-donaciones">
+        <div class="page-head">
+            <h1 id="titulo-donaciones">Mis Donaciones</h1>
+            <p class="page-sub">Gestiona y realiza seguimiento de todas tus donaciones</p>
+        </div>
+
+        <p class="empty-state" role="alert" th:if="${error}" th:text="${error}">Error</p>
+
+        <th:block th:unless="${error}">
+            <p class="results-count" aria-live="polite"
+               th:text="|Mostrando ${#lists.size(donaciones)} donaciones|">Mostrando 0 donaciones</p>
+
+            <p class="empty-state" th:if="${#lists.isEmpty(donaciones)}">
+                Todavía no registraste donaciones.
+            </p>
+
+            <div class="donations-grid">
+                <article class="donation-card" th:each="d : ${donaciones}">
+                    <div class="donation-card-top">
+                        <span class="donation-qty" th:text="|Donación #${d.id}|">Donación #1</span>
+                        <span class="pill" th:classappend="${d.estadoCss}"
+                              th:text="${d.estadoLegible}">En depósito</span>
+                    </div>
+
+                    <th:block th:each="b : ${d.bienes}">
+                        <h3 class="donation-name" th:text="${b.nombre}">Bien</h3>
+                        <span class="donation-meta"
+                              th:text="|${b.subcategoria?.categoria?.nombre} / ${b.subcategoria?.nombre}|">Categoría / Subcategoría</span>
+                        <span class="donation-meta"
+                              th:text="|Cantidad: ${b.cantidad} ${#strings.toLowerCase(b.tipoUnidad)}|">Cantidad</span>
+                        <span class="donation-meta" th:if="${b.esUsado}"
+                              th:text="|Condición: ${#strings.capitalize(#strings.toLowerCase(b.esUsado))}|">Condición</span>
+                        <span class="donation-meta" th:if="${b.fechaDeVencimiento}"
+                              th:text="|Vence: ${#temporals.format(b.fechaDeVencimiento, 'dd/MM/yyyy')}|">Vence</span>
+                    </th:block>
+
+                    <span class="donation-meta" th:if="${d.fechaDeIngreso}"
+                          th:text="|Ingresó: ${#temporals.format(d.fechaDeIngreso, 'dd/MM/yyyy HH:mm')}|">Ingresó</span>
+                </article>
+            </div>
+        </th:block>
+    </section>
+</main>
+
+</body>
+</html>
+

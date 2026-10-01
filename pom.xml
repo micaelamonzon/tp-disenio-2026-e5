@@ -15,7 +15,7 @@
     <module>notificaciones-service</module>
     <module>incentivos-service</module>
     <module>logistica-service</module>
-      <module>fronted-client</module>
+      <module>frontend-client</module>
     <module>autenticacion-service</module>
   </modules>
 
