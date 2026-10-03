@@ -17,6 +17,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
@@ -42,10 +43,10 @@ public class MisionParticular extends Persistente {
     private EstadoDeMision estado;
 
     @Column
-    private LocalDate fechaCompletada;
+    private LocalDateTime fechaCompletada;
 
     @Column
-    private LocalDate fechaUltimoAvance;
+    private LocalDateTime fechaUltimoAvance;
 
 
     public MisionParticular(Mision mision) {
@@ -59,11 +60,11 @@ public class MisionParticular extends Persistente {
 
         this.progreso = avance.getProgreso();
         this.distanciaDelObjetivo = avance.getDistanciaDelObjetivo();
-        this.setFechaUltimoAvance(LocalDate.now());
+        this.setFechaUltimoAvance(LocalDateTime.now());
 
         if(avance.getCumple()){
             this.setEstado(EstadoDeMision.COMPLETADA);
-            this.setFechaCompletada(java.time.LocalDate.now());
+            this.setFechaCompletada(java.time.LocalDateTime.now());
         }
     }
 }

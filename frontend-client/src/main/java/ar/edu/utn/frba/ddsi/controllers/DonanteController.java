@@ -32,5 +32,6 @@ public class DonanteController {
             model.addAttribute("error", "El servicio de donaciones no está disponible. Intentá de nuevo en unos minutos.");
         }
         return "Acceso/Donante/misDonaciones";
+
     }
 }
