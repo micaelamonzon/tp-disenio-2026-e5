@@ -1,0 +1,166 @@
+<html th:replace="~{layoutEntidad/base :: html}">
+<div th:fragment="contenido" class="row">
+    <section id="view-recepcion">
+        <div class="page-head">
+            <h1>Recepción de Donación</h1>
+            <p class="page-sub">Confirme la recepción de cada donación asignada, adjuntando las fotos correspondientes</p>
+        </div>
+
+        <div class="recepcion-container">
+            <h2 class="section-subtitle">Donaciones pendientes de confirmar</h2>
+
+            <div id="pendingDonationsList" class="status-list-container">
+                <article class="status-card donation-card">
+                    <div class="status-card-row">
+                        <div class="status-card-left">
+                            <span th:replace="~{fragments/iconosDeEstado:: iconoPendiente}"></span>
+                            <div class="status-card-info">
+                                <h3>Fideos tirabuzón</h3>
+                                <p class="status-card-sub">Molinos San José S.A</p>
+                                <div class="status-card-details">
+                                    <span>Cantidad: 50 Paquetes</span>
+                                    <span>Hace 2 horas</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="status-card-right">
+                            <span class="status-tag status-pendiente">Pendiente</span>
+                            <button type="button" class="link-btn-secondary" data-role="togglePhotos">Ver detalle y fotos</button>
+                        </div>
+                    </div>
+                    <div class="photos-panel">
+                        <div class="field-row">
+                            <div class="field"><span>Fecha de Asignación</span><p>Sin definir</p></div>
+                            <div class="field"><span>Donante</span><p>Molinos San José S.A</p></div>
+                        </div>
+                        <div class="field-row">
+                            <div class="field"><span>Tipo de Donación</span><p>Fideos</p></div>
+                            <div class="field"><span>Cantidad estimada</span><p>50 Paquetes</p></div>
+                        </div>
+                        <div class="field"><span>Descripción</span><p>50 paquetes de fideos tirabuzón, que están bien envasados y tienen fecha de vencimiento superior a 6 meses.</p></div>
+
+                        <div class="upload-actions-row">
+                            <button type="button" class="btn btn-outline btn-camera" data-role="cameraBtn">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                                Tomar foto
+                            </button>
+                        </div>
+                        <input type="file" accept="image/*" capture="environment" data-role="cameraInput" hidden>
+                        <div class="upload-dropzone" data-role="dropzone">
+                            <input type="file" accept="image/png, image/jpeg" multiple hidden data-role="fileInput">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                            <p><b>Click para subir fotografías</b></p>
+                            <span class="page-sub">PNG, JPG (MAX. 5MB)</span>
+                            <div class="upload-preview" data-role="preview"> </div>
+                        </div>
+
+                        <div class="form-actions-right">
+                            <button type="button" class="btn btn-outline" data-role="cancel">Cancelar</button>
+                            <button type="button" class="btn btn-submit" data-role="confirm">Confirmar Recepción</button>
+                        </div>
+
+                    </div>
+                </article>
+                <article class="status-card donation-card">
+                    <div class="status-card-row">
+                        <div class="status-card-left">
+                            <span th:replace="~{fragments/iconosDeEstado:: iconoPendiente}"></span>
+                            <div class="status-card-info">
+                                <h3>Frazadas de invierno</h3>
+                                <p class="status-card-sub">Corporación textil S.A</p>
+                                <div class="status-card-details">
+                                    <span>Cantidad: 60 unidades</span>
+                                    <span>Hace 1 día</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="status-card-right">
+                            <span class="status-tag status-pendiente">Pendiente</span>
+                            <button type="button" class="link-btn-secondary" data-role="togglePhotos">Ver detalle y fotos</button>
+                        </div>
+                    </div>
+                    <div class="photos-panel">
+                        <div class="field-row">
+                            <div class="field"><span>Fecha de Asignación</span><p>Sin definir</p></div>
+                            <div class="field"><span>Donante</span><p>Corporación textil S.A</p></div>
+                        </div>
+                        <div class="field-row">
+                            <div class="field"><span>Tipo de Donación</span><p>Frazadas</p></div>
+                            <div class="field"><span>Cantidad estimada</span><p>60 unidades</p></div>
+                        </div>
+                        <div class="field"><span>Descripción</span><p>60 frazadas, todas en buen estado.</p></div>
+
+                        <div class="upload-actions-row">
+                            <button type="button" class="btn btn-outline btn-camera" data-role="cameraBtn">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                                Tomar foto
+                            </button>
+                        </div>
+                        <input type="file" accept="image/*" capture="environment" data-role="cameraInput" hidden>
+                        <div class="upload-dropzone" data-role="dropzone">
+                            <input type="file" accept="image/png, image/jpeg" multiple hidden data-role="fileInput">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                            <p><b>Click para subir fotografías</b></p>
+                            <span class="page-sub">PNG, JPG (MAX. 5MB)</span>
+                            <div class="upload-preview" data-role="preview"></div>
+                        </div>
+
+                        <div class="form-actions-right">
+                            <button type="button" class="btn btn-outline" data-role="cancel">Cancelar</button>
+                            <button type="button" class="btn btn-submit" data-role="confirm">Confirmar Recepción</button>
+                        </div>
+
+                    </div>
+                </article>
+            </div>
+
+            <h2 class="section-subtitle" style="margin-top: 32px;">Donaciones confirmadas</h2>
+
+            <div id="confirmedDonationsList" class="status-list-container">
+                <article class="status-card donation-card">
+                    <div class="status-card-row">
+                        <div class="status-card-left">
+                           <span th:replace="~{fragments/iconosDeEstado:: iconoEntregado}"></span>
+                            <div class="status-card-info">
+                                <h3>Cuadernos escolares</h3>
+                                <p class="status-card-sub">Librería Central S.A.</p>
+                                <div class="status-card-details">
+                                    <span>Cantidad: 80 unidades</span>
+                                    <span>Hace 5 días</span>
+                                   <span>1 foto(s) adjunta(s)</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="status-card-right">
+                            <span class="status-tag status-entregado">Entregado</span>
+                            <button type="button" class="link-btn-secondary" data-role="togglePhotos">Ver detalle y fotos</button>
+                        </div>
+                    </div>
+                    <div class="photos-panel">
+                        <div class="field-row">
+                            <div class="field"><span>Fecha de Asignación</span><p>2 de Abril, 2026</p></div>
+                            <div class="field"><span>Donante</span><p>Librería Central S.A.</p></div>
+                        </div>
+                        <div class="field-row">
+                            <div class="field"><span>Tipo de Donación</span><p>Cuadernos</p></div>
+                            <div class="field"><span>Cantidad estimada</span><p>80 unidades</p></div>
+                        </div>
+                        <div class="field"><span>Descripción</span><p>80 cuadernos cuadriculados.</p></div>
+
+
+                        <div class="field">
+                            <span>Fotografías de la donación</span>
+                            <div class="photo-gallery">
+                                <img th:src="@{/img/cuadernos.jpg}" alt="Foto de la donación">
+                            </div>
+                        </div>
+
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+    <script th:src="@{/js/entidades/recepcion.js}"></script>
+</div>
+
+</html>

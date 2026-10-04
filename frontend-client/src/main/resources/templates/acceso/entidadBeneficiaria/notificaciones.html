@@ -1,0 +1,53 @@
+<html th:replace="~{layoutEntidad/base :: html}">
+<div th:fragment="contenido" class="row">
+    <section id="view-notificaciones">
+        <div class="page-head">
+            <h1>Notificaciones</h1>
+            <p class="page-sub">Mantente al día con tus entregas, donaciones recibidas y más</p>
+        </div>
+        <div class="notifications-actions">
+            <button class="link-btn" id="markAllReadBtn">Marcar todas como leídas</button>
+        </div>
+        <div class="notifications-list" id="notificationsList">
+            <article class="notification-card unread">
+                <span th:replace="~{fragments/iconosDeNotificacion:: iconoAsignada}"></span>
+                <div>
+                    <div class="notification-title">Nueva donación asignada.</div>
+                    <div class="notification-desc">Se le ha asignado una donación de mesas de la Muebleria Arcos S.A</div>
+                    <div class="notification-time">Hace 2 horas</div>
+                </div>
+                <span class="notification-unread-dot"></span>
+            </article>
+            <article class="notification-card unread">
+                <span th:replace="~{fragments/iconosDeNotificacion:: iconoTransito}"></span>
+                <div>
+                    <div class="notification-title">Donación en tránsito.</div>
+                    <div class="notification-desc">La donación de 10 cajas de azúcar está en camino.</div>
+                    <div class="notification-time">Hace 5 horas</div>
+                </div>
+                <span class="notification-unread-dot"></span>
+            </article>
+            <article class="notification-card">
+                <span th:replace="~{fragments/iconosDeNotificacion:: iconoPendiente}"></span>
+                <div>
+                    <div class="notification-title">Confirmación de entrega pendiente</div>
+                    <div class="notification-desc">Recuerde confirmar la recepción de la donación #DON-2026-04.</div>
+                    <div class="notification-time">Hace 1 día</div>
+                </div>
+            </article>
+            <article class="notification-card">
+                <span th:replace="~{fragments/iconosDeNotificacion:: iconoCompletada}"></span>
+                <div>
+                    <div class="notification-title">Entrega completada</div>
+                    <div class="notification-desc">Se ha confirmado la entrega exitosa de la donación #DON-2026-10.</div>
+                    <div class="notification-time">Hace 2 días</div>
+                </div>
+
+            </article>
+        </div>
+    </section>
+
+    <script th:src="@{/js/entidades/notificaciones.js}"></script>
+</div>
+
+</html>
