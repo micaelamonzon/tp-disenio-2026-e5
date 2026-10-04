@@ -25,6 +25,7 @@
 
 * { box-sizing: border-box; }
 
+
 html, body {
     margin: 0;
     padding: 0;
@@ -40,7 +41,9 @@ h1, h2, h3, p { margin: 0; }
 button, select, input, textarea { font-family: inherit; }
 
 svg { width: 18px; height: 18px; flex-shrink: 0; }
-
+a{
+    text-decoration: none
+}
 
 .topbar {
     display: flex;
@@ -211,7 +214,26 @@ svg { width: 18px; height: 18px; flex-shrink: 0; }
 @media (max-width: 768px) {
     .grid-two-columns { grid-template-columns: 1fr; }
 }
+.status-card-left {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+}
 
+.status-icon {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+}
+
+.status-icon svg {
+    width: 100%;
+    height: 100%;
+}
+
+.status-icon-pendiente { color: #ef4444; }
+.status-icon-entregado { color: #22c55e; }
 /* ===================== CARDS & FORM ===================== */
 .card {
     background: var(--card);
@@ -484,11 +506,14 @@ svg { width: 18px; height: 18px; flex-shrink: 0; }
 }
 
 .photos-panel {
+    display: none;
     margin-top: 16px;
     padding-top: 16px;
     border-top: 1px solid var(--border);
 }
-
+.photos-panel.open {
+    display: block;
+}
 .link-btn-secondary {
     background: none;
     border: none;
@@ -523,6 +548,7 @@ svg { width: 18px; height: 18px; flex-shrink: 0; }
 
 .lightbox {
     position: fixed;
+    inset: 0;
     top: 0;
     left: 0;
     width: 100%;
@@ -553,6 +579,9 @@ svg { width: 18px; height: 18px; flex-shrink: 0; }
     cursor: pointer;
 }
 
+.photo-gallery img {
+    cursor: zoom-in;
+}
 .btn-outline {
     background: transparent;
     border: 1px solid var(--border);
@@ -666,7 +695,7 @@ svg { width: 18px; height: 18px; flex-shrink: 0; }
 }
 .notification-icon.type-assigned { color: #2563eb; }
 .notification-icon.type-transit { color: var(--amber); }
-.notification-icon.type-pending { color: var(--amber); }
+.notification-icon.type-pending { color: var(--red-text); }
 .notification-icon.type-completed { color: var(--green); }
 
 .notification-title {
@@ -903,4 +932,62 @@ svg { width: 18px; height: 18px; flex-shrink: 0; }
 
 .notification-unread-dot {
     cursor: pointer;
+}
+
+.thumb {
+    position: relative;
+}
+
+.thumb img {
+    width: 90px;
+    height: 90px;
+    object-fit: cover;
+    border-radius: 8px;
+    cursor: zoom-in;
+}
+
+.thumb-remove {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: none;
+    background: #ef4444;
+    color: #fff;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.camera-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1100;
+    padding: 16px;
+}
+
+.camera-box {
+    background: #fff;
+    border-radius: 12px;
+    padding: 16px;
+    max-width: 640px;
+    width: 100%;
+}
+
+.camera-box video {
+    width: 100%;
+    border-radius: 8px;
+    background: #000;
+}
+
+.camera-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 12px;
 }

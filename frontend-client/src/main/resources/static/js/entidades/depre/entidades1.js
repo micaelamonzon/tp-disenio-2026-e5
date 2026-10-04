@@ -61,13 +61,6 @@ tabs.forEach(tab => {
 const needForm = document.getElementById("needForm");
 const registeredNeedsList = document.getElementById("registeredNeedsList");
 
-function formatDate(dateStr) {
-    if (!dateStr) return "";
-    const parts = dateStr.split("-");
-    if (parts.length !== 3) return dateStr;
-    const date = new Date(parts[0], parts[1] - 1, parts[2]);
-    return date.toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" });
-}
 
 function renderRegisteredNeeds() {
     if (registeredNeeds.length === 0) {

@@ -1,0 +1,67 @@
+<html th:replace="~{layoutEntidad/base :: html}">
+    <div th:fragment="contenido" class="row">
+        <section id="view-estado-necesidades">
+            <div class="page-head">
+                <h1>Estado de Donaciones</h1>
+                <p class="page-sub">En está sección podrá ver el estado de sus donaciones</p>
+            </div>
+            <div class="estado-necesidades-container">
+                <div class="status-list-container" id="statusNeedsList">
+                    <article class="status-card">
+                        <div class="status-card-left">
+                            <span th:replace="~{fragments/iconosDeEstado:: iconoPendiente}"></span>
+                            <div class="status-card-info">
+                                <h3>Leche fresca</h3>
+                                <p class="status-card-sub">100 paquetes de leche fresca.</p>
+                                <div class="status-card-details">
+                                    <span>Cantidad: 100</span>
+                                    <span>Hace 2 días</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="status-card-right">
+                            <span class="status-tag status-pendiente">Pendiente</span>
+                        </div>
+                    </article>
+                    <article class="status-card">
+                        <div class="status-card-left">
+                            <span th:replace="~{fragments/iconosDeEstado:: iconoPendiente}"></span>
+                            <div class="status-card-info">
+                                <h3>Camperas</h3>
+                                <p class="status-card-sub">30 camperas de invierno.</p>
+                                <div class="status-card-details">
+                                    <span>Cantidad: 30</span>
+                                    <span>Hace 4 días</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="status-card-right">
+                            <span class="status-tag status-pendiente">Pendiente</span>
+                        </div>
+                    </article>
+                    <article class="status-card">
+                        <div class="status-card-left">
+                            <span th:replace="~{fragments/iconosDeEstado:: iconoEntregado}"></span>
+                            <div class="status-card-info">
+                                <h3>Zapatillas</h3>
+                                <p class="status-card-sub">20 zapatillas para niños.</p>
+                                <div class="status-card-details">
+                                    <span>Cantidad: 20</span>
+                                    <span>Hace 1 semana</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="status-card-right">
+                            <span class="status-tag status-entregado">Entregado</span>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </section>
+    </div>
+</html>
+
+
+
+
+
