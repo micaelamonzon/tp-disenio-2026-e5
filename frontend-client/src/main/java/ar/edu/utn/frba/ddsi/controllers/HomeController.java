@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class HomeController {
     @GetMapping("/")
     public String home() {
-        return "redirect:/donante/6/donaciones";
+        return "redirect:/donante/misDonaciones";
     }
 
     @GetMapping("/404")

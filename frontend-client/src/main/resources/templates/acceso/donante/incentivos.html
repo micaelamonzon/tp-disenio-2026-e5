@@ -1,0 +1,21 @@
+<html th:replace="~{layoutDonante/base :: html}">
+<div th:fragment="contenido">
+    <section id="view-incentivos">
+        <div class="page-head">
+            <h1>Incentivos</h1>
+            <p class="page-sub">Tu progreso y logros en la comunidad solidaria</p>
+        </div>
+        <h2 class="section-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+            Misiones
+        </h2>
+        <div class="missions-grid" id="missionsGrid"></div>
+        <h2 class="section-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="6"/><path d="M15.5 13.5 17 22l-5-3-5 3 1.5-8.5"/></svg>
+            Insignias
+        </h2>
+        <div class="badges-grid" id="badgesGrid"></div>
+    </section>
+    <script th:src="@{/js/donante/incentivos.js}"></script>
+</div>
+</html>

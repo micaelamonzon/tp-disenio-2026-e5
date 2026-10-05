@@ -1,14 +1,29 @@
 package ar.edu.utn.frba.ddsi.dtos.donaciones;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
-
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DonacionDTO {
+
+    public static final Map<String, String> ESTADOS;
+    static {
+        Map<String, String> m = new LinkedHashMap<>();
+        m.put("EN_DEPOSITO", "En depósito");
+        m.put("ASIGNACION_REALIZADA", "Asignación realizada");
+        m.put("LISTA_PARA_ENTREGAR", "Lista para entregar");
+        m.put("EN_TRASLADO", "En traslado");
+        m.put("ENTREGADA", "Entregada");
+        m.put("ENTREGA_FALLIDA", "Entrega fallida");
+        m.put("VENCIDA", "Vencida");
+        ESTADOS = Collections.unmodifiableMap(m);
+    }
+
     private Long id;
     private String estadoActual;
     private List<BienDTO> bienes;
@@ -18,16 +33,7 @@ public class DonacionDTO {
 
     public String getEstadoLegible() {
         if (estadoActual == null) return "";
-        return switch (estadoActual) {
-            case "EN_DEPOSITO" -> "En depósito";
-            case "ASIGNACION_REALIZADA" -> "Asignación realizada";
-            case "LISTA_PARA_ENTREGAR" -> "Lista para entregar";
-            case "EN_TRASLADO" -> "En traslado";
-            case "ENTREGADA" -> "Entregada";
-            case "ENTREGA_FALLIDA" -> "Entrega fallida";
-            case "VENCIDA" -> "Vencida";
-            default -> estadoActual;
-        };
+        return ESTADOS.getOrDefault(estadoActual, estadoActual);
     }
 
     /** Reutiliza los colores de donante.css (.pill-Pendiente, .pill-Asignada, .pill-Recibida). */
@@ -39,6 +45,18 @@ public class DonacionDTO {
             case "ENTREGADA" -> "pill-Recibida";
             default -> "";
         };
+    }
+
+    /** Por la segmentación, todos los bienes de una donación comparten subcategoría. */
+    public String getSubcategoria() {
+        if (bienes == null || bienes.isEmpty() || bienes.get(0).getSubcategoria() == null) return null;
+        return bienes.get(0).getSubcategoria().getNombre();
+    }
+
+    public String getCategoria() {
+        if (bienes == null || bienes.isEmpty() || bienes.get(0).getSubcategoria() == null
+                || bienes.get(0).getSubcategoria().getCategoria() == null) return null;
+        return bienes.get(0).getSubcategoria().getCategoria().getNombre();
     }
 }
 

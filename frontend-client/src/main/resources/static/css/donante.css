@@ -955,3 +955,14 @@ svg{ width: 18px; height: 18px; flex-shrink:0; }
 .notif-unread-dot {
   cursor: pointer;
 }
+/* Pestañas como links  */
+.tab{ text-decoration: none; }
+
+/* Botones de los filtros */
+.filters-actions{ display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+.filters-actions .btn{ min-height: 48px; text-decoration: none; }
+
+.visually-hidden{
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
