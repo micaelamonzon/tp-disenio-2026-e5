@@ -1,0 +1,30 @@
+<html th:replace="~{layoutDonante/base :: html}">
+<div th:fragment="contenido">
+    <section id="view-seguimiento">
+        <div class="page-head">
+            <h1>Seguimiento de Entregas</h1>
+            <p class="page-sub">Monitorea en tiempo real la ubicación de tus donaciones</p>
+        </div>
+        <div class="tracking-container">
+            <div class="map-card" id="mapCard">
+                <div class="map-badge">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                    Seguimiento en tiempo real
+                </div>
+                <div class="map-viewport" id="mapViewport">
+                    <svg class="map-routes-svg" id="routesSvg" aria-hidden="true"></svg>
+                    <div id="mapMarkers"></div>
+                </div>
+            </div>
+            <aside class="tracking-sidebar" aria-label="Entregas activas">
+                <div class="sidebar-header">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 17h4V5H10z"/><path d="M20 17h2v-7l-3-4h-3v11h4z"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>
+                    Entregas Activas
+                </div>
+                <div class="deliveries-list" id="deliveriesList"></div>
+            </aside>
+        </div>
+    </section>
+    <script th:src="@{/js/donante/seguimiento.js}"></script>
+</div>
+</html>

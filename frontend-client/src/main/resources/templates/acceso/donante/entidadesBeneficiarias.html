@@ -1,0 +1,16 @@
+<html th:replace="~{layoutDonante/base :: html}">
+<div th:fragment="contenido">
+    <section id="view-entidades">
+        <div class="page-head">
+            <h1>Entidades Beneficiarias</h1>
+            <p class="page-sub">Conocé a las organizaciones registradas y seguí su trabajo</p>
+        </div>
+        <div class="entities-toolbar">
+            <label for="entitySearch" class="visually-hidden">Buscar entidad beneficiaria</label>
+            <input type="search" id="entitySearch" placeholder="Buscar por nombre o rubro" class="search-input">
+        </div>
+        <div class="entities-grid" id="entitiesGrid"></div>
+    </section>
+    <script th:src="@{/js/donante/entidades.js}"></script>
+</div>
+</html>
