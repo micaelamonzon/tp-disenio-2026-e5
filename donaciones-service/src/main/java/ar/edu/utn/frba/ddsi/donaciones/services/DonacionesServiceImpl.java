@@ -29,8 +29,6 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.stream.Collectors;
 
-import ar.edu.utn.frba.ddsi.donaciones.repositories.CategoriaRepository;
-import ar.edu.utn.frba.ddsi.donaciones.repositories.SubcategoriaRepository;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -47,8 +45,7 @@ public class DonacionesServiceImpl implements DonacionesService {
 
     //segmentador
     private final Segmentador segmentador;
-    private final SubcategoriaRepository subcategoriaRepository;
-    private final CategoriaRepository categoriaRepository;
+    private final CatalogoSubcategoriasService catalogoSubcategorias;
 
     public DonacionesServiceImpl(DonantesHumanosRepository donantesRepository,
                                  DonantesJuridicosRepository donantesJuridicosRepository,
@@ -56,16 +53,14 @@ public class DonacionesServiceImpl implements DonacionesService {
                                  NotificacionesProperties notificacionesProperties,
                                  DonacionesRepository donacionesRepository,
                                  Segmentador segmentador,
-                                 SubcategoriaRepository subcategoriaRepository,
-                                 CategoriaRepository categoriaRepository) {
+                                 CatalogoSubcategoriasService catalogoSubcategorias) {
         this.segmentador = segmentador;
         this.donantesHumanosRepository = donantesRepository;
         this.restTemplate = restTemplate;
         this.notificacionesProperties = notificacionesProperties;
         this.donacionesRepository = donacionesRepository;
         this.donantesJuridicosRepository = donantesJuridicosRepository;
-        this.subcategoriaRepository = subcategoriaRepository;
-        this.categoriaRepository = categoriaRepository;
+        this.catalogoSubcategorias = catalogoSubcategorias;
     }
 
 
@@ -758,22 +753,17 @@ public class DonacionesServiceImpl implements DonacionesService {
                 b.descripcion(),
                 resueltas.computeIfAbsent(
                         b.subcategoria().nombre().trim().toLowerCase(),
-                        k -> obtenerOCrearSubcategoria(b.subcategoria())),
+                        k -> catalogoSubcategorias.obtenerOCrear(
+                                b.subcategoria().nombre(),
+                                b.subcategoria().esPerecedero(),
+                                b.subcategoria().categoria() != null
+                                        ? b.subcategoria().categoria().nombre() : null)),
                 b.fechaDeVencimiento(),
                 b.esUsado(),
                 b.tipoUnidad(),
                 b.cantidad(),
                 null
         )).collect(Collectors.toCollection(ArrayList::new));
-    }
-    private Subcategoria obtenerOCrearSubcategoria(SubcategoriaDTO dto) {
-        return subcategoriaRepository.findByNombreIgnoreCase(dto.nombre().trim())
-                .orElseGet(() -> {
-                    Categoria categoria = categoriaRepository.findByNombreIgnoreCase(dto.categoria().nombre().trim())
-                            .orElseGet(() -> categoriaRepository.save(new Categoria(dto.categoria().nombre().trim())));
-                    return subcategoriaRepository.save(
-                            new Subcategoria(dto.nombre().trim(), dto.esPerecedero(), categoria));
-                });
     }
 
     public List<DonacionSegmentadaDTO> obtenerDonacionesSegmentadasDTODePersonaDonante(List<DonacionSinSegmentar> donacionesSinSegmentar){

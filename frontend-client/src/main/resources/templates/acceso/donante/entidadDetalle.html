@@ -1,0 +1,83 @@
+<html th:replace="~{layoutDonante/base :: html}">
+<div th:fragment="contenido">
+    <nav class="breadcrumb" aria-label="Ruta de navegación">
+        <a th:href="@{/donante/entidadesBeneficiarias}">&larr; Entidades Beneficiarias</a>
+    </nav>
+
+    <p class="empty-state" role="alert"
+       th:if="${error}" th:text="${error}">Error</p>
+
+    <th:block th:unless="${error}">
+        <!-- Datos de la entidad (TP: razón social, dirección, teléfono, correos de representantes) -->
+        <section class="entity-detail" aria-labelledby="titulo-entidad">
+            <div class="entity-top">
+                <span class="entity-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 22V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v18"/>
+                        <path d="M2 22h20"/>
+                        <path d="M9 7h1M14 7h1M9 11h1M14 11h1M9 15h1M14 15h1"/>
+                    </svg>
+                </span>
+                <div>
+                    <h1 id="titulo-entidad" class="entity-name"
+                        th:text="${entidad.razonSocial}">Comedor</h1>
+                    <span class="entity-category"
+                          th:text="${entidad.direccion}">Dirección</span>
+                </div>
+            </div>
+
+            <dl class="entity-detail-data">
+                <div>
+                    <dt>Teléfono</dt>
+                    <dd th:text="${entidad.telefono} ?: 'Sin teléfono'">Teléfono</dd>
+                </div>
+                <div>
+                    <dt>Contacto de representantes</dt>
+                    <dd th:if="${#lists.isEmpty(entidad.correosRepresentantes)}">
+                        Sin correos de contacto cargados.
+                    </dd>
+                    <dd th:each="c : ${entidad.correosRepresentantes}">
+                        <a th:href="'mailto:' + ${c}" th:text="${c}">mail</a>
+                    </dd>
+                </div>
+            </dl>
+        </section>
+
+        <!-- Necesidades materiales (TP: subcategoría, descripción, recurrente/extraordinaria) -->
+        <section class="needs-section" aria-labelledby="titulo-necesidades">
+            <h2 id="titulo-necesidades" class="section-title">Necesidades</h2>
+
+            <p class="empty-state" role="alert" th:if="${errorNecesidades}"
+               th:text="${errorNecesidades}">Error necesidades</p>
+
+            <th:block th:unless="${errorNecesidades}">
+                <p class="empty-state" th:if="${#lists.isEmpty(necesidades)}">
+                    Esta entidad todavía no registró necesidades.
+                </p>
+
+                <div class="needs-grid">
+                    <article class="need-card" th:each="n : ${necesidades}"
+                             th:classappend="${n.estaSatisfecha} ? 'need-done'">
+                        <div class="need-card-top">
+                            <h3 class="need-title" th:text="${n.subcategoria}">Arroz</h3>
+                            <span class="need-tag"
+                                  th:classappend="${n.extraordinaria} ? 'need-tag-urgent' : 'need-tag-recurrent'"
+                                  th:text="${n.tipoLegible}">Recurrente</span>
+                        </div>
+                        <p class="need-desc" th:text="${n.descripcion}">Descripción</p>
+                        <div class="need-footer">
+                            <span th:if="${n.extraordinaria}"
+                                  th:text="|Cantidad requerida: ${n.cantidad}|">Cantidad requerida: 30</span>
+                            <span th:unless="${n.extraordinaria}"
+                                  th:text="|Objetivo: ${n.cantidad} ${n.periodoLegible}|">Objetivo: 100 por semana</span>
+                            <span class="need-status"
+                                  th:text="${n.estaSatisfecha} ? 'Satisfecha' : 'Pendiente'">Pendiente</span>
+                        </div>
+                    </article>
+                </div>
+            </th:block>
+        </section>
+    </th:block>
+</div>
+</html>

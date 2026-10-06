@@ -10,7 +10,9 @@ import ar.edu.utn.frba.ddsi.donaciones.models.entities.mediosDeNotificacion.Tipo
 import ar.edu.utn.frba.ddsi.donaciones.repositories.EntidadBeneficiariaRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class EntidadBeneficiariaServiceImpl implements EntidadBeneficiariaService{
@@ -21,10 +23,12 @@ public class EntidadBeneficiariaServiceImpl implements EntidadBeneficiariaServic
                 .toList();
     }
 
+    // Lista modificable (no .toList()): Hibernate la administra por el cascade/orphanRemoval
     private List<MedioDeNotificacion> mapearMediosAEntidad(List<MedioDeNotificacionDTO> medios) {
+        if (medios == null) return new ArrayList<>();
         return medios.stream()
                 .map(dto -> new MedioDeNotificacion(dto.tipoDeNotificacion(), dto.datoDeContacto()))
-                .toList();
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     public EntidadBeneficiariaServiceImpl(EntidadBeneficiariaRepository entidadBeneficiariaRepository) {
@@ -86,7 +90,10 @@ public class EntidadBeneficiariaServiceImpl implements EntidadBeneficiariaServic
         nuevaEntidad.setDireccion(body.direccion());
         nuevaEntidad.setTelefono(body.telefono());
 
-        List<Representante> representantes = body.representantes()
+        List<RepresentanteDTO> representantesDTO =
+                body.representantes() != null ? body.representantes() : List.of();
+
+        List<Representante> representantes = representantesDTO
                 .stream()
                 .map(dto -> {
                     Representante r = new Representante();
@@ -96,7 +103,7 @@ public class EntidadBeneficiariaServiceImpl implements EntidadBeneficiariaServic
                     r.setMediosDeNotificacion(mapearMediosAEntidad(dto.mediosDeNotificacion()));
                     return r;
                 })
-                .toList();
+                .collect(Collectors.toCollection(ArrayList::new));
 
         nuevaEntidad.setRepresentantes(representantes);
         this.entidadBeneficiariaRepository.save(nuevaEntidad);

@@ -1,16 +1,89 @@
 <html th:replace="~{layoutDonante/base :: html}">
 <div th:fragment="contenido">
-    <section id="view-entidades">
+    <section id="view-entidades" aria-labelledby="titulo-entidades">
         <div class="page-head">
-            <h1>Entidades Beneficiarias</h1>
-            <p class="page-sub">Conocé a las organizaciones registradas y seguí su trabajo</p>
+            <h1 id="titulo-entidades">Entidades Beneficiarias</h1>
+            <p class="page-sub">Conocé a las organizaciones registradas</p>
         </div>
-        <div class="entities-toolbar">
-            <label for="entitySearch" class="visually-hidden">Buscar entidad beneficiaria</label>
-            <input type="search" id="entitySearch" placeholder="Buscar por nombre o rubro" class="search-input">
-        </div>
-        <div class="entities-grid" id="entitiesGrid"></div>
+
+        <p class="empty-state" role="alert"
+           th:if="${error}" th:text="${error}">Error</p>
+
+        <th:block th:unless="${error}">
+            <form class="entities-toolbar" method="get" role="search"
+                  th:action="@{/donante/entidadesBeneficiarias}">
+                <label for="busqueda" class="visually-hidden">
+                    Buscar entidad beneficiaria
+                </label>
+                <input type="search" id="busqueda" name="q"
+                       class="search-input"
+                       placeholder="Buscar por nombre o dirección"
+                       th:value="${busqueda}">
+                <button type="submit" class="btn btn-primary">Buscar</button>
+            </form>
+
+            <p class="results-count" aria-live="polite"
+               th:text="|Mostrando ${#lists.size(entidades)} de ${totalEntidades} entidades|">
+                Mostrando 0 de 0 entidades
+            </p>
+
+            <p class="empty-state" th:if="${totalEntidades == 0}">
+                Todavía no hay entidades beneficiarias registradas.
+            </p>
+            <p class="empty-state"
+               th:if="${totalEntidades > 0 and #lists.isEmpty(entidades)}">
+                No encontramos entidades con esa búsqueda.
+            </p>
+
+            <div class="entities-grid">
+                <article class="entity-card" th:each="e : ${entidades}">
+                    <div class="entity-top">
+                        <span class="entity-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="2" stroke-linecap="round"
+                                 stroke-linejoin="round">
+                                <path d="M6 22V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v18"/>
+                                <path d="M2 22h20"/>
+                                <path d="M9 7h1M14 7h1M9 11h1M14 11h1M9 15h1M14 15h1"/>
+                            </svg>
+                        </span>
+                        <div>
+                            <h3 class="entity-name"
+                                th:text="${e.razonSocial}">Comedor</h3>
+                            <span class="entity-category"
+                                  th:text="${e.direccion}">Dirección</span>
+                        </div>
+                    </div>
+
+                    <div class="entity-stats">
+                        <div class="entity-stat">
+                            <b th:text="${e.telefono} ?: 'Sin teléfono'">Teléfono</b>
+                            <span>Teléfono</span>
+                        </div>
+                    </div>
+
+                    <div class="entity-desc">
+                        <strong>Contacto de representantes</strong>
+                        <p th:if="${#lists.isEmpty(e.correosRepresentantes)}">
+                            Sin correos de contacto cargados.
+                        </p>
+                        <ul th:unless="${#lists.isEmpty(e.correosRepresentantes)}">
+                            <li th:each="c : ${e.correosRepresentantes}">
+                                <a th:href="'mailto:' + ${c}" th:text="${c}">mail</a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="entity-actions">
+                        <a class="btn btn-primary"
+                           th:href="@{/donante/entidadesBeneficiarias/{id}(id=${e.id})}"
+                           th:aria-label="'Ver necesidades de ' + ${e.razonSocial}">
+                            Ver necesidades
+                        </a>
+                    </div>
+                </article>
+            </div>
+        </th:block>
     </section>
-    <script th:src="@{/js/donante/entidades.js}"></script>
 </div>
 </html>
