@@ -29,7 +29,7 @@ public class MatchmakingService {
     private final DonacionesRepository donacionesRepository;
     private final MotorDeMatchmaking motorMatchmaking;
     private final EstadoDonacionServiceimpl estadoDonacionService;
-    private final List<Strategy_AlgoritmosMatchmaking> estrategiasActivas = new ArrayList<>();
+    private final List<Strategy_AlgoritmosMatchmaking> estrategiasActivas;
 
     private final RestTemplate restTemplate;
     private final NotificacionesProperties notificacionesProperties;

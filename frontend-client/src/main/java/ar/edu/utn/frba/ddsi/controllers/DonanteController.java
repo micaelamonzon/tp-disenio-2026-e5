@@ -1,12 +1,15 @@
 package ar.edu.utn.frba.ddsi.controllers;
 
 import ar.edu.utn.frba.ddsi.dtos.donaciones.DonacionDTO;
+import ar.edu.utn.frba.ddsi.dtos.entidades.EntidadBeneficiariaDTO;
 import ar.edu.utn.frba.ddsi.services.DonacionesApiService.DonanteNoEncontradoException;
+import ar.edu.utn.frba.ddsi.services.DonacionesApiService.EntidadNoEncontradaException;
 import ar.edu.utn.frba.ddsi.services.DonacionesService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -60,10 +63,52 @@ public class DonanteController {
     }
 
     @GetMapping("/entidadesBeneficiarias")
-    public String entidadesBeneficiarias(Model model) {
+    public String entidadesBeneficiarias(
+            @RequestParam(required = false) String q,
+            Model model) {
         model.addAttribute("titulo", "Entidades beneficiarias");
         model.addAttribute("tabActiva", "entidades");
+        model.addAttribute("busqueda", q);
+        try {
+            List<EntidadBeneficiariaDTO> todas =
+                    donacionesService.obtenerEntidades();
+            model.addAttribute("totalEntidades", todas.size());
+            model.addAttribute("entidades",
+                    donacionesService.buscarEntidades(todas, q));
+        } catch (RuntimeException e) {
+            model.addAttribute("error",
+                    "El servicio de donaciones no está disponible. "
+                            + "Intentá de nuevo en unos minutos.");
+        }
         return "acceso/donante/entidadesBeneficiarias";
+    }
+
+    // Datos de la entidad y necesidades se piden por separado, si fallan las
+    // necesidades, se muestran los datos de la entidad
+    @GetMapping("/entidadesBeneficiarias/{idEntidad}")
+    public String detalleEntidad(@PathVariable Long idEntidad, Model model) {
+        model.addAttribute("titulo", "Entidad beneficiaria");
+        model.addAttribute("tabActiva", "entidades");
+        try {
+            EntidadBeneficiariaDTO entidad = donacionesService.obtenerEntidad(idEntidad);
+            model.addAttribute("titulo", entidad.getRazonSocial());
+            model.addAttribute("entidad", entidad);
+        } catch (EntidadNoEncontradaException e) {
+            model.addAttribute("error", e.getMessage());
+            return "acceso/donante/entidadDetalle";
+        } catch (RuntimeException e) {
+            model.addAttribute("error",
+                    "El servicio de donaciones no está disponible. "
+                            + "Intentá de nuevo en unos minutos.");
+            return "acceso/donante/entidadDetalle";
+        }
+        try {
+            model.addAttribute("necesidades", donacionesService.obtenerNecesidades(idEntidad));
+        } catch (RuntimeException e) {
+            model.addAttribute("errorNecesidades",
+                    "No pudimos obtener las necesidades de esta entidad en este momento.");
+        }
+        return "acceso/donante/entidadDetalle";
     }
 
     @GetMapping("/incentivos")

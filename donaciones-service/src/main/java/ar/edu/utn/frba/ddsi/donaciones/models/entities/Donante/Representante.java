@@ -23,7 +23,8 @@ public class Representante extends Persistente {
     @Column(name = "dni")
     private Integer DNI;
 
-    @OneToMany
+    // Los medios de contacto pertenecen al representante: se guardan y se borran con él
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "representante_id", referencedColumnName = "id")
     private List<MedioDeNotificacion> mediosDeNotificacion = new ArrayList<>();
 

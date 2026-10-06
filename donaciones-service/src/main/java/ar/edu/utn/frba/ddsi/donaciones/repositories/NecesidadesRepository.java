@@ -12,4 +12,6 @@ public interface NecesidadesRepository extends JpaRepository<Necesidad, Long> {
     // Spring interpreta "False" al final y busca registros donde estaSatisfecha sea false
     List<Necesidad> findByEstaSatisfechaFalse();
 
+    // Necesidades registradas por una entidad beneficiaria
+    List<Necesidad> findByEntidadBeneficiariaId(Long idEntidad);
 }

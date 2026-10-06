@@ -1,6 +1,8 @@
 package ar.edu.utn.frba.ddsi.services;
 
 import ar.edu.utn.frba.ddsi.dtos.donaciones.DonacionDTO;
+import ar.edu.utn.frba.ddsi.dtos.entidades.EntidadBeneficiariaDTO;
+import ar.edu.utn.frba.ddsi.dtos.entidades.NecesidadDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -42,6 +44,59 @@ public class DonacionesApiService {
     public static class DonanteNoEncontradoException extends RuntimeException {
         public DonanteNoEncontradoException(Long id) {
             super("No encontramos al donante " + id + ".");
+        }
+    }
+    /** GET /servicioDeDonaciones/obtenerEntidades */
+    public List<EntidadBeneficiariaDTO> obtenerEntidades() {
+        try {
+            List<EntidadBeneficiariaDTO> entidades = webClient.get()
+                    .uri(donacionesServiceUrl + "/obtenerEntidades")
+                    .retrieve()
+                    .bodyToFlux(EntidadBeneficiariaDTO.class)
+                    .collectList()
+                    .block();
+            return entidades != null ? entidades : List.of();
+        } catch (Exception e) {
+            log.error("Error obteniendo entidades de donaciones-service", e);
+            throw new RuntimeException("No se pudieron obtener las entidades", e);
+        }
+    }
+
+    /** GET /servicioDeDonaciones/obtenerEntidad/{id} */
+    public EntidadBeneficiariaDTO obtenerEntidad(Long idEntidad) {
+        try {
+            return webClient.get()
+                    .uri(donacionesServiceUrl + "/obtenerEntidad/{id}", idEntidad)
+                    .retrieve()
+                    .bodyToMono(EntidadBeneficiariaDTO.class)
+                    .block();
+        } catch (WebClientResponseException.NotFound e) {
+            throw new EntidadNoEncontradaException(idEntidad);
+        } catch (Exception e) {
+            log.error("Error obteniendo la entidad {} de donaciones-service", idEntidad, e);
+            throw new RuntimeException("No se pudo obtener la entidad", e);
+        }
+    }
+
+    /** GET /servicioDeDonaciones/entidad/{idEntidad}/necesidades */
+    public List<NecesidadDTO> obtenerNecesidades(Long idEntidad) {
+        try {
+            List<NecesidadDTO> necesidades = webClient.get()
+                    .uri(donacionesServiceUrl + "/entidad/{id}/necesidades", idEntidad)
+                    .retrieve()
+                    .bodyToFlux(NecesidadDTO.class)
+                    .collectList()
+                    .block();
+            return necesidades != null ? necesidades : List.of();
+        } catch (Exception e) {
+            log.error("Error obteniendo necesidades de la entidad {}", idEntidad, e);
+            throw new RuntimeException("No se pudieron obtener las necesidades", e);
+        }
+    }
+
+    public static class EntidadNoEncontradaException extends RuntimeException {
+        public EntidadNoEncontradaException(Long id) {
+            super("No encontramos la entidad beneficiaria " + id + ".");
         }
     }
 }
