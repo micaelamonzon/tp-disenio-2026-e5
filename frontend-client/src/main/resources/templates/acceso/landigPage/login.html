@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${titulo} + ' - DonaTrack'">Iniciar Sesión - DonaTrack</title>
+    <link rel="stylesheet" th:href="@{/css/landingPage/landingPage.css}">
+</head>
+<body>
+
+<header th:replace="~{layoutAcceso/layoutAcceso :: header}"></header>
+<nav th:replace="~{layoutAcceso/layoutAcceso :: navBar}"></nav>
+
+<main class="page">
+    <div style="text-align: center; margin-bottom: 2rem;">
+        <h1 style="font-size: 2.25rem; font-weight: 800; color: #0f172a; margin-bottom: 0.5rem;">Iniciar Sesión</h1>
+        <p style="color: #64748b; font-size: 1rem; margin: 0;">Accede a tu cuenta de DonaTrack</p>
+    </div>
+
+    <!-- TARJETA DEL FORMULARIO -->
+    <div class="form-container" style="background: #ffffff; padding: 2rem; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.04); max-width: 420px; margin: 0 auto;">
+
+        <!-- SELECTOR DE ROL (BOTONES SEPARADOS EN COLUMNA) -->
+        <div class="role-selector" style="display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.75rem;">
+            <button type="button" class="role-btn active" id="btn-login-donante" onclick="selectLoginRole('DONANTE')"
+                    style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; width: 100%; padding: 0.85rem; border: none; border-radius: 12px; background-color: #2563eb; color: #ffffff; font-weight: 600; font-size: 0.95rem; cursor: pointer;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                Donante
+            </button>
+
+            <button type="button" class="role-btn" id="btn-login-entidad" onclick="selectLoginRole('ENTIDAD')"
+                    style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; width: 100%; padding: 0.85rem; border: none; border-radius: 12px; background-color: #f1f5f9; color: #334155; font-weight: 600; font-size: 0.95rem; cursor: pointer;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px;"><path d="M3 21h18"/><path d="M3 7v1a3 3 0 0 0 6 0V7m0 1a3 3 0 0 0 6 0V7m0 1a3 3 0 0 0 6 0V7H3"/><path d="M5 21V10.85M19 21V10.85"/></svg>
+                Entidad Beneficiaria
+            </button>
+
+            <button type="button" class="role-btn" id="btn-login-admin" onclick="selectLoginRole('ADMIN')"
+                    style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; width: 100%; padding: 0.85rem; border: none; border-radius: 12px; background-color: #f1f5f9; color: #334155; font-weight: 600; font-size: 0.95rem; cursor: pointer;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                Administrador
+            </button>
+        </div>
+
+            <!-- FORMULARIO DE LOGIN -->
+            <form th:action="@{/acceso/login}" method="post" id="login-form">
+
+                <!-- Rol oculto -->
+                <input type="hidden" name="tipoUsuario" id="input-tipo-usuario" value="DONANTE">
+
+                <!-- Mensajes de Error y Logout -->
+                <div th:if="${param.error != null or error != null}" class="toast error" style="margin-bottom: 1.25rem; position: relative; bottom: 0; right: 0;">
+                    <span th:text="${error != null ? error : 'Usuario o contraseña incorrectos.'}">Error al iniciar sesión.</span>
+                </div>
+
+                <div th:if="${param.logout != null}" class="toast info" style="margin-bottom: 1.25rem; position: relative; bottom: 0; right: 0;">
+                    <span>Sesión cerrada correctamente.</span>
+                </div>
+
+                <!-- CAMPO: EMAIL -->
+                <div class="form-group">
+                    <label for="username">Correo electrónico</label>
+                    <div class="input-icon-wrapper">
+                            <span class="input-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                            </span>
+                        <input type="email" id="username" name="username" placeholder="correo@ejemplo.com" required autofocus>
+                    </div>
+                </div>
+
+                <!-- CAMPO: CONTRASEÑA -->
+                <div class="form-group">
+                    <label for="password">Contraseña</label>
+                    <div class="input-icon-wrapper">
+                            <span class="input-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                            </span>
+                        <input type="password" id="password" name="password" placeholder="Tu contraseña" required>
+                    </div>
+                </div>
+
+                <!-- RECORDARME Y OLVIDO DE CLAVE -->
+                <div class="form-row-between">
+                    <label class="remember-check">
+                        <input type="checkbox" name="remember-me" id="remember-me">
+                        <span>Recordarme</span>
+                    </label>
+                    <a th:href="@{/acceso/recuperar-clave}" class="auth-switch-link" style="margin-top: 0;">¿Olvidaste tu contraseña?</a>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block">Iniciar Sesión</button>
+            </form>
+
+            <p class="auth-switch-link">
+                ¿Aún no tienes cuenta? <a th:href="@{/acceso/registro}">Regístrate aquí</a>
+            </p>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{layoutAcceso/layoutAcceso :: footer}"></footer>
+
+<script>
+    function selectLoginRole(role) {
+        document.getElementById('input-tipo-usuario').value = role;
+
+        document.getElementById('btn-login-donante').classList.remove('active');
+        document.getElementById('btn-login-entidad').classList.remove('active');
+        document.getElementById('btn-login-admin').classList.remove('active');
+
+        if (role === 'DONANTE') {
+            document.getElementById('btn-login-donante').classList.add('active');
+        } else if (role === 'ENTIDAD') {
+            document.getElementById('btn-login-entidad').classList.add('active');
+        } else if (role === 'ADMIN') {
+            document.getElementById('btn-login-admin').classList.add('active');
+        }
+    }
+</script>
+
+</body>
+</html>

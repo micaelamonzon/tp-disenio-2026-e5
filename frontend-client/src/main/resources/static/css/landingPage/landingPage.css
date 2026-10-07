@@ -1,3 +1,4 @@
+
 /* ===================== TOKENS & SYSTEM VARIABLES ===================== */
 :root {
     --bg: #f8fafc;
@@ -59,55 +60,67 @@ a:hover {
     text-decoration: underline;
 }
 
-/* ===================== TOPBAR HEADER ===================== */
+/* ===================== TOPBAR & HEADER ===================== */
 .topbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem 2rem;
     background-color: var(--card);
+    width: 100%;
+    height: 70px;
+    display: flex;
+    align-items: center;
     border-bottom: 1px solid var(--border);
     position: sticky;
     top: 0;
     z-index: 1000;
 }
 
+.topbar-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
 .topbar-left {
     display: flex;
     align-items: center;
-    gap: 2.5rem;
 }
 
 .logo-link {
     display: flex;
     align-items: center;
-    color: var(--blue);
     text-decoration: none !important;
 }
 
 .logo-icon svg {
-    margin-left: 150px;
-    width: 28px;
-    height: 28px;
+    width: 32px;
+    height: 32px;
     color: var(--blue);
+    display: block;
 }
 
-.main-nav {
+/* Enlaces de navegación principal */
+.nav-links {
     display: flex;
-    gap: 1.5rem;
+    align-items: center;
+    gap: 2rem;
 }
 
-.main-nav-link {
+.nav-item {
     color: var(--text-soft);
+    font-size: 0.95rem;
     font-weight: 500;
-    padding: 0.5rem 0.25rem;
-    border-bottom: 2px solid transparent;
-    transition: all 0.2s;
+    text-decoration: none;
+    padding: 0.5rem 0;
+    transition: color 0.2s ease;
 }
 
-.main-nav-link:hover, .main-nav-link.active {
-    color: var(--blue);
-    border-bottom-color: var(--blue);
+.nav-item:hover,
+.nav-item.active {
+    color: var(--blue-dark);
+    font-weight: 600;
     text-decoration: none;
 }
 
@@ -115,6 +128,25 @@ a:hover {
     display: flex;
     align-items: center;
     gap: 0.75rem;
+}
+
+/* Botón Iniciar Sesión */
+.btn-login-figma {
+    background-color: var(--blue);
+    color: #ffffff;
+    padding: 0.55rem 1.25rem;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease;
+}
+
+.btn-login-figma:hover {
+    background-color: var(--blue-dark);
 }
 
 .user-chip {
@@ -134,7 +166,7 @@ a:hover {
     text-transform: uppercase;
 }
 
-/* ===================== WIDGET PERFIL USUARIO (IMAGEN 1) ===================== */
+/* ===================== WIDGET PERFIL USUARIO ===================== */
 .user-profile-widget {
     display: flex;
     align-items: center;
@@ -150,7 +182,6 @@ a:hover {
     background: var(--bg-elev);
 }
 
-/* Tamaño de 44px con degradado violeta/rosa de la imagen */
 .avatar {
     width: 44px;
     height: 44px;
@@ -323,8 +354,29 @@ a:hover {
 .hero-actions {
     display: flex;
     justify-content: center;
+    align-items: center;
     gap: 1rem;
     flex-wrap: wrap;
+}
+
+/* Estilo para el nuevo botón "Ver mapa de donaciones" al lado de Registrarse */
+.btn-hero-map {
+    background-color: transparent;
+    border: 1.5px solid #ffffff;
+    color: #ffffff;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1.25rem;
+    border-radius: var(--radius-md);
+    text-decoration: none !important;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.btn-hero-map:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
 }
 
 .blue-header-banner {
@@ -359,24 +411,22 @@ a:hover {
 }
 
 .feature-card {
-    background: var(--card);
-    padding: 2rem;
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--border);
+    background: transparent;
+    border: none;
+    box-shadow: none;
     text-align: center;
-    box-shadow: var(--shadow-card);
 }
 
 .feature-icon {
-    width: 56px;
-    height: 56px;
-    background-color: var(--blue-soft-bg);
-    color: var(--blue);
+    width: 50px;
+    height: 50px;
+    background-color: #e8f0fe;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0 auto 1.25rem;
+    margin: 0 auto 1rem auto;
+    color: #2563eb;
 }
 
 .feature-icon svg {
@@ -430,7 +480,7 @@ a:hover {
     font-size: 0.88rem;
 }
 
-/* ACCESOS RÁPIDOS */
+/* ACCESOS RÁPIDOS (TEXTO EN BLANCO SEGÚN LA CUARTA IMAGEN) */
 .quick-access-card {
     background: var(--blue);
     color: #ffffff;
@@ -445,10 +495,24 @@ a:hover {
     transform: translateY(-4px);
 }
 
+.quick-access-card h3,
+.quick-access-card h4,
+.quick-access-card p,
+.quick-access-card span {
+    color: #ffffff !important;
+}
+
+.quick-access-card p {
+    opacity: 0.9;
+    font-size: 0.92rem;
+    margin-top: 0.5rem;
+}
+
 .quick-icon svg {
     width: 48px;
     height: 48px;
     margin-bottom: 1rem;
+    color: #ffffff;
 }
 
 /* CTA BANNER */
@@ -753,7 +817,6 @@ a:hover {
     font-size: 0.9rem;
 }
 
-/* Contenedor principal de redes */
 .social-links {
     display: flex;
     gap: 12px;
@@ -761,14 +824,13 @@ a:hover {
     margin-top: 12px;
 }
 
-/* Estilo base de los botones cuadrangulares con bordes redondeados */
 .social-btn {
     width: 48px;
     height: 48px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    border-radius: 14px; /* Esquinas suavizadas idénticas a la imagen 1 */
+    border-radius: 14px;
     color: #ffffff;
     text-decoration: none;
     transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
@@ -779,36 +841,16 @@ a:hover {
     height: 24px;
 }
 
-/* Colores exactos de la primera imagen */
-.social-btn.facebook {
-    background-color: #1877f2; /* Azul Facebook */
-}
+.social-btn.facebook { background-color: #1877f2; }
+.social-btn.instagram { background-color: #e1306c; }
+.social-btn.twitter { background-color: #00a2ed; }
+.social-btn.linkedin { background-color: #0a66c2; }
 
-.social-btn.instagram {
-    background-color: #e1306c; /* Magenta / Rosa Instagram */
-}
-
-.social-btn.twitter {
-    background-color: #00a2ed; /* Celeste Twitter */
-}
-
-.social-btn.linkedin {
-    background-color: #0a66c2; /* Azul oscuro LinkedIn */
-}
-
-/* Efecto hover interactivo */
 .social-btn:hover {
     transform: translateY(-3px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     filter: brightness(1.08);
 }
-
-.social-icons {
-    display: flex;
-    gap: 0.5rem;
-    margin-top: 0.5rem;
-}
-
 
 .location-card {
     background: var(--card);
@@ -921,7 +963,6 @@ a:hover {
     gap: 4px;
 }
 
-/* Variante apilada (login: Donante / Entidad / Administrador) */
 .role-selector.trio {
     flex-direction: column;
 }
@@ -989,7 +1030,6 @@ a:hover {
     border-color: var(--blue);
 }
 
-/* Iconos dentro de los inputs */
 .input-icon-wrapper {
     position: relative;
 }
@@ -1013,7 +1053,6 @@ a:hover {
     padding-left: 2.75rem;
 }
 
-/* Checkbox de Términos y Condiciones */
 .terms-check {
     display: flex;
     align-items: flex-start;
@@ -1032,7 +1071,6 @@ a:hover {
     accent-color: var(--blue);
 }
 
-/* Fila "Recordarme" / "¿Olvidaste tu contraseña?" del login */
 .form-row-between {
     display: flex;
     justify-content: space-between;
@@ -1119,11 +1157,12 @@ a:hover {
 }
 
 /* ===================== FOOTER ===================== */
-.site-footer {
+.footer {
     background-color: #0f172a;
     color: #94a3b8;
     margin-top: auto;
     border-top: 1px solid #1e293b;
+    padding: 3rem 0 1.5rem 0;
 }
 
 .footer-content {
@@ -1132,26 +1171,33 @@ a:hover {
     gap: 2rem;
 }
 
-.footer-col h3 {
+.footer-column h3 {
     color: #ffffff;
     font-size: 1.1rem;
     margin-bottom: 1rem;
 }
 
-.footer-col ul { list-style: none; }
-.footer-col li { margin-bottom: 0.5rem; }
-.footer-col a { color: #94a3b8; }
-.footer-col a:hover { color: #ffffff; }
+.footer-column ul { list-style: none; }
+.footer-column li { margin-bottom: 0.5rem; }
+.footer-column a { color: #94a3b8; text-decoration: none; }
+.footer-column a:hover { color: #ffffff; }
+
+.footer-divider {
+    border: none;
+    border-top: 1px solid #1e293b;
+    margin: 2rem 0 1.5rem 0;
+}
 
 .footer-bottom {
     text-align: center;
-    padding: 1.5rem;
-    border-top: 1px solid #1e293b;
     font-size: 0.85rem;
 }
 
 /* RESPONSIVE */
 @media (max-width: 768px) {
+    .nav-links {
+        gap: 1rem;
+    }
     .contact-grid {
         grid-template-columns: 1fr;
     }

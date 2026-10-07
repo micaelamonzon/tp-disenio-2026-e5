@@ -1,0 +1,193 @@
+package ar.edu.utn.frba.ddsi.controllers;
+
+import ar.edu.utn.frba.ddsi.dtos.donaciones.DonacionDTO;
+import ar.edu.utn.frba.ddsi.dtos.donaciones.RegistroEntidadBeneficiariaDTO;
+import ar.edu.utn.frba.ddsi.dtos.donaciones.RegistroPersonaHumanaDTO;
+import ar.edu.utn.frba.ddsi.dtos.donaciones.RegistroPersonaJuridicaDTO;
+import ar.edu.utn.frba.ddsi.services.DonacionesApiService;
+import ar.edu.utn.frba.ddsi.services.DonacionesService;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Controller
+@RequestMapping("/acceso")
+public class AccesoController {
+    private final DonacionesService donacionesService;
+    private final Long idHumanoEtapa1;
+    private final Long idJuridicoEtapa1;
+    private final DonacionesApiService donacionesApiService;
+
+    public AccesoController(DonacionesService donacionesService,
+                            @Value("${etapa1.donante.id:1}") Long idHumanoEtapa1,
+                            @Value("${etapa1.juridico.id:1}") Long idJuridicoEtapa1, DonacionesApiService donacionesApiService) {
+        this.donacionesService = donacionesService;
+        this.idHumanoEtapa1 = idHumanoEtapa1;
+        this.idJuridicoEtapa1 = idJuridicoEtapa1;
+        this.donacionesApiService = donacionesApiService;
+    }
+
+    private List<DonacionDTO> obtenerTodasLasDonacionesPublicas() {
+        List<DonacionDTO> donacionesTotales = new ArrayList<>();
+        try {
+            List<DonacionDTO> humanas = donacionesService.obtenerDonacionesDeHumano(idHumanoEtapa1);
+            if (humanas != null) {
+                donacionesTotales.addAll(humanas);
+            }
+        } catch (RuntimeException e) {
+            // Manejo en caso de fallo parcial del endpoint
+        }
+        try {
+            List<DonacionDTO> juridicas = donacionesService.obtenerDonacionesDeJuridico(idJuridicoEtapa1);
+            if (juridicas != null) {
+                donacionesTotales.addAll(juridicas);
+            }
+        } catch (RuntimeException e) {
+            // Manejo en caso de fallo parcial del endpoint
+        }
+
+        return donacionesTotales;
+    }
+
+    @GetMapping({"", "/", "/landing"})
+    public String landing(Model model) {
+        model.addAttribute("titulo", "Inicio");
+        model.addAttribute("tabActiva", "landing");
+        try {
+            List<DonacionDTO> destacadas = obtenerTodasLasDonacionesPublicas();
+            model.addAttribute("donacionesDestacadas", destacadas);
+        } catch (RuntimeException e) {
+            model.addAttribute("error", "El servicio de donaciones no está disponible. Intentá de nuevo en unos minutos.");
+            model.addAttribute("donacionesDestacadas", List.of());
+        }
+        return "acceso/landigPage/landing";
+    }
+
+    @GetMapping("/galeria")
+    public String galeria(Model model) {
+        model.addAttribute("titulo", "Galería de Donaciones");
+        model.addAttribute("tabActiva", "galeria");
+        try {
+            List<DonacionDTO> todas = obtenerTodasLasDonacionesPublicas();
+            model.addAttribute("donaciones", todas);
+        } catch (RuntimeException e) {
+            model.addAttribute("error", "El servicio de donaciones no está disponible. Intentá de nuevo en unos minutos.");
+            model.addAttribute("donaciones", List.of());
+        }
+        return "acceso/landigPage/galeria";
+    }
+
+    @GetMapping("/mapa")
+    public String mapa(Model model) {
+        model.addAttribute("titulo", "Mapa de Donaciones");
+        model.addAttribute("tabActiva", "mapa");
+        try {
+            List<DonacionDTO> todas = obtenerTodasLasDonacionesPublicas();
+            model.addAttribute("donacionesMapa", todas);
+        } catch (RuntimeException e) {
+            model.addAttribute("error", "El servicio de donaciones no está disponible. Intentá de nuevo en unos minutos.");
+            model.addAttribute("donacionesMapa", List.of());
+        }
+        return "acceso/landigPage/mapa";
+    }
+
+    @GetMapping({"/legal", "/terminos"})
+    public String legal(Model model) {
+        model.addAttribute("titulo", "Términos y Legales");
+        model.addAttribute("tabActiva", "legal");
+        return "acceso/landigPage/legal";
+    }
+
+    @GetMapping("/sobre-nosotros")
+    public String sobreNosotros(Model model) {
+        model.addAttribute("titulo", "Sobre Nosotros");
+        model.addAttribute("tabActiva", "sobre-nosotros");
+        return "acceso/landigPage/sobre-nosotros";
+    }
+
+    @GetMapping("/contacto")
+    public String contacto(Model model, HttpServletRequest request) {
+        request.getSession(true);
+
+        model.addAttribute("titulo", "Contacto");
+        model.addAttribute("tabActiva", "contacto");
+
+        return "acceso/landigPage/contacto";
+    }
+
+    @PostMapping("/contacto")
+    public String procesarContacto(@RequestParam String nombre, Model model) {
+        model.addAttribute("titulo", "Contacto");
+        model.addAttribute("tabActiva", "contacto");
+        model.addAttribute("mensajeEnviado", "¡Gracias " + nombre + "! Tu mensaje ha sido enviado con éxito.");
+
+        return "acceso/landigPage/contacto";
+    }
+
+    @GetMapping("/login")
+    public String mostrarLogin(Model model) {
+        model.addAttribute("titulo", "Iniciar Sesión");
+        model.addAttribute("tabActiva", "");
+        return "acceso/landigPage/login";
+    }
+
+    @GetMapping("/registro")
+    public String registro(Model model) {
+        model.addAttribute("titulo", "Registro de Usuarios");
+        model.addAttribute("tabActiva", "registro");
+
+        model.addAttribute("registroPersonaHumana", new RegistroPersonaHumanaDTO());
+        model.addAttribute("registroPersonaJuridica", new RegistroPersonaJuridicaDTO());
+        model.addAttribute("registroEntidadBeneficiaria", new RegistroEntidadBeneficiariaDTO());
+
+        return "acceso/landigPage/registro";
+    }
+
+    @PostMapping("/registro/donante-humana")
+    public String registrarPersonaHumana(@ModelAttribute RegistroPersonaHumanaDTO dto, Model model) {
+        try {
+            donacionesApiService.registrarDonanteHumano(dto);
+            return "redirect:/acceso/login?registroExitoso=true";
+        } catch (Exception e) {
+            model.addAttribute("titulo", "Registro de Usuarios");
+            model.addAttribute("tabActiva", "registro");
+            model.addAttribute("tipoFormulario", "donante-humana");
+            model.addAttribute("error", "No se pudo registrar la persona humana: " + e.getMessage());
+            return "acceso/landigPage/registro";
+        }
+    }
+
+    @PostMapping("/registro/donante-juridica")
+    public String registrarPersonaJuridica(@ModelAttribute RegistroPersonaJuridicaDTO dto, Model model) {
+        try {
+            donacionesApiService.registrarDonanteJuridico(dto);
+            return "redirect:/acceso/login?registroExitoso=true";
+        } catch (Exception e) {
+            model.addAttribute("titulo", "Registro de Usuarios");
+            model.addAttribute("tabActiva", "registro");
+            model.addAttribute("tipoFormulario", "donante-juridica");
+            model.addAttribute("error", "No se pudo registrar la empresa/entidad: " + e.getMessage());
+            return "acceso/landigPage/registro";
+        }
+    }
+
+    @PostMapping("/registro/entidad-beneficiaria")
+    public String registrarEntidadBeneficiaria(@ModelAttribute RegistroEntidadBeneficiariaDTO dto, Model model) {
+        try {
+            donacionesApiService.registrarEntidadBeneficiaria(dto);
+            return "redirect:/acceso/login?registroExitoso=true";
+        } catch (Exception e) {
+            model.addAttribute("titulo", "Registro de Usuarios");
+            model.addAttribute("tabActiva", "registro");
+            model.addAttribute("tipoFormulario", "entidad-beneficiaria");
+            model.addAttribute("error", "No se pudo registrar la entidad beneficiaria: " + e.getMessage());
+            return "acceso/landigPage/registro";
+        }
+    }
+
+}
