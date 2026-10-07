@@ -14,7 +14,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @Entity
-@Table(name = "Categoria")
+@Table(name = "Categoria") //categoria de donacion
 public class Categoria extends Persistente {
     @Column
     private String nombre;

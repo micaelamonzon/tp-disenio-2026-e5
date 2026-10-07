@@ -1,146 +1,150 @@
-// Datos de ejemplo: se reemplazan cuando se integre con el servicio de logística
-const activeDeliveries = [
-  {
-    id: "DON-001",
-    truckId: "CAMION-A1",
-    status: "En traslado",
-    eta: "45 minutos",
-    progress: 45,
-    destination: "Centro Comunitario San Martín, Av. Rivadavia 1234, CABA",
-    items: ["Alimentos no perecederos", "Agua mineral", "Ropa de invierno"],
-    lastUpdate: "hace menos de 1 minuto",
-    truckPos: { x: 34, y: 42 },
-    destPos: { x: 42, y: 34 }
-  },
-  {
-    id: "DON-002",
-    truckId: "CAMION-B2",
-    status: "En traslado",
-    eta: "15 minutos",
-    progress: 90,
-    destination: "Fundación Esperanza, Calle Bolívar 567, Buenos Aires",
-    items: ["Medicamentos", "Artículos de higiene"],
-    lastUpdate: "hace menos de 1 minuto",
-    truckPos: { x: 21, y: 53 },
-    destPos: { x: 48, y: 76 }
-  }
-];
+/* =====================================================================
+ * Seguimiento de entregas - mapa OpenStreetMap (Leaflet)
+ *
+ * Espera una lista global `window.ENTREGAS_ACTIVAS` (la inyecta Thymeleaf):
+ * [{
+ *   id: "DON-001",
+ *   truckId: "CAMION-A1",
+ *   status: "En traslado",
+ *   destination: "Centro Comunitario San Martín, Av. Rivadavia 1234, CABA",
+ *   destLat: -34.6095, destLng: -58.3925,
+ *   progress: 45,                       // opcional
+ *   lastUpdate: "hace menos de 1 minuto",
+ *   posiciones: [ {latitud: -34.60, longitud: -58.38}, ... ]   // PosicionDTO, en orden
+ * }]
+ * La última posición de la lista = ubicación actual del camión.
+ * ===================================================================== */
+(function () {
+  const TRUCK_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 17h4V5H10z"/><path d="M20 17h2v-7l-3-4h-3v11h4z"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>`;
+  const PIN_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>`;
 
-const routesSvg = document.getElementById("routesSvg");
-const mapMarkers = document.getElementById("mapMarkers");
-const deliveriesList = document.getElementById("deliveriesList");
-
-let activePopoverTruckId = null;
-
-function renderTrackingMap() {
-  routesSvg.innerHTML = "";
-  mapMarkers.innerHTML = "";
-
-  activeDeliveries.forEach(del => {
-    // Dibujar línea punteada entre el camión y el destino
-    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-    line.setAttribute("x1", `${del.truckPos.x}%`);
-    line.setAttribute("y1", `${del.truckPos.y}%`);
-    line.setAttribute("x2", `${del.destPos.x}%`);
-    line.setAttribute("y2", `${del.destPos.y}%`);
-    line.setAttribute("class", "route-line");
-    routesSvg.appendChild(line);
-
-    // Marker Camión
-    const truckMarker = document.createElement("button");
-    truckMarker.className = "marker marker-truck";
-    truckMarker.style.left = `${del.truckPos.x}%`;
-    truckMarker.style.top = `${del.truckPos.y}%`;
-    truckMarker.innerHTML = ICONS.truck;
-    truckMarker.title = `Camión ${del.truckId}`;
-    truckMarker.onclick = (e) => {
-      e.stopPropagation();
-      activePopoverTruckId = activePopoverTruckId === del.truckId ? null : del.truckId;
-      renderTrackingMap();
-    };
-    mapMarkers.appendChild(truckMarker);
-
-    // Marker Destino
-    const destMarker = document.createElement("div");
-    destMarker.className = "marker marker-dest";
-    destMarker.style.left = `${del.destPos.x}%`;
-    destMarker.style.top = `${del.destPos.y}%`;
-    destMarker.innerHTML = ICONS.pin;
-    mapMarkers.appendChild(destMarker);
-
-    // Ventana emergente (Popover) si está activo
-    if (activePopoverTruckId === del.truckId) {
-      const popover = document.createElement("div");
-      popover.className = "map-popover";
-      popover.style.left = `${del.truckPos.x}%`;
-      popover.style.top = `${del.truckPos.y}%`;
-      popover.innerHTML = `
-        <div class="popover-title">
-          <span>${ICONS.truck} <b>${del.truckId}</b></span>
-        </div>
-        <div class="popover-row"><span>Donación:</span> <b>${del.id}</b></div>
-        <div class="popover-row"><span>Estado:</span> <span class="badge-status status-orange">${del.status}</span></div>
-
-        <div class="popover-dest">
-          ${ICONS.pin}
-        <div>
-            <b>Destino:</b><br>
-            ${del.destination}
-          </div>
-        </div>
-     
-        <div class="popover-pct">${del.progress}% completado</div>
-        <div class="popover-time">Última actualización: ${del.lastUpdate}</div>
-      `;
-      mapMarkers.appendChild(popover);
+  // Datos de prueba: se usan solo si el backend todavía no inyecta nada
+  const DEMO = [
+    {
+      id: "DON-001", truckId: "CAMION-A1", status: "En traslado",
+      destination: "Centro Comunitario San Martín, Av. Rivadavia 1234, CABA",
+      destLat: -34.6095, destLng: -58.3925, progress: 45,
+      lastUpdate: "hace menos de 1 minuto",
+      posiciones: [
+        { latitud: -34.6400, longitud: -58.4300 },
+        { latitud: -34.6330, longitud: -58.4150 },
+        { latitud: -34.6250, longitud: -58.4050 },
+        { latitud: -34.6180, longitud: -58.3990 }
+      ]
+    },
+    {
+      id: "DON-002", truckId: "CAMION-B2", status: "En traslado",
+      destination: "Fundación Esperanza, Calle Bolívar 567, Buenos Aires",
+      destLat: -34.6125, destLng: -58.3735, progress: 70,
+      lastUpdate: "hace menos de 1 minuto",
+      posiciones: [
+        { latitud: -34.5800, longitud: -58.4200 },
+        { latitud: -34.5900, longitud: -58.4000 },
+        { latitud: -34.6000, longitud: -58.3850 }
+      ]
     }
+  ];
+
+  const mapEl = document.getElementById("mapViewport");
+  if (!mapEl || typeof L === "undefined") return;
+
+  const map = L.map(mapEl, { zoomControl: true }).setView([-34.6037, -58.3816], 12);
+  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 19,
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>'
+  }).addTo(map);
+
+  const layer = L.layerGroup().addTo(map);
+  const truckMarkers = {}; // truckId -> marker (para enfocar desde el panel lateral)
+
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, c =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+  const truckIcon = L.divIcon({
+    className: "lf-marker lf-truck",
+    html: TRUCK_SVG, iconSize: [38, 38], iconAnchor: [19, 19], popupAnchor: [0, -22]
   });
-}
+  const destIcon = L.divIcon({
+    className: "lf-marker lf-dest",
+    html: PIN_SVG, iconSize: [34, 34], iconAnchor: [17, 17]
+  });
 
-function renderTrackingList() {
-  deliveriesList.innerHTML = activeDeliveries.map(del => `
-    <article class="delivery-card">
-      <div class="delivery-card-head">
-        <div>
-          <span class="delivery-id">${ICONS.box} ${del.id}</span>
-          <span class="badge-status status-blue">${del.status}</span>
-        </div>
-        <div class="delivery-meta-right">
-          <span class="truck-code">${del.truckId}</span>
-         
-        </div>
-      </div>
-
-   
-
-      <div class="delivery-dest">
-        ${ICONS.pin}
-        <div>
-          <b>Destino:</b><br>
-          ${del.destination}
-        </div>
-      </div>
-
-      <div class="delivery-items">
-        <span>Donaciones:</span>
-        <ul>
-          ${del.items.map(item => `<li>${item}</li>`).join("")}
-        </ul>
-      </div>
-
-      <div class="delivery-footer">
-        Última actualización: ${del.lastUpdate}
-      </div>
-    </article>
-  `).join("");
-}
-
-document.addEventListener("click", () => {
-  if (activePopoverTruckId !== null) {
-    activePopoverTruckId = null;
-    renderTrackingMap();
+  function popupHtml(e) {
+    const pct = e.progress != null
+        ? `<div class="popover-pct">${esc(e.progress)}% completado</div>` : "";
+    return `
+      <div class="popover-title"><span>${TRUCK_SVG} <b>${esc(e.truckId)}</b></span></div>
+      <div class="popover-row"><span>Donación:</span> <b>${esc(e.id)}</b></div>
+      <div class="popover-row"><span>Estado:</span> <span class="badge-status status-orange">${esc(e.status)}</span></div>
+      <div class="popover-dest">${PIN_SVG}<div><b>Destino:</b><br>${esc(e.destination)}</div></div>
+      ${pct}
+      <div class="popover-time">Última actualización: ${esc(e.lastUpdate)}</div>`;
   }
-});
 
-renderTrackingMap();
-renderTrackingList();
+  function render(entregas) {
+    layer.clearLayers();
+    Object.keys(truckMarkers).forEach(k => delete truckMarkers[k]);
+    const bounds = [];
+
+    entregas.forEach(e => {
+      const recorrido = (e.posiciones || [])
+          .filter(p => p.latitud != null && p.longitud != null)
+          .map(p => [p.latitud, p.longitud]);
+      const tieneDestino = e.destLat != null && e.destLng != null;
+      const destino = tieneDestino ? [e.destLat, e.destLng] : null;
+
+      // Recorrido ya hecho por el camión
+      if (recorrido.length > 1) {
+        L.polyline(recorrido, { color: "#3b82f6", weight: 4, opacity: 0.9 }).addTo(layer);
+        bounds.push(...recorrido);
+      }
+      // Punto de inicio de la ruta
+      if (recorrido.length > 0) {
+        L.circleMarker(recorrido[0], {
+          radius: 8,
+          color: "#3b82f6",     // anillo azul
+          weight: 5,
+          fillColor: "#ffffff", // centro blanco
+          fillOpacity: 1,
+          interactive: false
+        }).addTo(layer);
+      }
+
+      // Tramo pendiente: última posición -> destino (punteado, como antes)
+      const actual = recorrido[recorrido.length - 1];
+      if (actual && destino) {
+        L.polyline([actual, destino], {
+          color: "#3b82f6", weight: 3, dashArray: "6 6", opacity: 0.8
+        }).addTo(layer);
+      }
+
+      if (destino) {
+        L.marker(destino, { icon: destIcon, title: e.destination }).addTo(layer);
+        bounds.push(destino);
+      }
+
+      if (actual) {
+        const m = L.marker(actual, { icon: truckIcon, title: `Camión ${e.truckId}`, zIndexOffset: 500 })
+            .bindPopup(popupHtml(e), { className: "tracking-popup", minWidth: 250, maxWidth: 250 })
+            .addTo(layer);
+        truckMarkers[e.truckId] = m;
+      }
+    });
+
+    if (bounds.length) map.fitBounds(bounds, { padding: [60, 60], maxZoom: 16 });
+  }
+
+  // Click en una tarjeta del panel lateral -> centra el mapa en ese camión
+  document.querySelectorAll("[data-truck-id]").forEach(card => {
+    card.addEventListener("click", () => {
+      const m = truckMarkers[card.dataset.truckId];
+      if (m) { map.setView(m.getLatLng(), Math.max(map.getZoom(), 15)); m.openPopup(); }
+    });
+  });
+
+  const datos = Array.isArray(window.ENTREGAS_ACTIVAS) ? window.ENTREGAS_ACTIVAS : DEMO;
+  render(datos);
+
+  // Para "tiempo real" más adelante: exponé esto y llamalo con un fetch cada X segundos
+  window.actualizarSeguimiento = render;
+})();

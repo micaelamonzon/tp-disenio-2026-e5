@@ -9,12 +9,118 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
             Misiones
         </h2>
-        <div class="missions-grid" id="missionsGrid"></div>
+        <div class="missions-grid" id="missionsGrid">
+                <article class="mission-card">
+                    <div class="mission-top">
+                        <div>
+                            <h3 class="mission-name">Racha de 10</h3>
+                            <br>
+                            <p class="mission-desc">Categoria: Colaborador</p>
+                            <p class="mission-desc">Dona por 10 meses consecutivos, una donación por día.</p>
+                        </div>
+                        <span th:replace="~{fragments/iconosDeMisiones :: iconoCheck}"></span>
+                    </div>
+                    <div class="mission-progress">
+                        <div class="mission-progress-labels">
+                            <span>Progreso</span>
+                            <span>100 / 100</span>
+                        </div>
+                        <div class="progress-track">
+                            <div class="progress-fill done" style="width:100%">
+                            </div>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="mission-card">
+                    <div class="mission-top">
+                        <div>
+                            <h3 class="mission-name">Completitud de 14</h3>
+                            <p class="mission-desc">Categoria: Colaborador</p>
+                            <p class="mission-desc">Realizar donaciones de 14 categorías distintas.</p>
+                        </div>
+                        <span th:replace="~{fragments/iconosDeMisiones :: iconoCheck}" class="mission-check"></span>
+                    </div>
+                    <div class="mission-progress">
+                        <div class="mission-progress-labels">
+                            <span>Progreso</span>
+                            <span>100 / 100</span>
+                        </div>
+                        <div class="progress-track">
+                            <div class="progress-fill done" style="width:100%">
+                            </div>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="mission-card">
+                <div class="mission-top">
+                    <div>
+                        <h3 class="mission-name">Hábil Donador de 8</h3>
+                        <p class="mission-desc">Categoria: Colaborador</p>
+                        <p class="mission-desc">Lograr que una donación supere 8 de cantidad de bienes</p>
+                    </div>
+                    <span th:replace="~{fragments/iconosDeMisiones :: iconoCheck}" class="mission-check"></span>
+                </div>
+                <div class="mission-progress">
+                    <div class="mission-progress-labels">
+                        <span>Progreso</span>
+                        <span>100 / 100</span>
+                    </div>
+                    <div class="progress-track">
+                        <div class="progress-fill done" style="width:100%">
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+                <article class="mission-card">
+                    <div class="mission-top">
+                        <div>
+                            <h3 class="mission-name">Donaciones Exitosas de 5</h3>
+                            <p class="mission-desc">Categoria: Colaborador</p>
+                            <p class="mission-desc">Lograr que 5 donaciones sean recibidas exitosamente por una entidad beneficiaria.</p>
+                        </div>
+
+                    </div>
+                    <div class="mission-progress">
+                        <div class="mission-progress-labels">
+                            <span>Progreso</span>
+                            <span>10 / 100</span>
+                        </div>
+                        <div class="progress-track">
+                            <div class="progress-fill" style="width:10%">
+                            </div>
+                        </div>
+                    </div>
+                </article>
+        </div>
         <h2 class="section-title">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="6"/><path d="M15.5 13.5 17 22l-5-3-5 3 1.5-8.5"/></svg>
             Insignias
         </h2>
-        <div class="badges-grid" id="badgesGrid"></div>
+        <div class="badges-grid" id="badgesGrid">
+            <article class="badge-card unlocked ">
+                <span th:replace="~{fragments/iconosDeMisiones :: iconoCheck}" class="badge-check"></span>
+                <div class="badge-circle">🌱</div>
+                <div class="badge-name">Colaborador</div>
+                <div class="badge-desc">Completaste todas las misiones de esta categoria</div>
+            </article>
+
+            <article class="badge-card locked">
+
+                <div class="badge-circle">🛡️</div>
+                <div class="badge-name">Sostenedor</div>
+                <div class="badge-desc">Completa la mision actual y las que faltán para desbloquear esta categoria</div>
+            </article>
+
+            <article class="badge-card locked">
+
+                <div class="badge-circle">🏅</div>
+                <div class="badge-name">Transformador</div>
+                <div class="badge-desc">Completa todas las misiones de Sostenedor para alcanzar esta categoria</div>
+            </article>
+        </div>
     </section>
     <script th:src="@{/js/donante/incentivos.js}"></script>
 </div>

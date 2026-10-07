@@ -49,10 +49,11 @@ public class Donante extends Persistente {
     @JoinColumn(name = "perfil_id", referencedColumnName = "id")
     private Perfil perfil;
 
-    @OneToMany(mappedBy = "donante", fetch = FetchType.LAZY)
+
+    @OneToMany(mappedBy = "donante", fetch = FetchType.LAZY,cascade = CascadeType.ALL)
     private List<MisionParticular> misiones; //historial de misiones tanto en curso como pasadas
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "mision_en_curso_id", referencedColumnName = "id")
     private MisionParticular misionEnCurso;
 
@@ -102,6 +103,8 @@ public class Donante extends Persistente {
     public List<MisionParticular> obtenerMisionesCompletadas(){
         return this.misiones.stream().filter(m -> m.getEstado() == EstadoDeMision.COMPLETADA).collect(Collectors.toList()) ;
     }
+
+
 
     public long cantidadDonacionesEnMes(YearMonth mes) {
         return donaciones.stream()

@@ -1,7 +1,6 @@
 package ar.edu.utn.frba.ddsi.models.entities.misiones;
 
-import ar.edu.utn.frba.ddsi.models.entities.categorias.CategoriaDeMision;
-import ar.edu.utn.frba.ddsi.models.entities.categorias.TipoCategoria;
+import ar.edu.utn.frba.ddsi.models.entities.categoriasDeMisiones.CategoriaDeMision;
 import ar.edu.utn.frba.ddsi.models.entities.donaciones.DonacionSegmentada;
 import ar.edu.utn.frba.ddsi.models.entities.persona.Insignia;
 import jakarta.persistence.Column;
@@ -17,16 +16,18 @@ import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
@@ -40,8 +41,8 @@ public class Mision {
     @Enumerated(EnumType.STRING)
     private NombreDeMision nombre;
 
-    @Enumerated(EnumType.STRING)
-    private Insignia insigniaGanadora;
+    @Column(length = 16)
+    private String insigniaGanadora;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "categoria_mision_id", referencedColumnName = "id")
@@ -50,25 +51,14 @@ public class Mision {
     @Column
     private Integer ordenSecuencial; //orden de la mision dentro de la categoria
 
-    public Mision(NombreDeMision nombre) {
+    public Mision(NombreDeMision nombre, CategoriaDeMision categoria, Integer ordenSecuencial, String insigniaGanadora ) {
+        this.categoria = categoria;
+        this.ordenSecuencial = ordenSecuencial;
         this.nombre = nombre;
-        this.definirInsigniaGanadora();
+        this.insigniaGanadora = insigniaGanadora;
     }
 
-    public void definirInsigniaGanadora(){
-        if(Objects.equals(this.nombre, "RACHA")){
-            this.insigniaGanadora = Insignia.RACHA;
-        }
-        else if(Objects.equals(this.nombre, "DONACIONEXITOSA")){
-            this.insigniaGanadora = Insignia.DONACIONEXITOSA;
-        }
-        else if(Objects.equals(this.nombre, "COMPLETITUD")){
-            this.insigniaGanadora = Insignia.COMPLETITUD;
-        }
-        else if(Objects.equals(this.nombre, "HABILDONADOR")){
-            this.insigniaGanadora = Insignia.HABILDONADOR;
-        }
-    }
+
 
     public AvanceDeMision seCompletoLaMision(List<DonacionSegmentada> donaciones){
         //lo reescriben las clases hijas

@@ -1,6 +1,4 @@
-package ar.edu.utn.frba.ddsi.models.entities.categorias;
-import ar.edu.utn.frba.ddsi.models.entities.donaciones.DonacionSegmentada;
-import ar.edu.utn.frba.ddsi.models.entities.misiones.EstadoDeMision;
+package ar.edu.utn.frba.ddsi.models.entities.categoriasDeMisiones;
 import ar.edu.utn.frba.ddsi.models.entities.misiones.Mision;
 import ar.edu.utn.frba.ddsi.models.entities.persistente.Persistente;
 import jakarta.persistence.Entity;
@@ -14,7 +12,6 @@ import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Data
 @Entity

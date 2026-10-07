@@ -131,4 +131,22 @@ public class DonanteController {
         model.addAttribute("tabActiva", "notificaciones");
         return "acceso/donante/notificaciones";
     }
+
+    @GetMapping("/perfil")
+    public String perfil(Model model) {
+        model.addAttribute("titulo", "Mi Perfil");
+        model.addAttribute("tabActiva", "");
+
+        return "acceso/donante/perfil";
+    }
+
+    @GetMapping("/logout")
+    public String logout(Model model) {
+        model.addAttribute("titulo", "Logout");
+        model.addAttribute("tabActiva", "");
+
+        return "acceso/donante/logout";
+    }
+
+
 }

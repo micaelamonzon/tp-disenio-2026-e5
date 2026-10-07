@@ -4,5 +4,14 @@ public enum NombreDeMision {
     RACHA,
     HABIL_DONADOR,
     DONACIONES_EXITOSAS,
-    COMPLETITUD
+    COMPLETITUD;
+
+    public static boolean perteneceAEnum(String texto) {
+        try {
+            NombreDeMision.valueOf(texto);
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+    }
 }

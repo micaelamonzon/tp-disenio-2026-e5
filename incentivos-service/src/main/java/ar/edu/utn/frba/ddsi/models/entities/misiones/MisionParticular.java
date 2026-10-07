@@ -14,12 +14,15 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-@Data
+@Setter
+@Getter
 @NoArgsConstructor
 @Entity
 @Table(name = "MisionParticular")
@@ -49,8 +52,9 @@ public class MisionParticular extends Persistente {
     private LocalDateTime fechaUltimoAvance;
 
 
-    public MisionParticular(Mision mision) {
+    public MisionParticular(Mision mision, Donante donante) {
         this.mision = mision;
+        this.donante = donante;
         this.estado=EstadoDeMision.ACTUAL;
     }
 

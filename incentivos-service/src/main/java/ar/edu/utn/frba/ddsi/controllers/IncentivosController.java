@@ -1,7 +1,6 @@
 package ar.edu.utn.frba.ddsi.controllers;
 
 import ar.edu.utn.frba.ddsi.dto.*;
-import ar.edu.utn.frba.ddsi.models.entities.persona.Donante;
 import ar.edu.utn.frba.ddsi.models.entities.persona.Insignia;
 import ar.edu.utn.frba.ddsi.models.entities.persona.RankingMensual;
 import ar.edu.utn.frba.ddsi.models.entities.persona.TipoDeDonante;
@@ -11,6 +10,7 @@ import ar.edu.utn.frba.ddsi.services.impl.InsigniaPublicadorService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 
 import java.util.List;
 
@@ -33,10 +33,10 @@ public class IncentivosController {
         incentivosService.pedirDonantesAServiceDonaciones();
     }
 
-    @PostMapping("donante/mision/{id}")
+    @PostMapping("donante/{id}/mision/{misionId}")
     @ResponseStatus(HttpStatus.CREATED) //para devolver el 201
-    public void agregarMisionADonante(@PathVariable Long id, @RequestParam TipoDeDonante tipoDeDonante, @RequestBody MisionDTO misionDTO) {
-        incentivosService.agregarMisionADonante(id, tipoDeDonante,misionDTO); //sirve tanto para humano como para juridico
+    public void agregarMisionADonante(@PathVariable Long id, @RequestParam TipoDeDonante tipoDeDonante, @PathVariable Long misionId) {
+        incentivosService.agregarMisionADonante(id, tipoDeDonante,misionId); //sirve tanto para humano como para juridico
     }
 
     //Obtención de las misiones completadas por una persona donante.
@@ -81,6 +81,7 @@ public class IncentivosController {
         return ResponseEntity.ok(resultado);
     }
 
+
     @GetMapping("/admin/metricas-sistema")
     public ResponseEntity<MetricasSistemaDTO> obtenerMetricasSistema() {
         return ResponseEntity.ok(incentivosService.obtenerMetricasDelSistema());
@@ -92,6 +93,9 @@ public class IncentivosController {
         return ResponseEntity.ok(
                 incentivosService.obtenerMetricasDeImpacto(id));
     }
+
+
+
     @GetMapping("/ranking") // top 3
     public ResponseEntity<RankingMensualDTO> obtenerRankingActual() {
         RankingMensualDTO dto = incentivosService.obtenerUltimoRankingDTO();
@@ -117,4 +121,24 @@ public class IncentivosController {
         if (historial.isEmpty()) return ResponseEntity.noContent().build();
         return ResponseEntity.ok(historial);
     }
+
+
+    @PostMapping("/categoriaMision")
+    public ResponseEntity<CategoriaDeMisionDTO> crearNuevaCategoriaDeMision(@RequestBody CategoriaDeMisionDTO categoria) {
+        CategoriaDeMisionDTO nuevaCategoria = incentivosService.crearCategoriaMision(categoria);
+        if (nuevaCategoria == null)
+            return ResponseEntity.badRequest().build();
+
+        return ResponseEntity.ok(nuevaCategoria);
+    }
+
+    @PostMapping("/mision")
+    public ResponseEntity<MisionDTO> crearNuevaMision(@RequestBody MisionDTO mision){
+        MisionDTO nuevaMision = incentivosService.crearMision(mision);
+        if (nuevaMision == null)
+            return ResponseEntity.badRequest().build();
+
+        return ResponseEntity.ok(nuevaMision);
+    }
+
 }

@@ -308,6 +308,7 @@ public class DonacionesServiceImpl implements DonacionesService {
                 body.genero(),
                 body.direccion()
                 );
+
         nuevaPersona.setEdad(body.edad());
 
 
@@ -315,11 +316,8 @@ public class DonacionesServiceImpl implements DonacionesService {
         this.setearMediosDeNotificacion(body.mediosDeNotificacion(),nuevaPersona.getMediosDeNotificacion());
 
         if (body.medioDeNotificacionPredeterminado() != null) {
-            MedioDeNotificacion medio = new MedioDeNotificacion(
-                    body.medioDeNotificacionPredeterminado().tipoDeNotificacion(),
-                    body.medioDeNotificacionPredeterminado().datoDeContacto()
-            );
-            nuevaPersona.setMedioDeNotificacionPredeterminado(medio);
+            MedioDeNotificacion medioP = nuevaPersona.getMediosDeNotificacion().stream().filter( m -> m.getTipoDeNotificacion().equals(body.medioDeNotificacionPredeterminado().tipoDeNotificacion())).findFirst().get();
+            nuevaPersona.setMedioDeNotificacionPredeterminado(medioP);
         }
         System.out.println(nuevaPersona);
 
