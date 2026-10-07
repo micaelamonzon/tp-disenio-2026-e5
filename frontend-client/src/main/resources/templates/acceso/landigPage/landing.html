@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DonaTrack - UTN Solidaria</title>
+
+    <!-- CSS Estático con Spring / Thymeleaf -->
+    <link rel="stylesheet" th:href="@{/css/landingPage/landingPage.css}">
+
+    <!-- Leaflet CSS y JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body>
+
+<header th:replace="~{layoutAcceso/layoutAcceso :: header}"></header>
+<nav th:replace="~{layoutAcceso/layoutAcceso :: navBar}"></nav>
+
+<!-- ===================== PAGE: HOME ===================== -->
+<section id="page-home" class="page-section active">
+    <header class="hero-banner">
+        <div class="hero-content">
+            <h1>Transparencia en cada donación</h1>
+            <p>DonaTrack es la plataforma de gestión y trazabilidad de donaciones de UTN Solidaria. Registramos y monitoreamos cada donación desde su recepción hasta su entrega, fortaleciendo la confianza y la distribución eficiente de recursos.</p>
+
+            <!-- BOTONES CORREGIDOS SEGÚN EL DISEÑO DE LA SEGUNDA IMAGEN -->
+            <div class="hero-actions" style="display: flex; gap: 1rem; justify-content: center; align-items: center; margin-top: 1.5rem;">
+                <a th:href="@{/acceso/registro}" class="btn btn-hero-white" style="background-color: #ffffff; color: #2563eb; padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    Registrarse
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="5" y1="12" x2="19" y2="12"/>
+                        <polyline points="12 5 19 12 12 19"/>
+                    </svg>
+                </a>
+
+                <a th:href="@{/acceso/mapa}" class="btn btn-secondary" style="background: transparent; color: #ffffff; border: 1.5px solid #ffffff; padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;">
+                    <span>Ver mapa de donaciones</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path>
+                        <circle cx="12" cy="10" r="3"></circle>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <section class="section container">
+        <h2 class="section-title">¿Por qué DonaTrack?</h2>
+        <div class="grid-3">
+            <article class="feature-card">
+                <div class="feature-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+                </div>
+                <h3>Trazabilidad Total</h3>
+                <p>Seguimiento completo de cada donación desde su recepción hasta su entrega final a entidades beneficiarias.</p>
+            </article>
+            <article class="feature-card">
+                <div class="feature-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </div>
+                <h3>Confianza</h3>
+                <p>Transparencia total para donantes y beneficiarios, con registro detallado de cada transacción.</p>
+            </article>
+            <article class="feature-card">
+                <div class="feature-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                </div>
+                <h3>Impacto Social</h3>
+                <p>Potenciamos el alcance de UTN Solidaria para generar un impacto positivo y sostenible en la comunidad.</p>
+            </article>
+        </div>
+    </section>
+
+    <section class="section container">
+        <h2 class="section-title">Donaciones destacadas del último mes</h2>
+        <p class="section-subtitle">Estos son algunos ejemplos del impacto que generamos juntos</p>
+
+        <div class="grid-3" id="featured-donations">
+            <article class="donation-card" th:each="donacion : ${donacionesDestacadas}">
+                <div class="donation-img-wrapper">
+                    <img th:src="${donacion.imagenUrl}" th:alt="${donacion.titulo}" loading="lazy">
+                </div>
+                <div class="donation-card-body">
+                    <h3 th:text="${donacion.titulo}">Título de Donación</h3>
+                    <div class="donation-meta">
+                        <span>📦 <span th:text="${donacion.entidad}">Entidad</span></span>
+                        <span>📍 <span th:text="${donacion.ubicacion}">Ubicación</span></span>
+                        <span>📅 <span th:text="${#temporals.format(donacion.fecha, 'dd/MM/yyyy')}">01/01/2026</span></span>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </section>
+
+    <!-- ACCESOS RÁPIDOS -->
+    <section class="section container">
+        <h2 class="section-title">Accesos rápidos</h2>
+        <div class="grid-3">
+            <a th:href="@{/acceso/galeria}" class="quick-access-card" style="text-decoration:none; color:inherit;">
+                <div class="quick-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                </div>
+                <h3>Galería de Donaciones</h3>
+                <p>Visualiza fotos de donaciones entregadas sin necesidad de iniciar sesión.</p>
+            </a>
+
+            <a th:href="@{/acceso/legal}" class="quick-access-card" style="text-decoration:none; color:inherit;">
+                <div class="quick-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                </div>
+                <h3>Información Legal y Privacidad</h3>
+                <p>Consulta nuestras políticas de privacidad, términos y condiciones del sistema.</p>
+            </a>
+
+            <a th:href="@{/acceso/registro}" class="quick-access-card" style="text-decoration:none; color:inherit;">
+                <div class="quick-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>
+                </div>
+                <h3>Únete a Nosotros</h3>
+                <p>Regístrate como donante o entidad beneficiaria y forma parte del cambio.</p>
+            </a>
+        </div>
+    </section>
+
+    <section class="cta-banner">
+        <h2>¿Listo para hacer la diferencia?</h2>
+        <p>Únete a nuestra comunidad de donantes y entidades beneficiarias. Juntos podemos generar un impacto sostenible en la sociedad.</p>
+        <a th:href="@{/acceso/registro}" class="btn btn-hero-white">Registrarse</a>
+    </section>
+</section>
+
+</main>
+
+<footer th:replace="~{layoutAcceso/layoutAcceso :: footer}"></footer>
+
+<!-- JS Estático con Thymeleaf -->
+<script th:src="@{/js/landigPage.js}"></script>
+</body>
+</html>

@@ -1,6 +1,9 @@
 package ar.edu.utn.frba.ddsi.services;
 
 import ar.edu.utn.frba.ddsi.dtos.donaciones.DonacionDTO;
+import ar.edu.utn.frba.ddsi.dtos.donaciones.RegistroEntidadBeneficiariaDTO;
+import ar.edu.utn.frba.ddsi.dtos.donaciones.RegistroPersonaHumanaDTO;
+import ar.edu.utn.frba.ddsi.dtos.donaciones.RegistroPersonaJuridicaDTO;
 import ar.edu.utn.frba.ddsi.dtos.entidades.EntidadBeneficiariaDTO;
 import ar.edu.utn.frba.ddsi.dtos.entidades.NecesidadDTO;
 import org.slf4j.Logger;
@@ -99,4 +102,50 @@ public class DonacionesApiService {
             super("No encontramos la entidad beneficiaria " + id + ".");
         }
     }
+
+    /** POST /servicioDeDonaciones/donantes/humana */
+    public void registrarDonanteHumano(RegistroPersonaHumanaDTO dto) {
+        try {
+            webClient.post()
+                    .uri(donacionesServiceUrl + "/donantes/humana")
+                    .bodyValue(dto)
+                    .retrieve()
+                    .toBodilessEntity()
+                    .block();
+        } catch (Exception e) {
+            log.error("Error registrando donante humano en donaciones-service", e);
+            throw new RuntimeException("No se pudo registrar el donante humano", e);
+        }
+    }
+
+    /** POST /servicioDeDonaciones/donantes/juridica */
+    public void registrarDonanteJuridico(RegistroPersonaJuridicaDTO dto) {
+        try {
+            webClient.post()
+                    .uri(donacionesServiceUrl + "/donantes/juridica")
+                    .bodyValue(dto)
+                    .retrieve()
+                    .toBodilessEntity()
+                    .block();
+        } catch (Exception e) {
+            log.error("Error registrando donante jurídico en donaciones-service", e);
+            throw new RuntimeException("No se pudo registrar la empresa o donante jurídico", e);
+        }
+    }
+
+    /** POST /servicioDeDonaciones/entidades-beneficiarias */
+    public void registrarEntidadBeneficiaria(RegistroEntidadBeneficiariaDTO dto) {
+        try {
+            webClient.post()
+                    .uri(donacionesServiceUrl + "/entidades-beneficiarias")
+                    .bodyValue(dto)
+                    .retrieve()
+                    .toBodilessEntity()
+                    .block();
+        } catch (Exception e) {
+            log.error("Error registrando entidad beneficiaria en donaciones-service", e);
+            throw new RuntimeException("No se pudo registrar la entidad beneficiaria", e);
+        }
+    }
+
 }

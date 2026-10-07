@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${titulo} + ' - DonaTrack'">Información Legal y Privacidad - DonaTrack</title>
+
+    <!-- CSS Estático -->
+    <link rel="stylesheet" th:href="@{/css/landingPage/landingPage.css}">
+    <!-- FontAwesome para íconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body style="background-color: #f8fafc; color: #334155; font-family: system-ui, -apple-system, sans-serif;">
+
+<!-- FRAGMENTOS DE HEADER Y NAVBAR -->
+<header th:replace="~{layoutAcceso/layoutAcceso :: header}"></header>
+<nav th:replace="~{layoutAcceso/layoutAcceso :: navBar}"></nav>
+
+<!-- CONTENEDOR PRINCIPAL SIN BANNER AZUL -->
+<main style="max-width: 900px; margin: 0 auto; padding: 3rem 1rem 4rem 1rem;">
+
+    <!-- TÍTULO PRINCIPAL CENTRADO -->
+    <div style="text-align: center; margin-bottom: 2.5rem;">
+        <h1 style="font-size: 2.25rem; font-weight: 800; color: #0f172a; margin: 0;">Información Legal y Privacidad</h1>
+    </div>
+
+    <!-- TARJETA 1: TÉRMINOS Y CONDICIONES -->
+    <section style="background: #ffffff; border-radius: 16px; padding: 2.5rem; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03); margin-bottom: 2rem;">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem;">
+            <i class="fa-regular fa-file-lines" style="font-size: 1.5rem; color: #2563eb;"></i>
+            <h2 style="font-size: 1.5rem; font-weight: 700; color: #1e293b; margin: 0;">Términos y Condiciones</h2>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 1.25rem; line-height: 1.6; font-size: 0.95rem; color: #475569;">
+            <div>
+                <h3 style="font-size: 1.05rem; font-weight: 700; color: #1e293b; margin-bottom: 0.35rem;">1. Aceptación de términos</h3>
+                <p style="margin: 0;">Al acceder y utilizar DonaTrack, aceptas estar sujeto a estos términos y condiciones de uso. DonaTrack es una plataforma desarrollada por UTN Solidaria para la gestión y trazabilidad de donaciones.</p>
+            </div>
+
+            <div>
+                <h3 style="font-size: 1.05rem; font-weight: 700; color: #1e293b; margin-bottom: 0.35rem;">2. Uso de la plataforma</h3>
+                <p style="margin: 0;">DonaTrack está destinado exclusivamente para la gestión de donaciones de bienes materiales en el marco de las actividades de UTN Solidaria. Los usuarios se comprometen a proporcionar información veraz y actualizada.</p>
+            </div>
+
+            <div>
+                <h3 style="font-size: 1.05rem; font-weight: 700; color: #1e293b; margin-bottom: 0.35rem;">3. Responsabilidades</h3>
+                <p style="margin: 0;">Los donantes y entidades beneficiarias son responsables de la exactitud de la información que proporcionan. UTN Solidaria se reserva el derecho de verificar la información y suspender cuentas que no cumplan con los requisitos establecidos.</p>
+            </div>
+
+            <div>
+                <h3 style="font-size: 1.05rem; font-weight: 700; color: #1e293b; margin-bottom: 0.35rem;">4. Modificaciones</h3>
+                <p style="margin: 0;">Nos reservamos el derecho de modificar estos términos en cualquier momento. Los cambios entrarán en vigor inmediatamente después de su publicación en la plataforma.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- TARJETA 2: POLÍTICA DE PRIVACIDAD -->
+    <section style="background: #ffffff; border-radius: 16px; padding: 2.5rem; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03); margin-bottom: 2rem;">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem;">
+            <i class="fa-regular fa-shield" style="font-size: 1.5rem; color: #2563eb;"></i>
+            <h2 style="font-size: 1.5rem; font-weight: 700; color: #1e293b; margin: 0;">Política de Privacidad</h2>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 1.25rem; line-height: 1.6; font-size: 0.95rem; color: #475569;">
+            <div>
+                <h3 style="font-size: 1.05rem; font-weight: 700; color: #1e293b; margin-bottom: 0.35rem;">1. Recopilación de datos</h3>
+                <p style="margin: 0;">Recopilamos información personal como nombre, email, teléfono y dirección únicamente con el propósito de gestionar las donaciones y facilitar la comunicación entre donantes y entidades beneficiarias.</p>
+            </div>
+
+            <div>
+                <h3 style="font-size: 1.05rem; font-weight: 700; color: #1e293b; margin-bottom: 0.35rem;">2. Uso de la información</h3>
+                <p style="margin-bottom: 0.5rem;">La información recopilada se utiliza exclusivamente para:</p>
+                <ul style="margin: 0; padding-left: 1.25rem; display: flex; flex-direction: column; gap: 0.35rem;">
+                    <li>Registrar y dar seguimiento a las donaciones</li>
+                    <li>Facilitar la comunicación entre las partes involucradas</li>
+                    <li>Generar reportes y estadísticas de impacto social</li>
+                    <li>Cumplir con requisitos legales y administrativos</li>
+                </ul>
+            </div>
+
+            <div>
+                <h3 style="font-size: 1.05rem; font-weight: 700; color: #1e293b; margin-bottom: 0.35rem;">3. Protección de datos</h3>
+                <p style="margin: 0;">Implementamos medidas de seguridad técnicas y organizativas apropiadas para proteger tus datos personales contra acceso no autorizado, alteración, divulgación o destrucción.</p>
+            </div>
+
+            <div>
+                <h3 style="font-size: 1.05rem; font-weight: 700; color: #1e293b; margin-bottom: 0.35rem;">4. Compartir información</h3>
+                <p style="margin: 0;">No vendemos, intercambiamos ni transferimos tu información personal a terceros sin tu consentimiento, excepto cuando sea necesario para cumplir con la ley o proteger nuestros derechos.</p>
+            </div>
+
+            <div>
+                <h3 style="font-size: 1.05rem; font-weight: 700; color: #1e293b; margin-bottom: 0.35rem;">5. Derechos del usuario</h3>
+                <p style="margin: 0;">Tienes derecho a acceder, rectificar, cancelar u oponerte al tratamiento de tus datos personales. Para ejercer estos derechos, puedes contactarnos a través de los canales oficiales de UTN Solidaria.</p>
+            </div>
+
+            <div>
+                <h3 style="font-size: 1.05rem; font-weight: 700; color: #1e293b; margin-bottom: 0.35rem;">6. Cookies y tecnologías similares</h3>
+                <p style="margin: 0;">Utilizamos cookies y tecnologías similares para mejorar la experiencia del usuario, analizar el uso de la plataforma y personalizar el contenido.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- CAJA DE CONTACTO DE DUDAS (AZUL CLARO) -->
+    <section style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 1.5rem 2rem; color: #1e3a8a;">
+        <h3 style="font-size: 1.15rem; font-weight: 700; margin: 0 0 0.5rem 0; color: #1e40af;">¿Tienes preguntas?</h3>
+        <p style="margin: 0 0 1rem 0; font-size: 0.95rem; color: #2563eb;">Si tienes alguna pregunta sobre nuestros términos y condiciones o política de privacidad, no dudes en contactarnos.</p>
+
+        <div style="font-size: 0.9rem; line-height: 1.4; color: #1e3a8a; font-weight: 500;">
+            <p style="margin: 0; font-weight: 700;">UTN Solidaria - Sede Medrano</p>
+            <p style="margin: 0;">Av. Medrano 951, CABA, Argentina</p>
+            <p style="margin: 0;">Email: <a href="mailto:utnsolidaria@frba.utn.edu.ar" style="color: #2563eb; text-decoration: underline;">utnsolidaria@frba.utn.edu.ar</a></p>
+        </div>
+    </section>
+
+</main>
+
+<!-- FRAGMENTO DE FOOTER -->
+<footer th:replace="~{layoutAcceso/layoutAcceso :: footer}"></footer>
+
+</body>
+</html>
