@@ -1,4 +1,3 @@
-/* Menú de usuario: común a todas las pantallas del donante */
 const userMenuTrigger = document.getElementById("userMenuTrigger");
 const userMenu = document.getElementById("userMenu");
 

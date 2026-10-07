@@ -1,0 +1,74 @@
+<html th:replace="~{layoutEntidad/base :: html}">
+<div th:fragment="contenido">
+    <section id="view-perfil">
+        <div class="page-head">
+            <h1>Mi Perfil</h1>
+            <p class="page-sub">Tu información como Entidad Beneficiaria</p>
+        </div>
+
+        <div class="profile-layout">
+
+
+            <div class="profile-card profile-header">
+                <div class="avatar profile-avatar">CG</div>
+                <div class="profile-header-info">
+                    <h2 class="profile-username">ComedorComunitarioLosGirasoles22</h2>
+                    <span class="profile-role">Entidad Beneficiaria</span>
+                </div>
+                <div class="profile-header-stats">
+                    <div class="profile-stat">
+                        <b>2</b>
+                        <span>Representantes</span>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="profile-card">
+                <h3 class="profile-section-title">Información de la Entidad</h3>
+                <dl class="profile-grid">
+                    <div class="profile-field">
+                        <dt>Razón Social</dt>
+                        <dd>Entidad Beneficiaria</dd>
+                    </div>
+                    <div class="profile-field">
+                        <dt>CUIT</dt>
+                        <dd>30-12345678-9</dd>
+                    </div>
+                    <div class="profile-field">
+                        <dt>Teléfono</dt>
+                        <dd>1121747299</dd>
+                    </div>
+                    <div class="profile-field profile-field-wide">
+                        <dt>Dirección</dt>
+                        <dd>Calle Falsa 123, Ciudad, Provincia</dd>
+                    </div>
+                </dl>
+            </div>
+
+
+            <div class="profile-card">
+                <h3 class="profile-section-title">Representantes de la Entidad</h3>
+                <div class="rep-list">
+                    <article class="rep-item">
+                        <div class="rep-avatar">ME</div>
+                        <div class="rep-info">
+                            <h4 class="rep-name">Maria Elena Fuscio</h4>
+                            <a class="rep-mail" href="mailto:mariaElena@gmail.com">mariaElena@gmail.com</a>
+                        </div>
+                    </article>
+                    <article class="rep-item">
+                        <div class="rep-avatar">MH</div>
+                        <div class="rep-info">
+                            <h4 class="rep-name">Mario Herrera</h4>
+                            <a class="rep-mail" href="mailto:maritoHerrera@gmail.com">maritoHerrera@gmail.com</a>
+                        </div>
+                    </article>
+                </div>
+            </div>
+
+        </div>
+    </section>
+    <script th:src="@{/js/entidades/entidades.js}"></script>
+</div>
+</html>
