@@ -22,7 +22,7 @@ public class HabilDonador extends Mision{
     public HabilDonador(NombreDeMision nombre,Integer cantidadDeBienes){
         this.setNombre(nombre);
         this.cantidadDeBienes = cantidadDeBienes;
-        setInsigniaGanadora(Insignia.HABILDONADOR);
+
     }
 
 

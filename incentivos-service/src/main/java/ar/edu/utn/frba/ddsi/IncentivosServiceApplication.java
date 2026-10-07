@@ -5,8 +5,10 @@ import ar.edu.utn.frba.ddsi.services.impl.IncentivosServiceImpl;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
+@EnableScheduling
 @EnableConfigurationProperties({RestProperties.class, NotificacionesProperties.class})
 public class IncentivosServiceApplication
 {

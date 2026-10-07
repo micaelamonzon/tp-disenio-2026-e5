@@ -44,12 +44,6 @@ public class DonacionSinSegmentar extends Persistente {
   private PersonaJuridica donanteJuridico;
 
 
-  public DonacionSinSegmentar(List<Bien> bienes, List<DonacionSegmentada> donacionesSegmentadas, String descripcionGeneral, LocalDateTime fechaDeIngreso) {
-    this.bienes = bienes;
-    this.donacionesSegmentadas = donacionesSegmentadas;
-    this.descripcionGeneral = descripcionGeneral;
-    this.fechaDeIngreso = fechaDeIngreso;
-  }
 
   public DonacionSinSegmentar(String descripcionGeneral, List<Bien> bienes, LocalDateTime fechaDeIngreso) {
     this.descripcionGeneral = descripcionGeneral;

@@ -1,7 +1,6 @@
 package ar.edu.utn.frba.ddsi.models.entities.misiones;
 
 import ar.edu.utn.frba.ddsi.models.entities.donaciones.DonacionSegmentada;
-import ar.edu.utn.frba.ddsi.models.entities.persona.Insignia;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
@@ -9,7 +8,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
-import java.util.Objects;
 
 @Data
 @NoArgsConstructor
@@ -17,12 +15,12 @@ import java.util.Objects;
 @DiscriminatorValue("DonacionesExitosas")
 public class DonacionesExitosas extends Mision{
     @Column
-    private Integer cantidadDeDonaciones;
+    private Integer cantidadDeDonacioneExitosas;
 
     public DonacionesExitosas(NombreDeMision nombre,Integer cantidadDeDonaciones){
         this.setNombre(nombre);
-        this.cantidadDeDonaciones = cantidadDeDonaciones;
-        this.setInsigniaGanadora(Insignia.DONACIONEXITOSA);
+        this.cantidadDeDonacioneExitosas = cantidadDeDonaciones;
+
     }
 
     //lograr X donaciones que sean recibidas exitosamente por una entidad beneficiaria.
@@ -38,6 +36,6 @@ public class DonacionesExitosas extends Mision{
             }
         }
 
-        return this.calcularProgresoyDistancia(cantInicial, cantidadDeDonaciones);
+        return this.calcularProgresoyDistancia(cantInicial, cantidadDeDonacioneExitosas);
     }
 }

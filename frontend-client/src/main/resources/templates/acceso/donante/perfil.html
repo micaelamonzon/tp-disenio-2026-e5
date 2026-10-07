@@ -1,0 +1,119 @@
+<html th:replace="~{layoutDonante/base :: html}">
+<div th:fragment="contenido">
+    <section id="view-perfil">
+        <div class="page-head">
+            <h1>Mi Perfil</h1>
+            <p class="page-sub">Tu actividad, insignias y progreso como persona donante</p>
+        </div>
+
+        <div class="profile-layout">
+
+
+            <div class="profile-card profile-header">
+                <div class="avatar profile-avatar">PD</div>
+                <div class="profile-header-info">
+                    <h2 class="profile-username">persona_donante</h2>
+                    <span class="profile-role">Persona Donante</span>
+                </div>
+                <div class="profile-header-stats">
+                    <div class="profile-stat">
+                        <b>3</b>
+                        <span>Insignias</span>
+                    </div>
+                    <div class="profile-stat">
+                        <b>2</b>
+                        <span>Categorías en curso</span>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="profile-card">
+                <h3 class="profile-section-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="6"/><path d="M15.5 13.5 17 22l-5-3-5 3 1.5-8.5"/></svg>
+                    Insignias ganadas
+                </h3>
+
+                <div class="badges-grid profile-badges">
+
+                    <div class="badge-card">
+                        <div class="badge-circle">🔥</div>
+                        <div class="badge-name">Racha ganadora</div>
+                        <div class="badge-desc">Misión: 5 donaciones seguidas</div>
+                    </div>
+                    <div class="badge-card">
+                        <div class="badge-circle">🏆</div>
+                        <div class="badge-name">Primera donación</div>
+                        <div class="badge-desc">Misión: Realizar tu primera donación</div>
+                    </div>
+                    <div class="badge-card">
+                        <div class="badge-circle">👩‍🔧</div>
+                        <div class="badge-name">Mecánica solidaria</div>
+                        <div class="badge-desc">Misión: Reparar un vehículo</div>
+                    </div>
+                </div>
+
+
+<!--                <p class="profile-empty" hidden>Todavía no hay insignias visibles en este perfil.</p>-->
+            </div>
+
+
+            <div class="profile-card">
+                <h3 class="profile-section-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+                    Categoría Actual
+                </h3>
+                <div class="category-chips">
+                    <!-- th:each="c : ${perfil.categoriasEnCurso}" th:text="${c}" -->
+                    <span class="category-chip">Sostenedor</span>
+
+                </div>
+            </div>
+
+
+            <div class="profile-card">
+                <h3 class="profile-section-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                    Evolución mensual
+                </h3>
+
+                <div class="evolution-chart" id="evolutionChart" role="img" aria-label="Evolución mensual de donaciones">
+
+                    <div class="evolution-col" data-valor="4">
+                        <span class="evolution-value">4</span>
+                        <div class="evolution-bar"></div>
+                        <span class="evolution-label">Abr</span>
+                    </div>
+                    <div class="evolution-col" data-valor="7">
+                        <span class="evolution-value">7</span>
+                        <div class="evolution-bar"></div>
+                        <span class="evolution-label">May</span>
+                    </div>
+                    <div class="evolution-col" data-valor="5">
+                        <span class="evolution-value">5</span>
+                        <div class="evolution-bar"></div>
+                        <span class="evolution-label">Jun</span>
+                    </div>
+                    <div class="evolution-col" data-valor="9">
+                        <span class="evolution-value">9</span>
+                        <div class="evolution-bar"></div>
+                        <span class="evolution-label">Jul</span>
+                    </div>
+                    <div class="evolution-col" data-valor="12">
+                        <span class="evolution-value">12</span>
+                        <div class="evolution-bar"></div>
+                        <span class="evolution-label">Ago</span>
+                    </div>
+                    <div class="evolution-col" data-valor="10">
+                        <span class="evolution-value">10</span>
+                        <div class="evolution-bar"></div>
+                        <span class="evolution-label">Sep</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+    <script th:src="@{/js/donante/donante.js}"></script>
+</div>
+</html>

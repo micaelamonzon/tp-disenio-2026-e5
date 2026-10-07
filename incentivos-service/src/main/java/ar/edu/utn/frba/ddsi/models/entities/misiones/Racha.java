@@ -6,11 +6,14 @@ import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @Entity
 @DiscriminatorValue("Racha")
@@ -28,7 +31,6 @@ public class Racha extends Mision{
         this.meses = mesFinal - mesInicial + 1; //calculo la cantidad de meses que dura la racha
         this.mesInicial = mesInicial; //empiezo en el mes 1
         this.mesFinal = mesFinal; // termino en el num de mes
-        this.setInsigniaGanadora(Insignia.RACHA);
     }
 
     @Override
