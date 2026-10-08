@@ -23,7 +23,7 @@ public class DonacionesService {
     }
 
     public List<DonacionDTO> obtenerDonacionesDeJuridico(Long idDonante) {
-        return donacionesApiService.obtenerDonacionesDeHumano(idDonante);
+        return donacionesApiService.obtenerDonacionesDeJuridico(idDonante);
     }
 
     public List<DonacionDTO> filtrar(List<DonacionDTO> donaciones,

@@ -17,11 +17,11 @@
     </div>
     <div class="topbar-right">
         <button class="user-menu-trigger" id="userMenuTrigger" aria-haspopup="true" aria-expanded="false">
-            <span class="avatar" aria-hidden="true">PD</span>
+            <span class="avatar" aria-hidden="true" th:text="${session.usuario?.iniciales}">PD</span>
             <div class="user-info">
-                <!-- TODO Etapa 2: nombre del usuario logueado -->
-                <span class="user-name">Persona donante</span>
-                <span class="user-role">Persona Donante</span>
+                <!-- Usuario logueado (UsuarioSesion guardado por CustomAuthProvider) -->
+                <span class="user-name" th:text="${session.usuario?.nombre}">Persona donante</span>
+                <span class="user-role" th:text="${session.usuario?.rol}">Persona Donante</span>
             </div>
         </button>
         <div class="user-menu" id="userMenu" hidden>
@@ -47,7 +47,9 @@
     <a th:href="@{/donante/entidadesBeneficiarias}" class="tab"
        th:classappend="${tabActiva == 'entidades'} ? 'active'"
        th:aria-current="${tabActiva == 'entidades'} ? 'page'">Entidades Beneficiarias</a>
+    <!-- Incentivos: solo para la persona humana donante  -->
     <a th:href="@{/donante/incentivos}" class="tab"
+       th:if="${session.usuario != null and session.usuario.esDonanteHumano()}"
        th:classappend="${tabActiva == 'incentivos'} ? 'active'"
        th:aria-current="${tabActiva == 'incentivos'} ? 'page'">Incentivos</a>
     <a th:href="@{/donante/seguimiento}" class="tab"

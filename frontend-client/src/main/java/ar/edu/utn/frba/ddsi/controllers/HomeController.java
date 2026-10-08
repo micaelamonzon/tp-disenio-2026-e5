@@ -9,7 +9,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class HomeController {
     @GetMapping("/")
     public String home() {
-        return "redirect:/donante/misDonaciones";
+        // La landing es pública; las pantallas de cada rol piden iniciar sesión
+        return "redirect:/acceso/landing";
     }
 
     @GetMapping("/404")

@@ -23,20 +23,24 @@ public class AuthApiService {
         this.authServiceUrl = authServiceUrl;
     }
 
-    /** Devuelve null si las credenciales son incorrectas (el servicio responde 404). */
-    public AuthResponseDTO login(String username, String password) {
+    /**
+     * POST /api/auth. Devuelve null si las credenciales son incorrectas
+     * (autenticacion-service responde 401 o 400 si falta el email o la contraseña).
+     * Cualquier otro error (servicio caído, 500) se lanza como excepción.
+     */
+    public AuthResponseDTO login(String email, String password) {
         try {
             return webClient.post()
                     .uri(authServiceUrl + "/auth")
-                    .bodyValue(Map.of("username", username, "password", password))
+                    .bodyValue(Map.of("email", email, "password", password))
                     .retrieve()
                     .bodyToMono(AuthResponseDTO.class)
                     .block();
         } catch (WebClientResponseException e) {
-            log.error(e.getMessage());
-            if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+            if (e.getStatusCode() == HttpStatus.UNAUTHORIZED || e.getStatusCode() == HttpStatus.BAD_REQUEST) {
                 return null;
             }
+            log.error("Error del servicio de autenticación: {}", e.getMessage());
             throw new RuntimeException("Error en el servicio de autenticación: " + e.getMessage(), e);
         } catch (Exception e) {
             throw new RuntimeException("Error de conexión con el servicio de autenticación: " + e.getMessage(), e);

@@ -20,32 +20,9 @@
     <!-- TARJETA DEL FORMULARIO -->
     <div class="form-container" style="background: #ffffff; padding: 2rem; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.04); max-width: 420px; margin: 0 auto;">
 
-        <!-- SELECTOR DE ROL (BOTONES SEPARADOS EN COLUMNA) -->
-        <div class="role-selector" style="display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.75rem;">
-            <button type="button" class="role-btn active" id="btn-login-donante" onclick="selectLoginRole('DONANTE')"
-                    style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; width: 100%; padding: 0.85rem; border: none; border-radius: 12px; background-color: #2563eb; color: #ffffff; font-weight: 600; font-size: 0.95rem; cursor: pointer;">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                Donante
-            </button>
-
-            <button type="button" class="role-btn" id="btn-login-entidad" onclick="selectLoginRole('ENTIDAD')"
-                    style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; width: 100%; padding: 0.85rem; border: none; border-radius: 12px; background-color: #f1f5f9; color: #334155; font-weight: 600; font-size: 0.95rem; cursor: pointer;">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px;"><path d="M3 21h18"/><path d="M3 7v1a3 3 0 0 0 6 0V7m0 1a3 3 0 0 0 6 0V7m0 1a3 3 0 0 0 6 0V7H3"/><path d="M5 21V10.85M19 21V10.85"/></svg>
-                Entidad Beneficiaria
-            </button>
-
-            <button type="button" class="role-btn" id="btn-login-admin" onclick="selectLoginRole('ADMIN')"
-                    style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; width: 100%; padding: 0.85rem; border: none; border-radius: 12px; background-color: #f1f5f9; color: #334155; font-weight: 600; font-size: 0.95rem; cursor: pointer;">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                Administrador
-            </button>
-        </div>
-
-            <!-- FORMULARIO DE LOGIN -->
+            <!-- FORMULARIO DE LOGIN
+                 No se elige el rol: lo determina el servicio de autenticación a partir del usuario. -->
             <form th:action="@{/acceso/login}" method="post" id="login-form">
-
-                <!-- Rol oculto -->
-                <input type="hidden" name="tipoUsuario" id="input-tipo-usuario" value="DONANTE">
 
                 <!-- Mensajes de Error y Logout -->
                 <div th:if="${param.error != null or error != null}" class="toast error" style="margin-bottom: 1.25rem; position: relative; bottom: 0; right: 0;">
@@ -56,14 +33,22 @@
                     <span>Sesión cerrada correctamente.</span>
                 </div>
 
+                <div th:if="${param.unauthorized != null}" class="toast info" role="status" style="margin-bottom: 1.25rem; position: relative; bottom: 0; right: 0;">
+                    <span>Iniciá sesión para continuar.</span>
+                </div>
+
+                <div th:if="${param.servicio != null}" class="toast error" role="alert" style="margin-bottom: 1.25rem; position: relative; bottom: 0; right: 0;">
+                    <span>No pudimos iniciar sesión: el servicio no está disponible. Intentá de nuevo en unos minutos.</span>
+                </div>
+
                 <!-- CAMPO: EMAIL -->
                 <div class="form-group">
-                    <label for="username">Correo electrónico</label>
+                    <label for="email">Correo electrónico</label>
                     <div class="input-icon-wrapper">
                             <span class="input-icon">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
                             </span>
-                        <input type="email" id="username" name="username" placeholder="correo@ejemplo.com" required autofocus>
+                        <input type="email" id="email" name="email" placeholder="correo@ejemplo.com" required autofocus>
                     </div>
                 </div>
 
@@ -78,12 +63,8 @@
                     </div>
                 </div>
 
-                <!-- RECORDARME Y OLVIDO DE CLAVE -->
-                <div class="form-row-between">
-                    <label class="remember-check">
-                        <input type="checkbox" name="remember-me" id="remember-me">
-                        <span>Recordarme</span>
-                    </label>
+                <!-- OLVIDO DE CLAVE -->
+                <div class="form-row-between" style="justify-content: flex-end;">
                     <a th:href="@{/acceso/recuperar-clave}" class="auth-switch-link" style="margin-top: 0;">¿Olvidaste tu contraseña?</a>
                 </div>
 
@@ -94,28 +75,9 @@
                 ¿Aún no tienes cuenta? <a th:href="@{/acceso/registro}">Regístrate aquí</a>
             </p>
         </div>
-    </div>
 </main>
 
 <footer th:replace="~{layoutAcceso/layoutAcceso :: footer}"></footer>
-
-<script>
-    function selectLoginRole(role) {
-        document.getElementById('input-tipo-usuario').value = role;
-
-        document.getElementById('btn-login-donante').classList.remove('active');
-        document.getElementById('btn-login-entidad').classList.remove('active');
-        document.getElementById('btn-login-admin').classList.remove('active');
-
-        if (role === 'DONANTE') {
-            document.getElementById('btn-login-donante').classList.add('active');
-        } else if (role === 'ENTIDAD') {
-            document.getElementById('btn-login-entidad').classList.add('active');
-        } else if (role === 'ADMIN') {
-            document.getElementById('btn-login-admin').classList.add('active');
-        }
-    }
-</script>
 
 </body>
 </html>

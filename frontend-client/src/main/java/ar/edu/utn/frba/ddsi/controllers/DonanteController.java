@@ -8,7 +8,7 @@ import ar.edu.utn.frba.ddsi.services.DonacionesApiService.EntidadNoEncontradaExc
 import ar.edu.utn.frba.ddsi.services.DonacionesService;
 import ar.edu.utn.frba.ddsi.services.IncentivosApiService;
 import ar.edu.utn.frba.ddsi.services.IncentivosService;
-import org.springframework.beans.factory.annotation.Value;
+import ar.edu.utn.frba.ddsi.utils.UsuarioActual;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,23 +25,19 @@ public class DonanteController {
 
     private final DonacionesService donacionesService;
     private final IncentivosService incentivosService;
-
-    // PROVISORIO, id fijo de un donante de prueba. Existe solo para probar la comunicación con la API de donaciones
-    // mientras no hay login
-    private final Long idDonanteEtapa1;
+    private final UsuarioActual usuarioActual;
 
     public DonanteController(DonacionesService donacionesService,
                              IncentivosService incentivosService,
-                             @Value("${etapa1.donante.id}") Long idDonanteEtapa1) {
+                             UsuarioActual usuarioActual) {
         this.donacionesService = donacionesService;
-        this.idDonanteEtapa1 = idDonanteEtapa1;
         this.incentivosService = incentivosService;
+        this.usuarioActual = usuarioActual;
     }
 
-
-    // TODO: modificarlo para obtener el id del usuario logueado (sesión/token del servicio de autenticacion)
+    // Id del donante logueado (viene del token de autenticacion-service, guardado en la sesión)
     private Long idDonanteActual() {
-        return idDonanteEtapa1;
+        return usuarioActual.idEnDominio();
     }
 
     @GetMapping("/misDonaciones")
@@ -56,7 +52,10 @@ public class DonanteController {
         model.addAttribute("categoriaSel", categoria);
         model.addAttribute("subcategoriaSel", subcategoria);
         try {
-            List<DonacionDTO> todas = donacionesService.obtenerDonacionesDeHumano(idDonanteActual());
+            // Humanos y jurídicos son tablas distintas en donaciones: cada uno tiene su endpoint
+            List<DonacionDTO> todas = usuarioActual.obtener().esDonanteHumano()
+                    ? donacionesService.obtenerDonacionesDeHumano(idDonanteActual())
+                    : donacionesService.obtenerDonacionesDeJuridico(idDonanteActual());
             model.addAttribute("totalSinFiltrar", todas.size());
             model.addAttribute("categorias", donacionesService.categorias(todas));
             model.addAttribute("subcategorias", donacionesService.subcategorias(todas, categoria));
