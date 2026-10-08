@@ -2,9 +2,12 @@ package ar.edu.utn.frba.ddsi.controllers;
 
 import ar.edu.utn.frba.ddsi.dtos.donaciones.DonacionDTO;
 import ar.edu.utn.frba.ddsi.dtos.entidades.EntidadBeneficiariaDTO;
+import ar.edu.utn.frba.ddsi.dtos.misiones.MisionFrontDTO;
 import ar.edu.utn.frba.ddsi.services.DonacionesApiService.DonanteNoEncontradoException;
 import ar.edu.utn.frba.ddsi.services.DonacionesApiService.EntidadNoEncontradaException;
 import ar.edu.utn.frba.ddsi.services.DonacionesService;
+import ar.edu.utn.frba.ddsi.services.IncentivosApiService;
+import ar.edu.utn.frba.ddsi.services.IncentivosService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -13,6 +16,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.Comparator;
 import java.util.List;
 
 @Controller
@@ -20,15 +24,18 @@ import java.util.List;
 public class DonanteController {
 
     private final DonacionesService donacionesService;
+    private final IncentivosService incentivosService;
 
     // PROVISORIO, id fijo de un donante de prueba. Existe solo para probar la comunicación con la API de donaciones
     // mientras no hay login
     private final Long idDonanteEtapa1;
 
     public DonanteController(DonacionesService donacionesService,
+                             IncentivosService incentivosService,
                              @Value("${etapa1.donante.id}") Long idDonanteEtapa1) {
         this.donacionesService = donacionesService;
         this.idDonanteEtapa1 = idDonanteEtapa1;
+        this.incentivosService = incentivosService;
     }
 
 
@@ -115,6 +122,15 @@ public class DonanteController {
     public String incentivos(Model model) {
         model.addAttribute("titulo", "Incentivos");
         model.addAttribute("tabActiva", "incentivos");
+        try {
+            List<MisionFrontDTO> misiones = incentivosService.obtenerMisiones(idDonanteActual()).stream()
+                    .sorted(Comparator.comparing(MisionFrontDTO::categoria)
+                            .thenComparing(MisionFrontDTO::ordenSecuencial))
+                    .toList();
+            model.addAttribute("misiones", misiones);
+        } catch (RuntimeException e) {
+            model.addAttribute("error", "El servicio de incentivos no está disponible. Intentá de nuevo en unos minutos.");
+        }
         return "acceso/donante/incentivos";
     }
 

@@ -42,16 +42,16 @@ public class Donante extends Persistente {
     @Column(name = "fechaDeRegistro")
     private LocalDateTime fechaDeRegistro;
 
-    @OneToMany(mappedBy = "donante", fetch = FetchType.LAZY)
-    private List<DonacionSegmentada> donaciones;
+    @OneToMany(mappedBy = "donante", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<DonacionSegmentada> donaciones = new ArrayList<>();
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "perfil_id", referencedColumnName = "id")
     private Perfil perfil;
 
 
     @OneToMany(mappedBy = "donante", fetch = FetchType.LAZY,cascade = CascadeType.ALL)
-    private List<MisionParticular> misiones; //historial de misiones tanto en curso como pasadas
+    private List<MisionParticular> misiones = new ArrayList<>();; //historial de misiones tanto en curso como pasadas
 
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "mision_en_curso_id", referencedColumnName = "id")
@@ -162,5 +162,11 @@ public class Donante extends Persistente {
         return YearMonth.from(fechaDeRegistro.toLocalDate()).equals(periodo);
     }
 
+    public void agregarDonacion(DonacionSegmentada donacion) {
+        if (donacion == null) {
+           return;
+        }
+        this.donaciones.add(donacion);
+    }
 
 }

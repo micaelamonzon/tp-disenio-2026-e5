@@ -37,5 +37,4 @@ public class CategoriaDeMision extends Persistente {
         this.misiones.add(mision);
     }
 
-
 }

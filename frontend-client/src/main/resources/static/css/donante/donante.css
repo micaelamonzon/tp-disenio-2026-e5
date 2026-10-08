@@ -1179,3 +1179,36 @@ a.user-menu-item { text-decoration: none; }
   .profile-header { justify-content: center; text-align: center; }
   .profile-header-stats { width: 100%; justify-content: center; }
 }
+
+/* Misión bloqueada: mismo criterio visual que .badge-card.locked */
+.mission-card.locked{ background:#e3ebf1; opacity:.65; box-shadow:none; }
+.mission-card.locked .mission-name{ color: var(--text-soft); }
+
+/* Misión en curso */
+.mission-card.current{
+  border-color: var(--blue);
+  box-shadow: 0 0 0 2px var(--blue-soft-bg), var(--shadow-card);
+}
+
+/* Candado: espejo de .mission-check pero en gris */
+.mission-lock{
+  width:26px; height:26px;
+  border-radius:50%;
+  background:#cbd5e1;
+  color: var(--text-soft);
+  display:flex; align-items:center; justify-content:center;
+  flex-shrink:0;
+}
+.mission-lock svg{ width:14px; height:14px; }
+
+.mission-locked-msg{ font-style:italic; margin-top:12px; }
+
+/* Etiqueta de estado (texto, para no depender solo del color: WCAG AA) */
+.mission-state{
+  display:inline-block;
+  margin-top:8px;
+  font-size:11px; font-weight:600;
+  padding:2px 8px; border-radius:10px;
+  background: var(--blue-soft-bg); color: var(--blue-dark);
+}
+.mission-state.done{ background: var(--green-bg); color:#0a6b43; }

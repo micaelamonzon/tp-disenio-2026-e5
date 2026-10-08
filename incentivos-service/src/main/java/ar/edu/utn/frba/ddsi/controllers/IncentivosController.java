@@ -141,4 +141,12 @@ public class IncentivosController {
         return ResponseEntity.ok(nuevaMision);
     }
 
+    @GetMapping("/misiones/todas/{id}")
+    public ResponseEntity<List<MisionFrontDTO>> obtenerTodasLasMisionesPorId(@PathVariable Long id) {
+        List<MisionFrontDTO> misiones = incentivosService.obtenerTodasLasMisionesPorId(id);
+        if (misiones.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(misiones);
+    }
 }

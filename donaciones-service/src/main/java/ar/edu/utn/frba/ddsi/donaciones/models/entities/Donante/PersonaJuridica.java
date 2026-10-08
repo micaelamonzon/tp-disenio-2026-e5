@@ -8,6 +8,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 @Data
@@ -32,6 +33,9 @@ public class PersonaJuridica {
     @Column(name = "rubro")
     private String rubro;
 
+    @Column(name = "fecha_de_registro")
+    private LocalDateTime fechaDeRegistro;
+
     @OneToMany (cascade = CascadeType.ALL)
     @JoinColumn(name = "persona_juridica_id", referencedColumnName = "id")
     private List<Representante> personasRepresentantes = new ArrayList<>();
@@ -46,6 +50,9 @@ public class PersonaJuridica {
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "donanteJuridico")
     private List<DonacionSinSegmentar> donaciones = new ArrayList<>();
+
+
+
 
     public PersonaJuridica(String cuit,String razonSocial,Tipo tipo, String rubro) {
         this.cuit = cuit;

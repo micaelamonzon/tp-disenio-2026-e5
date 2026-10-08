@@ -35,4 +35,6 @@ public interface IncentivosService {
     public CategoriaDeMisionDTO crearCategoriaMision(CategoriaDeMisionDTO dto);
 
     public MisionDTO crearMision(MisionDTO mision);
+    public List<MisionFrontDTO> obtenerTodasLasMisionesPorId(Long id);
+
 }

@@ -53,7 +53,7 @@ public class ImportadorDeCSV{
                     MedioDeNotificacion medioTelefono = new MedioDeNotificacion(TipoDeNotificacion.SMS, telefono);
                     MedioDeNotificacion medioWhatsapp = new MedioDeNotificacion(TipoDeNotificacion.WHATSAPP, telefono);
 
-                    PersonaHumana nuevoDonante = new PersonaHumana(nombre, apellido, DNI, null, null);
+                    PersonaHumana nuevoDonante = new PersonaHumana(nombre, apellido, DNI, null, null,null);
 
                     nuevoDonante.agregarMedioDeNotificacion(medioMail);
                     nuevoDonante.agregarMedioDeNotificacion(medioTelefono);

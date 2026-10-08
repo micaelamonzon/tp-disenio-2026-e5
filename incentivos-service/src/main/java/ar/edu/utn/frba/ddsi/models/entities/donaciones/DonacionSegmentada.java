@@ -37,7 +37,7 @@ public class DonacionSegmentada extends Persistente {
     @Column
     private Integer cantidadDeBienes;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "categoria_id", referencedColumnName = "id")
     private Categoria categoria;
 
