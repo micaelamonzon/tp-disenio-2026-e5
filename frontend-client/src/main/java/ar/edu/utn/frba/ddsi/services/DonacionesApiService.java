@@ -26,7 +26,7 @@ public class DonacionesApiService {
         this.donacionesServiceUrl = donacionesServiceUrl;
     }
 
-    /** GET /servicioDeDonaciones/donaciones/humano/{id} */
+
     public List<DonacionDTO> obtenerDonacionesDeHumano(Long idDonante) {
         try {
             List<DonacionDTO> donaciones = webClient.get()
@@ -49,7 +49,7 @@ public class DonacionesApiService {
             super("No encontramos al donante " + id + ".");
         }
     }
-    /** GET /servicioDeDonaciones/obtenerEntidades */
+
     public List<EntidadBeneficiariaDTO> obtenerEntidades() {
         try {
             List<EntidadBeneficiariaDTO> entidades = webClient.get()
@@ -65,7 +65,7 @@ public class DonacionesApiService {
         }
     }
 
-    /** GET /servicioDeDonaciones/obtenerEntidad/{id} */
+
     public EntidadBeneficiariaDTO obtenerEntidad(Long idEntidad) {
         try {
             return webClient.get()
@@ -81,7 +81,7 @@ public class DonacionesApiService {
         }
     }
 
-    /** GET /servicioDeDonaciones/entidad/{idEntidad}/necesidades */
+
     public List<NecesidadDTO> obtenerNecesidades(Long idEntidad) {
         try {
             List<NecesidadDTO> necesidades = webClient.get()
@@ -103,7 +103,7 @@ public class DonacionesApiService {
         }
     }
 
-    /** POST /servicioDeDonaciones/donantes/humana */
+
     public void registrarDonanteHumano(RegistroPersonaHumanaDTO dto) {
         try {
             webClient.post()
@@ -118,7 +118,7 @@ public class DonacionesApiService {
         }
     }
 
-    /** POST /servicioDeDonaciones/donantes/juridica */
+
     public void registrarDonanteJuridico(RegistroPersonaJuridicaDTO dto) {
         try {
             webClient.post()
@@ -133,7 +133,7 @@ public class DonacionesApiService {
         }
     }
 
-    /** POST /servicioDeDonaciones/entidades-beneficiarias */
+
     public void registrarEntidadBeneficiaria(RegistroEntidadBeneficiariaDTO dto) {
         try {
             webClient.post()

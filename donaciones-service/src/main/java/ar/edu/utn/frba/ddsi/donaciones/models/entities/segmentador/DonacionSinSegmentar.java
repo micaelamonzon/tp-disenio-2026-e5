@@ -9,23 +9,25 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.cglib.core.Local;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-@Data
+@Setter
 @Getter
 @NoArgsConstructor
 @Entity
 @Table(name = "donacion_sin_segmentar")
 public class DonacionSinSegmentar extends Persistente {
-  @OneToMany
+
+  @OneToMany(cascade = CascadeType.ALL)
   @JoinColumn(name = "donacionSinSegmentar_id", referencedColumnName = "id")
   private List<Bien> bienes = new ArrayList<>();
 
-  @OneToMany
+  @OneToMany(cascade = CascadeType.ALL)
   @JoinColumn(name = "donacionSinSegmentar_id", referencedColumnName = "id")
   private List<DonacionSegmentada> donacionesSegmentadas = new ArrayList<>();
 
@@ -35,19 +37,19 @@ public class DonacionSinSegmentar extends Persistente {
   @Column(name = "fecha_de_ingreso")
   private LocalDateTime fechaDeIngreso;
 
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
   @JoinColumn(name="donanteHumano_id", referencedColumnName = "id")
   private PersonaHumana donanteHumano;
 
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
   @JoinColumn(name="donanteJuridico_id", referencedColumnName = "id")
   private PersonaJuridica donanteJuridico;
 
 
 
-  public DonacionSinSegmentar(String descripcionGeneral, List<Bien> bienes, LocalDateTime fechaDeIngreso) {
+  public DonacionSinSegmentar(String descripcionGeneral, LocalDateTime fechaDeIngreso) {
     this.descripcionGeneral = descripcionGeneral;
-    this.bienes = new ArrayList<>(bienes);
+    this.bienes = new ArrayList<>();
     this.fechaDeIngreso = fechaDeIngreso;
   }
 

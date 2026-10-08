@@ -19,6 +19,7 @@ import ar.edu.utn.frba.ddsi.donaciones.repositories.DonantesHumanosRepository;
 import ar.edu.utn.frba.ddsi.donaciones.repositories.DonantesJuridicosRepository;
 import com.opencsv.exceptions.CsvValidationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
@@ -46,6 +47,7 @@ public class DonacionesServiceImpl implements DonacionesService {
     //segmentador
     private final Segmentador segmentador;
     private final CatalogoSubcategoriasService catalogoSubcategorias;
+    private final ServiceWebHook webhookAIncentivos;
 
     public DonacionesServiceImpl(DonantesHumanosRepository donantesRepository,
                                  DonantesJuridicosRepository donantesJuridicosRepository,
@@ -53,7 +55,8 @@ public class DonacionesServiceImpl implements DonacionesService {
                                  NotificacionesProperties notificacionesProperties,
                                  DonacionesRepository donacionesRepository,
                                  Segmentador segmentador,
-                                 CatalogoSubcategoriasService catalogoSubcategorias) {
+                                 CatalogoSubcategoriasService catalogoSubcategorias,
+                                 ServiceWebHook webhookAIncentivos) {
         this.segmentador = segmentador;
         this.donantesHumanosRepository = donantesRepository;
         this.restTemplate = restTemplate;
@@ -61,6 +64,7 @@ public class DonacionesServiceImpl implements DonacionesService {
         this.donacionesRepository = donacionesRepository;
         this.donantesJuridicosRepository = donantesJuridicosRepository;
         this.catalogoSubcategorias = catalogoSubcategorias;
+        this.webhookAIncentivos = webhookAIncentivos;
     }
 
 
@@ -72,9 +76,30 @@ public class DonacionesServiceImpl implements DonacionesService {
         String ruta = home + file; /*file sería la ubicación exacta, ej: "\\Desktop\\donantes_import_20000_UTF8_BOM.csv"*/
         try {
             ResultadoImportacion resultado = importador.importarCsv(ruta); /*ruta: "C:\\Users\\Analía\\Desktop\\donantes_import_20000_UTF8_BOM.csv"*/
-            resultado.humanos.forEach(this.donantesHumanosRepository::save);
-            resultado.juridicos.forEach(this.donantesJuridicosRepository::save);
-
+            this.donantesHumanosRepository.saveAll(resultado.humanos);
+            webhookAIncentivos.notificarNuevosDonantes(
+                    resultado.humanos.stream().map(h -> new PersonaDonanteDTO(
+                            h.getId(),
+                            h.getNombre(),
+                            h.getApellido(),
+                            null,
+                            null,
+                            h.getFechaDeRegistro(),
+                            this.obtenerDonacionesIncentivosDTO( h.getId(), h.getDonaciones())
+                    )).collect(Collectors.toList())
+            );
+            this.donantesJuridicosRepository.saveAll(resultado.juridicos);
+            webhookAIncentivos.notificarNuevosDonantes(
+                    resultado.juridicos.stream().map(j -> new PersonaDonanteDTO(
+                            null,
+                           null,
+                          null,
+                            j.getId(),
+                            j.getRazonSocial(),
+                            j.getFechaDeRegistro(),
+                            this.obtenerDonacionesIncentivosDTO(j.getId(),j.getDonaciones())
+                    )).collect(Collectors.toList())
+            );
         } catch (IOException | CsvValidationException e) {
             throw new RuntimeException(e);
         }
@@ -98,7 +123,8 @@ public class DonacionesServiceImpl implements DonacionesService {
                                 h.getApellido(),
                                 null,
                                 null,
-                                this.obtenerDonacionesIncentivosDTO(h.getDonaciones())
+                                h.getFechaDeRegistro(),
+                                this.obtenerDonacionesIncentivosDTO(h.getId(),h.getDonaciones())
                                 )
                         )
         );
@@ -113,7 +139,8 @@ public class DonacionesServiceImpl implements DonacionesService {
                                 null,
                                 j.getId(),
                                 j.getRazonSocial(),
-                                this.obtenerDonacionesIncentivosDTO(j.getDonaciones())
+                                j.getFechaDeRegistro(),
+                                this.obtenerDonacionesIncentivosDTO(j.getId(), j.getDonaciones())
                                 )
                         )
         );
@@ -123,7 +150,7 @@ public class DonacionesServiceImpl implements DonacionesService {
     }
 
 
-    public List<DonacionIncentivosDTO> obtenerDonacionesIncentivosDTO(List<DonacionSinSegmentar> donaciones){
+    public List<DonacionIncentivosDTO> obtenerDonacionesIncentivosDTO(Long donanteId, List<DonacionSinSegmentar> donaciones){
         return donaciones.stream()
                 .flatMap(donacionSinSegmentar -> donacionSinSegmentar.getDonacionesSegmentadas().stream())
                 .map(donacionSegmentada ->
@@ -150,7 +177,6 @@ public class DonacionesServiceImpl implements DonacionesService {
                 medioDTO = this.obtenerAMedioDTO(persona.getMedioDeNotificacionPredeterminado());
             }
 
-
             return new PersonaHumanaDTO(
                     persona.getId(),
                     persona.getNombre(),
@@ -159,6 +185,7 @@ public class DonacionesServiceImpl implements DonacionesService {
                     persona.getDNI(),
                     persona.getGenero(),
                     persona.getDireccion(),
+                    persona.getFechaDeNaciemiento(),
                     donacionesDTO,
                     mediosDTO,
                     medioDTO
@@ -268,6 +295,7 @@ public class DonacionesServiceImpl implements DonacionesService {
                 personaHumana.getDNI(),
                 personaHumana.getGenero(),
                 personaHumana.getDireccion(),
+                null,
                 donacionesDTO,
                 mediosDTO,
                 medioDTO
@@ -306,11 +334,12 @@ public class DonacionesServiceImpl implements DonacionesService {
                 body.apellido(),
                 body.DNI(),
                 body.genero(),
-                body.direccion()
+                body.direccion(),
+                body.fechaDeNacimiento()
                 );
 
-        nuevaPersona.setEdad(body.edad());
-
+            //se encraga de setear la edad de la persona humana a partir de su fecha de nacimiento
+            nuevaPersona.calcularEdad();
 
         // Mapper de DTO a entidad para el medio de notificación predeterminado y para la lista de medios
         this.setearMediosDeNotificacion(body.mediosDeNotificacion(),nuevaPersona.getMediosDeNotificacion());
@@ -323,9 +352,22 @@ public class DonacionesServiceImpl implements DonacionesService {
 
         PersonaHumana humano= this.donantesHumanosRepository.save(nuevaPersona);
 
+        webhookAIncentivos.notificarNuevoDonante(
+                new PersonaDonanteDTO(
+                        humano.getId(),
+                        humano.getNombre(),
+                        humano.getApellido(),
+                        null,
+                        null,
+                        humano.getFechaDeRegistro(),
+                        this.obtenerDonacionesIncentivosDTO(humano.getId(),humano.getDonaciones()
+                ))
+        );
+
         // Mapper de entidad a DTO para el medio de notificación predeterminado y los medios
 
         MedioDeNotificacionDTO medioDTO = null;
+
         if (humano.getMedioDeNotificacionPredeterminado() != null) {
             medioDTO = new MedioDeNotificacionDTO(
                     humano.getMedioDeNotificacionPredeterminado().getTipoDeNotificacion(),
@@ -338,6 +380,7 @@ public class DonacionesServiceImpl implements DonacionesService {
 
 
         List<DonacionSinSegmentarDTO> donacionesDTO = obtenerDonacionesSinSegmentarDTO(humano.getDonaciones());
+
         PersonaHumanaDTO nuevaPersonaDTO = new PersonaHumanaDTO(
                 humano.getId(),
                 humano.getNombre(),
@@ -346,6 +389,7 @@ public class DonacionesServiceImpl implements DonacionesService {
                 humano.getDNI(),
                 humano.getGenero(),
                 humano.getDireccion(),
+                humano.getFechaDeNaciemiento(),
                 donacionesDTO,
                 mediosDTO,
                 medioDTO
@@ -356,7 +400,7 @@ public class DonacionesServiceImpl implements DonacionesService {
 
     @Override
     public PersonaJuridicaDTO crearDonanteJuridico(PersonaJuridicaDTO request) {
-        // 1. Crear la entidad de dominio
+
         PersonaJuridica nuevaPersona = new PersonaJuridica(
                 request.cuit(),
                 request.razonSocial(),
@@ -367,6 +411,18 @@ public class DonacionesServiceImpl implements DonacionesService {
         this.setearRepresentantes(request.representantes(), nuevaPersona.getPersonasRepresentantes());
 
         PersonaJuridica juridica = this.donantesJuridicosRepository.save(nuevaPersona);
+
+        webhookAIncentivos.notificarNuevoDonante(
+                new PersonaDonanteDTO(
+                        null,
+                        null,
+                       null,
+                        juridica.getId(),
+                        juridica.getRazonSocial(),
+                        juridica.getFechaDeRegistro(),
+                        this.obtenerDonacionesIncentivosDTO(juridica.getId(),juridica.getDonaciones()
+                        ))
+        );
 
         List<DonacionSinSegmentarDTO> donacionesDTO = obtenerDonacionesSinSegmentarDTO(
                 juridica.getDonaciones());
@@ -387,7 +443,7 @@ public class DonacionesServiceImpl implements DonacionesService {
 
 
     @Override
-    public List<DonacionSegmentadaDTO> crearDonacionDeHumano(DonacionSinSegmentarDTO body, Long id){
+    public List<DonacionSegmentadaDTO> crearDonacionDeHumano(DonacionSinSegmentarDTO body, Long id) {
 
         PersonaHumana personaHumana = this.donantesHumanosRepository.findById(id).orElse(null);
 
@@ -396,33 +452,49 @@ public class DonacionesServiceImpl implements DonacionesService {
         }
 
         List<Bien> bienes = this.convertirBienesDTO(body.bienes());
-        DonacionSinSegmentar nuevaDonacion = new DonacionSinSegmentar(body.descripcionGeneral(), bienes, LocalDateTime.now());
+        DonacionSinSegmentar nuevaDonacion = new DonacionSinSegmentar(body.descripcionGeneral(), LocalDateTime.now());
+        bienes.forEach(nuevaDonacion::agregarBien);
+        nuevaDonacion.setDonanteHumano(personaHumana);
 
-        personaHumana.agregarDonacion(nuevaDonacion);
 
         //segmentamos
         List<DonacionSegmentada> donacionesSegmentadas = this.segmentador.segmentar(nuevaDonacion);
-
+        donacionesSegmentadas.forEach(d -> d.setDonanteHumano(personaHumana));
         //guardamos las donaciones segmentadas en su repo
 
-        donacionesSegmentadas.forEach(d -> {
-            d.setDonanteHumano(personaHumana);
-            this.donacionesRepository.save(d);
-        } );
+//        donacionesSegmentadas.forEach(d -> {
+//            d.setDonanteHumano(personaHumana);
+//            this.donacionesRepository.save(d);
+//        });
+
+        personaHumana.agregarDonacion(nuevaDonacion);
+        this.donantesHumanosRepository.save(personaHumana);
+
+        webhookAIncentivos.notificarNuevasDonaciones(
+            donacionesSegmentadas.stream().map( d ->
+                 new DonacionIncentivosDTO(
+                      d.getDonacionEntregada(),
+                      d.getEntidadBeneficiaria() != null ? d.getEntidadBeneficiaria().getId() : null,
+                      d.getFechaDeIngreso(),
+                      d.getBienesDelMismoTipo().size(),
+                      d.getBienesDelMismoTipo().getFirst().getSubcategoria().getCategoria().getNombre()
+                 )).collect(Collectors.toList()),TipoDonante.HUMANO, id
+        );
 
         // Notificar al donante que su donación fue registrada
-        if (personaHumana.getMedioDeNotificacionPredeterminado() != null) {
-            this.notificar(
-                    personaHumana.getMedioDeNotificacionPredeterminado().getContacto(),
-                    "Tu+donacion+fue+registrada+exitosamente",
-                    personaHumana.getMedioDeNotificacionPredeterminado().getTipoDeNotificacion().name()
-            );
-        }
+//        if (personaHumana.getMedioDeNotificacionPredeterminado() != null) {
+//            this.notificar(
+//                    personaHumana.getMedioDeNotificacionPredeterminado().getContacto(),
+//                    "Tu+donacion+fue+registrada+exitosamente",
+//                    personaHumana.getMedioDeNotificacionPredeterminado().getTipoDeNotificacion().name()
+//            );
+//        }
 
         return this.convertirADonacionesSegmentadasDTO(donacionesSegmentadas);
     }
 
     @Override
+    @Transactional
     public List<DonacionSegmentadaDTO> crearDonacionDeJuridico(DonacionSinSegmentarDTO body, Long id){
 
         PersonaJuridica personaJuridica = this.donantesJuridicosRepository.findById(id).orElse(null);
@@ -432,9 +504,9 @@ public class DonacionesServiceImpl implements DonacionesService {
         }
 
         List<Bien> bienes = this.convertirBienesDTO(body.bienes());
-        DonacionSinSegmentar nuevaDonacion = new DonacionSinSegmentar(body.descripcionGeneral(), bienes, LocalDateTime.now());
-
-        personaJuridica.agregarDonacion(nuevaDonacion);
+        DonacionSinSegmentar nuevaDonacion = new DonacionSinSegmentar(body.descripcionGeneral(), LocalDateTime.now());
+        bienes.forEach(nuevaDonacion::agregarBien);
+        nuevaDonacion.setDonanteJuridico(personaJuridica);
 
         //segmentamos
         List<DonacionSegmentada> donacionesSegmentadas = this.segmentador.segmentar(nuevaDonacion);
@@ -443,9 +515,21 @@ public class DonacionesServiceImpl implements DonacionesService {
 
         donacionesSegmentadas.forEach(d -> {
             d.setDonanteJuridico(personaJuridica);
-            this.donacionesRepository.save(d);
         } );
 
+        personaJuridica.agregarDonacion(nuevaDonacion);
+        this.donantesJuridicosRepository.save(personaJuridica);
+
+        webhookAIncentivos.notificarNuevasDonaciones(
+                donacionesSegmentadas.stream().map( d ->
+                        new DonacionIncentivosDTO(
+                                d.getDonacionEntregada(),
+                                d.getEntidadBeneficiaria().getId(),
+                                d.getFechaDeIngreso(),
+                                d.getBienesDelMismoTipo().size(),
+                                d.getBienesDelMismoTipo().getFirst().getSubcategoria().getCategoria().getNombre()
+                        )).collect(Collectors.toList()),TipoDonante.JURIDICO, id
+        );
         // Notificar al representante de la persona jurídica usando el primer medio disponible
         if (!personaJuridica.getMediosDeNotificacion().isEmpty()) {
             notificar(
@@ -588,6 +672,7 @@ public class DonacionesServiceImpl implements DonacionesService {
                 personaHumana.getDNI(),
                 personaHumana.getGenero(),
                 personaHumana.getDireccion(),
+                personaHumana.getFechaDeNaciemiento(),
                 donacionesDTO,
                 mediosDTO,
                 medioDTO
@@ -634,6 +719,8 @@ public class DonacionesServiceImpl implements DonacionesService {
 
         if(body.fechaDeIngreso() != null){
             donacionAModificada.setFechaDeIngreso(body.fechaDeIngreso());
+        }else {
+            donacionAModificada.setFechaDeIngreso(LocalDateTime.now());
         }
 
         if(body.bienes() != null){
@@ -708,12 +795,13 @@ public class DonacionesServiceImpl implements DonacionesService {
                 donacion -> {
                     List<Bien> bienes = this.convertirBienesDTO(donacion.bienes());
 
-                    return new DonacionSinSegmentar(
+                    DonacionSinSegmentar nuevaDonacion = new DonacionSinSegmentar(
                             donacion.descripcionGeneral(),
-                            bienes,
                             donacion.fechaDeIngreso()
                     );
-                //}).toList();
+                    bienes.forEach(nuevaDonacion::agregarBien);
+
+                    return nuevaDonacion;
                 }).collect(java.util.stream.Collectors.toCollection(ArrayList::new));
 
         return donaciones;
@@ -743,7 +831,7 @@ public class DonacionesServiceImpl implements DonacionesService {
         return bienesDTO;
     }
     public List<Bien> convertirBienesDTO(List<BienDTO> bienesDTO) {
-        // Mismo nombre de subcategoría -> misma instancia, para que el Segmentador las agrupe
+
         Map<String, Subcategoria> resueltas = new HashMap<>();
 
         return bienesDTO.stream().map(b -> new Bien(

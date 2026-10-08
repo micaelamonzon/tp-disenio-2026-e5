@@ -12,6 +12,5 @@ public record PersonaDonanteDTO (
         Long idJuridico,
         String razonSocial,
         LocalDateTime fechaDeRegistro,
-        List<DonacionIncentivosDTO> donaciones,
-        MedioDeNotificacionDTO medioDeNotificacionPredeterminado
+        List<DonacionIncentivosDTO> donaciones
 ){}

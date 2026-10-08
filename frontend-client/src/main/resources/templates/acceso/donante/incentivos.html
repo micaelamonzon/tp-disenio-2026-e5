@@ -9,91 +9,68 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
             Misiones
         </h2>
+        <p th:if="${error}" class="page-sub" th:text="${error}" role="alert"></p>
+
+        <p th:if="${error == null and #lists.isEmpty(misiones)}" class="page-sub">
+            Todavía no hay misiones disponibles.
+        </p>
+
         <div class="missions-grid" id="missionsGrid">
-                <article class="mission-card">
-                    <div class="mission-top">
-                        <div>
-                            <h3 class="mission-name">Racha de 10</h3>
-                            <br>
-                            <p class="mission-desc">Categoria: Colaborador</p>
-                            <p class="mission-desc">Dona por 10 meses consecutivos, una donación por día.</p>
-                        </div>
-                        <span th:replace="~{fragments/iconosDeMisiones :: iconoCheck}"></span>
-                    </div>
-                    <div class="mission-progress">
-                        <div class="mission-progress-labels">
-                            <span>Progreso</span>
-                            <span>100 / 100</span>
-                        </div>
-                        <div class="progress-track">
-                            <div class="progress-fill done" style="width:100%">
-                            </div>
-                        </div>
-                    </div>
-                </article>
+            <article class="mission-card"
+                     th:each="m : ${misiones}"
+                     th:with="completada=${m.estado.name() == 'COMPLETADA'},
+                  bloqueada=${m.estado.name() == 'BLOQUEADA'},
+                  actual=${m.estado.name() == 'ACTUAL'},
+                  prog=${m.progreso != null ? m.progreso : 0},
+                  dist=${m.distanciaDelObjetivo != null ? m.distanciaDelObjetivo : 0},
+                  objetivo=${prog + dist},
+                  pct=${completada ? 100 : (objetivo > 0 ? (prog * 100) / objetivo : 0)}"
+                     th:classappend="${bloqueada} ? 'locked' : (${actual} ? 'current' : '')"
+                     th:attr="aria-disabled=${bloqueada}">
 
-                <article class="mission-card">
-                    <div class="mission-top">
-                        <div>
-                            <h3 class="mission-name">Completitud de 14</h3>
-                            <p class="mission-desc">Categoria: Colaborador</p>
-                            <p class="mission-desc">Realizar donaciones de 14 categorías distintas.</p>
-                        </div>
-                        <span th:replace="~{fragments/iconosDeMisiones :: iconoCheck}" class="mission-check"></span>
-                    </div>
-                    <div class="mission-progress">
-                        <div class="mission-progress-labels">
-                            <span>Progreso</span>
-                            <span>100 / 100</span>
-                        </div>
-                        <div class="progress-track">
-                            <div class="progress-fill done" style="width:100%">
-                            </div>
-                        </div>
-                    </div>
-                </article>
-
-                <article class="mission-card">
                 <div class="mission-top">
                     <div>
-                        <h3 class="mission-name">Hábil Donador de 8</h3>
-                        <p class="mission-desc">Categoria: Colaborador</p>
-                        <p class="mission-desc">Lograr que una donación supere 8 de cantidad de bienes</p>
+                        <h3 class="mission-name" th:text="${m.nombre}">Racha de 10 meses</h3>
+                        <p class="mission-desc" th:text="'Categoría: ' + ${m.categoria}">Categoría: COLABORADOR</p>
+
+                        <p class="mission-desc" th:if="${m.meses != null}"
+                           th:text="'Doná durante ' + ${m.meses} + ' meses consecutivos.'"></p>
+                        <p class="mission-desc" th:if="${m.objetivoDeCategoriasDistintas != null}"
+                           th:text="'Realizá donaciones de ' + ${m.objetivoDeCategoriasDistintas} + ' categorías distintas.'"></p>
+                        <p class="mission-desc" th:if="${m.cantidadDeDonaciones != null}"
+                           th:text="'Lográ que ' + ${m.cantidadDeDonaciones} + ' donaciones sean recibidas por una entidad beneficiaria.'"></p>
+                        <p class="mission-desc" th:if="${m.cantidadDeBienes != null}"
+                           th:text="'Lográ que una donación supere los ' + ${m.cantidadDeBienes} + ' bienes.'"></p>
+                        <span class="mission-state done" th:if="${completada}">Completada</span>
+                        <span class="mission-state"      th:if="${actual}">En curso</span>
                     </div>
-                    <span th:replace="~{fragments/iconosDeMisiones :: iconoCheck}" class="mission-check"></span>
+
+                    <th:block th:if="${completada}">
+                        <span th:replace="~{fragments/iconosDeMisiones :: iconoCheck}"></span>
+                    </th:block>
+                    <th:block th:if="${bloqueada}">
+                        <span th:replace="~{fragments/iconosDeMisiones :: iconoCandado}"></span>
+                    </th:block>
                 </div>
-                <div class="mission-progress">
+
+                <div class="mission-progress" th:unless="${bloqueada}">
                     <div class="mission-progress-labels">
                         <span>Progreso</span>
-                        <span>100 / 100</span>
+                        <span th:text="${completada ? objetivo : prog} + ' / ' + ${objetivo}">0 / 10</span>
                     </div>
-                    <div class="progress-track">
-                        <div class="progress-fill done" style="width:100%">
-                        </div>
+                    <div class="progress-track" role="progressbar"
+                         aria-valuemin="0" aria-valuemax="100" th:attr="aria-valuenow=${pct}">
+                        <div class="progress-fill done" th:classappend="${completada} ? 'done'"
+                             th:style="'width:' + ${pct} + '%'"></div>
                     </div>
+                    <p class="mission-desc" th:if="${m.cantidadDeDonaciones != null}"
+                       th:text="'Lográ que ' + ${m.cantidadDeDonaciones} + ' donaciones sean recibidas por una entidad beneficiaria.'"></p>
                 </div>
+
+                <p class="mission-desc mission-locked-msg" th:if="${bloqueada}">
+                    Completá las misiones anteriores para desbloquearla.
+                </p>
             </article>
-
-                <article class="mission-card">
-                    <div class="mission-top">
-                        <div>
-                            <h3 class="mission-name">Donaciones Exitosas de 5</h3>
-                            <p class="mission-desc">Categoria: Colaborador</p>
-                            <p class="mission-desc">Lograr que 5 donaciones sean recibidas exitosamente por una entidad beneficiaria.</p>
-                        </div>
-
-                    </div>
-                    <div class="mission-progress">
-                        <div class="mission-progress-labels">
-                            <span>Progreso</span>
-                            <span>10 / 100</span>
-                        </div>
-                        <div class="progress-track">
-                            <div class="progress-fill" style="width:10%">
-                            </div>
-                        </div>
-                    </div>
-                </article>
         </div>
         <h2 class="section-title">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="6"/><path d="M15.5 13.5 17 22l-5-3-5 3 1.5-8.5"/></svg>

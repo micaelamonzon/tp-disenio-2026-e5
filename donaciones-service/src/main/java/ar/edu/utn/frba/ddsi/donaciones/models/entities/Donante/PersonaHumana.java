@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Persistent;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +32,10 @@ public class PersonaHumana {
     private Integer edad;
 
     @Column(name = "fecha_de_nacimiento")
-    private LocalDateTime fechaDeNaciemiento;
+    private LocalDate fechaDeNaciemiento;
+
+    @Column(name = "fecha_de_registro")
+    private LocalDateTime fechaDeRegistro;
 
     @Column(name = "dni")
     private Integer DNI;
@@ -50,22 +54,29 @@ public class PersonaHumana {
     @JoinColumn(name = "medio_predeterminado_id")
     private MedioDeNotificacion medioDeNotificacionPredeterminado;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "donanteHumano")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "donanteHumano", cascade = CascadeType.ALL)
     private List<DonacionSinSegmentar> donaciones = new ArrayList<>(); //al acceder a esta donacion sabremos que donaciones segmentadas salieron
 
 
-    public PersonaHumana(String nombre,String apellido,Integer numeroDeDocumento,String genero,String direccion) {
+    public PersonaHumana(String nombre,String apellido,Integer numeroDeDocumento,String genero,String direccion, LocalDate fechaDeNacimiento) {
         this.nombre = nombre;
         this.apellido = apellido;
         this.DNI = numeroDeDocumento;
         this.genero = genero;
         this.direccion = direccion;
+        this.fechaDeNaciemiento = fechaDeNacimiento;
+        this.fechaDeRegistro = LocalDateTime.now();
+
     }
 
-    public Integer calcularEdad() {
+    public void calcularEdad() {
+        if(this.fechaDeNaciemiento == null){
+            this.edad = null;
+            return ;
+        }
         LocalDateTime fechaActual = LocalDateTime.now();
-        Integer edadCalculada = fechaActual.getYear() - this.fechaDeNaciemiento.getYear();
-        return edadCalculada;
+        this.edad = fechaActual.getYear() - this.fechaDeNaciemiento.getYear();
+
     }
 
 

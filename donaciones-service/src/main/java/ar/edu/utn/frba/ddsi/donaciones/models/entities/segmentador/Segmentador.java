@@ -18,6 +18,7 @@ public class Segmentador {
     public List<DonacionSegmentada> segmentar(DonacionSinSegmentar donacionSinSegmentar){
 
         List<DonacionSegmentada> nuevasDonacionesSegmentadas = new ArrayList<>();
+
         Map<Subcategoria, List<Bien>> bienesAgrupados = donacionSinSegmentar.getBienes().stream().collect(Collectors.groupingBy(Bien::getSubcategoria));
 
         bienesAgrupados.forEach((subcategoria, listaBienes) -> {
