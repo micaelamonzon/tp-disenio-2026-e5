@@ -44,6 +44,24 @@ public class DonacionesApiService {
         }
     }
 
+    // GET /servicioDeDonaciones/donaciones/juridico/{id}
+    public List<DonacionDTO> obtenerDonacionesDeJuridico(Long idDonante) {
+        try {
+            List<DonacionDTO> donaciones = webClient.get()
+                    .uri(donacionesServiceUrl + "/donaciones/juridico/{id}", idDonante)
+                    .retrieve()
+                    .bodyToFlux(DonacionDTO.class)
+                    .collectList()
+                    .block();
+            return donaciones != null ? donaciones : List.of();
+        } catch (WebClientResponseException.NotFound e) {
+            throw new DonanteNoEncontradoException(idDonante);
+        } catch (Exception e) {
+            log.error("Error llamando a donaciones-service", e);
+            throw new RuntimeException("No se pudieron obtener las donaciones", e);
+        }
+    }
+
     public static class DonanteNoEncontradoException extends RuntimeException {
         public DonanteNoEncontradoException(Long id) {
             super("No encontramos al donante " + id + ".");

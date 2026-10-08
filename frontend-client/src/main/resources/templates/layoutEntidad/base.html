@@ -19,10 +19,10 @@
             </div>
             <div class="topbar-right">
                 <button class="user-menu-trigger" id="userMenuTrigger" aria-haspopup="true" aria-expanded="false">
-                    <div class="avatar">CG</div>
+                    <div class="avatar" th:text="${session.usuario?.iniciales}">CG</div>
                     <div class="user-info">
-                        <span class="user-name">Comedor Comunitario Los Girasoles</span>
-                        <span class="user-role">Entidad Beneficiaria</span>
+                        <span class="user-name" th:text="${session.usuario?.nombre}">Comedor Comunitario Los Girasoles</span>
+                        <span class="user-role" th:text="${session.usuario?.rol}">Entidad Beneficiaria</span>
                     </div>
                 </button>
                 <div class="user-menu" id="userMenu" hidden>
