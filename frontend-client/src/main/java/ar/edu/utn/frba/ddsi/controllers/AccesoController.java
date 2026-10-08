@@ -13,6 +13,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @Controller
@@ -59,7 +60,15 @@ public class AccesoController {
         model.addAttribute("titulo", "Inicio");
         model.addAttribute("tabActiva", "landing");
         try {
-            List<DonacionDTO> destacadas = obtenerTodasLasDonacionesPublicas();
+            List<DonacionDTO> todas = obtenerTodasLasDonacionesPublicas();
+            java.time.LocalDateTime haceUnMes = java.time.LocalDateTime.now().minusMonths(1);
+            // 3 donaciones con mas bienes del ultimo mes
+            List<DonacionDTO> destacadas = todas.stream()
+                    .filter(d -> d.getFechaDeIngreso() != null && d.getFechaDeIngreso().isAfter(haceUnMes))
+                    .sorted(Comparator.comparingInt(DonacionDTO::getCantidadTotalItems).reversed())
+                    .limit(3) // Máximo 3 para las destacar en el mes
+                    .toList();
+
             model.addAttribute("donacionesDestacadas", destacadas);
         } catch (RuntimeException e) {
             model.addAttribute("error", "El servicio de donaciones no está disponible. Intentá de nuevo en unos minutos.");
@@ -74,7 +83,17 @@ public class AccesoController {
         model.addAttribute("tabActiva", "galeria");
         try {
             List<DonacionDTO> todas = obtenerTodasLasDonacionesPublicas();
-            model.addAttribute("donaciones", todas);
+
+            // Filtrar las 6 donaciones HISTÓRICAS con más bienes
+            List<DonacionDTO> donacionesGaleria = todas.stream()
+                    .filter(d -> d.getFotoPath() != null && !d.getFotoPath().isBlank())
+                    .filter(d -> Boolean.TRUE.equals(d.getDonacionEntregada())
+                            || "ENTREGADA".equalsIgnoreCase(d.getEstadoActual()))
+                    .sorted(Comparator.comparingInt(DonacionDTO::getCantidadTotalItems).reversed())
+                    .limit(6) // Máximo 6 históricas
+                    .toList();
+
+            model.addAttribute("donaciones", donacionesGaleria);
         } catch (RuntimeException e) {
             model.addAttribute("error", "El servicio de donaciones no está disponible. Intentá de nuevo en unos minutos.");
             model.addAttribute("donaciones", List.of());

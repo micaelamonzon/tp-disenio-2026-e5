@@ -72,6 +72,7 @@
         </div>
     </section>
 
+    <!-- DONACIONES DESTACADAS -->
     <section class="section container">
         <h2 class="section-title">Donaciones destacadas del último mes</h2>
         <p class="section-subtitle">Estos son algunos ejemplos del impacto que generamos juntos</p>
@@ -79,14 +80,24 @@
         <div class="grid-3" id="featured-donations">
             <article class="donation-card" th:each="donacion : ${donacionesDestacadas}">
                 <div class="donation-img-wrapper">
-                    <img th:src="${donacion.imagenUrl}" th:alt="${donacion.titulo}" loading="lazy">
+                    <!-- Si fotoPath es nulo o vacío, coloca una imagen por defecto local -->
+                    <img th:src="${donacion.imagenUrlEfectiva != null ? donacion.imagenUrlEfectiva : '/img/default-donation.jpg'}"
+                         th:alt="${donacion.subcategoria != null ? donacion.subcategoria : 'Donación UTN'}"
+                         loading="lazy">
                 </div>
                 <div class="donation-card-body">
-                    <h3 th:text="${donacion.titulo}">Título de Donación</h3>
+                    <h3 th:text="${donacion.subcategoria != null ? donacion.subcategoria : (donacion.categoria != null ? donacion.categoria : 'Donación')}">Título de Donación</h3>
+
                     <div class="donation-meta">
-                        <span>📦 <span th:text="${donacion.entidad}">Entidad</span></span>
-                        <span>📍 <span th:text="${donacion.ubicacion}">Ubicación</span></span>
-                        <span>📅 <span th:text="${#temporals.format(donacion.fecha, 'dd/MM/yyyy')}">01/01/2026</span></span>
+                        <!-- Muestra la cantidad total de ítems o estado -->
+                        <span th:text="${donacion.cantidadTotalItems + ' ítems'}">100 ítems</span>
+
+                        <!-- Si no tienes nombre de entidad directo en el DTO, mostramos el estado legible -->
+                        <span th:text="${donacion.estadoLegible}">Entregada</span>
+
+                        <!-- Fecha formateada -->
+                        <span th:if="${donacion.fechaDeIngreso != null}"
+                              th:text="${#temporals.format(donacion.fechaDeIngreso, 'dd/MM/yyyy')}">01/01/2026</span>
                     </div>
                 </div>
             </article>
@@ -97,7 +108,7 @@
     <section class="section container">
         <h2 class="section-title">Accesos rápidos</h2>
         <div class="grid-3">
-            <a th:href="@{/acceso/galeria}" class="quick-access-card" style="text-decoration:none; color:inherit;">
+            <a th:href="@{/acceso/galeria}" class="quick-access-card">
                 <div class="quick-icon">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
                 </div>
@@ -105,15 +116,15 @@
                 <p>Visualiza fotos de donaciones entregadas sin necesidad de iniciar sesión.</p>
             </a>
 
-            <a th:href="@{/acceso/legal}" class="quick-access-card" style="text-decoration:none; color:inherit;">
+            <a th:href="@{/acceso/mapa}" class="quick-access-card">
                 <div class="quick-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path><circle cx="12" cy="10" r="3"></circle></svg>
                 </div>
-                <h3>Información Legal y Privacidad</h3>
-                <p>Consulta nuestras políticas de privacidad, términos y condiciones del sistema.</p>
+                <h3>Mapa Interactivo</h3>
+                <p>Explora en un mapa las donaciones entregadas a diferentes entidades.</p>
             </a>
 
-            <a th:href="@{/acceso/registro}" class="quick-access-card" style="text-decoration:none; color:inherit;">
+            <a th:href="@{/acceso/registro}" class="quick-access-card">
                 <div class="quick-icon">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>
                 </div>
@@ -130,7 +141,7 @@
     </section>
 </section>
 
-</main>
+</section>
 
 <footer th:replace="~{layoutAcceso/layoutAcceso :: footer}"></footer>
 

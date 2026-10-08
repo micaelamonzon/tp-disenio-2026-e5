@@ -10,5 +10,6 @@ public record DonacionSegmentadaDTO(
         List<BienDTO> bienes,
         LocalDateTime fechaDeIngreso,
         Boolean donacionEntregada,
-        Long organizacionId
+        Long organizacionId,
+        String fotoPath
 ) {}
