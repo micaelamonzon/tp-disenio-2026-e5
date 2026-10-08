@@ -3,8 +3,9 @@ package ar.edu.utn.frba.ddsi.dto;
 // Representa el mensaje que se publica en la cola para que
 // el servicio de notificaciones lo procese
 public record NotificacionMensajeDTO(
-        String idEvento, // para RabbitMQ
-        String destinatario,
+        String idEvento,
+        String destinatario,     // contacto ya resuelto (entidad, admin)
+        Long donanteId,          // se resuelve al consumir (donante)
         String mensaje,
-        String medio   // EMAIL, SMS o WHATSAPP
+        String medio
 ) {}
