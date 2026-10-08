@@ -8,7 +8,6 @@ import ar.edu.utn.frba.ddsi.dto.*;
 import ar.edu.utn.frba.ddsi.models.entities.categoriasDeMisiones.CategoriaDeMision;
 import ar.edu.utn.frba.ddsi.models.entities.categoriasDeMisiones.TipoCategoria;
 import ar.edu.utn.frba.ddsi.models.entities.donaciones.DonacionSegmentada;
-import ar.edu.utn.frba.ddsi.models.entities.misiones.AvanceDeMision;
 import ar.edu.utn.frba.ddsi.models.entities.misiones.Completitud;
 import ar.edu.utn.frba.ddsi.models.entities.misiones.DonacionesExitosas;
 import ar.edu.utn.frba.ddsi.models.entities.misiones.EstadoDeMision;
@@ -24,6 +23,7 @@ import ar.edu.utn.frba.ddsi.repositories.MisionParticularRepository;
 import ar.edu.utn.frba.ddsi.repositories.MisionRepository;
 import ar.edu.utn.frba.ddsi.repositories.RankingMensualRepository;
 import ar.edu.utn.frba.ddsi.services.IncentivosService;
+import org.hibernate.Hibernate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -685,6 +685,12 @@ public class IncentivosServiceImpl implements IncentivosService {
     }
 
     public String obtenerNombreDeMisionParticular(Mision m) {
+        System.out.println("CLASE DE LA MISION: " + m.getClass().getName());
+        System.out.println("ID: " + m.getId());
+        System.out.println("NOMBRE: " + m.getNombre());
+
+        m = (Mision) Hibernate.unproxy(m);
+
         return switch (m) {
             case Racha r -> r.getNombre() + " de " + r.getMeses() + " meses";
             case Completitud c -> c.getNombre() + " de " + c.getObjetivoDeCategoriasDistintas();
