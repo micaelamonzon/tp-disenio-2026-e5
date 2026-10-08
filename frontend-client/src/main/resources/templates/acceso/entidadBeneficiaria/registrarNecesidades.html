@@ -1,0 +1,74 @@
+<html th:replace="~{layoutEntidad/base :: html}">
+    <div th:fragment="contenido" class="row">
+        <section id="view-registrar-necesidades" >
+            <div class="page-head">
+                <h1>Registrar Necesidades</h1>
+                <p class="page-sub">Complete el formulario para registrar las necesidades materiales de su entidad</p>
+            </div>
+            <div class="grid-two-columns">
+                <div class="card">
+                    <h2 class="card-title">Nueva Necesidad</h2>
+                    <form id="needForm">
+                        <div class="field">
+                            <span>Subcategoría</span>
+                            <select id="needCategory" required>
+                                <option value="" selected disabled>Seleccionar subcategoría</option>
+                                <option value="Arroz">Arroz</option>
+                                <option value="Abrigos">Abrigos</option>
+                                <option value="Cuadernos escolares">Cuadernos escolares</option>
+                                <option value="Cepillos Dentales">Cepillos dentales</option>
+                                <option value="Mesas">Mesas</option>
+                                <option value="Zapatillas">Zapatillas</option>
+                                <option value="Leche">Leche</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <span>Descripción detallada</span>
+                            <textarea id="needDescription" rows="3" placeholder="Especifique qué necesita exactamente" required></textarea>
+                        </div>
+                        <div class="field-row">
+                            <div class="field">
+                                <span>Cantidad estimada</span>
+                                <input type="number" id="needQuantity" required>
+                            </div>
+                            <div class="field">
+                                <span>Unidad</span>
+                                <select id="needUnit" required>
+                                    <option value="" selected disabled>Seleccionar</option>
+                                    <option value="Kilogramos">Kilogramos</option>
+                                    <option value="Litros">Litros</option>
+                                    <option value="Unidades">Unidades</option>
+                                    <option value="Paquetes">Paquetes</option>
+                                    <option value="Cajas">Cajas</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <span>Prioridad</span>
+                            <select id="needPriority" required>
+                                <option value="" selected disabled>Seleccionar tipo de necesidad</option>
+                                <option value="recurrente">Recurrente</option>
+                                <option value="extraordinaria">Extraordinaria</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn btn-submit">+ Agregar Necesidad</button>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h2 class="card-title">Necesidades Registradas</h2>
+                    <div class="needs-list" id="registeredNeedsList">
+                    </div>
+                    <div class="contendedor-button">
+                        <button type="button" class="btn btn-submit" id="sendNeedsBtn">
+                            Enviar Necesidades
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <script th:src="@{/js/entidades/necesidades.js}"></script>
+    </div>
+
+</html>

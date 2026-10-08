@@ -25,7 +25,7 @@ public class Completitud extends Mision {
     public Completitud(NombreDeMision nombre,Integer objetivoDeCategoriasDistintas){
         this.setNombre(nombre);
         this.objetivoDeCategoriasDistintas = objetivoDeCategoriasDistintas;
-        setInsigniaGanadora(Insignia.COMPLETITUD);
+
     }
 
     //Completitud: realizar donaciones de X categorías distintas

@@ -1,0 +1,106 @@
+<html th:replace="~{layoutDonante/base :: html}">
+<div th:fragment="contenido">
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+    <section id="view-seguimiento">
+        <div class="page-head">
+            <h1>Seguimiento de Entregas</h1>
+            <p class="page-sub">Monitorea en tiempo real la ubicación de tus donaciones</p>
+        </div>
+        <div class="tracking-container">
+            <div class="map-card" id="mapCard">
+                <div class="map-badge">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                    Seguimiento en tiempo real
+                </div>
+                <div class="map-viewport" id="mapViewport">
+
+                </div>
+            </div>
+            <aside class="tracking-sidebar" aria-label="Entregas activas">
+                <div class="sidebar-header">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 17h4V5H10z"/><path d="M20 17h2v-7l-3-4h-3v11h4z"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>
+                    Entregas Activas
+                </div>
+                <div class="deliveries-list" id="deliveriesList">
+                    <article class="delivery-card" data-truck-id="CAMION-A1">
+                        <div class="delivery-card-head">
+                            <div>
+                                <span class="delivery-id" th:replace="~{fragments/iconosSeguimientoEntrega:: iconoCamion}">DON-001</span>
+                                <span class="badge-status status-blue">En traslado</span>
+                            </div>
+                            <div class="delivery-meta-right">
+                                <span class="truck-code">CAMION-A1</span>
+
+                            </div>
+                        </div>
+
+                        <div class="delivery-dest">
+                            <span th:replace="~{fragments/iconosSeguimientoEntrega::iconoPin}">
+                            </span>
+                            <div>
+                                <b>Destino:</b><br>
+                                Centro Comunitario San Martín, Av. Rivadavia 1234, CABA
+                            </div>
+                        </div>
+
+                        <div class="delivery-items">
+                            <span>Donaciones:</span>
+                            <ul>
+                                <li>Alimentos no perecederos</li>
+                                <li>Agua mineral</li>
+                                <li>Ropa de invierno</li>
+                            </ul>
+                        </div>
+
+                        <div class="delivery-footer">
+                            Última actualización: hace menos de 1 minuto
+                        </div>
+                    </article>
+
+                    <article class="delivery-card" data-truck-id="CAMION-B2">
+                        <div class="delivery-card-head">
+                            <div>
+                                <span class="delivery-id" th:replace="~{fragments/iconosSeguimientoEntrega:: iconoCamion}">DON-002</span>
+                                <span class="badge-status status-blue">En traslado</span>
+                            </div>
+                            <div class="delivery-meta-right">
+                                <span class="truck-code">CAMION-B2</span>
+
+                            </div>
+                        </div>
+
+                        <div class="delivery-dest">
+                            <span th:replace="~{fragments/iconosSeguimientoEntrega::iconoPin}">
+                            </span>
+                            <div>
+                                <b>Destino:</b><br>
+                                Fundación Esperanza, Calle Bolívar 567, Buenos Aires
+                            </div>
+                        </div>
+
+                        <div class="delivery-items">
+                            <span>Donaciones:</span>
+                            <ul>
+                                <li>Medicamentos</li>
+                                <li>Artículos de higiene</li>
+
+                            </ul>
+                        </div>
+
+                        <div class="delivery-footer">
+                            Última actualización: hace menos de 1 minuto
+                        </div>
+                    </article>
+                </div>
+            </aside>
+        </div>
+    </section>
+    <script th:src="@{/js/donante/seguimiento.js}"></script>
+</div>
+</html>

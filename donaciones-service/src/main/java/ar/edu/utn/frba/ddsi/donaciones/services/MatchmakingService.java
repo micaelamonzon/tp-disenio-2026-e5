@@ -1,9 +1,10 @@
 package ar.edu.utn.frba.ddsi.donaciones.services;
 
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.Necesidad.Necesidad;
-import ar.edu.utn.frba.ddsi.donaciones.models.entities.donacion.*;
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.algoritmos.*;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.mediosDeNotificacion.MedioDeNotificacion;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.DonacionSegmentada;
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.EstadoDonacion;
 import ar.edu.utn.frba.ddsi.donaciones.repositories.DonacionesRepository;
 import ar.edu.utn.frba.ddsi.donaciones.repositories.MatchRepository;
 import ar.edu.utn.frba.ddsi.donaciones.repositories.NecesidadesRepository;
@@ -28,17 +29,17 @@ public class MatchmakingService {
     private final DonacionesRepository donacionesRepository;
     private final MotorDeMatchmaking motorMatchmaking;
     private final EstadoDonacionServiceimpl estadoDonacionService;
-    private final List<Strategy_AlgoritmosMatchmaking> estrategiasActivas = new ArrayList<>();
+    private final List<Strategy_AlgoritmosMatchmaking> estrategiasActivas;
 
     private final RestTemplate restTemplate;
     private final NotificacionesProperties notificacionesProperties;
 
     public PropuestaMatch obtenerPropuestaPorId(Long matcheoId ) {
-        return matchRepository.findById(matcheoId);
+        return matchRepository.findById(matcheoId).orElseThrow();
     }
 
     public void ejecutarProcesoMatchmaking() {
-        List<DonacionSegmentada> donacionesPendientes = donacionesRepository.findByEstado("EN_DEPOSITO");
+        List<DonacionSegmentada> donacionesPendientes = donacionesRepository.findByEstado(EstadoDonacion.EN_DEPOSITO);
         List<Necesidad> necesidadesActivas = necesidadesRepository.findByEstaSatisfechaFalse();
 
         if (donacionesPendientes.isEmpty() || necesidadesActivas.isEmpty() || estrategiasActivas.isEmpty()) {
@@ -83,10 +84,10 @@ public class MatchmakingService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Debe indicar una necesidadId");
         }
 
-        PropuestaMatch propuesta = matchRepository.findById(matcheoId);
+        PropuestaMatch propuesta = matchRepository.findById(matcheoId).orElseThrow();
 
 
-        Necesidad necesidad = necesidadesRepository.findById(necesidadId);
+        Necesidad necesidad = necesidadesRepository.findById(necesidadId).orElseThrow();
 
         if (!perteneceAAlgunRanking(propuesta, necesidadId)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La necesidad seleccionada no pertenece a los rankings generados");

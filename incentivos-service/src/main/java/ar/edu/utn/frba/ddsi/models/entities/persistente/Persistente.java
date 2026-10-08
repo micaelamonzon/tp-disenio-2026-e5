@@ -25,13 +25,14 @@ public abstract class Persistente {
     private LocalDateTime fechaAlta;
 
     @Column
-    private LocalDate fechaModificacion;
+    private LocalDateTime fechaModificacion;
 
     @Column
     private String nombreDeUsuario;
 
     public Persistente() {
         this.fechaAlta = LocalDateTime.now();
+        this.fechaModificacion = LocalDateTime.now();
         this.activo = true;
     }
 }

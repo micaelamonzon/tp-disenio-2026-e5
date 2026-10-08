@@ -4,12 +4,14 @@ import ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante.TipoDonante;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.Persistente;
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
 
 @Getter
 @Setter
+@NoArgsConstructor
 @Entity
 @Table(name = "cambio_estado")
 public class CambioEstado extends Persistente {
