@@ -109,16 +109,10 @@ public class EntregaServiceImpl {
         } catch (Exception e) {
             System.out.println("No se pudo notificar a la entidad: " + e.getMessage());
         }
+        // El contacto del donante ya no se resuelve aca, se publica solo el id
+        // y notificaciones-service lo resuelve al consumir el mensaje de la cola
         if (entrega.getDonanteId() != null) {
-            try {
-                PersonaContactoDTO donante = donacionesClient.obtenerDonanteHumano(entrega.getDonanteId());
-                if (donante != null && donante.medioDeNotificacionPredeterminado() != null) {
-                    MedioDeNotificacionDTO medio = donante.medioDeNotificacionPredeterminado();
-                    notificacionesPublisher.publicar(medio.datoDeContacto(), mensaje, medio.tipoDeNotificacion());
-                }
-            } catch (Exception e) {
-                System.out.println("No se pudo notificar al donante: " + e.getMessage());
-            }
+            notificacionesPublisher.publicarParaDonante(entrega.getDonanteId(), mensaje, "SMS");
         }
     }
 

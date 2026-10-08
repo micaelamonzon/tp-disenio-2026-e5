@@ -20,6 +20,12 @@ public class Notificacion {
     @Column
     private String destinatario;
 
+    // Solo se completa cuando la notificación es para un donante
+    // La entidad beneficiaria y el admin siguen usando solo destinatario
+    @ManyToOne
+    @JoinColumn(name = "donante_id")
+    private Donante donante;
+
     @Column(columnDefinition = "TEXT")
     private String mensaje;
 

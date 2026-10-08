@@ -22,15 +22,28 @@ public class NotificacionesPublisher {
         this.queueName = queueName;
     }
 
+    // Publica una notificación con el contacto ya resuelto (uso actual:
+    // entidad beneficiaria y administradores)
     public void publicar(String destinatario, String mensaje, String medio) {
         try {
             String idEvento = UUID.randomUUID().toString();
             NotificacionMensajeDTO notificacion =
-                    new NotificacionMensajeDTO(idEvento, destinatario, mensaje, medio);
+                    new NotificacionMensajeDTO(idEvento, destinatario, null, mensaje, medio);
             rabbitTemplate.convertAndSend(queueName, notificacion);
         } catch (Exception e) {
-            // Si falla la publicación no queremos que se caiga la operación
-            // de negocio (ej: confirmar una entrega)
+            System.out.println("Error al publicar notificación en la cola: " + e.getMessage());
+        }
+    }
+
+    // Publica una notificación para el donante, sin resolver el contacto:
+    // notificaciones-service lo resuelve al consumir el mensaje
+    public void publicarParaDonante(Long donanteId, String mensaje, String medio) {
+        try {
+            String idEvento = UUID.randomUUID().toString();
+            NotificacionMensajeDTO notificacion =
+                    new NotificacionMensajeDTO(idEvento, null, donanteId, mensaje, medio);
+            rabbitTemplate.convertAndSend(queueName, notificacion);
+        } catch (Exception e) {
             System.out.println("Error al publicar notificación en la cola: " + e.getMessage());
         }
     }
