@@ -264,7 +264,8 @@ public class DonacionesServiceImpl implements DonacionesService {
                             this.obtenerBienesDTO(d.getBienesDelMismoTipo()),
                             d.getFechaDeIngreso(),
                             d.getDonacionEntregada(),
-                            d.getEntidadBeneficiaria() != null ? d.getEntidadBeneficiaria().getId() : null
+                            d.getEntidadBeneficiaria() != null ? d.getEntidadBeneficiaria().getId() : null,
+                            d.getFotoPath()
                     )
                 );
             }
@@ -863,7 +864,8 @@ public class DonacionesServiceImpl implements DonacionesService {
                         this.obtenerBienesDTO(donacionSegmentada.getBienesDelMismoTipo()),
                         donacionSegmentada.getFechaDeIngreso(),
                         donacionSegmentada.getDonacionEntregada(),
-                        donacionSegmentada.getEntidadBeneficiaria().getId()
+                        donacionSegmentada.getEntidadBeneficiaria().getId(),
+                                donacionSegmentada.getFotoPath()
 
                 ))
                 .collect(Collectors.toList());
@@ -922,7 +924,8 @@ public class DonacionesServiceImpl implements DonacionesService {
                         this.obtenerBienesDTO(d.getBienesDelMismoTipo()),
                         d.getFechaDeIngreso(),
                         d.getDonacionEntregada(),
-                        d.getEntidadBeneficiaria() != null ? d.getEntidadBeneficiaria().getId() : null
+                        d.getEntidadBeneficiaria() != null ? d.getEntidadBeneficiaria().getId() : null,
+                        d.getFotoPath()
                         ));});
         return dtos;
     }

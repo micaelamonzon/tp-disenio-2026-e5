@@ -65,6 +65,8 @@ public class DonacionSegmentada  {
     @Column(name = "fecha_de_entrega")
     private LocalDate fechaEntrega;
 
+    private String fotoPath;
+
     @ManyToOne
     @JoinColumn(name = "necesidad_id")
     private Necesidad necesidad;
