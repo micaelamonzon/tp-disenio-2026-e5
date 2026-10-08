@@ -1,6 +1,5 @@
 package ar.edu.utn.frba.ddsi.models.entities.donaciones;
 
-import ar.edu.utn.frba.ddsi.models.entities.categorias.CategoriaDeMision;
 import ar.edu.utn.frba.ddsi.models.entities.persistente.Persistente;
 import ar.edu.utn.frba.ddsi.models.entities.persona.Categoria;
 import ar.edu.utn.frba.ddsi.models.entities.persona.Donante;
@@ -10,13 +9,11 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
-import jakarta.persistence.Persistence;
 import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Data
 @NoArgsConstructor

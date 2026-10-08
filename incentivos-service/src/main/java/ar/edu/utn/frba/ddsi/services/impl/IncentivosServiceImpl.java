@@ -4,27 +4,32 @@ import ar.edu.utn.frba.ddsi.config.RestProperties;
 import ar.edu.utn.frba.ddsi.dto.InsigniaDTO;
 import ar.edu.utn.frba.ddsi.dto.MisionDTO;
 import ar.edu.utn.frba.ddsi.dto.PersonaDonanteDTO;
-import ar.edu.utn.frba.ddsi.exceptions.ResourceNotFoundException;
 import ar.edu.utn.frba.ddsi.dto.*;
-import ar.edu.utn.frba.ddsi.models.entities.categorias.CategoriaDeMision;
-import ar.edu.utn.frba.ddsi.models.entities.categorias.TipoCategoria;
+import ar.edu.utn.frba.ddsi.models.entities.categoriasDeMisiones.CategoriaDeMision;
+import ar.edu.utn.frba.ddsi.models.entities.categoriasDeMisiones.TipoCategoria;
 import ar.edu.utn.frba.ddsi.models.entities.donaciones.DonacionSegmentada;
+import ar.edu.utn.frba.ddsi.models.entities.misiones.AvanceDeMision;
+import ar.edu.utn.frba.ddsi.models.entities.misiones.Completitud;
+import ar.edu.utn.frba.ddsi.models.entities.misiones.DonacionesExitosas;
 import ar.edu.utn.frba.ddsi.models.entities.misiones.EstadoDeMision;
+import ar.edu.utn.frba.ddsi.models.entities.misiones.HabilDonador;
 import ar.edu.utn.frba.ddsi.models.entities.misiones.Mision;
 import ar.edu.utn.frba.ddsi.models.entities.misiones.MisionParticular;
+import ar.edu.utn.frba.ddsi.models.entities.misiones.NombreDeMision;
+import ar.edu.utn.frba.ddsi.models.entities.misiones.Racha;
 import ar.edu.utn.frba.ddsi.models.entities.persona.*;
-import ar.edu.utn.frba.ddsi.repositories.CategoriaRepository;
+import ar.edu.utn.frba.ddsi.repositories.CategoriaDeMisionRepository;
 import ar.edu.utn.frba.ddsi.repositories.IncentivosRepository;
 import ar.edu.utn.frba.ddsi.repositories.MisionParticularRepository;
 import ar.edu.utn.frba.ddsi.repositories.MisionRepository;
 import ar.edu.utn.frba.ddsi.repositories.RankingMensualRepository;
 import ar.edu.utn.frba.ddsi.services.IncentivosService;
+import jakarta.persistence.Transient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.net.URI;
 import java.time.LocalDate;
@@ -46,13 +51,13 @@ public class IncentivosServiceImpl implements IncentivosService {
     private final NotificacionesProperties notificacionesProperties;
     private final RankingMensualRepository rankingMensualRepository;
     private final MisionRepository misionRepository;
-    private final CategoriaRepository categoriaRepository;
+    private final CategoriaDeMisionRepository categoriaDeMisionRepository;
     private final MisionParticularRepository misionParticularRepository;
 
     public IncentivosServiceImpl(IncentivosRepository incentivosRepository, RestTemplate restTemplate, RestProperties propiedades,
                                  InsigniaPublicadorService publicadorService, NotificacionesProperties notificacionesProperties,
                                  RankingMensualRepository rankingMensualRepository, MisionRepository misionRepository,
-                                 CategoriaRepository categoriaRepository, MisionParticularRepository misionParticularRepository) {
+                                 CategoriaDeMisionRepository categoriaDeMisionRepository, MisionParticularRepository misionParticularRepository) {
         this.incentivosRepository = incentivosRepository;
         this.restTemplate = restTemplate;
         this.propiedades = propiedades;
@@ -60,7 +65,7 @@ public class IncentivosServiceImpl implements IncentivosService {
         this.notificacionesProperties = notificacionesProperties;
         this.rankingMensualRepository = rankingMensualRepository;
         this.misionRepository = misionRepository;
-        this.categoriaRepository = categoriaRepository;
+        this.categoriaDeMisionRepository = categoriaDeMisionRepository;
         this.misionParticularRepository = misionParticularRepository;
     }
 
@@ -82,8 +87,6 @@ public class IncentivosServiceImpl implements IncentivosService {
         for (PersonaDonanteDTO personaDonante : arrayDeDonantes) {
 
           List<DonacionSegmentada> donaciones = this.convertirDonacionesDTO(personaDonante.donaciones());
-
-            MedioDeNotificacion medioDeNotificacionPredeterminado = this.convertirMedioDeNotificacionDTO(personaDonante.medioDeNotificacionPredeterminado());
 
             if(personaDonante.idHumano() != null){
                 Donante nuevoDonante = new Donante(
@@ -124,12 +127,15 @@ public class IncentivosServiceImpl implements IncentivosService {
     }
 
     @Override
-    public void agregarMisionADonante(Long id, TipoDeDonante tipoDeDonante, MisionDTO misionDTO){
+    @Transactional
+    public void agregarMisionADonante(Long id, TipoDeDonante tipoDeDonante, Long misionId){
 
-       Mision mision  = this.misionRepository.findById(misionDTO.Id()).orElseThrow(() -> new RuntimeException("Misión no encontrada"));
-       MisionParticular misionParticular = new MisionParticular(mision);
+       Mision mision  = this.misionRepository.findById(misionId).orElseThrow(() -> new RuntimeException("Misión no encontrada"));
 
        Donante donante = incentivosRepository.findByIdEnDonaciones(id,tipoDeDonante);
+
+       MisionParticular misionParticular = new MisionParticular(mision, donante);
+        misionParticularRepository.save(misionParticular);
 
        if(donante != null){
            donante.agregarMision(misionParticular);
@@ -231,9 +237,6 @@ public class IncentivosServiceImpl implements IncentivosService {
         return false;
     }
 
-
-
-
     @Override
     public List<InsigniaDTO> buscarInsigniasPorId(Long id,TipoDeDonante tipoDeDonante) {
         Donante donante = this.incentivosRepository.findByIdEnDonaciones(id, tipoDeDonante);
@@ -259,34 +262,55 @@ public class IncentivosServiceImpl implements IncentivosService {
     //TODO: Hacer que tome el query param de tipoDeDonante para que tambien pubique y difunda  insignias para los donantes juridicos
 
     @Override
-    public String publicarYDifundirInsignia(Long id, Insignia insignia) {
-        Donante donante = incentivosRepository.findById(id).orElseThrow(); // usar incentivosRepository.buscarDonantePorIdEnDonaciones(id,tipoDeDonante);
+    public String publicarYDifundirInsignia(Long id, Insignia insignia,
+                                            String tipoDeDonante) {
+
+        TipoDeDonante tipo = TipoDeDonante.valueOf(tipoDeDonante);
+        Donante donante = incentivosRepository.findByIdEnDonaciones(id, tipo);
 
         if (donante == null) {
-            System.out.println("Donante " + id + " no encontrado localmente. Sincronizando...");
+            System.out.println("Donante " + id + " no encontrado. Sincronizando...");
 
             try {
+                String path = tipoDeDonante.equals("HUMANO")
+                        ? "/humano/obtenerDonaciones/{id}"
+                        : "/juridico/obtenerDonaciones/{id}";
+
                 URI uri = UriComponentsBuilder
-                        .fromUriString("http://localhost:8080/servicioDeDonaciones")
-                        .path("/humano/{id}")
+                        .fromUriString(propiedades.getUrl())
+                        .path(path)
                         .buildAndExpand(id)
                         .toUri();
 
-                Donante donanteImportado = restTemplate.getForObject(uri, Donante.class);
+                ResponseEntity<PersonaDonanteDTO> response =
+                        restTemplate.getForEntity(uri, PersonaDonanteDTO.class);
+                PersonaDonanteDTO dto = response.getBody();
 
-                if (donanteImportado != null) {
-                    incentivosRepository.save(donanteImportado);
-                    donante = donanteImportado;
-                    System.out.println("Sincronización exitosa: " + donante.getNombre());
+                if (dto != null) {
+                    Donante nuevo = new Donante();
+                    nuevo.setIdEnDonaciones(id);
+                    nuevo.setTipoDeDonante(tipo);
+                    nuevo.setNombre(dto.nombre());
+                    nuevo.setApellido(dto.apellido());
+                    nuevo.setRazonSocial(dto.razonSocial());
+
+                    incentivosRepository.save(nuevo);
+                    donante = nuevo;
+
                 } else {
-                    throw new ResourceNotFoundException("Donante no existe en el sistema integral: " + id);
+                    throw new RuntimeException("Donante no existe: " + id);
                 }
+
             } catch (Exception e) {
-                e.printStackTrace();
-                throw new ResourceNotFoundException("No se pudo recuperar al donante del servicio externo: " + id);
+                throw new RuntimeException("No se pudo recuperar el donante: " + id, e);
             }
         }
-        String nombre = donante.getNombre();
+
+        String nombre = donante.getNombre() != null
+                ? donante.getNombre() + " " +
+                  (donante.getApellido() != null ? donante.getApellido() : "")
+                : donante.getRazonSocial();
+
         return publicadorService.publicarYDifundirInsignia(nombre, insignia);
     }
 
@@ -377,14 +401,6 @@ public class IncentivosServiceImpl implements IncentivosService {
         return insigniasDTO;
     }
 
-
-
-    public MedioDeNotificacion convertirMedioDeNotificacionDTO(MedioDeNotificacionDTO medioDeNotificacionPredeterminadoDTO){
-
-        MedioDeNotificacion medioDeNotificacionPredeterminado = new MedioDeNotificacion(medioDeNotificacionPredeterminadoDTO.tipoDeNotificacion(), medioDeNotificacionPredeterminadoDTO.datoDeContacto());
-
-        return medioDeNotificacionPredeterminado;
-    }
 
 
     //TODO: Hacer que tome el query param de tipoDeDonante para que tambien obtenga las metricas de juridico
@@ -545,4 +561,107 @@ public class IncentivosServiceImpl implements IncentivosService {
             System.out.println("Error al notificar: " + e.getMessage());
         }
     }
+
+    public CategoriaDeMisionDTO crearCategoriaMision(CategoriaDeMisionDTO categoriaDto){
+        if(categoriaDto == null){
+            throw new RuntimeException("El DTO de categoria no puede ser nulo");
+        }
+
+        if(categoriaDto.nombre() == null){
+            throw new RuntimeException("El nombre de la categoria no puede ser nulo");
+        }
+        if (!TipoCategoria.perteneceAEnum(categoriaDto.nombre().toString())) {
+            throw new RuntimeException("El nombre de la categoria no pertenece a los nombres de categorias permitidas");
+        }
+        if(categoriaDto.categoriaSiguiente() == null && TipoCategoria.obtenerCategoriaSiguiente(categoriaDto.nombre()) != null){
+            throw new RuntimeException("La categoria siguiente no puede ser nula");
+        }
+        CategoriaDeMision categoriaDeMision = new CategoriaDeMision(categoriaDto.nombre(), categoriaDto.categoriaSiguiente());
+
+        this.categoriaDeMisionRepository.save(categoriaDeMision);
+
+        return this.mapearAcategoriaDeMisionDTO(categoriaDeMision);
+
+    }
+
+    public CategoriaDeMisionDTO mapearAcategoriaDeMisionDTO(CategoriaDeMision categoria){
+        if(categoria == null){
+            throw new RuntimeException("La categoria no puede ser nula");
+        }
+        return new CategoriaDeMisionDTO(categoria.getId(), categoria.getNombre(), categoria.getCategoriaSiguiente());
+    }
+
+     public MisionDTO crearMision(MisionDTO mision){
+        if(mision == null){
+            throw new RuntimeException("El DTO de mision no puede ser nulo");
+        }
+
+        if(mision.nombre() == null){
+            throw new RuntimeException("El nombre de la mision no puede ser nulo");
+        }
+         if (!NombreDeMision.perteneceAEnum(mision.nombre().toString())) {
+             throw new RuntimeException("El nombre de la mision no pertenece a los nombres de misiones permitidas");
+         }
+        if(mision.categoriaId() == null){
+            throw new RuntimeException("La categoria de la mision no puede ser nula");
+        }
+
+        if(mision.ordenSecuencial() == 0 || mision.ordenSecuencial() < 0){
+            throw new RuntimeException("El orden secuencial de la mision no puede ser cero o menor a 1");
+
+        }
+        CategoriaDeMision categoria = this.categoriaDeMisionRepository.findById(mision.categoriaId())
+                .orElseThrow(() -> new RuntimeException("No se encontro la categoria con id: " + mision.categoriaId()));
+
+        if(categoria.getMisiones().size() == mision.ordenSecuencial()){
+            throw new RuntimeException(
+                    "Ya existe una mision con el mismo orden secuencial en la categoria " + categoria.getNombre() + ". El orden secuencial debe ser unico dentro de la categoria."
+            );
+        }
+        Mision nuevaMision = this.crearMisionSegunTipo(mision, categoria);
+
+        this.misionRepository.save(nuevaMision);
+
+        return this.mapearAMisionDTO(nuevaMision);
+     }
+
+    public MisionDTO mapearAMisionDTO(Mision mision) {
+        Long categoriaId = mision.getCategoria().getId();
+
+        return switch (mision) {
+            case Racha r -> new MisionDTO(
+                    r.getId(), r.getNombre(), categoriaId, r.getOrdenSecuencial(), r.getInsigniaGanadora(),
+                    r.getMeses(), r.getMesInicial(), r.getMesFinal(), null, null, null);
+
+            case Completitud c -> new MisionDTO(
+                    c.getId(), c.getNombre(), categoriaId, c.getOrdenSecuencial(), c.getInsigniaGanadora(),
+                    null, null, null, c.getObjetivoDeCategoriasDistintas(), null, null);
+
+            case DonacionesExitosas d -> new MisionDTO(
+                    d.getId(), d.getNombre(), categoriaId, d.getOrdenSecuencial(), d.getInsigniaGanadora(),
+                    null, null, null, null, d.getCantidadDeDonacioneExitosas(), null);
+
+            case HabilDonador h -> new MisionDTO(
+                    h.getId(), h.getNombre(), categoriaId, h.getOrdenSecuencial(), h.getInsigniaGanadora(),
+                    null, null, null, null, null, h.getCantidadDeBienes());
+
+            default -> throw new IllegalArgumentException("Tipo de misión no soportado: " + mision.getClass());
+        };
+    }
+
+    public Mision crearMisionSegunTipo(MisionDTO dto, CategoriaDeMision categoria) {
+        Mision mision = switch (dto.nombre()) {
+            case RACHA               -> new Racha(dto.nombre(), dto.mesInicial(), dto.mesFinal());
+            case COMPLETITUD         -> new Completitud(dto.nombre(), dto.objetivoDeCategoriasDistintas());
+            case DONACIONES_EXITOSAS -> new DonacionesExitosas(dto.nombre(), dto.cantidadDeDonaciones());
+            case HABIL_DONADOR       -> new HabilDonador(dto.nombre(), dto.cantidadDeBienes());
+        };
+
+        mision.setCategoria(categoria);
+        mision.setOrdenSecuencial(dto.ordenSecuencial());
+        mision.setInsigniaGanadora(dto.insigniaGanadora());
+        return mision;
+    }
+
+
 }

@@ -38,40 +38,34 @@ public class RankingMensual {
     @JoinColumn(name = "id_tercer_puesto")
     private Donante tercerPuesto;
 
-    @ElementCollection
-    @CollectionTable(
-            name = "ranking_posicion",
-            joinColumns = @JoinColumn(name = "ranking_id")
-    )
-    @OrderColumn(name = "posicion")
-    @Column(name = "donante_id")
-    private List<Long> idsRankingCompleto = new ArrayList<>();
+    @OneToMany(mappedBy = "ranking")
+    @OrderBy("posicion ASC")
+    private List<RankingPosicion> posiciones = new ArrayList<>();
 
-    public RankingMensual(LocalDate fecha, Donante primerPuesto, Donante segundoPuesto, Donante tercerPuesto,List<Donante> rankingCompletoOrdenado){
+    public RankingMensual(LocalDate fecha, Donante primerPuesto, Donante segundoPuesto, Donante tercerPuesto,List<Donante> rankingOrdenado){
         this.fecha = fecha;
         this.primerPuesto = primerPuesto;
         this.segundoPuesto = segundoPuesto;
         this.tercerPuesto = tercerPuesto;
-        this.idsRankingCompleto  = rankingCompletoOrdenado.stream()
-                .map(Donante::getId).toList();
+        for (int i = 0; i < rankingOrdenado.size(); i++) {
+            this.posiciones.add(
+                    new RankingPosicion(this, rankingOrdenado.get(i), i + 1)
+            );
+        }
     }
 
     public Integer getPosicion(Donante donante) {
         return (donante != null) ? getPosicionPorId(donante.getId()) : null;
     }
 
-    public Integer getPosicionPorId(Long id) {
-        if (id == null) return null;
-        for (int i = 0; i < idsRankingCompleto.size(); i++) {
-            if (idsRankingCompleto.get(i).equals(id)) {
-                return i + 1;
-            }
-        }
-        return null;
+    public Integer getPosicionPorId(Long idDonante) {
+        return posiciones.stream()
+                .filter(rp -> rp.getDonante().getId().equals(idDonante))
+                .map(RankingPosicion::getPosicion)
+                .findFirst()
+                .orElse(null);
     }
-    public List<Long> getRankingCompleto() {
-        return idsRankingCompleto;
-    }
+
 
     public String getNombrePrimerPuesto(){
         return getNombre(primerPuesto);

@@ -26,7 +26,8 @@ public class EntidadBeneficiaria {
     @Column(name = "telefono")
     private String telefono;
 
-    @OneToMany
+    // Los representantes pertenecen a la entidad (composición): se guardan y se borran con ella
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "entidad_beneficiaria_id", referencedColumnName = "id")
     private List<Representante> representantes;
 

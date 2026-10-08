@@ -1,12 +1,11 @@
 package ar.edu.utn.frba.ddsi.donaciones.controllers;
 import ar.edu.utn.frba.ddsi.donaciones.dto.*;
-import ar.edu.utn.frba.ddsi.donaciones.models.entities.donacion.PropuestaMatch;
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.algoritmos.PropuestaMatch;
 import ar.edu.utn.frba.ddsi.donaciones.services.DonacionesService;
 import ar.edu.utn.frba.ddsi.donaciones.services.MatchmakingService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 

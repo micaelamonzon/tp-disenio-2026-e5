@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${titulo} + ' - DonaTrack'">Galería de Donaciones - DonaTrack</title>
+
+    <!-- CSS Estático -->
+    <link rel="stylesheet" th:href="@{/css/landingPage/landingPage.css}">
+    <!-- FontAwesome para los íconos de la tarjeta -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+<!-- HEADER Y NAVBAR REEMPLAZADOS -->
+<header th:replace="~{layoutAcceso/layoutAcceso :: header}"></header>
+<nav th:replace="~{layoutAcceso/layoutAcceso :: navBar}"></nav>
+
+<main class="container" style="max-width: 1140px; margin: 0 auto; padding: 3rem 1rem 4rem 1rem;">
+
+    <!-- SECCIÓN DE TÍTULO PRINCIPAL DE LA GALERÍA -->
+    <div style="text-align: center; margin-bottom: 2.5rem;">
+        <h1 style="font-size: 2.25rem; font-weight: 800; color: #0f172a; margin-bottom: 0.5rem;">Galería de Donaciones</h1>
+        <p style="color: #64748b; font-size: 1rem;">Conocé el impacto de cada donación entregada a través de UTN Solidaria</p>
+    </div>
+
+    <!-- GRILLA DE DONACIONES (3 COLUMNAS) -->
+    <section class="section" style="padding: 0;">
+
+        <!-- 1. SI LA LISTA VIENE DE SPRING BOOT CON DATOS -->
+        <div th:if="${donaciones != null and !#lists.isEmpty(donaciones)}" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.75rem;">
+
+            <article class="donation-card" th:each="donacion : ${donaciones}" style="background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); transition: transform 0.2s; cursor: pointer;" onclick="openModalFromCard(this)" th:attr="data-titulo=${donacion.titulo}, data-imagen=${donacion.imagenUrl}, data-entidad=${donacion.entidad}, data-ubicacion=${donacion.ubicacion}, data-fecha=${#temporals.format(donacion.fechaEntregado, 'dd/MM/yyyy')}, data-desc=${donacion.descripcion}">
+                <div style="height: 200px; width: 100%; overflow: hidden;">
+                    <img th:src="${donacion.imagenUrl}" th:alt="${donacion.titulo}" style="width: 100%; height: 100%; object-fit: cover;" loading="lazy">
+                </div>
+                <div style="padding: 1.25rem;">
+                    <h3 style="font-size: 1.1rem; font-weight: 700; color: #1e293b; margin-bottom: 0.75rem;" th:text="${donacion.titulo}">Título</h3>
+                    <div style="display: flex; flex-direction: column; gap: 0.4rem; color: #64748b; font-size: 0.88rem;">
+                        <span style="display: flex; align-items: center; gap: 0.5rem;"><i class="fa-solid fa-box-open" style="width: 16px;"></i> <span th:text="${donacion.entidad}">Entidad</span></span>
+                        <span style="display: flex; align-items: center; gap: 0.5rem;"><i class="fa-solid fa-location-dot" style="width: 16px;"></i> <span th:text="${donacion.ubicacion}">Ubicación</span></span>
+                        <span style="display: flex; align-items: center; gap: 0.5rem;"><i class="fa-regular fa-calendar" style="width: 16px;"></i> <span th:text="${#temporals.format(donacion.fechaEntregado, 'd \'de\' MMMM, yyyy')}">Fecha</span></span>
+                    </div>
+                </div>
+            </article>
+
+        </div>
+
+        <!-- 2. DATOS ESTÁTICOS DE RESPALDO (SE MUESTRAN SI LA LISTA ESTÁ VACÍA O ES NULL) -->
+        <div th:if="${donaciones == null or #lists.isEmpty(donaciones)}" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.75rem;">
+
+            <!-- Tarjeta 1 -->
+            <article class="donation-card" style="background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); cursor: pointer;" onclick="openModal('Entrega de viandas en Almagro', 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=600', 'Comedor Barrio Almagro', 'Almagro, CABA', '15 de Abril, 2026', 'Entrega mensual de viandas y raciones preparadas por los voluntarios de UTN Solidaria.')">
+                <div style="height: 200px; width: 100%; overflow: hidden;">
+                    <img src="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=600" alt="Entrega de viandas" style="width: 100%; height: 100%; object-fit: cover;">
+                </div>
+                <div style="padding: 1.25rem;">
+                    <h3 style="font-size: 1.1rem; font-weight: 700; color: #1e293b; margin-bottom: 0.75rem;">Entrega de viandas en Almagro</h3>
+                    <div style="display: flex; flex-direction: column; gap: 0.4rem; color: #64748b; font-size: 0.88rem;">
+                        <span style="display: flex; align-items: center; gap: 0.5rem;"><i class="fa-solid fa-box-open" style="width: 16px;"></i> Comedor Barrio Almagro</span>
+                        <span style="display: flex; align-items: center; gap: 0.5rem;"><i class="fa-solid fa-location-dot" style="width: 16px;"></i> Almagro, CABA</span>
+                        <span style="display: flex; align-items: center; gap: 0.5rem;"><i class="fa-regular fa-calendar" style="width: 16px;"></i> 15 de Abril, 2026</span>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Tarjeta 2 -->
+            <article class="donation-card" style="background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); cursor: pointer;" onclick="openModal('Donación de abrigos y frazadas', 'https://images.unsplash.com/photo-1532629345422-7515f3d16bb0?q=80&w=600', 'Hogar de Niños San José', 'Caballito, CABA', '10 de Abril, 2026', 'Campañas de abrigo para acompañar a niños y familias ante la llegada de las bajas temperaturas.')">
+                <div style="height: 200px; width: 100%; overflow: hidden;">
+                    <img src="https://images.unsplash.com/photo-1532629345422-7515f3d16bb0?q=80&w=600" alt="Donación de abrigos" style="width: 100%; height: 100%; object-fit: cover;">
+                </div>
+                <div style="padding: 1.25rem;">
+                    <h3 style="font-size: 1.1rem; font-weight: 700; color: #1e293b; margin-bottom: 0.75rem;">Donación de abrigos y frazadas</h3>
+                    <div style="display: flex; flex-direction: column; gap: 0.4rem; color: #64748b; font-size: 0.88rem;">
+                        <span style="display: flex; align-items: center; gap: 0.5rem;"><i class="fa-solid fa-box-open" style="width: 16px;"></i> Hogar de Niños San José</span>
+                        <span style="display: flex; align-items: center; gap: 0.5rem;"><i class="fa-solid fa-location-dot" style="width: 16px;"></i> Caballito, CABA</span>
+                        <span style="display: flex; align-items: center; gap: 0.5rem;"><i class="fa-regular fa-calendar" style="width: 16px;"></i> 10 de Abril, 2026</span>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Tarjeta 3 -->
+            <article class="donation-card" style="background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); cursor: pointer;" onclick="openModal('Alimentos al Hospital Gandulfo', 'https://images.unsplash.com/photo-1593113598332-cd288d649433?q=80&w=600', 'Hospital Gandulfo', 'Lomas de Zamora, Buenos Aires', '5 de Abril, 2026', 'Insumos de alimentos no perecederos destinados al comedor institucional.')">
+                <div style="height: 200px; width: 100%; overflow: hidden;">
+                    <img src="https://images.unsplash.com/photo-1593113598332-cd288d649433?q=80&w=600" alt="Alimentos al hospital" style="width: 100%; height: 100%; object-fit: cover;">
+                </div>
+                <div style="padding: 1.25rem;">
+                    <h3 style="font-size: 1.1rem; font-weight: 700; color: #1e293b; margin-bottom: 0.75rem;">Alimentos al Hospital Gandulfo</h3>
+                    <div style="display: flex; flex-direction: column; gap: 0.4rem; color: #64748b; font-size: 0.88rem;">
+                        <span style="display: flex; align-items: center; gap: 0.5rem;"><i class="fa-solid fa-box-open" style="width: 16px;"></i> Hospital Gandulfo</span>
+                        <span style="display: flex; align-items: center; gap: 0.5rem;"><i class="fa-solid fa-location-dot" style="width: 16px;"></i> Lomas de Zamora, Buenos Aires</span>
+                        <span style="display: flex; align-items: center; gap: 0.5rem;"><i class="fa-regular fa-calendar" style="width: 16px;"></i> 5 de Abril, 2026</span>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Tarjeta 4 -->
+            <article class="donation-card" style="background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); cursor: pointer;" onclick="openModal('Ropa y calzado para comunidad', 'https://images.unsplash.com/photo-1559027615-cd4628902d4a?q=80&w=600', 'Centro Comunitario La Esperanza', 'Villa Lugano, CABA', '1 de Abril, 2026', 'Distribución de indumentaria clasificada por talles para niños y adultos.')">
+                <div style="height: 200px; width: 100%; overflow: hidden;">
+                    <img src="https://images.unsplash.com/photo-1559027615-cd4628902d4a?q=80&w=600" alt="Ropa y calzado" style="width: 100%; height: 100%; object-fit: cover;">
+                </div>
+                <div style="padding: 1.25rem;">
+                    <h3 style="font-size: 1.1rem; font-weight: 700; color: #1e293b; margin-bottom: 0.75rem;">Ropa y calzado para comunidad</h3>
+                    <div style="display: flex; flex-direction: column; gap: 0.4rem; color: #64748b; font-size: 0.88rem;">
+                        <span style="display: flex; align-items: center; gap: 0.5rem;"><i class="fa-solid fa-box-open" style="width: 16px;"></i> Centro Comunitario La Esperanza</span>
+                        <span style="display: flex; align-items: center; gap: 0.5rem;"><i class="fa-solid fa-location-dot" style="width: 16px;"></i> Villa Lugano, CABA</span>
+                        <span style="display: flex; align-items: center; gap: 0.5rem;"><i class="fa-regular fa-calendar" style="width: 16px;"></i> 1 de Abril, 2026</span>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Tarjeta 5 -->
+            <article class="donation-card" style="background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); cursor: pointer;" onclick="openModal('Útiles escolares para escuela', 'https://images.unsplash.com/photo-1452860606245-08befc0ff44b?q=80&w=600', 'Escuela Primaria N°42', 'Flores, CABA', '28 de Marzo, 2026', 'Kits escolares completos entregados al inicio del ciclo lectivo.')">
+                <div style="height: 200px; width: 100%; overflow: hidden;">
+                    <img src="https://images.unsplash.com/photo-1452860606245-08befc0ff44b?q=80&w=600" alt="Útiles escolares" style="width: 100%; height: 100%; object-fit: cover;">
+                </div>
+                <div style="padding: 1.25rem;">
+                    <h3 style="font-size: 1.1rem; font-weight: 700; color: #1e293b; margin-bottom: 0.75rem;">Útiles escolares para escuela</h3>
+                    <div style="display: flex; flex-direction: column; gap: 0.4rem; color: #64748b; font-size: 0.88rem;">
+                        <span style="display: flex; align-items: center; gap: 0.5rem;"><i class="fa-solid fa-box-open" style="width: 16px;"></i> Escuela Primaria N°42</span>
+                        <span style="display: flex; align-items: center; gap: 0.5rem;"><i class="fa-solid fa-location-dot" style="width: 16px;"></i> Flores, CABA</span>
+                        <span style="display: flex; align-items: center; gap: 0.5rem;"><i class="fa-regular fa-calendar" style="width: 16px;"></i> 28 de Marzo, 2026</span>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Tarjeta 6 -->
+            <article class="donation-card" style="background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); cursor: pointer;" onclick="openModal('Colchones y muebles', 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=600', 'Refugio Noche Segura', 'Constitución, CABA', '22 de Marzo, 2026', 'Mobiliario para reacondicionar las instalaciones del refugio.')">
+                <div style="height: 200px; width: 100%; overflow: hidden;">
+                    <img src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=600" alt="Colchones y muebles" style="width: 100%; height: 100%; object-fit: cover;">
+                </div>
+                <div style="padding: 1.25rem;">
+                    <h3 style="font-size: 1.1rem; font-weight: 700; color: #1e293b; margin-bottom: 0.75rem;">Colchones y muebles</h3>
+                    <div style="display: flex; flex-direction: column; gap: 0.4rem; color: #64748b; font-size: 0.88rem;">
+                        <span style="display: flex; align-items: center; gap: 0.5rem;"><i class="fa-solid fa-box-open" style="width: 16px;"></i> Refugio Noche Segura</span>
+                        <span style="display: flex; align-items: center; gap: 0.5rem;"><i class="fa-solid fa-location-dot" style="width: 16px;"></i> Constitución, CABA</span>
+                        <span style="display: flex; align-items: center; gap: 0.5rem;"><i class="fa-regular fa-calendar" style="width: 16px;"></i> 22 de Marzo, 2026</span>
+                    </div>
+                </div>
+            </article>
+
+        </div>
+    </section>
+</main>
+
+<!-- MODAL DE DETALLE -->
+<div id="detail-modal" class="hidden" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); display: flex; align-items: center; justify-content: center; z-index: 1000;" onclick="closeModalOnOverlay(event)">
+    <div style="background: #ffffff; width: 90%; max-width: 600px; padding: 2rem; border-radius: 16px; position: relative;">
+        <button onclick="closeModal()" style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #64748b;">&times;</button>
+        <img id="modal-image" src="" alt="" style="width: 100%; height: 220px; object-fit: cover; border-radius: 12px; margin-bottom: 1rem;">
+        <h2 id="modal-title" style="margin-bottom: 0.75rem; color: #1e293b;">Título</h2>
+        <div style="margin-bottom: 1rem; color: #64748b; font-size: 0.95rem; display: flex; flex-direction: column; gap: 0.25rem;">
+            <p style="margin: 0;"><strong>Entidad:</strong> <span id="modal-entidad"></span></p>
+            <p style="margin: 0;"><strong>Ubicación:</strong> <span id="modal-ubicacion"></span></p>
+            <p style="margin: 0;"><strong>Fecha:</strong> <span id="modal-fecha"></span></p>
+        </div>
+        <p id="modal-description" style="color: #475569; line-height: 1.6; font-size: 0.95rem; margin: 0;"></p>
+    </div>
+</div>
+
+<!-- FOOTER REEMPLAZADO -->
+<footer th:replace="~{layoutAcceso/layoutAcceso :: footer}"></footer>
+
+<script>
+    function openModal(title, img, entidad, ubicacion, fecha, desc) {
+        document.getElementById('modal-title').textContent = title;
+        document.getElementById('modal-image').src = img;
+        document.getElementById('modal-entidad').textContent = entidad;
+        document.getElementById('modal-ubicacion').textContent = ubicacion;
+        document.getElementById('modal-fecha').textContent = fecha;
+        document.getElementById('modal-description').textContent = desc;
+
+        document.getElementById('detail-modal').classList.remove('hidden');
+    }
+
+    function openModalFromCard(element) {
+        openModal(
+            element.getAttribute('data-titulo'),
+            element.getAttribute('data-imagen'),
+            element.getAttribute('data-entidad'),
+            element.getAttribute('data-ubicacion'),
+            element.getAttribute('data-fecha'),
+            element.getAttribute('data-desc')
+        );
+    }
+
+    function closeModal() {
+        document.getElementById('detail-modal').classList.add('hidden');
+    }
+
+    function closeModalOnOverlay(e) {
+        if (e.target.id === 'detail-modal') {
+            closeModal();
+        }
+    }
+</script>
+
+<style>
+    .hidden { display: none !important; }
+</style>
+
+</body>
+</html>

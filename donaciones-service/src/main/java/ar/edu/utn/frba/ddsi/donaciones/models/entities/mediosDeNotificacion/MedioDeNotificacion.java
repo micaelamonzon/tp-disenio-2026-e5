@@ -3,8 +3,10 @@ package ar.edu.utn.frba.ddsi.donaciones.models.entities.mediosDeNotificacion;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.Persistente;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
 @Entity
 @Table(name = "medio_de_notificacion")
 public class MedioDeNotificacion extends Persistente {

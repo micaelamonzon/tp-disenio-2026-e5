@@ -1,6 +1,9 @@
 package ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador;
 
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante.PersonaHumana;
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante.PersonaJuridica;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante.TipoDonante;
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.Necesidad.EntidadBeneficiaria;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.Necesidad.Necesidad;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.Persistente;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.Bien;
@@ -14,6 +17,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import jakarta.persistence.CascadeType;
 
 @Getter
 @Setter
@@ -25,16 +29,17 @@ public class DonacionSegmentada  {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "id_del_donante")
-    private Long idDelDonante;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="donanteHumano_id", referencedColumnName = "id")
+   private PersonaHumana donanteHumano;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "tipo_donante")
-    private TipoDonante tipoDonante;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="donanteJuridico_id", referencedColumnName = "id")
+    private PersonaJuridica donanteJuridico;
 
-    @OneToMany
+    @OneToMany(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "donacion_segmentada_id", referencedColumnName = "id")
-    private ArrayList<Bien> bienesDelMismoTipo = new ArrayList<>();
+    private List<Bien> bienesDelMismoTipo = new ArrayList<>();
 
     @ManyToOne
     @JoinColumn(name = "subcategoria_id")
@@ -44,7 +49,7 @@ public class DonacionSegmentada  {
     @Column(name = "estado_actual")
     private EstadoDonacion estadoActual;
 
-    @OneToMany(mappedBy = "donacionSegmentada")
+    @OneToMany(mappedBy = "donacionSegmentada", cascade = CascadeType.ALL)
     private List<CambioEstado> historial = new ArrayList<>();
 
     @Column(name = "fecha_de_ingreso")
@@ -53,8 +58,9 @@ public class DonacionSegmentada  {
     @Column(name = "donacion_entregada")
     private Boolean donacionEntregada;
 
-    @Column(name = "entidad_beneficiaria_id")
-    private Long entidadBeneficiariaId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="entidadBeneficiaria_id", referencedColumnName = "id")
+    private EntidadBeneficiaria entidadBeneficiaria;
 
     @Column(name = "fecha_de_entrega")
     private LocalDate fechaEntrega;
@@ -63,11 +69,16 @@ public class DonacionSegmentada  {
     @JoinColumn(name = "necesidad_id")
     private Necesidad necesidad;
 
+    private void registrarCambio(EstadoDonacion anterior, EstadoDonacion nuevo,
+                                 String justificacion, String responsableId) {
+        CambioEstado cambio = new CambioEstado(anterior, nuevo, justificacion, responsableId);
+        cambio.setDonacionSegmentada(this);
+        historial.add(cambio);
+    }
     public DonacionSegmentada(Subcategoria subcategoria) {
         this.subcategoria = subcategoria;
         this.estadoActual = EstadoDonacion.EN_DEPOSITO;
-        historial.add(new CambioEstado(null, EstadoDonacion.EN_DEPOSITO,
-                "Donación registrada en depósito", "SISTEMA"));
+        registrarCambio(null, EstadoDonacion.EN_DEPOSITO,"Donación registrada en depósito", "SISTEMA");
     }
 
 
@@ -78,7 +89,7 @@ public class DonacionSegmentada  {
 
     public void cambiarEstado(EstadoDonacion nuevo, String justificacion, String responsableId) {
         this.estadoActual.validarTransicion(nuevo);
-        historial.add(new CambioEstado(this.estadoActual, nuevo, justificacion, responsableId));
+        registrarCambio(this.estadoActual, nuevo, justificacion, responsableId);
         this.estadoActual = nuevo;
     }
 

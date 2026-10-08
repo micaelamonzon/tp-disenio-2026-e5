@@ -31,7 +31,6 @@ public interface DonacionesService {
     PersonaJuridicaDTO modificarDonanteJuridico(Long id, PersonaJuridicaDTO request);
     void eliminarDonanteHumano(Long id);
 
-
     public void arrancarImportacionDeCSV( String file);
 
 
