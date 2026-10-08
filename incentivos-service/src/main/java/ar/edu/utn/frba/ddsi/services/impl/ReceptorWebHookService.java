@@ -109,8 +109,9 @@ public class ReceptorWebHookService {
                     nuevaDonacionDTO.cantidadDeBienes(),
                     this.obtenerOCrearCategoria(nuevaDonacionDTO.categoria())
             );
-
             donacion.setDonante(donante);
+            donante.agregarDonacion(donacion);
+
             this.incentivosRepository.save(donante);
         } else {
             logger.warn("Intento de registrar una donación para un donante inexistente: {}", id);

@@ -686,7 +686,7 @@ public class IncentivosServiceImpl implements IncentivosService {
 
     public String obtenerNombreDeMisionParticular(Mision m) {
         return switch (m) {
-            case  Racha r -> r.getNombre() + " de " + r.getMeses() + " meses";
+            case Racha r -> r.getNombre() + " de " + r.getMeses() + " meses";
             case Completitud c -> c.getNombre() + " de " + c.getObjetivoDeCategoriasDistintas();
             case DonacionesExitosas d -> d.getNombre() + " de " + d.getCantidadDeDonacioneExitosas();
             case HabilDonador h -> h.getNombre() + " de " + h.getCantidadDeBienes();
