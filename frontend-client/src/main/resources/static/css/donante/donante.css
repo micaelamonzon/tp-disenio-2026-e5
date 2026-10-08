@@ -33,7 +33,9 @@ html, body{
   color: var(--text);
   font-family: var(--font);
   -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
 }
+
 
 h1,h2,h3,p{ margin:0; }
 
@@ -539,53 +541,6 @@ svg{ width: 18px; height: 18px; flex-shrink:0; }
 }
 .mission-reward b{ color: var(--blue); font-weight: 700; }
 
-/* ===================== INSIGNIAS ===================== */
-.badges-grid{
-  display:grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 16px;
-}
-
-.badge-card{
-  background: var(--bg-elev);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 20px 14px;
-  text-align:center;
-  position:relative;
-}
-
-.badge-card.locked{ background: #e3ebf1; opacity: 0.65; }
-
-.badge-circle{
-  width: 58px; height:58px;
-  margin: 0 auto 12px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #ffe066, #ff9500);
-  display:flex; align-items:center; justify-content:center;
-  font-size: 26px;
-  border: 1px solid #f0a916;
-}
-
-.badge-card.locked .badge-circle{
-  background: #cbd5e1;
-  border-color: #b6c4d4;
-  filter: grayscale(1);
-}
-
-.badge-check{
-  position:absolute;
-  top: 12px; right: 12px;
-  width: 20px; height:20px;
-  border-radius: 50%;
-  background: var(--blue);
-  color:#fff;
-  display:flex; align-items:center; justify-content:center;
-}
-.badge-check svg{ width:11px; height:11px; }
-
-.badge-name{ font-size: 14.5px; font-weight: 700; }
-.badge-desc{ font-size: 12px; color: var(--text-muted); margin-top: 4px; line-height:1.4; }
 
 /* ===================== SEGUIMIENTO EN TIEMPO REAL ===================== */
 .tracking-container {
