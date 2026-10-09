@@ -3,6 +3,7 @@ package ar.edu.utn.frba.ddsi.models.entities.misiones;
 import ar.edu.utn.frba.ddsi.models.entities.persistente.Persistente;
 import ar.edu.utn.frba.ddsi.models.entities.persona.Donante;
 import ar.edu.utn.frba.ddsi.models.entities.persona.Insignia;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -20,6 +21,8 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Setter
 @Getter
@@ -51,11 +54,14 @@ public class MisionParticular extends Persistente {
     @Column
     private LocalDateTime fechaUltimoAvance;
 
+    @OneToMany(mappedBy = "misionParticular", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private List<Estado> historialDeEstados = new ArrayList<>();
+
 
     public MisionParticular(Mision mision, Donante donante) {
         this.mision = mision;
         this.donante = donante;
-        this.estado=EstadoDeMision.ACTUAL;
+        this.estado = EstadoDeMision.ACTUAL;
     }
 
     public void avanzarMision() {
@@ -71,4 +77,16 @@ public class MisionParticular extends Persistente {
             this.setFechaCompletada(java.time.LocalDateTime.now());
         }
     }
+
+
+    public void agregarEstado(Estado estado) {
+        if(this.historialDeEstados.isEmpty()){
+            this.historialDeEstados.add(estado);
+            return;
+        }
+        Estado estadoAnterior = this.getHistorialDeEstados().get(this.getHistorialDeEstados().size() - 1);
+        estadoAnterior.setEstado_actual(false);
+        this.historialDeEstados.add(estado);
+    }
+
 }

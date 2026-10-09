@@ -27,11 +27,6 @@ public class IncentivosController {
         this.insigniaPublicadorService = insigniaPublicadorService;
     }
 
-    @GetMapping("/donantes")
-    @ResponseStatus(HttpStatus.ACCEPTED) //para devolver el 200
-    public void pedirTodosLosDonantesADonanciones() {
-        incentivosService.pedirDonantesAServiceDonaciones();
-    }
 
     @PostMapping("donante/{id}/mision/{misionId}")
     @ResponseStatus(HttpStatus.CREATED) //para devolver el 201
@@ -148,5 +143,14 @@ public class IncentivosController {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.ok(misiones);
+    }
+
+    @GetMapping("/perfil/{id}")
+    public ResponseEntity<PerfilDTO> obtenerPerfilPorId(@PathVariable Long id, @RequestParam TipoDeDonante tipoDeDonante) {
+        PerfilDTO perfil = incentivosService.obtenerPerfilPorId(id,tipoDeDonante);
+        if (perfil == null) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(perfil);
     }
 }

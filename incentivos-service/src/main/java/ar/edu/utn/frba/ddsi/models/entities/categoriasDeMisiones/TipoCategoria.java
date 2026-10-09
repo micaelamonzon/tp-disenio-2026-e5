@@ -11,9 +11,11 @@ public enum TipoCategoria {
 
         if(actual == COLABORADOR){
             return TipoCategoria.SOSTENEDOR;
-        }else if(actual == SOSTENEDOR){
+        }else if(actual == SOSTENEDOR) {
             return TipoCategoria.TRANSFORMADOR;
-        }else {
+        }else if(actual == TRANSFORMADOR){
+                return TipoCategoria.TRANSFORMADOR;
+        } else {
             return null;
         }
     }

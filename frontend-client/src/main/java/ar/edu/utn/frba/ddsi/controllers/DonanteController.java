@@ -2,19 +2,20 @@ package ar.edu.utn.frba.ddsi.controllers;
 
 import ar.edu.utn.frba.ddsi.dtos.donaciones.DonacionDTO;
 import ar.edu.utn.frba.ddsi.dtos.entidades.EntidadBeneficiariaDTO;
-import ar.edu.utn.frba.ddsi.dtos.misiones.MisionFrontDTO;
+import ar.edu.utn.frba.ddsi.dtos.donaciones.misiones.MisionFrontDTO;
 import ar.edu.utn.frba.ddsi.services.DonacionesApiService.DonanteNoEncontradoException;
 import ar.edu.utn.frba.ddsi.services.DonacionesApiService.EntidadNoEncontradaException;
 import ar.edu.utn.frba.ddsi.services.DonacionesService;
-import ar.edu.utn.frba.ddsi.services.IncentivosApiService;
 import ar.edu.utn.frba.ddsi.services.IncentivosService;
 import ar.edu.utn.frba.ddsi.utils.UsuarioActual;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.Comparator;
 import java.util.List;
@@ -127,10 +128,36 @@ public class DonanteController {
                             .thenComparing(MisionFrontDTO::ordenSecuencial))
                     .toList();
             model.addAttribute("misiones", misiones);
+            model.addAttribute("puedeComenzar", puedeComenzar(misiones));
         } catch (RuntimeException e) {
             model.addAttribute("error", "El servicio de incentivos no está disponible. Intentá de nuevo en unos minutos.");
         }
         return "acceso/donante/incentivos";
+    }
+
+    @PostMapping("/incentivos/comenzar/{misionId}")
+    public String comenzarMision(@PathVariable Long misionId, RedirectAttributes redirect) {
+        try {
+            incentivosService.comenzarMision(idDonanteActual(), misionId);
+        } catch (RuntimeException e) {
+            redirect.addFlashAttribute("errorComenzar",
+                    "No pudimos comenzar la misión. Intentá de nuevo en unos minutos.");
+        }
+        return "redirect:/donante/incentivos";
+    }
+
+    // usuario nuevo: sin categoría y sin ninguna misión en curso ni completada
+    private boolean puedeComenzar(List<MisionFrontDTO> misiones) {
+        if (misiones.isEmpty()) return false;
+        boolean sinMisionEnCurso = misiones.stream()
+                .noneMatch(m -> m.estado().name().equals("ACTUAL")
+                        || m.estado().name().equals("COMPLETADA"));
+        if (!sinMisionEnCurso) return false;
+        try {
+            return incentivosService.obtenerPerfil(idDonanteActual()).categoriaActual() == null;
+        } catch (RuntimeException e) {
+            return false; // si no podemos confirmar la categoría, no mostramos el botón
+        }
     }
 
     @GetMapping("/seguimiento")
@@ -151,7 +178,11 @@ public class DonanteController {
     public String perfil(Model model) {
         model.addAttribute("titulo", "Mi Perfil");
         model.addAttribute("tabActiva", "");
-
+        try {
+            model.addAttribute("perfil", incentivosService.obtenerPerfil(idDonanteActual()));
+        } catch (RuntimeException e) {
+            model.addAttribute("error", "El servicio de incentivos no está disponible. Intentá de nuevo en unos minutos.");
+        }
         return "acceso/donante/perfil";
     }
 

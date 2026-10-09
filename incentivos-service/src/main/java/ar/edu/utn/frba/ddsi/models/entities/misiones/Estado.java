@@ -3,6 +3,8 @@ package ar.edu.utn.frba.ddsi.models.entities.misiones;
 import ar.edu.utn.frba.ddsi.models.entities.persona.Donante;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -25,6 +27,7 @@ public class Estado {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "estado")
     private EstadoDeMision estado;
 
@@ -38,8 +41,17 @@ public class Estado {
     @JoinColumn(name = "donante_id", referencedColumnName = "id")
     private Donante donante;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "mision_particular_id", referencedColumnName = "id")
     private MisionParticular misionParticular;
+
+    public Estado(EstadoDeMision estadoNuevo, Donante donante, MisionParticular misionParticular ) {
+        this.estado = estadoNuevo;
+        this.donante = donante;
+        this.misionParticular = misionParticular;
+        this.fecha = LocalDateTime.now();
+        this.estado_actual = true;
+
+    }
 
 }

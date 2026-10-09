@@ -10,16 +10,17 @@
             Misiones
         </h2>
         <p th:if="${error}" class="page-sub" th:text="${error}" role="alert"></p>
-
+        <p th:if="${errorComenzar}" class="page-sub" th:text="${errorComenzar}" role="alert"></p>
         <p th:if="${error == null and #lists.isEmpty(misiones)}" class="page-sub">
             Todavía no hay misiones disponibles.
         </p>
 
         <div class="missions-grid" id="missionsGrid">
             <article class="mission-card"
-                     th:each="m : ${misiones}"
-                     th:with="completada=${m.estado.name() == 'COMPLETADA'},
-                  bloqueada=${m.estado.name() == 'BLOQUEADA'},
+                     th:each="m, st : ${misiones}"
+                     th:with="comenzable=${puedeComenzar != null and puedeComenzar and st.first},
+                  completada=${m.estado.name() == 'COMPLETADA'},
+                  bloqueada=${m.estado.name() == 'BLOQUEADA' and !comenzable},
                   actual=${m.estado.name() == 'ACTUAL'},
                   prog=${m.progreso != null ? m.progreso : 0},
                   dist=${m.distanciaDelObjetivo != null ? m.distanciaDelObjetivo : 0},
@@ -53,7 +54,7 @@
                     </th:block>
                 </div>
 
-                <div class="mission-progress" th:unless="${bloqueada}">
+                <div class="mission-progress" th:unless="${bloqueada or comenzable}">
                     <div class="mission-progress-labels">
                         <span>Progreso</span>
                         <span th:text="${completada ? objetivo : prog} + ' / ' + ${objetivo}">0 / 10</span>
@@ -70,6 +71,11 @@
                 <p class="mission-desc mission-locked-msg" th:if="${bloqueada}">
                     Completá las misiones anteriores para desbloquearla.
                 </p>
+
+                <form class="mission-start" th:if="${comenzable}" method="post"
+                      th:action="@{/donante/incentivos/comenzar/{id}(id=${m.id})}">
+                    <button type="submit" class="btn btn-primary">Comenzar</button>
+                </form>
             </article>
         </div>
 

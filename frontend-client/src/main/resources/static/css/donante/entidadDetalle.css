@@ -1,0 +1,54 @@
+
+.entity-actions .btn{ min-height: 48px; text-decoration: none; }
+
+.breadcrumb{ margin-bottom: 18px; }
+.breadcrumb a{
+    display: inline-flex; align-items: center; min-height: 48px;
+    color: var(--blue-dark); font-weight: 600; text-decoration: none;
+}
+.breadcrumb a:hover, .breadcrumb a:focus-visible{ text-decoration: underline; }
+
+.entity-detail{
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    padding: 24px;
+}
+.entity-detail .entity-name{ font-size: 22px; margin: 0; }
+.entity-detail-data{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin: 20px 0 0;
+}
+.entity-detail-data dt{ font-size: 12.5px; color: var(--text-muted); margin-bottom: 4px; }
+.entity-detail-data dd{ margin: 0; font-weight: 600; color: var(--text); overflow-wrap: anywhere; }
+
+.needs-grid{
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+}
+.need-card{
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-card);
+    padding: 18px;
+    display: flex; flex-direction: column; gap: 10px;
+}
+.need-card.need-done{ opacity: .7; }
+.need-card-top{ display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+.need-title{ font-size: 16px; font-weight: 700; margin: 0; }
+.need-desc{ font-size: 13.5px; color: var(--text-soft); margin: 0; line-height: 1.5; }
+.need-tag{ font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 999px; white-space: nowrap; }
+.need-tag-urgent{ background: var(--amber-bg); color: var(--amber); }
+.need-tag-recurrent{ background: var(--blue-soft-bg); color: var(--blue-dark); }
+.need-footer{
+    display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+    font-size: 13px; color: var(--text-soft);
+    border-top: 1px solid var(--border-soft); padding-top: 10px; margin-top: auto;
+}
+.need-status{ font-weight: 600; color: var(--amber); }
+.need-done .need-status{ color: var(--green); }

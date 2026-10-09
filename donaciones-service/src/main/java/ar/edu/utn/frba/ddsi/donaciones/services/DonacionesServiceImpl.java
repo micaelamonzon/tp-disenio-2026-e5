@@ -477,7 +477,7 @@ public class DonacionesServiceImpl implements DonacionesService {
                       d.getDonacionEntregada(),
                       d.getEntidadBeneficiaria() != null ? d.getEntidadBeneficiaria().getId() : null,
                       d.getFechaDeIngreso(),
-                      d.getBienesDelMismoTipo().size(),
+                      d.calcularCantidadDeBienes(),
                       d.getBienesDelMismoTipo().getFirst().getSubcategoria().getCategoria().getNombre()
                  )).collect(Collectors.toList()),TipoDonante.HUMANO, id
         );
@@ -527,7 +527,7 @@ public class DonacionesServiceImpl implements DonacionesService {
                                 d.getDonacionEntregada(),
                                 d.getEntidadBeneficiaria().getId(),
                                 d.getFechaDeIngreso(),
-                                d.getBienesDelMismoTipo().size(),
+                                d.calcularCantidadDeBienes(),
                                 d.getBienesDelMismoTipo().getFirst().getSubcategoria().getCategoria().getNombre()
                         )).collect(Collectors.toList()),TipoDonante.JURIDICO, id
         );
