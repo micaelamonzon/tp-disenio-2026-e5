@@ -6,23 +6,25 @@
             <p class="page-sub">Tu actividad, insignias y progreso como persona donante</p>
         </div>
 
-        <div class="profile-layout">
+        <p th:if="${error}" th:text="${error}" class="profile-empty" role="alert"></p>
 
+        <div class="profile-layout" th:if="${perfil}">
 
             <div class="profile-card profile-header">
-                <div class="avatar profile-avatar">PD</div>
+                <div class="avatar profile-avatar" aria-hidden="true"
+                     th:text="${#strings.toUpperCase(#strings.substring(perfil.nombreDeUsuario, 0, perfil.nombreDeUsuario.length() > 1 ? 2 : 1))}">PD</div>
                 <div class="profile-header-info">
-                    <h2 class="profile-username">persona_donante</h2>
+                    <h2 class="profile-username" th:text="${perfil.nombreDeUsuario}">persona_donante</h2>
                     <span class="profile-role">Persona Donante</span>
                 </div>
                 <div class="profile-header-stats">
                     <div class="profile-stat">
-                        <b>3</b>
+                        <b th:text="${perfil.cantidadDeInsigniasGanadas}">3</b>
                         <span>Insignias</span>
                     </div>
                     <div class="profile-stat">
-                        <b>2</b>
-                        <span>Categorías en curso</span>
+                        <b th:text="${perfil.cantidadDeMisionesCompletadas}">2</b>
+                        <span>Misiones completadas</span>
                     </div>
                 </div>
             </div>
@@ -34,29 +36,17 @@
                     Insignias ganadas
                 </h3>
 
-                <div class="badges-grid profile-badges">
-
-                    <div class="badge-card">
-                        <div class="badge-circle">🔥</div>
-                        <div class="badge-name">Racha ganadora</div>
-                        <div class="badge-desc">Misión: 5 donaciones seguidas</div>
-                    </div>
-                    <div class="badge-card">
-                        <div class="badge-circle">🏆</div>
-                        <div class="badge-name">Primera donación</div>
-                        <div class="badge-desc">Misión: Realizar tu primera donación</div>
-                    </div>
-                    <div class="badge-card">
-                        <div class="badge-circle">👩‍🔧</div>
-                        <div class="badge-name">Mecánica solidaria</div>
-                        <div class="badge-desc">Misión: Reparar un vehículo</div>
+                <div class="badges-grid profile-badges" th:if="${not #lists.isEmpty(perfil.insignias())}">
+                    <div class="badge-card" th:each="insignia : ${perfil.insignias()}">
+                        <div class="badge-circle" aria-hidden="true" th:text="${insignia.emojin()}"></div>
+                        <div class="badge-name" th:text="${insignia.nombre()}"></div>
                     </div>
                 </div>
 
-
-<!--                <p class="profile-empty" hidden>Todavía no hay insignias visibles en este perfil.</p>-->
+                <p class="profile-empty" th:if="${#lists.isEmpty(perfil.insignias)}">
+                    Todavía no hay insignias visibles en este perfil.
+                </p>
             </div>
-
 
             <div class="profile-card">
                 <h3 class="profile-section-title">
@@ -64,9 +54,8 @@
                     Categoría Actual
                 </h3>
                 <div class="category-chips">
-                    <!-- th:each="c : ${perfil.categoriasEnCurso}" th:text="${c}" -->
-                    <span class="category-chip">Sostenedor</span>
-
+                    <span class="category-chip"
+                          th:text="${perfil.categoriaActual != null} ? ${#strings.capitalize(#strings.toLowerCase(perfil.categoriaActual))} : 'Sin categoría'">Sostenedor</span>
                 </div>
             </div>
 

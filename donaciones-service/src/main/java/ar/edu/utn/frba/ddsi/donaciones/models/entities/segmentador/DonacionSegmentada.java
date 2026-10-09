@@ -95,5 +95,9 @@ public class DonacionSegmentada  {
         this.estadoActual = nuevo;
     }
 
+    public Integer calcularCantidadDeBienes() {
+        return bienesDelMismoTipo.stream().mapToInt(Bien::getCantidad).sum();
+    }
+
 
 }

@@ -2,12 +2,14 @@ package ar.edu.utn.frba.ddsi.services.impl;
 
 import ar.edu.utn.frba.ddsi.dto.DonacionIncentivosDTO;
 import ar.edu.utn.frba.ddsi.dto.PersonaDonanteDTO;
+import ar.edu.utn.frba.ddsi.models.entities.categoriasDeMisiones.CategoriaDeMision;
 import ar.edu.utn.frba.ddsi.models.entities.donaciones.DonacionSegmentada;
 import ar.edu.utn.frba.ddsi.models.entities.persona.Categoria;
 import ar.edu.utn.frba.ddsi.models.entities.persona.Donante;
 import ar.edu.utn.frba.ddsi.models.entities.persona.Perfil;
 import ar.edu.utn.frba.ddsi.models.entities.persona.TipoDeDonante;
 import ar.edu.utn.frba.ddsi.repositories.CategoriaDeBien;
+import ar.edu.utn.frba.ddsi.repositories.CategoriaDeMisionRepository;
 import ar.edu.utn.frba.ddsi.repositories.IncentivosRepository;
 import org.springframework.transaction.annotation.Transactional;
 import org.slf4j.Logger;
@@ -21,11 +23,13 @@ public class ReceptorWebHookService {
 
     private final IncentivosRepository incentivosRepository;
     private final CategoriaDeBien categoriaRepository;
+    private final CategoriaDeMisionRepository categoriaDeMisionRepository;
     private static final Logger logger = LoggerFactory.getLogger(ReceptorWebHookService.class);
 
-    public ReceptorWebHookService(IncentivosRepository incentivosRepository,CategoriaDeBien categoriaRepository) {
+    public ReceptorWebHookService(IncentivosRepository incentivosRepository,CategoriaDeBien categoriaRepository, CategoriaDeMisionRepository categoriaDeMisionRepository) {
         this.incentivosRepository = incentivosRepository;
         this.categoriaRepository = categoriaRepository;
+        this.categoriaDeMisionRepository = categoriaDeMisionRepository;
     }
 
 
@@ -59,8 +63,13 @@ public class ReceptorWebHookService {
                 : crearDonanteJuridico(dto, donaciones);
 
         nuevoDonante.setPerfil(new Perfil(obtenerNombreDeUsuario(dto, tipoDeDonante), null));
+
+        nuevoDonante.getPerfil().setCategoria(null);//empieza sin categoria en el perfil
+
         nuevoDonante.setNombreDeUsuario(obtenerNombreDeUsuario(dto, tipoDeDonante));
+
         nuevoDonante.setFechaDeRegistro(dto.fechaDeRegistro());
+
         this.incentivosRepository.save(nuevoDonante);
     }
 

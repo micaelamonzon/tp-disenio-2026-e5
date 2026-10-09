@@ -26,7 +26,7 @@ public class Perfil extends Persistente {
     @ElementCollection
     @CollectionTable(name = "perfil_insignia", joinColumns = @JoinColumn(name="perfil_id"))
     @Column(name = "insignia")
-    private List<Insignia> insignias;
+    private List<String> insignias;
 
     @Column
     private String nombreDeUsuario; // lo sacamos del nombre y apellido del donante o de la razón social de la empresa
@@ -53,7 +53,7 @@ public class Perfil extends Persistente {
         this.evolucionMensual = new ArrayList<>();
     }
 
-    public void agregarInsignia(Insignia insignia){
+    public void agregarInsignia(String insignia){
         this.insignias.add(insignia);
     }
 }
