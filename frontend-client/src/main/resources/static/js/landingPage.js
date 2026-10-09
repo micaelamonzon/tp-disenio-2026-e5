@@ -5,39 +5,6 @@ const ZONE_COLORS = {
     'Oeste': '#9333ea'
 };
 
-const MOCK_DONATIONS = [
-    {
-        id: 1,
-        title: "Entrega de Alimentos",
-        entity: "Comedor Los Chicos",
-        location: "Av. Corrientes 1234, CABA",
-        date: "02/09/2026",
-        lat: -34.6037,
-        lng: -58.3816,
-        image: "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=600&q=80"
-    },
-    {
-        id: 2,
-        title: "Ropa de Abrigo",
-        entity: "Fundación Comunidad",
-        location: "Av. Rivadavia 4500, CABA",
-        date: "28/08/2026",
-        lat: -34.6157,
-        lng: -58.4333,
-        image: "https://images.unsplash.com/photo-1578357078586-491adf1aa5ba?auto=format&fit=crop&w=600&q=80"
-    },
-    {
-        id: 3,
-        title: "Kits Sanitarios",
-        entity: "Hogar San José",
-        location: "Calle Las Heras 2100, CABA",
-        date: "15/08/2026",
-        lat: -34.5833,
-        lng: -58.4000,
-        image: "https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=600&q=80"
-    }
-];
-
 // ===================== SESIÓN (mock, solo front) =====================
 const SESSION_KEY = 'donatrack_session';
 
@@ -105,7 +72,6 @@ function handleLogout() {
     navigateTo('home');
 }
 
-
 // ===================== NAVIGATION CONTROLLER =====================
 function navigateTo(pageId) {
     showLoader();
@@ -135,54 +101,14 @@ function navigateTo(pageId) {
         }
 
         hideLoader();
-    }, 350);
-}
-
-// ===================== UI RENDERERS =====================
-function renderDonations() {
-    const featuredContainer = document.getElementById('featured-donations');
-    const galleryContainer = document.getElementById('gallery-container');
-
-    const cardsHTML = MOCK_DONATIONS.map(d => `
-    <article class="donation-card">
-      <div class="donation-img-wrapper">
-        <img src="${d.image}" alt="${d.title}" loading="lazy">
-      </div>
-      <div class="donation-card-body">
-        <h3>${d.title}</h3>
-        <div class="donation-meta">
-          <span>📦 ${d.entity}</span>
-          <span>📍 ${d.location}</span>
-          <span>📅 ${d.date}</span>
-        </div>
-      </div>
-    </article>
-  `).join('');
-
-    if (featuredContainer) featuredContainer.innerHTML = MOCK_DONATIONS.slice(0, 3).map(d => `
-    <article class="donation-card">
-      <div class="donation-img-wrapper">
-        <img src="${d.image}" alt="${d.title}" loading="lazy">
-      </div>
-      <div class="donation-card-body">
-        <h3>${d.title}</h3>
-        <div class="donation-meta">
-          <span>📦 ${d.entity}</span>
-          <span>📍 ${d.location}</span>
-          <span>📅 ${d.date}</span>
-        </div>
-      </div>
-    </article>
-  `).join('');
-
-    if (galleryContainer) galleryContainer.innerHTML = cardsHTML;
+    }, 200);
 }
 
 // ===================== MAPA ESTILIZADO =====================
 let mapInstance = null;
 
 function renderMapPage() {
-    const mapContainer = document.getElementById('map');
+    const mapContainer = document.getElementById('real-map') || document.getElementById('map');
     const cardsContainer = document.getElementById('map-cards-container');
     if (!mapContainer || typeof L === 'undefined') return;
 
@@ -193,10 +119,25 @@ function renderMapPage() {
 
     if (mapInstance) {
         mapInstance.remove();
+        mapInstance = null;
     }
 
+    // Coordenadas predeterminadas distribuidas para mostrar donaciones en Buenos Aires
+    const coordenadasDefecto = [
+        { lat: -34.6037, lng: -58.4116, lugar: "Sede Medrano - Almagro" },
+        { lat: -34.6180, lng: -58.4350, lugar: "Hogar San José - Caballito" },
+        { lat: -34.7600, lng: -58.3970, lugar: "Hospital Gandulfo - Lomas de Zamora" },
+        { lat: -34.6800, lng: -58.4600, lugar: "Centro La Esperanza - Lugano" },
+        { lat: -34.6300, lng: -58.4620, lugar: "Escuela N°42 - Flores" }
+    ];
+
+    // Obtener las donaciones reales inyectadas por Spring Boot/Thymeleaf
+    const listadoDonaciones = (typeof donacionesServidor !== 'undefined' && Array.isArray(donacionesServidor))
+        ? donacionesServidor
+        : [];
+
     // Inicializar mapa centrado en Buenos Aires
-    mapInstance = L.map('map').setView([-34.6037, -58.4000], 12);
+    mapInstance = L.map(mapContainer.id).setView([-34.6037, -58.3816], 11);
 
     // Servidor oficial y gratuito de OpenStreetMap
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -204,43 +145,42 @@ function renderMapPage() {
         attribution: '&copy; OpenStreetMap contributors'
     }).addTo(mapInstance);
 
-    // Renderizar marcadores con datos reales
-    MOCK_DONATIONS.forEach(d => {
-        const popupContent = `
-            <div style="font-family: sans-serif; padding: 4px; min-width: 180px;">
-                <h4 style="margin: 0 0 6px 0; color: #1e293b; font-size: 15px;">${d.mapTitle || d.title}</h4>
-                <p style="margin: 3px 0; font-size: 13px; color: #475569;">📦 <strong>${d.entity}</strong></p>
-                <p style="margin: 3px 0; font-size: 12px; color: #64748b;">📍 ${d.location}</p>
-                <p style="margin: 3px 0; font-size: 12px; color: #64748b;">📅 ${d.date}</p>
-            </div>
-        `;
+    // Renderizar marcadores con datos reales provenientes del backend
+    if (listadoDonaciones.length > 0) {
+        listadoDonaciones.forEach((d, index) => {
+            const pos = coordenadasDefecto[index % coordenadasDefecto.length];
+            const titulo = d.subcategoria ? d.subcategoria : (d.categoria ? d.categoria : "Donación entregada");
+            const cantidad = d.cantidadTotalItems ? d.cantidadTotalItems : 1;
 
-        const marker = L.marker([d.lat, d.lng]).addTo(mapInstance);
-        marker.bindPopup(popupContent);
-
-        marker.on('click', () => {
-            if (cardsContainer) {
-                const card = document.getElementById(`map-card-${d.id}`);
-                if (card) {
-                    card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                    card.style.outline = '2px solid #2563eb';
-                    setTimeout(() => card.style.outline = 'none', 2000);
-                }
-            }
-        });
-    });
-
-    if (cardsContainer) {
-        cardsContainer.innerHTML = MOCK_DONATIONS.map(d => `
-            <article class="mapa-donation-card" id="map-card-${d.id}" style="padding: 12px; margin-bottom: 10px; background: #fff; border-radius: 8px; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.04);">
-                <h3 style="color: #2563eb; margin: 0 0 6px 0; font-size: 16px;">${d.mapTitle || d.title}</h3>
-                <div class="donation-meta" style="display: flex; gap: 12px; font-size: 13px; color: #64748b; flex-wrap: wrap;">
-                    <span>📦 ${d.entity}</span>
-                    <span>📍 ${d.location}</span>
-                    <span>📅 ${d.date}</span>
+            const popupContent = `
+                <div style="font-family: system-ui, sans-serif; padding: 4px; min-width: 180px;">
+                    <h4 style="margin: 0 0 6px 0; color: #1e293b; font-size: 15px;">${titulo}</h4>
+                    <p style="margin: 3px 0; font-size: 13px; color: #2563eb;">📦 <strong>${cantidad} unidades</strong></p>
+                    <p style="margin: 3px 0; font-size: 12px; color: #64748b;">📍 ${pos.lugar}</p>
                 </div>
-            </article>
-        `).join('');
+            `;
+
+            const marker = L.circleMarker([pos.lat, pos.lng], {
+                color: '#ffffff',
+                weight: 2,
+                fillColor: '#2563eb',
+                fillOpacity: 1,
+                radius: 10
+            }).addTo(mapInstance);
+
+            marker.bindPopup(popupContent);
+
+            marker.on('click', () => {
+                if (cardsContainer) {
+                    const card = document.getElementById(`map-card-${d.id}`);
+                    if (card) {
+                        card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                        card.style.outline = '2px solid #2563eb';
+                        setTimeout(() => card.style.outline = 'none', 2000);
+                    }
+                }
+            });
+        });
     }
 
     setTimeout(() => {
@@ -269,12 +209,10 @@ function selectDonation(mapContainer, cardsContainer, d, marker) {
 
     popup.innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-            <strong style="color: #1e293b; font-size: 14px;">${d.mapTitle || d.title}</strong>
+            <strong style="color: #1e293b; font-size: 14px;">${d.subcategoria || d.categoria || 'Donación'}</strong>
             <button onclick="this.parentElement.parentElement.remove()" style="background:none; border:none; cursor:pointer; font-weight:bold; color:#94a3b8;">&times;</button>
         </div>
-        <p style="margin:2px 0; font-size:12px; color:#475569;"><strong>Entidad:</strong> ${d.entity}</p>
-        <p style="margin:2px 0; font-size:12px; color:#475569;"><strong>Ubicación:</strong> ${d.location}</p>
-        <p style="margin:2px 0; font-size:12px; color:#475569;"><strong>Fecha:</strong> ${d.date}</p>
+        <p style="margin:2px 0; font-size:12px; color:#475569;"><strong>Cantidad:</strong> ${d.cantidadTotalItems || 1} ítems</p>
     `;
 
     mapContainer.appendChild(popup);
@@ -290,21 +228,6 @@ function selectDonation(mapContainer, cardsContainer, d, marker) {
     }
 }
 
-function selectDonation(mapContainer, cardsContainer, donation, markerEl) {
-    mapContainer.querySelectorAll('.map-marker').forEach(m => m.classList.remove('active'));
-    cardsContainer.querySelectorAll('.mapa-donation-card').forEach(c => c.classList.remove('active'));
-
-    markerEl.classList.add('active');
-
-    const card = document.getElementById(`map-card-${donation.id}`);
-    if (card) {
-        card.classList.add('active');
-        card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }
-
-    showMapPopup(mapContainer, donation);
-}
-
 function showMapPopup(mapContainer, donation) {
     const prev = mapContainer.querySelector('.map-popup');
     if (prev) prev.remove();
@@ -313,12 +236,9 @@ function showMapPopup(mapContainer, donation) {
     popup.className = 'map-popup';
     popup.innerHTML = `
         <button class="map-popup-close" onclick="this.parentElement.remove()" aria-label="Cerrar">&times;</button>
-        <img src="${donation.image}" alt="${donation.title}">
         <div class="map-popup-body">
-            <h4>${donation.mapTitle || donation.title}</h4>
-            <p>📦 ${donation.entity}</p>
-            <p>📍 ${donation.location}</p>
-            <p>📅 ${donation.date}</p>
+            <h4>${donation.subcategoria || donation.categoria || 'Donación'}</h4>
+            <p>📦 ${donation.cantidadTotalItems || 1} ítems</p>
         </div>
     `;
     mapContainer.appendChild(popup);
@@ -431,6 +351,7 @@ function handleRegister(event) {
     showToast(`¡Bienvenida, ${nombreValue}! Registro exitoso.`, 'success');
     navigateTo('home');
 }
+
 function handleLogin(event) {
     event.preventDefault();
 
@@ -504,36 +425,12 @@ function hideLoader() {
     }
 }
 
-function renderFeaturedDonations() {
-    const container = document.getElementById('featured-donations-container'); // O el ID que use tu contenedor
-    if (!container) return;
-
-    container.innerHTML = MOCK_DONATIONS.map(d => `
-        <article class="card-donacion" style="background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
-            <div style="width: 100%; height: 180px; background: #e2e8f0; overflow: hidden;">
-                ${d.image ? `
-                    <img src="${d.image}" 
-                         alt="${d.title}" 
-                         style="width: 100%; height: 100%; object-fit: cover;" 
-                         onerror="this.style.display='none'">
-                ` : ''}
-            </div>
-            <div style="padding: 16px;">
-                <h3 style="margin: 0 0 8px 0; font-size: 18px; color: #0f172a;">${d.title}</h3>
-                <p style="margin: 4px 0; font-size: 14px; color: #64748b;">📦 ${d.entity}</p>
-                <p style="margin: 4px 0; font-size: 14px; color: #64748b;">📍 ${d.location}</p>
-                <p style="margin: 4px 0; font-size: 14px; color: #64748b;">📅 ${d.date}</p>
-            </div>
-        </article>
-    `).join('');
-}
-
 // ===================== INITIALIZATION =====================
 document.addEventListener('DOMContentLoaded', () => {
-    renderDonations();
     updateAuthUI();
     hideLoader();
 
-    const hash = window.location.hash.replace('#', '');
-    if (hash) navigateTo(hash);
+    if (window.location.pathname.includes('/mapa') || window.location.hash === '#mapa') {
+        renderMapPage();
+    }
 });
