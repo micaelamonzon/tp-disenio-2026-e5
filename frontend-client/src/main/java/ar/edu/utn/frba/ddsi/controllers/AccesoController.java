@@ -6,11 +6,13 @@ import ar.edu.utn.frba.ddsi.dtos.donaciones.RegistroPersonaHumanaDTO;
 import ar.edu.utn.frba.ddsi.dtos.donaciones.RegistroPersonaJuridicaDTO;
 import ar.edu.utn.frba.ddsi.services.DonacionesApiService;
 import ar.edu.utn.frba.ddsi.services.DonacionesService;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -107,9 +109,24 @@ public class AccesoController {
         model.addAttribute("tabActiva", "mapa");
         try {
             List<DonacionDTO> todas = obtenerTodasLasDonacionesPublicas();
-            model.addAttribute("donacionesMapa", todas);
-        } catch (RuntimeException e) {
-            model.addAttribute("error", "El servicio de donaciones no está disponible. Intentá de nuevo en unos minutos.");
+
+            List<DonacionDTO> donacionesEntregadas = todas.stream()
+                    .filter(d -> Boolean.TRUE.equals(d.getDonacionEntregada())
+                            || "ENTREGADA".equalsIgnoreCase(d.getEstadoActual()))
+                    .toList();
+
+            // Creamos un ObjectMapper local configurado con el módulo de fechas Java 8
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.registeredModules();
+
+            // Serializamos manualmente a String JSON
+            String donacionesJson = mapper.writeValueAsString(donacionesEntregadas);
+
+            model.addAttribute("donacionesMapaJson", donacionesJson);
+            model.addAttribute("donacionesMapa", donacionesEntregadas); // Para las tarjetas HTML
+        } catch (Exception e) {
+            model.addAttribute("error", "El servicio de donaciones no está disponible.");
+            model.addAttribute("donacionesMapaJson", "[]");
             model.addAttribute("donacionesMapa", List.of());
         }
         return "acceso/landigPage/mapa";

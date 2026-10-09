@@ -9,7 +9,7 @@
     <link rel="stylesheet" th:href="@{/css/landingPage/landingPage.css}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <!-- CSS de Leaflet para el Mapa Real -->
+    <!-- CSS de Leaflet -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 </head>
 <body style="background-color: #f8fafc; color: #334155; font-family: system-ui, -apple-system, sans-serif;">
@@ -26,13 +26,13 @@
         <p style="color: #64748b; font-size: 1rem; margin: 0;">Explorá la ubicación de cada donación entregada a través de UTN Solidaria. Hacé clic en los marcadores para ver los detalles de cada entrega.</p>
     </div>
 
-    <!-- CONTENEDOR DEL MAPA CON LEYENDA ENCARAMADA -->
-    <div style="position: relative; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.06); border: 1px solid #e2e8f0; margin-bottom: 3rem;">
+    <!-- CONTENEDOR DEL MAPA -->
+    <div style="position: relative; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.06); border: 1px solid #e2e8f0; margin-bottom: 3rem; background-color: #e2e8f0;">
 
-        <!-- MAPA REAL LEAFLET -->
-        <div id="real-map" style="width: 100%; height: 480px; z-index: 1;"></div>
+        <!-- MAPA REAL LEAFLET (Altura obligatoria e inline z-index) -->
+        <div id="real-map" style="width: 100%; height: 480px; min-height: 480px; display: block; z-index: 1;"></div>
 
-        <!-- CUADRO DE LEYENDA (SUPERPUESTO ARRIBA A LA IZQUIERDA) -->
+        <!-- CUADRO DE LEYENDA -->
         <div style="position: absolute; top: 20px; left: 20px; z-index: 1000; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(4px); padding: 1rem 1.25rem; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; font-size: 0.88rem;">
             <div style="display: flex; align-items: center; gap: 0.5rem; font-weight: 700; color: #1e293b; margin-bottom: 0.6rem;">
                 <i class="fa-regular fa-compass" style="color: #2563eb;"></i>
@@ -40,18 +40,17 @@
             </div>
             <div style="display: flex; flex-direction: column; gap: 0.4rem; color: #475569;">
                 <div style="display: flex; align-items: center; gap: 0.5rem;">
-                    <span style="width: 10px; height: 10px; border-radius: 50%; background-color: #2563eb; display: inline-block;"></span> Centro
+                    <span style="width: 10px; height: 10px; border-radius: 50%; background-color: #2563eb; display: inline-block;"></span> CABA / Centro
                 </div>
                 <div style="display: flex; align-items: center; gap: 0.5rem;">
-                    <span style="width: 10px; height: 10px; border-radius: 50%; background-color: #3b82f6; display: inline-block;"></span> Sur
+                    <span style="width: 10px; height: 10px; border-radius: 50%; background-color: #3b82f6; display: inline-block;"></span> Zona Sur
                 </div>
                 <div style="display: flex; align-items: center; gap: 0.5rem;">
-                    <span style="width: 10px; height: 10px; border-radius: 50%; background-color: #a855f7; display: inline-block;"></span> Oeste
+                    <span style="width: 10px; height: 10px; border-radius: 50%; background-color: #a855f7; display: inline-block;"></span> Zona Oeste
                 </div>
             </div>
         </div>
 
-        <!-- ETIQUETA INFERIOR CENTRADA -->
         <div style="position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); z-index: 1000; background: #ffffff; padding: 0.4rem 1rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600; color: #475569; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
             Buenos Aires, Argentina
         </div>
@@ -59,113 +58,106 @@
 
     <!-- TARJETAS DE PUNTOS DE ENTREGA -->
     <section>
-        <!-- 1. SI HAY DATOS DINÁMICOS DESDE SPRING BOOT -->
-        <div th:if="${puntosMapa != null and !#lists.isEmpty(puntosMapa)}" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
-            <article th:each="punto : ${puntosMapa}" style="background: #ffffff; border-radius: 12px; padding: 1.25rem; box-shadow: 0 2px 10px rgba(0,0,0,0.03); border: 1px solid #f1f5f9;">
-                <h3 style="font-size: 1.05rem; font-weight: 700; color: #0f172a; margin-bottom: 0.75rem;" th:text="${punto.titulo}">Título de la Donación</h3>
+        <!-- DATOS DINÁMICOS DESDE SPRING BOOT -->
+        <div th:if="${donacionesMapa != null and !#lists.isEmpty(donacionesMapa)}"
+             style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+
+            <article th:each="donacion : ${donacionesMapa}"
+                     style="background: #ffffff; border-radius: 12px; padding: 1.25rem; box-shadow: 0 2px 10px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; cursor: pointer;">
+
+                <h3 style="font-size: 1.05rem; font-weight: 700; color: #0f172a; margin-bottom: 0.75rem;"
+                    th:text="${donacion.subcategoria != null ? donacion.subcategoria : (donacion.categoria != null ? donacion.categoria : 'Donación Solidaria')}">Título</h3>
+
                 <div style="display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.88rem; color: #64748b;">
-                    <span style="display: flex; align-items: center; gap: 0.5rem;"><i class="fa-solid fa-box-open" style="width: 16px; color: #2563eb;"></i> <span th:text="${punto.entidad}">Entidad</span></span>
-                    <span style="display: flex; align-items: center; gap: 0.5rem;"><i class="fa-solid fa-location-dot" style="width: 16px; color: #2563eb;"></i> <span th:text="${punto.ubicacion}">Ubicación</span></span>
-                    <span style="display: flex; align-items: center; gap: 0.5rem;"><i class="fa-regular fa-calendar" style="width: 16px; color: #2563eb;"></i> <span th:text="${punto.fecha}">Fecha</span></span>
+                    <span style="display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="fa-solid fa-box-open" style="width: 16px; color: #2563eb;"></i>
+                        <span th:text="${donacion.cantidadTotalItems + ' ítems / unidades'}">Cantidad</span>
+                    </span>
+                    <span style="display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="fa-solid fa-location-dot" style="width: 16px; color: #2563eb;"></i>
+                        <span>UTN Solidaria (Sede Central)</span>
+                    </span>
+                    <span style="display: flex; align-items: center; gap: 0.5rem;" th:if="${donacion.fechaDeIngreso != null}">
+                        <i class="fa-regular fa-calendar" style="width: 16px; color: #2563eb;"></i>
+                        <span th:text="${#temporals.format(donacion.fechaDeIngreso, 'dd/MM/yyyy')}">Fecha</span>
+                    </span>
                 </div>
             </article>
         </div>
 
-        <!-- 2. DATOS DE RESPALDO (ESTÁTICOS SEGÚN IMAGEN 3) -->
-        <div th:if="${puntosMapa == null or #lists.isEmpty(puntosMapa)}" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
-            <!-- Tarjeta 1 -->
-            <article style="background: #ffffff; border-radius: 12px; padding: 1.25rem; box-shadow: 0 2px 10px rgba(0,0,0,0.03); border: 1px solid #f1f5f9;">
-                <h3 style="font-size: 1.05rem; font-weight: 700; color: #0f172a; margin-bottom: 0.75rem;">200 viandas entregadas</h3>
-                <div style="display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.88rem; color: #64748b;">
-                    <span style="display: flex; align-items: center; gap: 0.5rem;"><i class="fa-solid fa-box-open" style="width: 16px; color: #2563eb;"></i> Comedor Barrio Almagro</span>
-                    <span style="display: flex; align-items: center; gap: 0.5rem;"><i class="fa-solid fa-location-dot" style="width: 16px; color: #2563eb;"></i> Almagro, CABA</span>
-                    <span style="display: flex; align-items: center; gap: 0.5rem;"><i class="fa-regular fa-calendar" style="width: 16px; color: #2563eb;"></i> 15 de Abril, 2026</span>
-                </div>
-            </article>
-
-            <!-- Tarjeta 2 -->
-            <article style="background: #ffffff; border-radius: 12px; padding: 1.25rem; box-shadow: 0 2px 10px rgba(0,0,0,0.03); border: 1px solid #f1f5f9;">
-                <h3 style="font-size: 1.05rem; font-weight: 700; color: #0f172a; margin-bottom: 0.75rem;">150 abrigos y frazadas</h3>
-                <div style="display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.88rem; color: #64748b;">
-                    <span style="display: flex; align-items: center; gap: 0.5rem;"><i class="fa-solid fa-box-open" style="width: 16px; color: #2563eb;"></i> Hogar de Niños San José</span>
-                    <span style="display: flex; align-items: center; gap: 0.5rem;"><i class="fa-solid fa-location-dot" style="width: 16px; color: #2563eb;"></i> Caballito, CABA</span>
-                    <span style="display: flex; align-items: center; gap: 0.5rem;"><i class="fa-regular fa-calendar" style="width: 16px; color: #2563eb;"></i> 10 de Abril, 2026</span>
-                </div>
-            </article>
-
-            <!-- Tarjeta 3 -->
-            <article style="background: #ffffff; border-radius: 12px; padding: 1.25rem; box-shadow: 0 2px 10px rgba(0,0,0,0.03); border: 1px solid #f1f5f9;">
-                <h3 style="font-size: 1.05rem; font-weight: 700; color: #0f172a; margin-bottom: 0.75rem;">80 kg de alimentos no perecederos</h3>
-                <div style="display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.88rem; color: #64748b;">
-                    <span style="display: flex; align-items: center; gap: 0.5rem;"><i class="fa-solid fa-box-open" style="width: 16px; color: #2563eb;"></i> Hospital Gandulfo</span>
-                    <span style="display: flex; align-items: center; gap: 0.5rem;"><i class="fa-solid fa-location-dot" style="width: 16px; color: #2563eb;"></i> Lomas de Zamora, Buenos Aires</span>
-                    <span style="display: flex; align-items: center; gap: 0.5rem;"><i class="fa-regular fa-calendar" style="width: 16px; color: #2563eb;"></i> 5 de Abril, 2026</span>
-                </div>
-            </article>
-
-            <!-- Tarjeta 4 -->
-            <article style="background: #ffffff; border-radius: 12px; padding: 1.25rem; box-shadow: 0 2px 10px rgba(0,0,0,0.03); border: 1px solid #f1f5f9;">
-                <h3 style="font-size: 1.05rem; font-weight: 700; color: #0f172a; margin-bottom: 0.75rem;">300 prendas de ropa y calzado</h3>
-                <div style="display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.88rem; color: #64748b;">
-                    <span style="display: flex; align-items: center; gap: 0.5rem;"><i class="fa-solid fa-box-open" style="width: 16px; color: #2563eb;"></i> Centro Comunitario La Esperanza</span>
-                    <span style="display: flex; align-items: center; gap: 0.5rem;"><i class="fa-solid fa-location-dot" style="width: 16px; color: #2563eb;"></i> Villa Lugano, CABA</span>
-                    <span style="display: flex; align-items: center; gap: 0.5rem;"><i class="fa-regular fa-calendar" style="width: 16px; color: #2563eb;"></i> 1 de Abril, 2026</span>
-                </div>
-            </article>
-
-            <!-- Tarjeta 5 -->
-            <article style="background: #ffffff; border-radius: 12px; padding: 1.25rem; box-shadow: 0 2px 10px rgba(0,0,0,0.03); border: 1px solid #f1f5f9;">
-                <h3 style="font-size: 1.05rem; font-weight: 700; color: #0f172a; margin-bottom: 0.75rem;">Útiles escolares para 120 estudiantes</h3>
-                <div style="display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.88rem; color: #64748b;">
-                    <span style="display: flex; align-items: center; gap: 0.5rem;"><i class="fa-solid fa-box-open" style="width: 16px; color: #2563eb;"></i> Escuela Primaria N°42</span>
-                    <span style="display: flex; align-items: center; gap: 0.5rem;"><i class="fa-solid fa-location-dot" style="width: 16px; color: #2563eb;"></i> Flores, CABA</span>
-                    <span style="display: flex; align-items: center; gap: 0.5rem;"><i class="fa-regular fa-calendar" style="width: 16px; color: #2563eb;"></i> 28 de Marzo, 2026</span>
-                </div>
-            </article>
+        <!-- SIN DATOS -->
+        <div th:if="${donacionesMapa == null or #lists.isEmpty(donacionesMapa)}"
+             style="text-align: center; padding: 3rem 1rem; color: #64748b;">
+            <i class="fa-solid fa-map-location-dot" style="font-size: 3rem; color: #cbd5e1; margin-bottom: 1rem;"></i>
+            <p style="font-size: 1.1rem; font-weight: 500;">No hay donaciones geolocalizadas registradas por el momento.</p>
         </div>
     </section>
 </main>
 
 <footer th:replace="~{layoutAcceso/layoutAcceso :: footer}"></footer>
+
+<!-- JS LEAFLET -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-<script>
+<!-- SCRIPT DE INTEGRACIÓN DINÁMICA DE SPRING BOOT CON LEAFLET -->
+<script th:inline="javascript">
     document.addEventListener("DOMContentLoaded", function() {
-        // Inicializar mapa centrado en Buenos Aires
-        const map = L.map('real-map').setView([-34.6037, -58.3816], 11);
+        // 1. Obtener la cadena JSON serializada de forma segura
+        const jsonRaw = /*[[${donacionesMapaJson}]]*/ '[]';
 
-        // Capa de OpenStreetMap (Gratuita y sin API Key)
+        let donacionesServidor = [];
+        try {
+            donacionesServidor = JSON.parse(jsonRaw);
+        } catch (e) {
+            console.error("Error al parsear el JSON de donaciones:", e);
+        }
+
+        // 2. Renderizar mapa con Leaflet normalmente...
+        const mapContainer = document.getElementById('real-map') || document.getElementById('map');
+        if (!mapContainer || typeof L === 'undefined') return;
+
+        const map = L.map(mapContainer.id).setView([-34.6037, -58.3816], 11);
+
         L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            attribution: '&copy; OpenStreetMap contributors'
         }).addTo(map);
 
-        // Marcadores de ejemplo de las donaciones
-        const puntosEjemplo = [
-            { lat: -34.6037, lng: -58.4116, titulo: "200 viandas entregadas", lugar: "Almagro, CABA" },
-            { lat: -34.6180, lng: -58.4350, titulo: "150 abrigos y frazadas", lugar: "Caballito, CABA" },
-            { lat: -34.7600, lng: -58.3970, titulo: "80 kg de alimentos no perecederos", lugar: "Lomas de Zamora" },
-            { lat: -34.6800, lng: -58.4600, titulo: "300 prendas de ropa", lugar: "Villa Lugano" },
-            { lat: -34.6300, lng: -58.4620, titulo: "Útiles escolares", lugar: "Flores, CABA" }
+        const coordenadasDefecto = [
+            { lat: -34.6037, lng: -58.4116, lugar: "Sede Medrano - Almagro" },
+            { lat: -34.6180, lng: -58.4350, lugar: "Hogar San José - Caballito" },
+            { lat: -34.7600, lng: -58.3970, lugar: "Hospital Gandulfo - Lomas de Zamora" },
+            { lat: -34.6800, lng: -58.4600, lugar: "Centro La Esperanza - Lugano" },
+            { lat: -34.6300, lng: -58.4620, lugar: "Escuela N°42 - Flores" }
         ];
 
-        // Añadir marcadores circulares azules
-        puntosEjemplo.forEach(punto => {
-            const circle = L.circleMarker([punto.lat, punto.lng], {
-                color: '#ffffff',
-                weight: 2,
-                fillColor: '#2563eb',
-                fillOpacity: 1,
-                radius: 9
-            }).addTo(map);
+        if (donacionesServidor && donacionesServidor.length > 0) {
+            donacionesServidor.forEach((d, index) => {
+                const pos = coordenadasDefecto[index % coordenadasDefecto.length];
+                const titulo = d.subcategoria ? d.subcategoria : (d.categoria ? d.categoria : "Donación entregada");
+                const cantidad = d.cantidadTotalItems ? d.cantidadTotalItems : 1;
 
-            circle.bindPopup(`
-                <div style="font-family: system-ui, sans-serif; padding: 2px;">
-                    <strong style="color: #0f172a; font-size: 0.95rem;">${punto.titulo}</strong><br>
-                    <span style="color: #64748b; font-size: 0.85rem;">📍 ${punto.lugar}</span>
-                </div>
-            `);
-        });
+                const circle = L.circleMarker([pos.lat, pos.lng], {
+                    color: '#ffffff',
+                    weight: 2,
+                    fillColor: '#2563eb',
+                    fillOpacity: 1,
+                    radius: 10
+                }).addTo(map);
+
+                circle.bindPopup(`
+                    <div style="font-family: system-ui, sans-serif; padding: 4px;">
+                        <strong style="color: #0f172a; font-size: 0.95rem;">${titulo}</strong><br>
+                        <span style="color: #2563eb; font-weight: 600; font-size: 0.85rem;">📦 ${cantidad} unidades</span><br>
+                        <span style="color: #64748b; font-size: 0.8rem;">📍 ${pos.lugar}</span>
+                    </div>
+                `);
+            });
+        }
+
+        setTimeout(() => {
+            map.invalidateSize();
+        }, 200);
     });
 </script>
 
