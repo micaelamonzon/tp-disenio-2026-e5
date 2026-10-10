@@ -26,6 +26,12 @@ public class Notificacion {
     @JoinColumn(name = "donante_id")
     private Donante donante;
 
+    // Id de la entidad beneficiaria si la notificación es para una entidad
+    // Se usa para poder listar "las notificaciones de la entidad X" en la pantalla
+    // Queda null si la notificación es para un donante o un admin
+    @Column(name = "entidad_beneficiaria_id")
+    private Long entidadBeneficiariaId;
+
     @Column(columnDefinition = "TEXT")
     private String mensaje;
 

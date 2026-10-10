@@ -28,7 +28,8 @@ class NotificacionPersistenciaTest {
     @Test
     void alNotificarSePersisteLaNotificacionConEstadoEnviada() {
         // Llama directo al método del controller, como haría Postman
-        controller.notificar("test@donatrack.com", "Prueba de persistencia", "EMAIL");
+        //controller.notificar("test@donatrack.com", "Prueba de persistencia", "EMAIL");
+        controller.notificar("test-mysql@donatrack.com", "Prueba contra MySQL real", "EMAIL", null, null);
 
         List<Notificacion> guardadas = notificacionRepository.findAll();
 

@@ -28,7 +28,8 @@ class NotificacionPersistenciaMySQLTest {
 
     @Test
     void alNotificarSePersisteEnLaBaseMySQLReal() {
-        controller.notificar("test-mysql@donatrack.com", "Prueba contra MySQL real", "EMAIL");
+        //controller.notificar("test-mysql@donatrack.com", "Prueba contra MySQL real", "EMAIL");
+        controller.notificar("test-mysql@donatrack.com", "Prueba contra MySQL real", "EMAIL", null, null);
 
         List<Notificacion> guardadas = notificacionRepository
                 .findAll()
