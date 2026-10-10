@@ -4,11 +4,21 @@ import org.springframework.ui.Model;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import ar.edu.utn.frba.ddsi.services.NotificacionesApiService;
+import java.util.List;
 
 @Controller
 @RequestMapping("/entidadBeneficiaria")
 public class EntidadController {
 
+    // TODO: reemplazar por el id de la entidad logueada cuando este la sesion
+    private static final Long ENTIDAD_ID_PRUEBA = 1L;
+
+    private final NotificacionesApiService notificacionesApiService;
+
+    public EntidadController(NotificacionesApiService notificacionesApiService) {
+        this.notificacionesApiService = notificacionesApiService;
+    }
 
     @GetMapping("/estadoDeDonaciones")
     public String estadoDeDonaciones(Model model) {
@@ -44,6 +54,17 @@ public class EntidadController {
     public String notificaciones(Model model) {
         model.addAttribute("titulo", "Notificaciones");
         model.addAttribute("tabActiva", "notificaciones");
+
+        // Si notificaciones-service no responde, mostramos un aviso en la
+        // pág en vez de que explote con un error 500
+        try {
+            model.addAttribute("notificaciones",
+                    notificacionesApiService.obtenerNotificacionesDeEntidad(ENTIDAD_ID_PRUEBA));
+        } catch (RuntimeException e) {
+            model.addAttribute("notificaciones", List.of());
+            model.addAttribute("errorNotificaciones",
+                    "No pudimos cargar tus notificaciones. Intentá de nuevo en unos minutos.");
+        }
         return "acceso/entidadBeneficiaria/notificaciones";
     }
 
