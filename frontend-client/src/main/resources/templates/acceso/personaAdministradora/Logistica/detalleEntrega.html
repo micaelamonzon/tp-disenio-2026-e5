@@ -1,0 +1,70 @@
+<html th:replace="~{layoutAcceso/layoutAcceso :: html}">
+<div th:fragment="contenido" class="row">
+    <section id="view-detalle-entrega">
+        <div class="page-head">
+            <h1>Detalle de Entrega</h1>
+        </div>
+
+        <div class="grid-two-columns">
+            <div class="card">
+                <h2 class="card-title">Información de la Entrega</h2>
+                <div class="field">
+                    <span>Estado actual</span>
+                    <p th:text="${entrega.estadoActual}">PENDIENTE</p>
+                </div>
+                <div class="field">
+                    <span>Fecha</span>
+                    <p th:text="${#temporals.format(entrega.fechaEntrega, 'dd/MM/yyyy HH:mm')}">01/01/2026</p>
+                </div>
+                <div class="field">
+                    <span>Dirección de destino</span>
+                    <p th:text="${entrega.direccion}">Av. Corrientes 1234</p>
+                </div>
+                <div class="field" th:if="${entrega.motivoNoRecepcion != null}">
+                    <span>Motivo de no recepción</span>
+                    <p th:text="${entrega.motivoNoRecepcion}">-</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title">Seguimiento en mapa</h2>
+                <div class="tracking-map">
+                    <div class="tracking-map-route">
+                        <div class="tracking-map-point current">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="1" y="3" width="15" height="13"/>
+                                <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/>
+                                <circle cx="5.5" cy="18.5" r="2.5"/>
+                                <circle cx="18.5" cy="18.5" r="2.5"/>
+                            </svg>
+                        </div>
+                        <div class="tracking-map-line"></div>
+                        <div class="tracking-map-point destination">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                                <circle cx="12" cy="10" r="3"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="tracking-map-callout">
+                        <strong>Destino</strong>
+                        <p th:text="${entrega.direccion}">Av. Corrientes 1234</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" style="margin-top: 20px;">
+            <h2 class="card-title">Fotos de recepción</h2>
+            <div th:if="${entrega.fotosUrl != null and !entrega.fotosUrl.isEmpty()}">
+                <div th:each="foto : ${entrega.fotosUrl}">
+                    <img th:src="${foto}" style="max-width: 200px; margin: 8px;" alt="Foto de recepción"/>
+                </div>
+            </div>
+            <p th:unless="${entrega.fotosUrl != null and !entrega.fotosUrl.isEmpty()}">
+                No hay fotos de recepción todavía.
+            </p>
+        </div>
+    </section>
+</div>
+</html>

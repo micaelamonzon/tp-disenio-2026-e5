@@ -1,0 +1,43 @@
+<html th:replace="~{layoutAcceso/layoutAcceso :: html}">
+<div th:fragment="contenido" class="row">
+    <section id="view-entregas">
+        <div class="page-head">
+            <h1>Entregas</h1>
+        </div>
+
+        <div class="card">
+            <table class="tabla">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Estado</th>
+                    <th>Fecha</th>
+                    <th>Dirección</th>
+                    <th>Acciones</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="entrega : ${entregas}">
+                    <td th:text="${entrega.id}">1</td>
+                    <td>
+                                <span th:text="${entrega.estadoActual}"
+                                      th:classappend="${entrega.estadoActual == 'ENTREGADA'} ? 'status-tag status-activo' :
+                                                      (${entrega.estadoActual == 'EN_CAMINO'} ? 'status-tag status-en-proceso' :
+                                                      'status-tag status-pendiente')">
+                                    PENDIENTE
+                                </span>
+                    </td>
+                    <td th:text="${#temporals.format(entrega.fechaEntrega, 'dd/MM/yyyy HH:mm')}">01/01/2026</td>
+                    <td th:text="${entrega.direccion}">Av. Corrientes 1234</td>
+                    <td>
+                        <a th:href="@{/logistica/entregas/{id}(id=${entrega.id})}" class="btn-secondary">
+                            Ver detalle
+                        </a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>
+</html>
