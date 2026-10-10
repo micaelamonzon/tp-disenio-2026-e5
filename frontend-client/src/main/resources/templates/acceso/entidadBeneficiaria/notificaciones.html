@@ -5,49 +5,37 @@
             <h1>Notificaciones</h1>
             <p class="page-sub">Mantente al día con tus entregas, donaciones recibidas y más</p>
         </div>
-        <div class="notifications-actions">
-            <button class="link-btn" id="markAllReadBtn">Marcar todas como leídas</button>
-        </div>
-        <div class="notifications-list" id="notificationsList">
-            <article class="notification-card unread">
-                <span th:replace="~{fragments/iconosDeNotificacion:: iconoAsignada}"></span>
-                <div>
-                    <div class="notification-title">Nueva donación asignada.</div>
-                    <div class="notification-desc">Se le ha asignado una donación de mesas de la Muebleria Arcos S.A</div>
-                    <div class="notification-time">Hace 2 horas</div>
-                </div>
-                <span class="notification-unread-dot"></span>
-            </article>
-            <article class="notification-card unread">
-                <span th:replace="~{fragments/iconosDeNotificacion:: iconoTransito}"></span>
-                <div>
-                    <div class="notification-title">Donación en tránsito.</div>
-                    <div class="notification-desc">La donación de 10 cajas de azúcar está en camino.</div>
-                    <div class="notification-time">Hace 5 horas</div>
-                </div>
-                <span class="notification-unread-dot"></span>
-            </article>
-            <article class="notification-card">
-                <span th:replace="~{fragments/iconosDeNotificacion:: iconoPendiente}"></span>
-                <div>
-                    <div class="notification-title">Confirmación de entrega pendiente</div>
-                    <div class="notification-desc">Recuerde confirmar la recepción de la donación #DON-2026-04.</div>
-                    <div class="notification-time">Hace 1 día</div>
-                </div>
-            </article>
-            <article class="notification-card">
-                <span th:replace="~{fragments/iconosDeNotificacion:: iconoCompletada}"></span>
-                <div>
-                    <div class="notification-title">Entrega completada</div>
-                    <div class="notification-desc">Se ha confirmado la entrega exitosa de la donación #DON-2026-10.</div>
-                    <div class="notification-time">Hace 2 días</div>
-                </div>
 
-            </article>
+        <!-- Aviso si notificaciones-service no respondió -->
+        <p th:if="${errorNotificaciones}" class="page-sub" role="alert"
+           th:text="${errorNotificaciones}">No pudimos cargar tus notificaciones.</p>
+
+        <!-- Estado vacío: el servicio respondió bien pero no hay notificaciones -->
+        <p th:if="${errorNotificaciones == null and #lists.isEmpty(notificaciones)}" class="page-sub">
+            Todavía no tenés notificaciones.
+        </p>
+
+        <div th:unless="${#lists.isEmpty(notificaciones)}">
+            <div class="notifications-actions">
+                <button class="link-btn" id="markAllReadBtn">Marcar todas como leídas</button>
+            </div>
+
+            <div class="notifications-list" id="notificationsList">
+                <!-- Una tarjeta por cada notificación (ya vienen ordenadas, la más nueva primero) -->
+                <article class="notification-card" th:each="n : ${notificaciones}">
+                    <span th:replace="~{fragments/iconosDeNotificacion :: iconoGeneral}"></span>
+                    <div>
+                        <div class="notification-title" th:text="${n.mensaje}">Mensaje de la notificación</div>
+                        <div class="notification-desc" th:if="${n.medio}"
+                             th:text="'Enviada por ' + ${#strings.toLowerCase(n.medio)}">Enviada por email</div>
+                        <div class="notification-time" th:if="${n.fechaEnvio}"
+                             th:text="${#temporals.format(n.fechaEnvio, 'dd/MM/yyyy HH:mm')}">10/10/2026 15:30</div>
+                    </div>
+                </article>
+            </div>
         </div>
     </section>
 
     <script th:src="@{/js/entidades/notificaciones.js}"></script>
 </div>
-
 </html>
