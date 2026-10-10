@@ -1,0 +1,35 @@
+<html th:replace="~{layoutAcceso/layoutAcceso :: html}">
+<div th:fragment="contenido" class="row">
+    <section id="view-camiones">
+        <div class="page-head">
+            <h1>Gestión de Camiones</h1>
+        </div>
+
+        <div class="card">
+            <table class="tabla">
+                <thead>
+                <tr>
+                    <th>Patente</th>
+                    <th>Volumen (m³)</th>
+                    <th>Altura (m)</th>
+                    <th>Capacidad (kg)</th>
+                    <th>Disponible</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="camion : ${camiones}">
+                    <td th:text="${camion.patente}">ABC123</td>
+                    <td th:text="${camion.volumen}">10</td>
+                    <td th:text="${camion.altura}">2.5</td>
+                    <td th:text="${camion.capacidadCarga}">1000</td>
+                    <td>
+                        <span th:if="${camion.disponible}" class="status-tag status-activo">Disponible</span>
+                        <span th:unless="${camion.disponible}" class="status-tag status-inactivo">No disponible</span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>
+</html>
