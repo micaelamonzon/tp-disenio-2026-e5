@@ -189,13 +189,19 @@ public class AccesoController {
         try {
             Long idDominio = donacionesApiService.registrarDonanteHumano(dto);
 
-            authApiService.crearUsuario(
-                    dto.getEmail(),
-                    dto.getPassword(),
-                    "DONANTE_HUMANO",
-                    idDominio,
-                    dto.getNombre() + " " + dto.getApellido()
-            );
+            try {
+                authApiService.crearUsuario(
+                        dto.getEmail(),
+                        dto.getPassword(),
+                        "DONANTE_HUMANO",
+                        idDominio,
+                        dto.getNombre() + " " + dto.getApellido()
+                );
+            } catch (RuntimeException e) {
+                // Sin usuario no puede entrar: se deshace el alta para que pueda volver a registrarse
+                donacionesApiService.eliminarDonanteHumano(idDominio);
+                throw e;
+            }
 
             return "redirect:/acceso/login?registroExitoso=true";
         } catch (Exception e) {
@@ -212,13 +218,18 @@ public class AccesoController {
         try {
             Long idDominio = donacionesApiService.registrarDonanteJuridico(dto);
 
-            authApiService.crearUsuario(
-                    dto.getEmail(),
-                    dto.getPassword(),
-                    "DONANTE_JURIDICO",
-                    idDominio,
-                    dto.getRazonSocial()
-            );
+            try {
+                authApiService.crearUsuario(
+                        dto.getEmail(),
+                        dto.getPassword(),
+                        "DONANTE_JURIDICO",
+                        idDominio,
+                        dto.getRazonSocial()
+                );
+            } catch (RuntimeException e) {
+                donacionesApiService.eliminarDonanteJuridico(idDominio);
+                throw e;
+            }
 
             return "redirect:/acceso/login?registroExitoso=true";
         } catch (Exception e) {
@@ -235,13 +246,18 @@ public class AccesoController {
         try {
             Long idDominio = donacionesApiService.registrarEntidadBeneficiaria(dto);
 
-            authApiService.crearUsuario(
-                    dto.getEmail(),
-                    dto.getPassword(),
-                    "ENTIDAD_BENEFICIARIA",
-                    idDominio,
-                    dto.getRazonSocial()
-            );
+            try {
+                authApiService.crearUsuario(
+                        dto.getEmail(),
+                        dto.getPassword(),
+                        "ENTIDAD_BENEFICIARIA",
+                        idDominio,
+                        dto.getRazonSocial()
+                );
+            } catch (RuntimeException e) {
+                donacionesApiService.eliminarEntidadBeneficiaria(idDominio);
+                throw e;
+            }
 
             return "redirect:/acceso/login?registroExitoso=true";
         } catch (Exception e) {

@@ -136,8 +136,19 @@
                 <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.3rem;">Teléfono</label>
                 <input type="tel" name="telefono" placeholder="+54 11 1234-5678" required style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;">
             </div>
+            <!-- Persona representante designada (TP: de la entidad se conocen los correos de sus representantes) -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                <div class="form-group">
+                    <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.3rem;">Nombre del representante</label>
+                    <input type="text" name="representante.nombre" placeholder="María" required style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;">
+                </div>
+                <div class="form-group">
+                    <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.3rem;">Apellido del representante</label>
+                    <input type="text" name="representante.apellido" placeholder="Gómez" required style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;">
+                </div>
+            </div>
             <div class="form-group" style="margin-bottom: 1rem;">
-                <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.3rem;">Email</label>
+                <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.3rem;">Email del representante</label>
                 <input type="email" name="email" placeholder="contacto@entidad.org" required style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;">
             </div>
             <div class="form-group" style="margin-bottom: 1.25rem;">
@@ -155,7 +166,10 @@
 
 <footer th:replace="~{layoutAcceso/layoutAcceso :: footer}"></footer>
 
-<script>
+<script th:inline="javascript">
+    // Si el registro falló, el controller indica qué formulario volver a mostrar
+    const tipoFormulario = /*[[${tipoFormulario}]]*/ null;
+
     function setMainRole(role) {
         const btnDonante = document.getElementById('btn-role-donante');
         const btnEntidad = document.getElementById('btn-role-entidad');
@@ -201,7 +215,14 @@
     }
 
     document.addEventListener("DOMContentLoaded", function() {
-        setMainRole('DONANTE');
+        if (tipoFormulario === 'entidad-beneficiaria') {
+            setMainRole('ENTIDAD');
+        } else if (tipoFormulario === 'donante-juridica') {
+            document.getElementById('radio-juridica').checked = true;
+            setMainRole('DONANTE');
+        } else {
+            setMainRole('DONANTE');
+        }
     });
 </script>
 

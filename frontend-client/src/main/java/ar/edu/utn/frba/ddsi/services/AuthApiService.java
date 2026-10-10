@@ -72,12 +72,15 @@ public class AuthApiService {
     }
 
     public void crearUsuario(String email, String password, String rol, Long idEnDominio, String nombre) {
+        if (idEnDominio == null) {
+            throw new IllegalArgumentException("Falta el id del donante o la entidad para crear el usuario");
+        }
         try {
             Map<String, Object> body = new HashMap<>();
             body.put("email", email);
             body.put("password", password);
             body.put("rol", rol); // "DONANTE_HUMANO", "DONANTE_JURIDICO" o "ENTIDAD_BENEFICIARIA"
-            body.put("idEnDominio", idEnDominio != null ? idEnDominio : 1L);
+            body.put("idEnDominio", idEnDominio);
             body.put("nombre", nombre);
 
             webClient.post()
@@ -89,9 +92,28 @@ public class AuthApiService {
 
             log.info("Usuario {} registrado exitosamente en servicio de autenticación", email);
 
+        } catch (WebClientResponseException e) {
+            // 409 = email ya registrado, 400 = datos inválidos: auth explica el motivo en "error"
+            log.error("Autenticación rechazó el alta de {}: {} {}", email, e.getStatusCode(), e.getResponseBodyAsString());
+            if (e.getStatusCode() == HttpStatus.CONFLICT) {
+                throw new RuntimeException("Ya existe una cuenta con ese email", e);
+            }
+            throw new RuntimeException(motivoDelError(e), e);
         } catch (Exception e) {
             log.error("Error creando usuario en servicio de autenticación: {}", e.getMessage());
-            throw new RuntimeException("No se pudo crear la cuenta de usuario: " + e.getMessage(), e);
+            throw new RuntimeException("El servicio de autenticación no está disponible", e);
         }
+    }
+
+    private String motivoDelError(WebClientResponseException e) {
+        try {
+            JsonNode error = objectMapper.readTree(e.getResponseBodyAsString()).get("error");
+            if (error != null) {
+                return error.asText();
+            }
+        } catch (Exception ignorada) {
+            // cuerpo vacío o no JSON: se usa el mensaje genérico
+        }
+        return "No se pudo crear la cuenta de usuario";
     }
 }

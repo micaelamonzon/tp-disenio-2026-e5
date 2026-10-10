@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -134,19 +133,8 @@ public class DonacionesApiService {
             body.put("DNI", dto.getDNI());
             body.put("genero", dto.getGenero());
 
-            List<Map<String, Object>> mediosNotificacion = new ArrayList<>();
-            Map<String, Object> medioEmail = null;
-
-            if (dto.getEmail() != null && !dto.getEmail().isBlank()) {
-                medioEmail = Map.of(
-                        "tipoDeNotificacion", "EMAIL",
-                        "contacto", dto.getEmail(),
-                        "activo", true
-                );
-                mediosNotificacion.add(medioEmail);
-            }
-
-            body.put("mediosDeNotificacion", mediosNotificacion);
+            Map<String, Object> medioEmail = medioEmail(dto.getEmail());
+            body.put("mediosDeNotificacion", List.of(medioEmail));
             body.put("medioDeNotificacionPredeterminado", medioEmail);
             body.put("donaciones", List.of());
 
@@ -156,11 +144,7 @@ public class DonacionesApiService {
                     .retrieve()
                     .bodyToMono(Map.class)
                     .block();
-            if (response != null && response.containsKey("id")) {
-                return ((Number) response.get("id")).longValue();
-            }
-
-            return null;
+            return extraerId(response);
         } catch (Exception e) {
             log.error("Error registrando donante humano en donaciones-service", e);
             throw new RuntimeException("No se pudo registrar el donante humano", e);
@@ -181,20 +165,7 @@ public class DonacionesApiService {
                 body.put("tipo", "EMPRESA"); // Colocar una constante por defecto si viene vacío
             }
 
-            List<Map<String, Object>> mediosNotificacion = new ArrayList<>();
-            Map<String, Object> medioEmail = null;
-
-            if (dto.getEmail() != null && !dto.getEmail().isBlank()) {
-                medioEmail = Map.of(
-                        "tipoDeNotificacion", "EMAIL",
-                        "contacto", dto.getEmail(),
-                        "activo", true
-                );
-                mediosNotificacion.add(medioEmail);
-            }
-
-            body.put("mediosDeNotificacion", mediosNotificacion);
-            body.put("medioDeNotificacionPredeterminado", medioEmail);
+            body.put("mediosDeNotificacion", List.of(medioEmail(dto.getEmail())));
 
             Map response = webClient.post()
                     .uri(donacionesServiceUrl + "/donante/juridico")
@@ -202,54 +173,82 @@ public class DonacionesApiService {
                     .retrieve()
                     .bodyToMono(Map.class)
                     .block();
-            if (response != null && response.containsKey("id")) {
-                return ((Number) response.get("id")).longValue();
-            }
-
-            return null;
+            return extraerId(response);
         } catch (Exception e) {
             log.error("Error registrando donante jurídico en donaciones-service", e);
             throw new RuntimeException("No se pudo registrar la empresa o donante jurídico", e);
         }
     }
 
-
     public Long registrarEntidadBeneficiaria(RegistroEntidadBeneficiariaDTO dto) {
         try {
+            Map<String, Object> representante = new HashMap<>();
+            if (dto.getRepresentante() != null) {
+                representante.put("nombre", dto.getRepresentante().getNombre());
+                representante.put("apellido", dto.getRepresentante().getApellido());
+                representante.put("numeroDeDocumento", dto.getRepresentante().getNumeroDeDocumento());
+            }
+            representante.put("mediosDeNotificacion", List.of(medioEmail(dto.getEmail())));
+
             Map<String, Object> body = new HashMap<>();
             body.put("razonSocial", dto.getRazonSocial());
-            body.put("cuit", dto.getCuit());
-
-            List<Map<String, Object>> mediosNotificacion = new ArrayList<>();
-            Map<String, Object> medioEmail = null;
-
-            if (dto.getEmail() != null && !dto.getEmail().isBlank()) {
-                medioEmail = Map.of(
-                        "tipoDeNotificacion", "EMAIL",
-                        "contacto", dto.getEmail(),
-                        "activo", true
-                );
-                mediosNotificacion.add(medioEmail);
-            }
-
-            body.put("mediosDeNotificacion", mediosNotificacion);
-            body.put("medioDeNotificacionPredeterminado", medioEmail);
+            body.put("direccion", dto.getDireccion());
+            body.put("telefono", dto.getTelefono());
+            body.put("representantes", List.of(representante));
 
             Map response = webClient.post()
-                    .uri(donacionesServiceUrl + "/crearEntidad")
+                    .uri(donacionesServiceUrl + "/entidad")
                     .bodyValue(body)
                     .retrieve()
                     .bodyToMono(Map.class)
                     .block();
-            if (response != null && response.containsKey("id")) {
-                return ((Number) response.get("id")).longValue();
-            }
-
-            return null;
+            return extraerId(response);
         } catch (Exception e) {
             log.error("Error registrando entidad beneficiaria en donaciones-service", e);
             throw new RuntimeException("No se pudo registrar la entidad beneficiaria", e);
         }
+    }
+
+    // Bajas para deshacer un registro cuando falla la creación del usuario en autenticación
+    public void eliminarDonanteHumano(Long id) {
+        eliminar("/donante/humano/" + id);
+    }
+
+    public void eliminarDonanteJuridico(Long id) {
+        eliminar("/donante/juridico/" + id);
+    }
+
+    public void eliminarEntidadBeneficiaria(Long id) {
+        eliminar("/entidad/" + id);
+    }
+
+    private void eliminar(String path) {
+        try {
+            webClient.delete()
+                    .uri(donacionesServiceUrl + path)
+                    .retrieve()
+                    .toBodilessEntity()
+                    .block();
+        } catch (Exception e) {
+            // No se relanza: el error que importa mostrar es el del registro
+            log.error("No se pudo deshacer el alta {} en donaciones-service", path, e);
+        }
+    }
+
+    // Mismo formato que MedioDeNotificacionDTO de donaciones (tipoDeNotificacion, datoDeContacto)
+    private Map<String, Object> medioEmail(String email) {
+        if (email == null || email.isBlank()) {
+            throw new IllegalArgumentException("El email es obligatorio");
+        }
+        return Map.of("tipoDeNotificacion", "EMAIL", "datoDeContacto", email.trim());
+    }
+
+    // Sin id no se puede vincular el usuario con su donante/entidad: se corta el registro
+    private Long extraerId(Map response) {
+        if (response == null || !(response.get("id") instanceof Number id)) {
+            throw new IllegalStateException("donaciones-service no devolvió el id del alta");
+        }
+        return id.longValue();
     }
 
 }
