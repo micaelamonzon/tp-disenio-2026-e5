@@ -8,5 +8,6 @@ public interface EntidadBeneficiariaService {
     List<EntidadBeneficiariaDTO> obtenerTodas();
     EntidadBeneficiariaDTO obtenerPorId(Long id);
     EntidadBeneficiariaDTO crear(EntidadBeneficiariaDTO body);
+    EntidadBeneficiariaDTO modificar(EntidadBeneficiariaDTO body, Long id);
     void eliminar(Long id);
 }

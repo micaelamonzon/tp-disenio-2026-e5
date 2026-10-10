@@ -146,7 +146,7 @@ public class DonanteController {
         return "redirect:/donante/incentivos";
     }
 
-    // usuario nuevo: sin categoría y sin ninguna misión en curso ni completada
+
     private boolean puedeComenzar(List<MisionFrontDTO> misiones) {
         if (misiones.isEmpty()) return false;
         boolean sinMisionEnCurso = misiones.stream()
@@ -156,7 +156,7 @@ public class DonanteController {
         try {
             return incentivosService.obtenerPerfil(idDonanteActual()).categoriaActual() == null;
         } catch (RuntimeException e) {
-            return false; // si no podemos confirmar la categoría, no mostramos el botón
+            return false;
         }
     }
 

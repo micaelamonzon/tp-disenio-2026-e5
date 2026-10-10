@@ -65,6 +65,7 @@ public class DonacionSegmentada  {
     @Column(name = "fecha_de_entrega")
     private LocalDate fechaEntrega;
 
+    @Column
     private String fotoPath;
 
     @ManyToOne
@@ -98,6 +99,18 @@ public class DonacionSegmentada  {
     public Integer calcularCantidadDeBienes() {
         return bienesDelMismoTipo.stream().mapToInt(Bien::getCantidad).sum();
     }
+
+    public Double calcularVolumen(){
+        Integer cantBienes = this.getBienesDelMismoTipo().size();
+        return cantBienes.doubleValue() * 2;
+    }
+
+
+    public Double calcularPeso(){
+        Integer cantBienes = this.getBienesDelMismoTipo().size();
+        return cantBienes.doubleValue() * 3;
+    }
+
 
 
 }

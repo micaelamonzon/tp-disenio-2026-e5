@@ -2,36 +2,43 @@ package ar.edu.utn.frba.ddsi.donaciones.services;
 import ar.edu.utn.frba.ddsi.donaciones.dto.BienDTO;
 import ar.edu.utn.frba.ddsi.donaciones.dto.CambioEstadoDTO;
 import ar.edu.utn.frba.ddsi.donaciones.dto.CategoriaDTO;
+import ar.edu.utn.frba.ddsi.donaciones.dto.DonacionDTO;
 import ar.edu.utn.frba.ddsi.donaciones.dto.DonacionSegmentadaDTO;
 import ar.edu.utn.frba.ddsi.donaciones.dto.SubcategoriaDTO;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.Bien;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.algoritmos.Estado;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.DonacionSegmentada;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.EstadoDonacion;
+import ar.edu.utn.frba.ddsi.donaciones.repositories.DonacionesRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Service
-public class EstadoDonacionServiceimpl {
+public class EstadoDonacionServiceimpl implements EstadoDonacionService{
 
-    private final Map<Long, DonacionSegmentada> donaciones = new HashMap<>();
-    private final AtomicLong contador = new AtomicLong(1);
+    private final DonacionesRepository donacionesRepository;
 
-    public Long registrarDonacion(DonacionSegmentada donacion) {
-        Long id = contador.getAndIncrement();
-        donacion.setId(id);
-        donaciones.put(id, donacion);
-        return id;
+    public EstadoDonacionServiceimpl(DonacionesRepository donacionesRepository) {
+        this.donacionesRepository = donacionesRepository;
     }
 
+    @Override
+    public Long registrarDonacion(DonacionSegmentada donacion) {
+        this.donacionesRepository.save(donacion);
+        return donacion.getId();
+    }
+
+    @Override
     public DonacionSegmentadaDTO obtenerHistorial(Long id) {
         return toDTO(buscar(id));
     }
 
+    @Override
     public DonacionSegmentadaDTO asignar(Long id, String responsableId) {
         DonacionSegmentada d = buscar(id);
         d.cambiarEstado(EstadoDonacion.ASIGNACION_REALIZADA,
@@ -39,13 +46,16 @@ public class EstadoDonacionServiceimpl {
         return toDTO(d);
     }
 
+    @Override
     public DonacionSegmentadaDTO listaParaEntregar(Long id, String responsableId) {
         DonacionSegmentada d = buscar(id);
         d.cambiarEstado(EstadoDonacion.LISTA_PARA_ENTREGAR,
                 "Ruta planificada", responsableId);
+        this.donacionesRepository.save(d);
         return toDTO(d);
     }
 
+    @Override
     public DonacionSegmentadaDTO iniciarTraslado(Long id, String responsableId) {
         DonacionSegmentada d = buscar(id);
         d.cambiarEstado(EstadoDonacion.EN_TRASLADO,
@@ -53,6 +63,7 @@ public class EstadoDonacionServiceimpl {
         return toDTO(d);
     }
 
+    @Override
     public DonacionSegmentadaDTO entregar(Long id, String responsableId) {
         DonacionSegmentada d = buscar(id);
         d.cambiarEstado(EstadoDonacion.ENTREGADA,
@@ -60,6 +71,7 @@ public class EstadoDonacionServiceimpl {
         return toDTO(d);
     }
 
+    @Override
     public DonacionSegmentadaDTO fallarEntrega(Long id, String justificacion, String responsableId) {
         DonacionSegmentada d = buscar(id);
         d.cambiarEstado(EstadoDonacion.ENTREGA_FALLIDA, justificacion, responsableId);
@@ -68,6 +80,7 @@ public class EstadoDonacionServiceimpl {
         return toDTO(d);
     }
 
+    @Override
     public DonacionSegmentadaDTO vencer(Long id, String responsableId) {
         DonacionSegmentada d = buscar(id);
         d.cambiarEstado(EstadoDonacion.VENCIDA,
@@ -75,20 +88,31 @@ public class EstadoDonacionServiceimpl {
         return toDTO(d);
     }
 
-    public List<DonacionSegmentada> findByEstado(String nombreEstado) {
-        return donaciones.values().stream()
-                .filter(d -> d.getEstadoActual().toString().equals(nombreEstado))
-                .toList();
+    //SE USA PARA LOGISTICAAAA
+    public List<DonacionDTO> findByEstado(String nombreEstado) {
+        List<DonacionDTO> donacionesDTO = new ArrayList<>();
+        List<DonacionSegmentada> donacionSegmentadas = this.donacionesRepository.findByEstado(EstadoDonacion.valueOf(nombreEstado));
+        donacionSegmentadas.forEach(d -> donacionesDTO.add(
+                new DonacionDTO(
+                        d.getId().intValue(),
+                        d.getEstadoActual().toString(),
+                        d.calcularPeso(),
+                        d.calcularVolumen(),
+                        d.getEntidadBeneficiaria().getDireccion(),
+                        d.getEntidadBeneficiaria().getLatitud(),
+                        d.getEntidadBeneficiaria().getLongitud()
+                        )));
+        return donacionesDTO;
     }
 
     private DonacionSegmentada buscar(Long id) {
-        DonacionSegmentada d = donaciones.get(id);
+        DonacionSegmentada d = this.donacionesRepository.findById(id).orElse(null);
         if (d == null) throw new RuntimeException("Donación no encontrada: " + id);
         return d;
     }
 
-    private DonacionSegmentada buscarPorEstado(Estado estado) {
-        DonacionSegmentada d = donaciones.get(estado);
+    private DonacionSegmentada buscarPorEstado(EstadoDonacion estado) {
+        DonacionSegmentada d = this.donacionesRepository.findByEstado(estado).getFirst();
         if (d == null) throw new RuntimeException("Donación no encontrada: " + estado);
         return d;
     }

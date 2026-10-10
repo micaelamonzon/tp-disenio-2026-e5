@@ -18,13 +18,13 @@ public class EntidadBeneficiariaController {
         this.entidadBeneficiariaService = entidadBeneficiariaService;
     }
 
-    @GetMapping("/obtenerEntidades")
+    @GetMapping("/entidades")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public List<EntidadBeneficiariaDTO> obtenerTodas() {
         return this.entidadBeneficiariaService.obtenerTodas();
     }
 
-    @GetMapping("/obtenerEntidad/{id}")
+    @GetMapping("/entidad/{id}")
     public ResponseEntity<EntidadBeneficiariaDTO> obtenerPorId(@PathVariable Long id) {
         try {
             EntidadBeneficiariaDTO entidad = this.entidadBeneficiariaService.obtenerPorId(id);
@@ -35,13 +35,18 @@ public class EntidadBeneficiariaController {
         }
     }
 
-    @PostMapping("/crearEntidad")
+    @PutMapping("entidad/{id}")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public EntidadBeneficiariaDTO modificar(@RequestBody EntidadBeneficiariaDTO body, @PathVariable Long id){
+        return this.entidadBeneficiariaService.modificar(body,id);
+    }
+    @PostMapping("/entidad")
     @ResponseStatus(HttpStatus.CREATED)
     public EntidadBeneficiariaDTO crear(@RequestBody EntidadBeneficiariaDTO body) {
         return this.entidadBeneficiariaService.crear(body);
     }
 
-    @DeleteMapping("/eliminarEntidad/{id}")
+    @DeleteMapping("/entidad/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
         try {
             this.entidadBeneficiariaService.eliminar(id);

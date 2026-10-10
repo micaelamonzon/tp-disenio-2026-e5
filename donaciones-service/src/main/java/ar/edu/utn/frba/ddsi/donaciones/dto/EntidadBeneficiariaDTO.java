@@ -7,5 +7,7 @@ public record EntidadBeneficiariaDTO (
         String razonSocial,
         String direccion,
         String telefono,
+        Double latitud,
+        Double longitud,
         List<RepresentanteDTO> representantes
 ){}

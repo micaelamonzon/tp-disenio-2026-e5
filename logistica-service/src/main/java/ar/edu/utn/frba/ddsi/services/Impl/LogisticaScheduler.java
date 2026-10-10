@@ -1,5 +1,6 @@
 package ar.edu.utn.frba.ddsi.services.Impl;
 
+import ar.edu.utn.frba.ddsi.dto.CamionDTO;
 import ar.edu.utn.frba.ddsi.dto.DonacionDTO;
 import ar.edu.utn.frba.ddsi.models.entities.Camion;
 import ar.edu.utn.frba.ddsi.models.entities.DonacionesClient;
@@ -25,7 +26,7 @@ public class LogisticaScheduler {
     public void planificadorRutasDelDiaSiguiente(){
         List<DonacionDTO> donaciones = donacionesClient.obtenerDonacionesAsignadas();
 
-        List<Camion> camiones = camionService.obtenerCamionesDisponibles();
+        List<CamionDTO> camiones = camionService.obtenerCamionesDisponibles();
 
         if(donaciones.isEmpty() || camiones.isEmpty()) return;
 

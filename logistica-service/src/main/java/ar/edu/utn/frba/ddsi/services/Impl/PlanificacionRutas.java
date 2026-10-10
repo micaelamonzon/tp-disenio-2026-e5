@@ -5,9 +5,15 @@ import ar.edu.utn.frba.ddsi.dto.*;
 import ar.edu.utn.frba.ddsi.models.entities.Camion;
 import ar.edu.utn.frba.ddsi.models.entities.SolicitudPlanificacion;
 import ar.edu.utn.frba.ddsi.repository.impl.SolicitudPlanificacionRepository;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.http.HttpMethod;
+
 
 import java.net.URI;
 import java.time.LocalDateTime;
@@ -23,6 +29,7 @@ public class PlanificacionRutas {
     private static final double WAREHOUSE_LAT = -34.3556;
     private static final double WAREHOUSE_LON = -58.42015;
 
+
     private  final SolicitudPlanificacionRepository solicitudRepository;
     private final RestTemplate restTemplate;
     private final LogisticaProperties properties;
@@ -35,16 +42,14 @@ public class PlanificacionRutas {
         this.servicePlani = servicePlani;
     }
 
-    public void solicitarPlanificacion(List<Camion> camiones, List<DonacionDTO> donaciones) {
+    public void solicitarPlanificacion(List<CamionDTO> camiones, List<DonacionDTO> donaciones) {
         List<List<DonacionDTO>> lotes = dividirEnLotes(donaciones, MAXIMO_DONACIONES);
 
         lotes.forEach(lote -> enviarLote(lote, camiones));
     }
 
-    private void enviarLote(List<DonacionDTO> lote, List<Camion> camiones) {
+    private void enviarLote(List<DonacionDTO> lote, List<CamionDTO> camiones) {
         String requestId = UUID.randomUUID().toString();
-
-        solicitudRepository.save(new SolicitudPlanificacion(requestId));
 
         LocalDateTime mañana = LocalDateTime.now().plusDays(1)
                 .withHour(9).withMinute(0).withSecond(0);
@@ -69,26 +74,34 @@ public class PlanificacionRutas {
 
         servicePlani.registrarSolicitud(requestId);
 
-        restTemplate.postForObject(uri, solicitud, String.class);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(properties.getTokenPlanificador());
+
+        HttpEntity<PlanRouteDTO> request = new HttpEntity<>(solicitud, headers);
+
+        restTemplate.exchange(uri, HttpMethod.POST, request, String.class);
     }
 
     private DeliveryDTO convertirADelivery(DonacionDTO donacion) {
+        if(donacion.volumenM3() == null || donacion.pesoKg() == null){
+            throw new RuntimeException("El peso o el volumen de la donacion no puede ser nulo");
+        }
         return new DeliveryDTO(
-                donacion.codigo(),
-                donacion.pesoKg(),
-                donacion.volumenM3(),
-                donacion.direccionEntidad(),
+                donacion.codigo().toString(),
                 donacion.latitudEntidad(),
-                donacion.longitudEntidad()
+                donacion.longitudEntidad(),
+                donacion.direccionEntidad(),
+                donacion.pesoKg(),
+                donacion.volumenM3()
         );
     }
 
-    private TruckDTO convertirATruck(Camion camion) {
+    private TruckDTO convertirATruck(CamionDTO camion) {
         return new TruckDTO(
-                null,
-                camion.getPatente(),
-                camion.getCapacidadCarga(),
-                camion.getVolumen()
+                camion.id(),
+                camion.capacidadCarga(),
+                camion.volumen()
         );
     }
 

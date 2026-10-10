@@ -38,4 +38,34 @@ public enum EstadoDonacion {
             );
         }
     }
+
+    public EstadoDonacion esUnEstado(String estadoString){
+        if(estadoString.equals(EstadoDonacion.EN_DEPOSITO.name())){
+            return EstadoDonacion.EN_DEPOSITO;
+        }
+        else if(estadoString.equals(EstadoDonacion.ASIGNACION_REALIZADA.name())){
+            return EstadoDonacion.ASIGNACION_REALIZADA;
+        }
+        else if(estadoString.equals(EstadoDonacion.LISTA_PARA_ENTREGAR.name())){
+            return EstadoDonacion.LISTA_PARA_ENTREGAR;
+        }
+        else if(estadoString.equals(EstadoDonacion.EN_TRASLADO.name())){
+            return EstadoDonacion.EN_TRASLADO;
+        }
+        else if(estadoString.equals(EstadoDonacion.ENTREGADA.name())){
+            return EstadoDonacion.ENTREGADA;
+        }
+        else if(estadoString.equals(EstadoDonacion.ENTREGA_FALLIDA.name())){
+            return EstadoDonacion.ENTREGA_FALLIDA;
+        }
+        else if(estadoString.equals(EstadoDonacion.VENCIDA.name())){
+            return EstadoDonacion.VENCIDA;
+        }
+        else if(estadoString.equals(EstadoDonacion.INICIO.name())){
+            return EstadoDonacion.INICIO;
+        }
+        else {
+            return null;
+        }
+    }
 }
