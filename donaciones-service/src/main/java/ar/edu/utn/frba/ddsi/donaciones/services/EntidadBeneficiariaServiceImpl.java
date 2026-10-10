@@ -106,8 +106,8 @@ public class EntidadBeneficiariaServiceImpl implements EntidadBeneficiariaServic
                 .collect(Collectors.toCollection(ArrayList::new));
 
         nuevaEntidad.setRepresentantes(representantes);
-        this.entidadBeneficiariaRepository.save(nuevaEntidad);
-        return this.obtenerPorId(nuevaEntidad.getId());
+        EntidadBeneficiaria guardada = this.entidadBeneficiariaRepository.save(nuevaEntidad);
+        return this.obtenerPorId(guardada.getId());
     }
 
     @Override

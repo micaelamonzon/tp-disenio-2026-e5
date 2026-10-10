@@ -8,7 +8,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
+import java.util.Base64;
+import java.util.HashMap;
 import java.util.Map;
 
 
@@ -18,6 +22,7 @@ public class AuthApiService {
     private static final Logger log = LoggerFactory.getLogger(AuthApiService.class);
     private final WebClient webClient = WebClient.builder().build();
     private final String authServiceUrl;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public AuthApiService(@Value("${auth.service.url}") String authServiceUrl) {
         this.authServiceUrl = authServiceUrl;
@@ -44,6 +49,49 @@ public class AuthApiService {
             throw new RuntimeException("Error en el servicio de autenticación: " + e.getMessage(), e);
         } catch (Exception e) {
             throw new RuntimeException("Error de conexión con el servicio de autenticación: " + e.getMessage(), e);
+        }
+    }
+    /**
+     * Extrae el claim 'rol' del JWT devuelto por el servidor de autenticación
+     */
+    public String extraerRolDelJwt(String jwtToken) {
+        try {
+            if (jwtToken == null || jwtToken.isBlank()) return "DONANTE_HUMANO";
+
+            String[] partes = jwtToken.split("\\.");
+            if (partes.length < 2) return "DONANTE_HUMANO";
+
+            String payloadJson = new String(Base64.getUrlDecoder().decode(partes[1]));
+            JsonNode node = objectMapper.readTree(payloadJson);
+
+            return node.has("rol") ? node.get("rol").asText() : "DONANTE_HUMANO";
+        } catch (Exception e) {
+            log.warn("No se pudo extraer el claim 'rol' del JWT: {}", e.getMessage());
+            return "DONANTE_HUMANO";
+        }
+    }
+
+    public void crearUsuario(String email, String password, String rol, Long idEnDominio, String nombre) {
+        try {
+            Map<String, Object> body = new HashMap<>();
+            body.put("email", email);
+            body.put("password", password);
+            body.put("rol", rol); // "DONANTE_HUMANO", "DONANTE_JURIDICO" o "ENTIDAD_BENEFICIARIA"
+            body.put("idEnDominio", idEnDominio != null ? idEnDominio : 1L);
+            body.put("nombre", nombre);
+
+            webClient.post()
+                    .uri(authServiceUrl + "/usuarios")
+                    .bodyValue(body)
+                    .retrieve()
+                    .toBodilessEntity()
+                    .block();
+
+            log.info("Usuario {} registrado exitosamente en servicio de autenticación", email);
+
+        } catch (Exception e) {
+            log.error("Error creando usuario en servicio de autenticación: {}", e.getMessage());
+            throw new RuntimeException("No se pudo crear la cuenta de usuario: " + e.getMessage(), e);
         }
     }
 }

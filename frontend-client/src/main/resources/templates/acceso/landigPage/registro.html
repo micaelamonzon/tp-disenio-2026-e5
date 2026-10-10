@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="${titulo} + ' - DonaTrack'">Crear Cuenta - DonaTrack</title>
     <link rel="stylesheet" th:href="@{/css/landingPage/landingPage.css}">
-    <!-- FontAwesome para los íconos exactos de los campos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body style="background-color: #f8fafc; color: #334155; font-family: system-ui, -apple-system, sans-serif;">
@@ -15,150 +14,140 @@
 
 <main class="page" style="padding: 2.5rem 1rem 4rem 1rem;">
 
-    <!-- ENCABEZADO CENTRADO FUERA DE LA TARJETA -->
     <div style="text-align: center; margin-bottom: 2rem;">
         <h1 style="font-size: 2.25rem; font-weight: 800; color: #0f172a; margin-bottom: 0.5rem;">Crear Cuenta</h1>
         <p style="color: #64748b; font-size: 1rem; margin: 0;">Únete a nuestra comunidad y forma parte del cambio</p>
     </div>
 
-    <!-- TARJETA DEL FORMULARIO -->
-    <div class="form-container" style="background: #ffffff; padding: 2rem; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.04); max-width: 480px; margin: 0 auto; border: 1px solid #f1f5f9;">
+    <div class="form-container" style="background: #ffffff; padding: 2rem; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.04); max-width: 520px; margin: 0 auto; border: 1px solid #f1f5f9;">
 
-        <!-- SELECTOR DE ROLS -->
-        <div class="role-selector" style="display: flex; gap: 0.5rem; background: #f1f5f9; padding: 0.25rem; border-radius: 12px; margin-bottom: 1.5rem;">
-            <button type="button" class="role-btn active" id="btn-role-donante" onclick="setRole('DONANTE')"
+        <!-- 1. SELECTOR DE ROL PRINCIPAL -->
+        <div class="role-selector" style="display: flex; gap: 0.5rem; background: #f1f5f9; padding: 0.25rem; border-radius: 12px; margin-bottom: 1.25rem;">
+            <button type="button" class="role-btn active" id="btn-role-donante" onclick="setMainRole('DONANTE')"
                     style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.75rem; border: none; border-radius: 10px; background-color: #2563eb; color: #ffffff; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.2s;">
-                <i class="fa-regular fa-user"></i>
-                Soy Donante
+                <i class="fa-regular fa-user"></i> Soy Donante
             </button>
-            <button type="button" class="role-btn" id="btn-role-entidad" onclick="setRole('ENTIDAD')"
+            <button type="button" class="role-btn" id="btn-role-entidad" onclick="setMainRole('ENTIDAD')"
                     style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.75rem; border: none; border-radius: 10px; background-color: transparent; color: #64748b; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.2s;">
-                <i class="fa-solid fa-store"></i>
-                Soy Entidad Beneficiaria
+                <i class="fa-solid fa-store"></i> Soy Entidad Beneficiaria
             </button>
         </div>
 
-        <!-- FORMULARIO -->
-        <form th:action="@{/acceso/registro/donante-humana}" method="post" id="register-form">
-
-            <input type="hidden" name="rol" id="input-rol" value="DONANTE">
-
-            <!-- Mensaje de error -->
-            <div th:if="${error != null}" class="toast error" style="margin-bottom: 1.25rem; background: #fef2f2; border: 1px solid #fca5a5; color: #991b1b; padding: 0.75rem; border-radius: 8px; font-size: 0.88rem;">
-                <span th:text="${error}">Error al registrar la cuenta.</span>
-            </div>
-
-            <!-- CAMPO: NOMBRE COMPLETO / RAZÓN SOCIAL -->
-            <div class="form-group" style="margin-bottom: 1.25rem;">
-                <label for="nombre" id="label-nombre" style="display: block; font-weight: 600; font-size: 0.88rem; color: #334155; margin-bottom: 0.4rem;">Nombre Completo</label>
-                <div class="input-icon-wrapper" style="position: relative;">
-                    <span class="input-icon" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8;">
-                        <i id="icon-nombre" class="fa-regular fa-user"></i>
-                    </span>
-                    <input type="text" id="nombre" name="nombre" placeholder="Juan Pérez" required
-                           style="width: 100%; padding: 0.75rem 0.75rem 0.75rem 2.5rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; box-sizing: border-box; outline: none;">
-                </div>
-            </div>
-
-            <!-- CAMPO: EMAIL -->
-            <div class="form-group" style="margin-bottom: 1.25rem;">
-                <label for="email" style="display: block; font-weight: 600; font-size: 0.88rem; color: #334155; margin-bottom: 0.4rem;">Email</label>
-                <div class="input-icon-wrapper" style="position: relative;">
-                    <span class="input-icon" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8;">
-                        <i class="fa-regular fa-envelope"></i>
-                    </span>
-                    <input type="email" id="email" name="email" placeholder="email@ejemplo.com" required
-                           style="width: 100%; padding: 0.75rem 0.75rem 0.75rem 2.5rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; box-sizing: border-box; outline: none;">
-                </div>
-            </div>
-
-            <!-- CAMPO: TELÉFONO -->
-            <div class="form-group" style="margin-bottom: 1.25rem;">
-                <label for="telefono" style="display: block; font-weight: 600; font-size: 0.88rem; color: #334155; margin-bottom: 0.4rem;">Teléfono</label>
-                <div class="input-icon-wrapper" style="position: relative;">
-                    <span class="input-icon" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8;">
-                        <i class="fa-solid fa-phone"></i>
-                    </span>
-                    <input type="tel" id="telefono" name="telefono" placeholder="+54 11 1234-5678" required
-                           style="width: 100%; padding: 0.75rem 0.75rem 0.75rem 2.5rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; box-sizing: border-box; outline: none;">
-                </div>
-            </div>
-
-            <!-- CAMPOS EXCLUSIVOS DE ENTIDAD (OCULTOS POR DEFECTO PARA DONANTE) -->
-            <div id="entidad-fields" style="display: none;">
-                <!-- CAMPO: CUIT -->
-                <div class="form-group" style="margin-bottom: 1.25rem;">
-                    <label for="cuit" style="display: block; font-weight: 600; font-size: 0.88rem; color: #334155; margin-bottom: 0.4rem;">CUIT</label>
-                    <div class="input-icon-wrapper" style="position: relative;">
-                        <span class="input-icon" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8;">
-                            <i class="fa-regular fa-file-lines"></i>
-                        </span>
-                        <input type="text" id="cuit" name="cuit" placeholder="20-12345678-9"
-                               style="width: 100%; padding: 0.75rem 0.75rem 0.75rem 2.5rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; box-sizing: border-box; outline: none;">
-                    </div>
-                </div>
-
-                <!-- CAMPO: DIRECCIÓN -->
-                <div class="form-group" style="margin-bottom: 1.25rem;">
-                    <label for="direccion" style="display: block; font-weight: 600; font-size: 0.88rem; color: #334155; margin-bottom: 0.4rem;">Dirección</label>
-                    <div class="input-icon-wrapper" style="position: relative;">
-                        <span class="input-icon" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8;">
-                            <i class="fa-solid fa-location-dot"></i>
-                        </span>
-                        <input type="text" id="direccion" name="direccion" placeholder="Av. Medrano 951, CABA"
-                               style="width: 100%; padding: 0.75rem 0.75rem 0.75rem 2.5rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; box-sizing: border-box; outline: none;">
-                    </div>
-                </div>
-
-                <!-- CAMPO: DESCRIPCIÓN -->
-                <div class="form-group" style="margin-bottom: 1.25rem;">
-                    <label for="descripcion" style="display: block; font-weight: 600; font-size: 0.88rem; color: #334155; margin-bottom: 0.4rem;">Descripción de la organización</label>
-                    <textarea id="descripcion" name="descripcion" placeholder="Describe brevemente la misión y actividades de tu organización..." rows="3"
-                              style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; box-sizing: border-box; outline: none; font-family: inherit; resize: vertical;"></textarea>
-                </div>
-            </div>
-
-            <!-- CAMPO: CONTRASEÑA -->
-            <div class="form-group" style="margin-bottom: 1.25rem;">
-                <label for="password" style="display: block; font-weight: 600; font-size: 0.88rem; color: #334155; margin-bottom: 0.4rem;">Contraseña</label>
-                <div class="input-icon-wrapper" style="position: relative;">
-                    <span class="input-icon" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8;">
-                        <i class="fa-solid fa-lock"></i>
-                    </span>
-                    <input type="password" id="password" name="password" placeholder="Mínimo 8 caracteres" minlength="8" required
-                           style="width: 100%; padding: 0.75rem 0.75rem 0.75rem 2.5rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; box-sizing: border-box; outline: none;">
-                </div>
-            </div>
-
-            <!-- CAMPO: CONFIRMAR CONTRASEÑA -->
-            <div class="form-group" style="margin-bottom: 1.25rem;">
-                <label for="confirmPassword" style="display: block; font-weight: 600; font-size: 0.88rem; color: #334155; margin-bottom: 0.4rem;">Confirmar Contraseña</label>
-                <div class="input-icon-wrapper" style="position: relative;">
-                    <span class="input-icon" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8;">
-                        <i class="fa-solid fa-lock"></i>
-                    </span>
-                    <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirma tu contraseña" minlength="8" required
-                           style="width: 100%; padding: 0.75rem 0.75rem 0.75rem 2.5rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; box-sizing: border-box; outline: none;">
-                </div>
-            </div>
-
-            <!-- CHECKBOX DE TÉRMINOS -->
-            <div style="margin-bottom: 1.5rem;">
-                <label class="terms-check" style="display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.82rem; color: #475569; cursor: pointer;">
-                    <input type="checkbox" name="aceptaTerminos" id="aceptaTerminos" required style="margin-top: 0.15rem;">
-                    <span>Acepto los <a th:href="@{/acceso/legal}" target="_blank" style="color: #2563eb; text-decoration: none; font-weight: 600;">Términos y Condiciones</a> y la <a th:href="@{/acceso/legal}" target="_blank" style="color: #2563eb; text-decoration: none; font-weight: 600;">Política de Privacidad</a></span>
+        <!-- 2. SUB-SELECTOR DE PERSONERÍA (SOLO VISIBLE SI ES DONANTE) -->
+        <div id="sub-personeria-wrapper" style="margin-bottom: 1.5rem; background: #f8fafc; padding: 0.75rem; border-radius: 10px; border: 1px dashed #cbd5e1;">
+            <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #475569; margin-bottom: 0.5rem; text-align: center;">TIPO DE DONANTE</label>
+            <div style="display: flex; justify-content: center; gap: 1.5rem;">
+                <label style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.88rem; font-weight: 600; color: #334155; cursor: pointer;">
+                    <input type="radio" name="tipoDonanteRadio" id="radio-humana" value="HUMANA" checked onclick="switchDonanteForm('HUMANA')">
+                    Persona Humana
+                </label>
+                <label style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.88rem; font-weight: 600; color: #334155; cursor: pointer;">
+                    <input type="radio" name="tipoDonanteRadio" id="radio-juridica" value="JURIDICA" onclick="switchDonanteForm('JURIDICA')">
+                    Persona Jurídica (Empresa/ONG)
                 </label>
             </div>
+        </div>
 
-            <!-- BOTÓN ENVIAR -->
-            <button type="submit" class="btn btn-primary btn-block"
-                    style="width: 100%; padding: 0.85rem; border: none; border-radius: 10px; background-color: #2563eb; color: #ffffff; font-weight: 700; font-size: 1rem; cursor: pointer;">
-                Crear Cuenta
-            </button>
+        <!-- MENSAJE DE ERROR DEL BACKEND -->
+        <div th:if="${error != null}" class="toast error" style="margin-bottom: 1.25rem; background: #fef2f2; border: 1px solid #fca5a5; color: #991b1b; padding: 0.75rem; border-radius: 8px; font-size: 0.88rem;">
+            <span th:text="${error}">Error al registrar la cuenta.</span>
+        </div>
+
+        <!-- FORMULARIO 1: PERSONA HUMANA -->
+        <form th:action="@{/acceso/registro/donante-humana}" method="post" id="form-humana">
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.3rem;">Nombre</label>
+                <input type="text" name="nombre" placeholder="Juan" required style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;">
+            </div>
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.3rem;">Apellido</label>
+                <input type="text" name="apellido" placeholder="Pérez" required style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;">
+            </div>
+            <div style="display: flex; gap: 0.75rem; margin-bottom: 1rem;">
+                <div style="flex: 1;">
+                    <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.3rem;">DNI</label>
+                    <input type="number" name="DNI" placeholder="12345678" required style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;">
+                </div>
+                <div style="flex: 1;">
+                    <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.3rem;">Edad</label>
+                    <input type="number" name="edad" placeholder="25" style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;">
+                </div>
+            </div>
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.3rem;">Género</label>
+                <input type="text" name="genero" placeholder="Masculino / Femenino / Otro" style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;">
+            </div>
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.3rem;">Email</label>
+                <input type="email" name="email" placeholder="juan@ejemplo.com" required style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;">
+            </div>
+            <div class="form-group" style="margin-bottom: 1.25rem;">
+                <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.3rem;">Contraseña</label>
+                <input type="password" name="password" placeholder="Mínimo 8 caracteres" minlength="8" required style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;">
+            </div>
+            <button type="submit" style="width: 100%; padding: 0.85rem; border: none; border-radius: 10px; background-color: #2563eb; color: #ffffff; font-weight: 700; cursor: pointer;">Registrarme como Donante Humano</button>
         </form>
 
-        <!-- SWITCH INICIAR SESIÓN -->
-        <p class="auth-switch-link" style="text-align: center; font-size: 0.88rem; color: #64748b; margin-top: 1.5rem; margin-bottom: 0;">
+        <!-- FORMULARIO 2: PERSONA JURÍDICA -->
+        <form th:action="@{/acceso/registro/donante-juridica}" method="post" id="form-juridica" style="display: none;">
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.3rem;">Razón Social</label>
+                <input type="text" name="razonSocial" placeholder="Tech S.A." required style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;">
+            </div>
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.3rem;">CUIT</label>
+                <input type="text" name="cuit" placeholder="30-12345678-9" required style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;">
+            </div>
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.3rem;">Tipo de Organización</label>
+                <select name="tipo" style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;">
+                    <option value="Empresa">Empresa</option>
+                    <option value="ONG">ONG</option>
+                    <option value="Gubernamental">Gubernamental</option>
+                    <option value="Institucion">Institución</option>
+                </select>
+            </div>
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.3rem;">Rubro</label>
+                <input type="text" name="rubro" placeholder="Tecnología / Alimenticio" required style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;">
+            </div>
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.3rem;">Email Institucional</label>
+                <input type="email" name="email" placeholder="contacto@empresa.com" required style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;">
+            </div>
+            <div class="form-group" style="margin-bottom: 1.25rem;">
+                <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.3rem;">Contraseña</label>
+                <input type="password" name="password" placeholder="Mínimo 8 caracteres" minlength="8" required style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;">
+            </div>
+            <button type="submit" style="width: 100%; padding: 0.85rem; border: none; border-radius: 10px; background-color: #2563eb; color: #ffffff; font-weight: 700; cursor: pointer;">Registrar Empresa / Organización</button>
+        </form>
+
+        <!-- FORMULARIO 3: ENTIDAD BENEFICIARIA -->
+        <form th:action="@{/acceso/registro/entidad-beneficiaria}" method="post" id="form-entidad" style="display: none;">
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.3rem;">Razón Social</label>
+                <input type="text" name="razonSocial" placeholder="Comedor San José" required style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;">
+            </div>
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.3rem;">Dirección</label>
+                <input type="text" name="direccion" placeholder="Av. Medrano 951, CABA" required style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;">
+            </div>
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.3rem;">Teléfono</label>
+                <input type="tel" name="telefono" placeholder="+54 11 1234-5678" required style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;">
+            </div>
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.3rem;">Email</label>
+                <input type="email" name="email" placeholder="contacto@entidad.org" required style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;">
+            </div>
+            <div class="form-group" style="margin-bottom: 1.25rem;">
+                <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.3rem;">Contraseña</label>
+                <input type="password" name="password" placeholder="Mínimo 8 caracteres" minlength="8" required style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;">
+            </div>
+            <button type="submit" style="width: 100%; padding: 0.85rem; border: none; border-radius: 10px; background-color: #2563eb; color: #ffffff; font-weight: 700; cursor: pointer;">Registrar Entidad Beneficiaria</button>
+        </form>
+
+        <p style="text-align: center; font-size: 0.88rem; color: #64748b; margin-top: 1.5rem; margin-bottom: 0;">
             ¿Ya tienes una cuenta? <a th:href="@{/acceso/login}" style="color: #2563eb; text-decoration: none; font-weight: 600;">Inicia Sesión</a>
         </p>
     </div>
@@ -167,63 +156,53 @@
 <footer th:replace="~{layoutAcceso/layoutAcceso :: footer}"></footer>
 
 <script>
-    function setRole(role) {
+    function setMainRole(role) {
         const btnDonante = document.getElementById('btn-role-donante');
         const btnEntidad = document.getElementById('btn-role-entidad');
-        const inputRol = document.getElementById('input-rol');
-
-        const labelNombre = document.getElementById('label-nombre');
-        const inputNombre = document.getElementById('nombre');
-        const iconNombre = document.getElementById('icon-nombre');
-
-        const entidadFields = document.getElementById('entidad-fields');
-        const inputCuit = document.getElementById('cuit');
-        const inputDireccion = document.getElementById('direccion');
-
-        const form = document.getElementById('register-form');
-
-        inputRol.value = role;
+        const subPersoneriaWrapper = document.getElementById('sub-personeria-wrapper');
+        const formEntidad = document.getElementById('form-entidad');
 
         if (role === 'DONANTE') {
-            // Estilos del Selector de Rol
             btnDonante.style.backgroundColor = '#2563eb';
             btnDonante.style.color = '#ffffff';
             btnEntidad.style.backgroundColor = 'transparent';
             btnEntidad.style.color = '#64748b';
 
-            // Ajuste del primer campo
-            labelNombre.textContent = 'Nombre Completo';
-            inputNombre.placeholder = 'Juan Pérez';
-            iconNombre.className = 'fa-regular fa-user';
+            subPersoneriaWrapper.style.display = 'block';
+            formEntidad.style.display = 'none';
 
-            // Ocultar campos de entidad y quitar restricción 'required'
-            entidadFields.style.display = 'none';
-            inputCuit.removeAttribute('required');
-            inputDireccion.removeAttribute('required');
-
-            // Endpoint para Donante
-            form.action = '[[@{/acceso/registro/donante-humana}]]';
+            // Verificamos qué radio button está marcado
+            const selectedPersoneria = document.querySelector('input[name="tipoDonanteRadio"]:checked').value;
+            switchDonanteForm(selectedPersoneria);
         } else {
-            // Estilos del Selector de Rol
             btnEntidad.style.backgroundColor = '#2563eb';
             btnEntidad.style.color = '#ffffff';
             btnDonante.style.backgroundColor = 'transparent';
             btnDonante.style.color = '#64748b';
 
-            // Ajuste del primer campo
-            labelNombre.textContent = 'Razón Social';
-            inputNombre.placeholder = 'Fundación Ejemplo';
-            iconNombre.className = 'fa-solid fa-store';
-
-            // Mostrar campos de entidad y agregar restricción 'required'
-            entidadFields.style.display = 'block';
-            inputCuit.setAttribute('required', 'required');
-            inputDireccion.setAttribute('required', 'required');
-
-            // Endpoint para Entidad
-            form.action = '[[@{/acceso/registro/entidad-beneficiaria}]]';
+            subPersoneriaWrapper.style.display = 'none';
+            document.getElementById('form-humana').style.display = 'none';
+            document.getElementById('form-juridica').style.display = 'none';
+            formEntidad.style.display = 'block';
         }
     }
+
+    function switchDonanteForm(personeria) {
+        const formHumana = document.getElementById('form-humana');
+        const formJuridica = document.getElementById('form-juridica');
+
+        if (personeria === 'HUMANA') {
+            formHumana.style.display = 'block';
+            formJuridica.style.display = 'none';
+        } else {
+            formHumana.style.display = 'none';
+            formJuridica.style.display = 'block';
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        setMainRole('DONANTE');
+    });
 </script>
 
 </body>

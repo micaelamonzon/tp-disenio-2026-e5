@@ -4,6 +4,7 @@ import ar.edu.utn.frba.ddsi.dtos.donaciones.DonacionDTO;
 import ar.edu.utn.frba.ddsi.dtos.donaciones.RegistroEntidadBeneficiariaDTO;
 import ar.edu.utn.frba.ddsi.dtos.donaciones.RegistroPersonaHumanaDTO;
 import ar.edu.utn.frba.ddsi.dtos.donaciones.RegistroPersonaJuridicaDTO;
+import ar.edu.utn.frba.ddsi.services.AuthApiService;
 import ar.edu.utn.frba.ddsi.services.DonacionesApiService;
 import ar.edu.utn.frba.ddsi.services.DonacionesService;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -25,14 +26,16 @@ public class AccesoController {
     private final Long idHumanoEtapa1;
     private final Long idJuridicoEtapa1;
     private final DonacionesApiService donacionesApiService;
+    private final AuthApiService authApiService;
 
     public AccesoController(DonacionesService donacionesService,
                             @Value("${etapa1.donante.id:1}") Long idHumanoEtapa1,
-                            @Value("${etapa1.juridico.id:1}") Long idJuridicoEtapa1, DonacionesApiService donacionesApiService) {
+                            @Value("${etapa1.juridico.id:1}") Long idJuridicoEtapa1, DonacionesApiService donacionesApiService, AuthApiService authApiService) {
         this.donacionesService = donacionesService;
         this.idHumanoEtapa1 = idHumanoEtapa1;
         this.idJuridicoEtapa1 = idJuridicoEtapa1;
         this.donacionesApiService = donacionesApiService;
+        this.authApiService = authApiService;
     }
 
     private List<DonacionDTO> obtenerTodasLasDonacionesPublicas() {
@@ -115,11 +118,9 @@ public class AccesoController {
                             || "ENTREGADA".equalsIgnoreCase(d.getEstadoActual()))
                     .toList();
 
-            // Creamos un ObjectMapper local configurado con el módulo de fechas Java 8
             ObjectMapper mapper = new ObjectMapper();
             mapper.registeredModules();
 
-            // Serializamos manualmente a String JSON
             String donacionesJson = mapper.writeValueAsString(donacionesEntregadas);
 
             model.addAttribute("donacionesMapaJson", donacionesJson);
@@ -183,11 +184,19 @@ public class AccesoController {
 
         return "acceso/landigPage/registro";
     }
-
     @PostMapping("/registro/donante-humana")
     public String registrarPersonaHumana(@ModelAttribute RegistroPersonaHumanaDTO dto, Model model) {
         try {
-            donacionesApiService.registrarDonanteHumano(dto);
+            Long idDominio = donacionesApiService.registrarDonanteHumano(dto);
+
+            authApiService.crearUsuario(
+                    dto.getEmail(),
+                    dto.getPassword(),
+                    "DONANTE_HUMANO",
+                    idDominio,
+                    dto.getNombre() + " " + dto.getApellido()
+            );
+
             return "redirect:/acceso/login?registroExitoso=true";
         } catch (Exception e) {
             model.addAttribute("titulo", "Registro de Usuarios");
@@ -201,7 +210,16 @@ public class AccesoController {
     @PostMapping("/registro/donante-juridica")
     public String registrarPersonaJuridica(@ModelAttribute RegistroPersonaJuridicaDTO dto, Model model) {
         try {
-            donacionesApiService.registrarDonanteJuridico(dto);
+            Long idDominio = donacionesApiService.registrarDonanteJuridico(dto);
+
+            authApiService.crearUsuario(
+                    dto.getEmail(),
+                    dto.getPassword(),
+                    "DONANTE_JURIDICO",
+                    idDominio,
+                    dto.getRazonSocial()
+            );
+
             return "redirect:/acceso/login?registroExitoso=true";
         } catch (Exception e) {
             model.addAttribute("titulo", "Registro de Usuarios");
@@ -215,7 +233,16 @@ public class AccesoController {
     @PostMapping("/registro/entidad-beneficiaria")
     public String registrarEntidadBeneficiaria(@ModelAttribute RegistroEntidadBeneficiariaDTO dto, Model model) {
         try {
-            donacionesApiService.registrarEntidadBeneficiaria(dto);
+            Long idDominio = donacionesApiService.registrarEntidadBeneficiaria(dto);
+
+            authApiService.crearUsuario(
+                    dto.getEmail(),
+                    dto.getPassword(),
+                    "ENTIDAD_BENEFICIARIA",
+                    idDominio,
+                    dto.getRazonSocial()
+            );
+
             return "redirect:/acceso/login?registroExitoso=true";
         } catch (Exception e) {
             model.addAttribute("titulo", "Registro de Usuarios");

@@ -35,6 +35,10 @@ public class SecurityConfig {
                         .requestMatchers("/donante/incentivos").hasRole("DONANTE_HUMANO")
                         .requestMatchers("/donante/**").hasAnyRole("DONANTE_HUMANO", "DONANTE_JURIDICO")
                         .requestMatchers("/entidadBeneficiaria/**").hasRole("ENTIDAD_BENEFICIARIA")
+
+                        // agrego ruta para persona adminsitradora
+                        .requestMatchers("/personaAdministradora/**").hasRole("ADMIN")
+
                         // Lo demás (por ahora logística) solo pide haber iniciado sesión
                         .anyRequest().authenticated()
                 )
@@ -84,6 +88,8 @@ public class SecurityConfig {
                     return "/donante/misDonaciones";
                 case "ROLE_ENTIDAD_BENEFICIARIA":
                     return "/entidadBeneficiaria/recepcionDeDonaciones";
+                case "ROLE_ADMIN":
+                    return "/personaAdministradora/index";
                 default:
                     break;
             }
