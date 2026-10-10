@@ -6,6 +6,7 @@ public record NotificacionMensajeDTO(
         String idEvento,
         String destinatario,     // contacto ya resuelto (entidad, admin)
         Long donanteId,          // se resuelve al consumir (donante)
+        Long entidadId,          // identifica a la entidad beneficiaria destinataria
         String mensaje,
         String medio
 ) {}

@@ -1,7 +1,6 @@
 package ar.edu.utn.frba.ddsi.notificaciones.listeners;
 
 import ar.edu.utn.frba.ddsi.notificaciones.dto.NotificacionMensajeDTO;
-import ar.edu.utn.frba.ddsi.notificaciones.dto.PersonaHumanaDTO;
 import ar.edu.utn.frba.ddsi.notificaciones.models.entities.ServicioDeNotificaciones.Donante;
 import ar.edu.utn.frba.ddsi.notificaciones.models.entities.ServicioDeNotificaciones.Email;
 import ar.edu.utn.frba.ddsi.notificaciones.models.entities.ServicioDeNotificaciones.MedioDeNotificacion;
@@ -9,13 +8,12 @@ import ar.edu.utn.frba.ddsi.notificaciones.models.entities.ServicioDeNotificacio
 import ar.edu.utn.frba.ddsi.notificaciones.models.entities.ServicioDeNotificaciones.NotificacionEstadoHistorial;
 import ar.edu.utn.frba.ddsi.notificaciones.models.entities.ServicioDeNotificaciones.SMS;
 import ar.edu.utn.frba.ddsi.notificaciones.models.entities.ServicioDeNotificaciones.WhatsApp;
-import ar.edu.utn.frba.ddsi.notificaciones.models.repositories.DonanteRepository;
 import ar.edu.utn.frba.ddsi.notificaciones.models.repositories.NotificacionEstadoHistorialRepository;
 import ar.edu.utn.frba.ddsi.notificaciones.models.repositories.NotificacionRepository;
+import ar.edu.utn.frba.ddsi.notificaciones.services.DonanteService;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -33,14 +31,8 @@ public class NotificacionesListener {
     private final SMS sms;
     private final WhatsApp whatsApp;
     private final NotificacionRepository notificacionRepository;
-    private final DonanteRepository donanteRepository;
     private final NotificacionEstadoHistorialRepository historialRepository;
-    private final RestTemplate restTemplate;
-
-    // URL base de donaciones-service para resolver el contacto del donante
-    // cuando el DTO llega solo con donanteId (sin destinatario resuelto)
-    private static final String DONACIONES_SERVICE_URL =
-            "http://localhost:8080/servicioDeDonaciones/donante/humano/";
+    private final DonanteService donanteService;
 
     // guarda los ids de eventos ya procesados, para descartar reentregas duplicadas de RabbitMQ (idempotencia)
     // manejamos el tamaño acotado con LinkedHashSet + eliminacion del mas viejo para no crecer indefinidamente en memoria
@@ -49,16 +41,14 @@ public class NotificacionesListener {
 
     public NotificacionesListener(Email email, SMS sms, WhatsApp whatsApp,
                                   NotificacionRepository notificacionRepository,
-                                  DonanteRepository donanteRepository,
                                   NotificacionEstadoHistorialRepository historialRepository,
-                                  RestTemplate restTemplate) {
+                                  DonanteService donanteService) {
         this.email = email;
         this.sms = sms;
         this.whatsApp = whatsApp;
         this.notificacionRepository = notificacionRepository;
-        this.donanteRepository = donanteRepository;
         this.historialRepository = historialRepository;
-        this.restTemplate = restTemplate;
+        this.donanteService = donanteService;
     }
 
     @RabbitListener(queues = "${notificaciones.queue.name}")
@@ -83,7 +73,7 @@ public class NotificacionesListener {
         Donante donante = null;
         try {
             if (dto.donanteId() != null) {
-                donante = resolverYActualizarDonante(dto.donanteId());
+                donante = donanteService.resolverYActualizarDonante(dto.donanteId());
                 destinatarioFinal = donante.getContacto();
             } else {
                 destinatarioFinal = dto.destinatario();
@@ -104,6 +94,7 @@ public class NotificacionesListener {
         Notificacion notificacion = new Notificacion();
         notificacion.setDestinatario(destinatarioFinal);
         notificacion.setDonante(donante); // null si la notificación es para entidad/admin
+        notificacion.setEntidadBeneficiariaId(dto.entidadId()); // null si no es para una entidad
         notificacion.setMensaje(dto.mensaje());
 
         MedioDeNotificacion medioDeNotificacion = switch (dto.medio().toUpperCase()) {
@@ -117,32 +108,6 @@ public class NotificacionesListener {
         notificacion.enviar();
         notificacionRepository.save(notificacion); // persiste la notificación consumida de la cola
         registrarCambioDeEstado(notificacion); // deja constancia del estado resultante en el historial
-    }
-
-    // Llama a donaciones-service para obtener los datos actuales del donante,
-    // y pisa (upsert) la copia local en la tabla Donante con lo que devuelve
-    // el GET: así el envío siempre usa el contacto más reciente, sin
-    // necesitar un proceso de validación periódico aparte.
-    private Donante resolverYActualizarDonante(Long donanteId) {
-        PersonaHumanaDTO persona = restTemplate.getForObject(
-                DONACIONES_SERVICE_URL + donanteId,
-                PersonaHumanaDTO.class
-        );
-
-        if (persona == null || persona.medioDeNotificacionPredeterminado() == null) {
-            throw new IllegalStateException(
-                    "No se pudo resolver el contacto del donante id=" + donanteId);
-        }
-
-        Donante donante = donanteRepository.findById(donanteId).orElse(new Donante());
-        donante.setId(donanteId);
-        donante.setNombre(persona.nombre());
-        donante.setApellido(persona.apellido());
-        donante.setTipoDeNotificacion(persona.medioDeNotificacionPredeterminado().tipoDeNotificacion());
-        donante.setContacto(persona.medioDeNotificacionPredeterminado().datoDeContacto());
-        donante.setFechaActualizacion(LocalDateTime.now());
-
-        return donanteRepository.save(donante);
     }
 
     // Deja una fila en el historial con el estado en que quedó la
