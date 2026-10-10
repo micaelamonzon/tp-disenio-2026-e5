@@ -33,6 +33,10 @@
                     <span>Sesión cerrada correctamente.</span>
                 </div>
 
+                <div th:if="${param.registroExitoso != null}" class="toast info" role="status" style="margin-bottom: 1.25rem; position: relative; bottom: 0; right: 0;">
+                    <span>Cuenta creada. Ya podés iniciar sesión con tu email y contraseña.</span>
+                </div>
+
                 <div th:if="${param.unauthorized != null}" class="toast info" role="status" style="margin-bottom: 1.25rem; position: relative; bottom: 0; right: 0;">
                     <span>Iniciá sesión para continuar.</span>
                 </div>
