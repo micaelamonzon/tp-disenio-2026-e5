@@ -770,8 +770,16 @@ public class DonacionesServiceImpl implements DonacionesService {
     }
 
     public void setearMediosDeNotificacion(List<MedioDeNotificacionDTO> mediosDTO, List<MedioDeNotificacion> medios){
-        mediosDTO.forEach(dto -> medios.add(new MedioDeNotificacion(dto.tipoDeNotificacion(), dto.datoDeContacto())));
+        if (mediosDTO == null) {
+            return;
+        }
 
+        mediosDTO.forEach(dto ->
+                medios.add(new MedioDeNotificacion(
+                        dto.tipoDeNotificacion(),
+                        dto.datoDeContacto()
+                ))
+        );
     }
 
     public List<DonacionSinSegmentarDTO> obtenerDonacionesSinSegmentarDTO(List<DonacionSinSegmentar> donacionesSinSegmentar){
