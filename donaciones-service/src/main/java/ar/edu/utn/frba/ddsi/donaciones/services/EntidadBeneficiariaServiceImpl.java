@@ -16,24 +16,16 @@ import java.util.stream.Collectors;
 
 @Service
 public class EntidadBeneficiariaServiceImpl implements EntidadBeneficiariaService{
+
     private final EntidadBeneficiariaRepository entidadBeneficiariaRepository;
-    private List<MedioDeNotificacionDTO> mapearMedios(List<MedioDeNotificacion> medios) {
-        return medios.stream()
-                .map(m -> new MedioDeNotificacionDTO(m.getTipoDeNotificacion(), m.getContacto()))
-                .toList();
-    }
+    private final UsigGeocodingService geocodingService;
 
-    // Lista modificable (no .toList()): Hibernate la administra por el cascade/orphanRemoval
-    private List<MedioDeNotificacion> mapearMediosAEntidad(List<MedioDeNotificacionDTO> medios) {
-        if (medios == null) return new ArrayList<>();
-        return medios.stream()
-                .map(dto -> new MedioDeNotificacion(dto.tipoDeNotificacion(), dto.datoDeContacto()))
-                .collect(Collectors.toCollection(ArrayList::new));
-    }
-
-    public EntidadBeneficiariaServiceImpl(EntidadBeneficiariaRepository entidadBeneficiariaRepository) {
+    public EntidadBeneficiariaServiceImpl(EntidadBeneficiariaRepository entidadBeneficiariaRepository, UsigGeocodingService geocodingService) {
         this.entidadBeneficiariaRepository = entidadBeneficiariaRepository;
+        this.geocodingService = geocodingService;
     }
+
+
     @Override
     public List<EntidadBeneficiariaDTO> obtenerTodas() {
         List<EntidadBeneficiaria> entidades =
@@ -55,6 +47,8 @@ public class EntidadBeneficiariaServiceImpl implements EntidadBeneficiariaServic
                     entidad.getRazonSocial(),
                     entidad.getDireccion(),
                     entidad.getTelefono(),
+                    entidad.getLatitud(),
+                    entidad.getLongitud(),
                     representantesDTO
             );
         }).toList();
@@ -79,16 +73,26 @@ public class EntidadBeneficiariaServiceImpl implements EntidadBeneficiariaServic
                     entidad.getRazonSocial(),
                     entidad.getDireccion(),
                     entidad.getTelefono(),
+                    entidad.getLatitud(),
+                    entidad.getLongitud(),
                     representantesDTO
+
             );
     }
 
     @Override
     public EntidadBeneficiariaDTO crear(EntidadBeneficiariaDTO body) {
+
         EntidadBeneficiaria nuevaEntidad = new EntidadBeneficiaria();
         nuevaEntidad.setRazonSocial(body.razonSocial());
         nuevaEntidad.setDireccion(body.direccion());
         nuevaEntidad.setTelefono(body.telefono());
+
+        geocodingService.geocodificar(nuevaEntidad.getDireccion())
+                .ifPresent(c -> {
+                    nuevaEntidad.setLatitud(c.latitud());
+                    nuevaEntidad.setLongitud(c.longitud());
+                });
 
         List<RepresentanteDTO> representantesDTO =
                 body.representantes() != null ? body.representantes() : List.of();
@@ -111,6 +115,55 @@ public class EntidadBeneficiariaServiceImpl implements EntidadBeneficiariaServic
     }
 
     @Override
+    public EntidadBeneficiariaDTO modificar(EntidadBeneficiariaDTO body, Long id){
+        if(id== null){
+            throw new RuntimeException("El id no puede ser null");
+        }
+
+        EntidadBeneficiaria entidad = this.entidadBeneficiariaRepository.findById(id).orElse(null);
+
+        if(entidad == null){
+            throw new RuntimeException("No se encontró la entidad con id " + id);
+        }
+
+        if(body.razonSocial()!=null){
+            entidad.setRazonSocial(body.razonSocial());
+        }
+        if(body.direccion()!=null){
+            entidad.setDireccion(body.direccion());
+        }
+        if(body.telefono()!=null){
+            entidad.setTelefono(body.telefono());
+        }
+
+        entidadBeneficiariaRepository.save(entidad);
+
+        return new EntidadBeneficiariaDTO(
+                entidad.getId(),
+                entidad.getRazonSocial(),
+                entidad.getDireccion(),
+                entidad.getTelefono(),
+                entidad.getLatitud(),
+                entidad.getLongitud(),
+                this.mapearARepresentantesDTO(entidad.getRepresentantes()));
+    }
+
+
+    public List<RepresentanteDTO> mapearARepresentantesDTO(List<Representante> representantes) {
+        List<RepresentanteDTO> representanteDTOS = new ArrayList<>();
+
+        representantes.forEach(r -> representanteDTOS.add(
+                                                new RepresentanteDTO(
+                                                r.getNombre(),
+                                                r.getApellido(),
+                                                r.getDNI(),
+                                                this.mapearMedios(r.getMediosDeNotificacion())
+                                                )
+        ));
+
+        return representanteDTOS;
+    }
+    @Override
     public void eliminar(Long id) {
         EntidadBeneficiaria entidad =
                 this.entidadBeneficiariaRepository.findById(id).orElse(null);
@@ -121,4 +174,20 @@ public class EntidadBeneficiariaServiceImpl implements EntidadBeneficiariaServic
 
         this.entidadBeneficiariaRepository.delete(entidad);
     }
+
+    private List<MedioDeNotificacionDTO> mapearMedios(List<MedioDeNotificacion> medios) {
+        return medios.stream()
+                .map(m -> new MedioDeNotificacionDTO(m.getTipoDeNotificacion(), m.getContacto()))
+                .toList();
+    }
+
+    // Lista modificable (no .toList()): Hibernate la administra por el cascade/orphanRemoval
+    private List<MedioDeNotificacion> mapearMediosAEntidad(List<MedioDeNotificacionDTO> medios) {
+        if (medios == null) return new ArrayList<>();
+        return medios.stream()
+                .map(dto -> new MedioDeNotificacion(dto.tipoDeNotificacion(), dto.datoDeContacto()))
+                .collect(Collectors.toCollection(ArrayList::new));
+    }
+
+
 }

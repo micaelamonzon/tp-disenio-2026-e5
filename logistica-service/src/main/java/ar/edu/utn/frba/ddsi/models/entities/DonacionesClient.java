@@ -18,7 +18,7 @@ public class DonacionesClient {
 
     private final RestTemplate restTemplate;
     private final String donacionesUrl;
-    private final String BASE_URL = "http://localhost:8081/servicioDeDonaciones"; //TODO ver cual es el puerto
+    private final String BASE_URL = "http://localhost:8080/servicioDeDonaciones";
 
     public DonacionesClient(RestTemplate restTemplate,
                             @Value("${donaciones.service.url}") String donacionesUrl){

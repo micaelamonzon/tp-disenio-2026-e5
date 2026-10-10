@@ -1,11 +1,14 @@
 package ar.edu.utn.frba.ddsi.donaciones.controllers;
 
 import ar.edu.utn.frba.ddsi.donaciones.dto.CambioEstadoRequestDTO;
+import ar.edu.utn.frba.ddsi.donaciones.dto.DonacionDTO;
 import ar.edu.utn.frba.ddsi.donaciones.dto.DonacionSegmentadaDTO;
 
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.Subcategoria;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.DonacionSegmentada;
 import ar.edu.utn.frba.ddsi.donaciones.services.EstadoDonacionServiceimpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +18,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/servicioDeDonaciones")
 public class EstadoDonacionController {
+
+    private static final Logger estadosDonacionController = LoggerFactory.getLogger(EstadoDonacionController.class);
 
     private final EstadoDonacionServiceimpl estadoDonacionService; // ← cambia acá
 
@@ -108,8 +113,9 @@ public class EstadoDonacionController {
 
     //Para que logística pueda consultar donaciones según estado
     @GetMapping("/donaciones")
-    public ResponseEntity<List<DonacionSegmentada>> buscarPorEstado(@RequestParam String estado) {
-        List<DonacionSegmentada> encontradas = estadoDonacionService.findByEstado(estado);
+    public ResponseEntity<List<DonacionDTO>> buscarPorEstado(@RequestParam String estado) {
+        estadosDonacionController.info("ENTRE AL ENDPOINT DE DONACIONES BUSCAR POR ESTADO");
+        List<DonacionDTO> encontradas = estadoDonacionService.findByEstado(estado);
         return ResponseEntity.ok(encontradas);
     }
 

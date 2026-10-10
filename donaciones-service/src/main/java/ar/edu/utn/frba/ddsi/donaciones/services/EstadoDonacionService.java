@@ -6,10 +6,10 @@ import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.DonacionSegme
 public interface EstadoDonacionService {
     Long registrarDonacion(DonacionSegmentada donacion);
     DonacionSegmentadaDTO obtenerHistorial(Long id);
-    DonacionSegmentadaDTO asignar(Long id);
-    DonacionSegmentadaDTO listaParaEntregar(Long id);
-    DonacionSegmentadaDTO iniciarTraslado(Long id);
-    DonacionSegmentadaDTO entregar(Long id);
-    DonacionSegmentadaDTO fallarEntrega(Long id, String justificacion);
-    DonacionSegmentadaDTO vencer(Long id);
+    DonacionSegmentadaDTO asignar(Long id, String responsableId);
+    DonacionSegmentadaDTO listaParaEntregar(Long id,String responsableId);
+    DonacionSegmentadaDTO iniciarTraslado(Long id,  String responsableId);
+    DonacionSegmentadaDTO entregar(Long id, String responsableId);
+    DonacionSegmentadaDTO fallarEntrega(Long id, String justificacion, String responsableId);
+    DonacionSegmentadaDTO vencer(Long id, String responsableId);
 }

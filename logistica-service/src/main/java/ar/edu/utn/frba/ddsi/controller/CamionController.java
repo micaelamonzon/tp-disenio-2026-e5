@@ -1,6 +1,6 @@
 package ar.edu.utn.frba.ddsi.controller;
 
-import ar.edu.utn.frba.ddsi.dto.CamionRequestDTO;
+import ar.edu.utn.frba.ddsi.dto.CamionDTO;
 import ar.edu.utn.frba.ddsi.dto.CamionResponseDTO;
 import ar.edu.utn.frba.ddsi.services.Impl.CamionServiceImpl;
 import org.springframework.http.HttpStatus;
@@ -20,7 +20,7 @@ public class CamionController {
     }
 
     @PostMapping("/camiones")
-    public ResponseEntity<CamionResponseDTO> crearCamion(@RequestBody CamionRequestDTO request) {
+    public ResponseEntity<CamionResponseDTO> crearCamion(@RequestBody CamionDTO request) {
         try {
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(camionService.crearCamion(request));
@@ -47,7 +47,7 @@ public class CamionController {
     @PutMapping("/camiones/{id}")
     public ResponseEntity<CamionResponseDTO> actualizarCamion(
             @PathVariable String id,
-            @RequestBody CamionRequestDTO request) {
+            @RequestBody CamionDTO request) {
         try {
             return ResponseEntity.ok(camionService.actualizarCamion(id, request));
         } catch (IllegalStateException e) {

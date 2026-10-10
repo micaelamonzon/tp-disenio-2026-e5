@@ -66,7 +66,7 @@ public class LogisticaCallbackController {
         switch (callback.eventType()) {
             case "routing.completed" -> {
                 procesarRutasCompletadas(callback.data());
-                actualizarSolicitud(callback.data().requestId(), callback.data());
+                actualizarSolicitud(callback.requestId(), callback.data());
                 SolicitudPlanificacionServiceImpl.marcarComoCompletada(callback.requestId(), bodyRaw);
             }
             case "routing.failed" -> {

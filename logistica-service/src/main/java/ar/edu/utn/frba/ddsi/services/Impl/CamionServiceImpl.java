@@ -1,15 +1,14 @@
 package ar.edu.utn.frba.ddsi.services.Impl;
 
-import ar.edu.utn.frba.ddsi.dto.CamionRequestDTO;
+import ar.edu.utn.frba.ddsi.dto.CamionDTO;
 import ar.edu.utn.frba.ddsi.dto.CamionResponseDTO;
 import ar.edu.utn.frba.ddsi.models.entities.Camion;
 import ar.edu.utn.frba.ddsi.services.CamionService;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicLong;
+
 import ar.edu.utn.frba.ddsi.repository.RepositoryCamiones;
 
 
@@ -24,26 +23,35 @@ public class CamionServiceImpl implements CamionService {
     }
 
     @Override
-    public List<Camion> obtenerCamionesDisponibles() {
-        return repositoryCamiones.findAll().stream()
+    public List<CamionDTO> obtenerCamionesDisponibles() {
+        List<Camion> camiones = repositoryCamiones.findAll().stream()
                 .filter(camion -> Boolean.TRUE.equals(camion.getDisponible()))
                 .toList();
+
+        List<CamionDTO> camionDTOS = new ArrayList<>();
+
+        camiones.forEach(c -> {camionDTOS.add(
+                new CamionDTO(c.getId(),c.getPatente(),c.getVolumen(), c.getAltura(),c.getCapacidadCarga(), c.getDisponible())
+        );});
+
+        return camionDTOS;
     }
 
     @Override
-    public CamionResponseDTO crearCamion(CamionRequestDTO request) {
+    public CamionResponseDTO crearCamion(CamionDTO request) {
         boolean patenteExistente = repositoryCamiones.findAll().stream()
-                .anyMatch(c -> c.getPatente().equals(request.getPatente()));
+                .anyMatch(c -> c.getPatente().equals(request.patente()));
+
         if (patenteExistente) {
-            throw new IllegalStateException("Ya existe un camión con esa patente: " + request.getPatente());
+            throw new IllegalStateException("Ya existe un camión con esa patente: " + request.patente());
         }
 
-        Boolean disponible = request.getDisponible() != null ? request.getDisponible() : Boolean.TRUE;
+        Boolean disponible = request.disponible() != null ? request.disponible() : Boolean.TRUE;
         Camion camion = new Camion(
-                request.getPatente(),
-                request.getVolumen(),
-                request.getAltura(),
-                request.getCapacidadCarga(),
+                request.patente(),
+                request.volumen(),
+                request.altura(),
+                request.capacidadCarga(),
                 disponible
         );
         repositoryCamiones.save(camion); // ← MongoDB genera el id solo
@@ -64,13 +72,13 @@ public class CamionServiceImpl implements CamionService {
     }
 
     @Override
-    public CamionResponseDTO actualizarCamion(String id, CamionRequestDTO request) {
+    public CamionResponseDTO actualizarCamion(String id, CamionDTO request) {
         Camion camion = buscar(id);
-        camion.setPatente(request.getPatente());
-        camion.setVolumen(request.getVolumen());
-        camion.setAltura(request.getAltura());
-        camion.setCapacidadCarga(request.getCapacidadCarga());
-        camion.setDisponible(request.getDisponible());
+        camion.setPatente(request.patente());
+        camion.setVolumen(request.volumen());
+        camion.setAltura(request.altura());
+        camion.setCapacidadCarga(request.capacidadCarga());
+        camion.setDisponible(request.disponible());
         repositoryCamiones.save(camion); // ← persiste cambios
         return toDTO(camion);
     }
