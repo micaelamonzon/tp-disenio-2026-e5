@@ -1,3 +1,4 @@
+/*
 // Datos de ejemplo: se reemplazan cuando exista la API de notificaciones
 const notifications = [
   { type: "asignada", title: "Donación asignada", desc: "Tus 100 paquetes de fideos secos fueron asignados a Fundación Esperanza", time: "Hace 10 minutos", unread: true },
@@ -54,3 +55,8 @@ notificationsList.addEventListener("click", (e) => {
 });
 
 renderNotifications();
+*/
+
+// La lista de notificaciones ahora la arma Thymeleaf en el servidor con los
+// datos reales de notificaciones-service (ver DonanteController#notificaciones).
+// Este archivo queda para agregar interacciones del lado del cliente si hacen falta.
