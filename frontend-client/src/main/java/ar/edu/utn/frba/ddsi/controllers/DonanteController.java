@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
+import ar.edu.utn.frba.ddsi.services.NotificacionesApiService;
 import java.util.Comparator;
 import java.util.List;
 
@@ -26,13 +26,16 @@ public class DonanteController {
 
     private final DonacionesService donacionesService;
     private final IncentivosService incentivosService;
+    private final NotificacionesApiService notificacionesApiService;
     private final UsuarioActual usuarioActual;
 
     public DonanteController(DonacionesService donacionesService,
                              IncentivosService incentivosService,
+                             NotificacionesApiService notificacionesApiService,
                              UsuarioActual usuarioActual) {
         this.donacionesService = donacionesService;
         this.incentivosService = incentivosService;
+        this.notificacionesApiService = notificacionesApiService;
         this.usuarioActual = usuarioActual;
     }
 
@@ -171,6 +174,23 @@ public class DonanteController {
     public String notificaciones(Model model) {
         model.addAttribute("titulo", "Notificaciones");
         model.addAttribute("tabActiva", "notificaciones");
+        model.addAttribute("notificaciones", List.of());
+        try {
+            // notificaciones-service solo conoce donantes humanos: humanos y jurídicos
+            // tienen ids independientes en donaciones, así que un jurídico podría ver
+            // notificaciones de un humano con el mismo id. Por eso solo consultamos
+            // si el donante es humano.
+            if (usuarioActual.obtener().esDonanteHumano()) {
+                model.addAttribute("notificaciones",
+                        notificacionesApiService.obtenerNotificacionesDeDonante(idDonanteActual()));
+            } else {
+                model.addAttribute("avisoNotificaciones",
+                        "Las notificaciones para personas jurídicas todavía no están disponibles en esta sección.");
+            }
+        } catch (RuntimeException e) {
+            model.addAttribute("error",
+                    "El servicio de notificaciones no está disponible. Intentá de nuevo en unos minutos.");
+        }
         return "acceso/donante/notificaciones";
     }
 
