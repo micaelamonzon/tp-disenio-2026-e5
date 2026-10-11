@@ -14,14 +14,12 @@ import ar.edu.utn.frba.ddsi.services.FotoStorageService;
 import ar.edu.utn.frba.ddsi.services.LogisticaApiService;
 import ar.edu.utn.frba.ddsi.services.NotificacionesApiService;
 import ar.edu.utn.frba.ddsi.services.SeguimientoService;
+import ar.edu.utn.frba.ddsi.utils.UsuarioActual;
 import java.util.List;
 
 @Controller
 @RequestMapping("/entidadBeneficiaria")
 public class EntidadController {
-
-    // TODO: reemplazar por el id de la entidad logueada cuando este la sesion
-    private static final Long ENTIDAD_ID_PRUEBA = 1L;
 
     private static final String REDIRECT_RECEPCION = "redirect:/entidadBeneficiaria/recepcionDeDonaciones";
 
@@ -29,15 +27,23 @@ public class EntidadController {
     private final SeguimientoService seguimientoService;
     private final LogisticaApiService logisticaApiService;
     private final FotoStorageService fotoStorageService;
+    private final UsuarioActual usuarioActual;
 
     public EntidadController(NotificacionesApiService notificacionesApiService,
                              SeguimientoService seguimientoService,
                              LogisticaApiService logisticaApiService,
-                             FotoStorageService fotoStorageService) {
+                             FotoStorageService fotoStorageService,
+                             UsuarioActual usuarioActual) {
         this.notificacionesApiService = notificacionesApiService;
         this.seguimientoService = seguimientoService;
         this.logisticaApiService = logisticaApiService;
         this.fotoStorageService = fotoStorageService;
+        this.usuarioActual = usuarioActual;
+    }
+
+    // Id de la entidad logueada en donaciones-service (viene de la sesión)
+    private Long idEntidadActual() {
+        return usuarioActual.idEnDominio();
     }
 
     @GetMapping("/estadoDeDonaciones")
@@ -57,7 +63,7 @@ public class EntidadController {
         try {
             // TODO: si logística agrega un filtro por entidad, usarlo en vez de filtrar acá
             List<EntregaDTO> entregasDeLaEntidad = logisticaApiService.obtenerEntregas().stream()
-                    .filter(e -> ENTIDAD_ID_PRUEBA.equals(e.getEntidadBeneficiariaId()))
+                    .filter(e -> idEntidadActual().equals(e.getEntidadBeneficiariaId()))
                     .toList();
             model.addAttribute("pendientes", filtrarPorEstado(entregasDeLaEntidad, "EN_CAMINO"));
             model.addAttribute("confirmadas", filtrarPorEstado(entregasDeLaEntidad, "ENTREGADA"));
@@ -82,13 +88,13 @@ public class EntidadController {
         try {
             // Seguridad: la entidad solo puede confirmar entregas propias
             EntregaDTO entrega = logisticaApiService.obtenerEntregaPorId(entregaId);
-            if (entrega == null || !ENTIDAD_ID_PRUEBA.equals(entrega.getEntidadBeneficiariaId())) {
+            if (entrega == null || !idEntidadActual().equals(entrega.getEntidadBeneficiariaId())) {
                 redirect.addFlashAttribute("errorRecepcion", "Esa entrega no corresponde a tu entidad.");
                 return REDIRECT_RECEPCION;
             }
 
             List<String> urls = fotoStorageService.guardar(fotos);
-            logisticaApiService.confirmarRecepcion(entregaId, urls, String.valueOf(ENTIDAD_ID_PRUEBA));
+            logisticaApiService.confirmarRecepcion(entregaId, urls, String.valueOf(idEntidadActual()));
             redirect.addFlashAttribute("mensajeRecepcion", "¡Recepción confirmada! Gracias por avisarnos.");
         } catch (IllegalArgumentException e) {
             // Error de validación de las fotos (formato)
@@ -114,7 +120,7 @@ public class EntidadController {
         model.addAttribute("tabActiva", "seguimiento");
         try {
             model.addAttribute("camiones",
-                    seguimientoService.obtenerCamionesEnCaminoAEntidad(ENTIDAD_ID_PRUEBA));
+                    seguimientoService.obtenerCamionesEnCaminoAEntidad(idEntidadActual()));
         } catch (RuntimeException e) {
             model.addAttribute("camiones", List.of());
             model.addAttribute("errorSeguimiento",
@@ -132,7 +138,7 @@ public class EntidadController {
         // pág en vez de que explote con un error 500
         try {
             model.addAttribute("notificaciones",
-                    notificacionesApiService.obtenerNotificacionesDeEntidad(ENTIDAD_ID_PRUEBA));
+                    notificacionesApiService.obtenerNotificacionesDeEntidad(idEntidadActual()));
         } catch (RuntimeException e) {
             model.addAttribute("notificaciones", List.of());
             model.addAttribute("errorNotificaciones",
