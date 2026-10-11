@@ -50,7 +50,9 @@ public class MonitoreoController {
         return ResponseEntity.ok(monitoreoService.obtenerRecorridoDeDonacionesDeDonante(idDonante));
     }
 
-
-
-
+    // Rutas de las entregas activas de la entidad, recortadas hasta su parada (req. 14)
+    @GetMapping("entidad/{idEntidad}/recorrido")
+    public ResponseEntity<List<RutaEntregaDTO>> obtenerRecorridoDeEntregasDeEntidad(@PathVariable Long idEntidad) {
+        return ResponseEntity.ok(monitoreoService.obtenerRecorridoDeEntregasDeEntidad(idEntidad));
+    }
 }

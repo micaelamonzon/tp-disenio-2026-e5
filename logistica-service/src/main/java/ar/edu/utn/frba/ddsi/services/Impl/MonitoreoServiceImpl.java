@@ -92,6 +92,51 @@ public class MonitoreoServiceImpl implements MonitoreoService {
     }
 
 
+    // Rutas de las entregas activas de una entidad beneficiaria (req. 14).
+    // Reusa armarRutaDeEntrega (la misma que usa el donante) y recorta la ruta en el
+    // punto de la entidad: el camión pasa por varias entidades, pero a esta solo le
+    // interesa el tramo hasta ella (no se muestran las paradas de otras entidades).
+    @Override
+    public List<RutaEntregaDTO> obtenerRecorridoDeEntregasDeEntidad(Long idEntidad) {
+        List<Entrega> entregas = this.repositoryEntregas.findAll().stream()
+                .filter(e -> idEntidad.equals(e.getEntidadBeneficiariaId()))
+                .filter(e -> e.getEstadoActual() == EstadoEntrega.PENDIENTE
+                        || e.getEstadoActual() == EstadoEntrega.EN_TRASLADO)
+                .filter(e -> e.getCamionId() != null) // sin camión asignado todavía no hay ruta
+                .toList();
+
+        if (entregas.isEmpty()) return List.of();
+
+        // Donaciones de esas entregas, para mostrar sus subcategorías en el mapa
+        List<Long> idsDonaciones = entregas.stream()
+                .flatMap(e -> e.getDonacionesIds().stream())
+                .toList();
+        List<Donacion> donaciones = this.repositoryDonacion.findAll().stream()
+                .filter(d -> idsDonaciones.contains(d.getIdEnDonaciones()))
+                .toList();
+
+        List<RutaEntregaDTO> rutas = new ArrayList<>();
+        for (Entrega entrega : entregas) {
+            try {
+                rutas.add(recortarHastaLaParada(armarRutaDeEntrega(entrega, donaciones)));
+            } catch (RuntimeException e) {
+                // Si una entrega tiene datos incompletos, no rompemos el mapa de las demás
+                System.out.println("No se pudo armar la ruta de la entrega " + entrega.getId() + ": " + e.getMessage());
+            }
+        }
+        return rutas;
+    }
+
+    // Deja la ruta del camión solo hasta la parada de esta entrega
+    private RutaEntregaDTO recortarHastaLaParada(RutaEntregaDTO r) {
+        if (r.rutaCompleta() == null || r.indiceParada() == null || r.indiceParada() < 0) return r;
+        int fin = Math.min(r.indiceParada() + 1, r.rutaCompleta().size());
+        return new RutaEntregaDTO(
+                r.entregaId(), r.camionId(), r.estadoActual(), r.direccion(), r.destino(),
+                new ArrayList<>(r.rutaCompleta().subList(0, fin)),
+                r.indiceParada(), r.subcategorias(), r.ultimoAvance());
+    }
+
     private RutaEntregaDTO armarRutaDeEntrega(Entrega entrega, List<Donacion> donacionesDelDonante) {
         double lat = Double.parseDouble(entrega.getLatitud());
         double lon = Double.parseDouble(entrega.getLongitud());
