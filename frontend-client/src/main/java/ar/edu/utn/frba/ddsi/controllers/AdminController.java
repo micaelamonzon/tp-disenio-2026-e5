@@ -27,14 +27,14 @@ public class AdminController {
         return "admin/personaAdmin";
     } todavia no esta probado*/
 
-    @GetMapping("/home")
-    public String panelAdministrador(Model model) {
-        model.addAttribute("titulo", "DonaTrack - Panel de Administración");
-        return "acceso/personaAdministradora/home";
-    }
-
     @GetMapping("/index")
     public String index() {
-        return "acceso/personaAdministradora/index";
+        return "redirect:/personaAdministradora/home";
+    }
+
+    @GetMapping("/home")
+    public String home(Model model) {
+        model.addAttribute("titulo", "DonaTrack - Panel de Administración");
+        return "acceso/personaAdministradora/home";
     }
 }
