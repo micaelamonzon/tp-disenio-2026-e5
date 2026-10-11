@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-
+import java.util.Map;
 import java.util.List;
 
 @Service
@@ -61,6 +61,24 @@ public class LogisticaApiService {
         } catch (Exception e) {
             log.error("Error obteniendo entrega {}", id, e);
             throw new RuntimeException("No se pudo obtener la entrega", e);
+        }
+    }
+
+
+    // Confirma la recepción de una entrega (req. 12). Logística guarda las URLs de las fotos,
+    // pasa la entrega a ENTREGADA y avisa a donaciones para actualizar cada donación.
+    public EntregaDTO confirmarRecepcion(String entregaId, List<String> fotosUrl, String responsableId) {
+        try {
+            return webClient.patch()
+                    .uri(logisticaServiceUrl + "/logistica-service/entrega/" + entregaId
+                            + "/confirmarRecepcion?responsableId=" + responsableId)
+                    .bodyValue(Map.of("fotosUrl", fotosUrl))
+                    .retrieve()
+                    .bodyToMono(EntregaDTO.class)
+                    .block();
+        } catch (Exception e) {
+            log.error("Error confirmando la recepción de la entrega {}", entregaId, e);
+            throw new RuntimeException("No se pudo confirmar la recepción", e);
         }
     }
 }

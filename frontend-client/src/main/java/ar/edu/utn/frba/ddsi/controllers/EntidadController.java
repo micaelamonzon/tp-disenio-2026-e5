@@ -4,6 +4,14 @@ import org.springframework.ui.Model;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import ar.edu.utn.frba.ddsi.dtos.logistica.EntregaDTO;
+import ar.edu.utn.frba.ddsi.services.FotoStorageService;
+import ar.edu.utn.frba.ddsi.services.LogisticaApiService;
 import ar.edu.utn.frba.ddsi.services.NotificacionesApiService;
 import ar.edu.utn.frba.ddsi.services.SeguimientoService;
 import java.util.List;
@@ -15,13 +23,21 @@ public class EntidadController {
     // TODO: reemplazar por el id de la entidad logueada cuando este la sesion
     private static final Long ENTIDAD_ID_PRUEBA = 1L;
 
+    private static final String REDIRECT_RECEPCION = "redirect:/entidadBeneficiaria/recepcionDeDonaciones";
+
     private final NotificacionesApiService notificacionesApiService;
     private final SeguimientoService seguimientoService;
+    private final LogisticaApiService logisticaApiService;
+    private final FotoStorageService fotoStorageService;
 
     public EntidadController(NotificacionesApiService notificacionesApiService,
-                             SeguimientoService seguimientoService) {
+                             SeguimientoService seguimientoService,
+                             LogisticaApiService logisticaApiService,
+                             FotoStorageService fotoStorageService) {
         this.notificacionesApiService = notificacionesApiService;
         this.seguimientoService = seguimientoService;
+        this.logisticaApiService = logisticaApiService;
+        this.fotoStorageService = fotoStorageService;
     }
 
     @GetMapping("/estadoDeDonaciones")
@@ -32,11 +48,56 @@ public class EntidadController {
     }
 
 
+    // Req. 12: lista las entregas de la entidad que están en camino (para confirmar)
+    // y las ya entregadas (con sus fotos)
     @GetMapping("/recepcionDeDonaciones")
     public String recepcionDeDonaciones(Model model) {
         model.addAttribute("titulo", "Recepcion de donaciones");
         model.addAttribute("tabActiva", "recepcion");
+        try {
+            // TODO: si logística agrega un filtro por entidad, usarlo en vez de filtrar acá
+            List<EntregaDTO> entregasDeLaEntidad = logisticaApiService.obtenerEntregas().stream()
+                    .filter(e -> ENTIDAD_ID_PRUEBA.equals(e.getEntidadBeneficiariaId()))
+                    .toList();
+            model.addAttribute("pendientes", filtrarPorEstado(entregasDeLaEntidad, "EN_CAMINO"));
+            model.addAttribute("confirmadas", filtrarPorEstado(entregasDeLaEntidad, "ENTREGADA"));
+        } catch (RuntimeException e) {
+            model.addAttribute("pendientes", List.of());
+            model.addAttribute("confirmadas", List.of());
+            model.addAttribute("errorCarga",
+                    "No pudimos obtener tus entregas. Intentá de nuevo en unos minutos.");
+        }
         return "acceso/entidadBeneficiaria/recepcionDeDonaciones";
+    }
+
+    // Req. 12: la entidad confirma la recepción adjuntando fotos
+    @PostMapping("/recepcionDeDonaciones/{entregaId}/confirmar")
+    public String confirmarRecepcion(@PathVariable String entregaId,
+                                     @RequestParam(value = "fotos", required = false) List<MultipartFile> fotos,
+                                     RedirectAttributes redirect) {
+        if (fotos == null || fotos.stream().allMatch(MultipartFile::isEmpty)) {
+            redirect.addFlashAttribute("errorRecepcion", "Adjuntá al menos una foto de la donación recibida.");
+            return REDIRECT_RECEPCION;
+        }
+        try {
+            // Seguridad: la entidad solo puede confirmar entregas propias
+            EntregaDTO entrega = logisticaApiService.obtenerEntregaPorId(entregaId);
+            if (entrega == null || !ENTIDAD_ID_PRUEBA.equals(entrega.getEntidadBeneficiariaId())) {
+                redirect.addFlashAttribute("errorRecepcion", "Esa entrega no corresponde a tu entidad.");
+                return REDIRECT_RECEPCION;
+            }
+
+            List<String> urls = fotoStorageService.guardar(fotos);
+            logisticaApiService.confirmarRecepcion(entregaId, urls, String.valueOf(ENTIDAD_ID_PRUEBA));
+            redirect.addFlashAttribute("mensajeRecepcion", "¡Recepción confirmada! Gracias por avisarnos.");
+        } catch (IllegalArgumentException e) {
+            // Error de validación de las fotos (formato)
+            redirect.addFlashAttribute("errorRecepcion", e.getMessage());
+        } catch (RuntimeException e) {
+            redirect.addFlashAttribute("errorRecepcion",
+                    "No pudimos confirmar la recepción. Intentá de nuevo en unos minutos.");
+        }
+        return REDIRECT_RECEPCION;
     }
 
     @GetMapping("/registrarNecesidades")
@@ -87,6 +148,9 @@ public class EntidadController {
         return "acceso/entidadBeneficiaria/perfil";
     }
 
-
-
+    private List<EntregaDTO> filtrarPorEstado(List<EntregaDTO> entregas, String estado) {
+        return entregas.stream()
+                .filter(e -> estado.equals(e.getEstadoActual()))
+                .toList();
+    }
 }
