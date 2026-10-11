@@ -17,13 +17,16 @@ import java.util.List;
 public class MonitoreoController {
 
     private final MonitoreoService monitoreoService;
+    private final EntregaController entregaController;
 
-    public MonitoreoController(MonitoreoService monitoreoService) {
+    public MonitoreoController(MonitoreoService monitoreoService,EntregaController entregaController) {
         this.monitoreoService = monitoreoService;
+        this.entregaController = entregaController;
 
     }
 
-    //Endpoint para registrar la posición de un camión en tiempo real, es lo que recibimos del GPS.
+    //Endpoint para registrar la posición de un camión en tiempo real, es lo que recibimos del GPS
+    //NO LO USAMOS, AHORA TENEMOS UN SIMULADOR DE GPS!!!
     @PostMapping("camion/{idCamion}/posicionActual")
     public ResponseEntity<PosicionDTO> obtenerPosicionActual(@PathVariable String idCamion, @RequestBody PosicionDTO posicionDTO) {
 
@@ -44,9 +47,10 @@ public class MonitoreoController {
         return ResponseEntity.ok(recorrido);
     }
 
-    // Rutas (depósito -> entidad beneficiaria) de las entregas que llevan donaciones del donante
+    // Rutas de las entregas que llevan donaciones del donante
     @GetMapping("donante/{idDonante}/recorrido")
     public ResponseEntity<List<RutaEntregaDTO>> obtenerRecorridoDeDonacionesDeDonante(@PathVariable Long idDonante) {
+
         return ResponseEntity.ok(monitoreoService.obtenerRecorridoDeDonacionesDeDonante(idDonante));
     }
 

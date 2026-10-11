@@ -36,15 +36,17 @@ public class MonitoreoServiceImpl implements MonitoreoService {
     private final RepositoryEntregas repositoryEntregas;
     private final OsrmRutaService osrmRutaService;
     private final RutaCamionService rutaCamionService;
+    private final EntregaServiceImpl entregaService;
 
 
 
-    public MonitoreoServiceImpl(RepositoryCamiones repositoryCamiones,RepositoryDonacion repositoryDonacion, RepositoryEntregas repositoryEntregas, OsrmRutaService osrmRutaService, RutaCamionService rutaCamionService) {
+    public MonitoreoServiceImpl(RepositoryCamiones repositoryCamiones,RepositoryDonacion repositoryDonacion, RepositoryEntregas repositoryEntregas, OsrmRutaService osrmRutaService, RutaCamionService rutaCamionService,  EntregaServiceImpl entregaService) {
         this.repositoryCamiones = repositoryCamiones;
         this.repositoryDonacion = repositoryDonacion;
         this.repositoryEntregas = repositoryEntregas;
         this.osrmRutaService = osrmRutaService;
         this.rutaCamionService = rutaCamionService;
+        this.entregaService = entregaService;
     }
 
     @Override
@@ -85,6 +87,7 @@ public class MonitoreoServiceImpl implements MonitoreoService {
 
         List<Entrega> entregas = this.repositoryEntregas.findByDonacionesIdsIn(idsDeDonacionesEnDonaciones);
 
+        this.iniciarTrasladoSiCorresponde(entregas);
 
          return entregas.stream()
                  .map( e -> this.armarRutaDeEntrega(e,donaciones))
@@ -149,6 +152,7 @@ public class MonitoreoServiceImpl implements MonitoreoService {
 
         RutaCamionService.RutaCamion rutaCamion = rutaCamionService.armarRutaPara(entrega);
 
+
         return new RutaEntregaDTO(
                 entrega.getId(),
                 entrega.getCamionId(),
@@ -183,5 +187,11 @@ public class MonitoreoServiceImpl implements MonitoreoService {
                         p.getFecha(),
                         p.getIndiceRuta()))
                 .orElse(null);
+    }
+
+    private void iniciarTrasladoSiCorresponde(List<Entrega> entregas) {
+        entregas.stream()
+                .filter(e -> e.getEstadoActual() == EstadoEntrega.PENDIENTE)
+                .forEach(e -> entregaService.iniciarTrasladoDeEntrega(e.getId(), "SISTEMA_LOGISTICA"));
     }
 }

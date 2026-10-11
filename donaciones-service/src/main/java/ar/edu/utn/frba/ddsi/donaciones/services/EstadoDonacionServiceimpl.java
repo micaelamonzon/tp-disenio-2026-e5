@@ -60,6 +60,7 @@ public class EstadoDonacionServiceimpl implements EstadoDonacionService{
         DonacionSegmentada d = buscar(id);
         d.cambiarEstado(EstadoDonacion.EN_TRASLADO,
                 "Camión inició recorrido", responsableId);
+        this.donacionesRepository.save(d);
         return toDTO(d);
     }
 

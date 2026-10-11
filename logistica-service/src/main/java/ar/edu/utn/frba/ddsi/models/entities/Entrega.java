@@ -20,6 +20,7 @@ public class Entrega {
     private List<Long> donacionesIds = new ArrayList<>();
     private Long entidadBeneficiariaId;
     private String camionId;
+    private Integer indiceParada;
     private List<Long> donantesId = new ArrayList<>();
     private EstadoEntrega estadoActual;
     private LocalDateTime fechaEntrega;
