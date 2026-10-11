@@ -25,20 +25,20 @@ public class LogisticaController {
     public String camiones(Model model) {
         List<CamionDTO> camiones = logisticaApiService.obtenerCamiones();
         model.addAttribute("camiones", camiones);
-        return "logistica/camiones";
+        return "acceso/personaAdministradora/logistica/camiones"; // ← cambiado
     }
 
     @GetMapping("/entregas")
     public String entregas(Model model) {
         List<EntregaDTO> entregas = logisticaApiService.obtenerEntregas();
         model.addAttribute("entregas", entregas);
-        return "logistica/entregas";
+        return "acceso/personaAdministradora/logistica/entregas"; // ← cambiado
     }
 
     @GetMapping("/entregas/{id}")
     public String detalleEntrega(@PathVariable String id, Model model) {
         EntregaDTO entrega = logisticaApiService.obtenerEntregaPorId(id);
         model.addAttribute("entrega", entrega);
-        return "logistica/detalle-entrega";
+        return "acceso/personaAdministradora/logistica/detalle-entrega"; // ← cambiado
     }
 }

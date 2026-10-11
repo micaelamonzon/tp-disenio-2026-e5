@@ -90,4 +90,17 @@ public class EntregaController {
             return ResponseEntity.badRequest().build();
         }
     }
+    @GetMapping("/entregas")
+    public ResponseEntity<List<EntregaDTO>> listarEntregas() {
+        return ResponseEntity.ok(entregaService.listarEntregas());
+    }
+
+    @GetMapping("/entrega/{id}")
+    public ResponseEntity<EntregaDTO> obtenerEntrega(@PathVariable String id) {
+        try {
+            return ResponseEntity.ok(entregaService.obtenerEntrega(id));
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
 }

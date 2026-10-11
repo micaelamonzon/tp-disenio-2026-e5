@@ -132,4 +132,13 @@ public class EntregaServiceImpl {
                 e.getMotivoNoRecepcion()
         );
     }
+    public List<EntregaDTO> listarEntregas() {
+        return repositoryEntregas.findAll().stream()
+                .map(this::toDTO)
+                .toList();
+    }
+
+    public EntregaDTO obtenerEntrega(String id) {
+        return toDTO(buscar(id));
+    }
 }
