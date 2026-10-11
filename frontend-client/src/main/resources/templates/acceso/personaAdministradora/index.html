@@ -381,9 +381,68 @@
             <div class="page-head"><h1>Gestión de Camiones</h1></div>
             <div class="placeholder-card">Esta sección está a cargo de otra integrante del equipo.</div>
         </section>
+        <!-- ===================== RANKING DE DONANTES ===================== -->
         <section id="view-ranking" class="admin-view">
-            <div class="page-head"><h1>Ranking de Donantes</h1></div>
-            <div class="placeholder-card">Esta sección está a cargo de otra integrante del equipo.</div>
+            <div class="page-head">
+                <h1>Ranking de Donantes Más Activos</h1>
+                <p class="page-sub">Visualiza el ranking mensual persistido y el historial de períodos anteriores.</p>
+            </div>
+
+            <!-- Pestañas de Navegación del Ranking -->
+            <div class="ranking-tabs" style="display: flex; gap: 10px; margin-bottom: 20px;">
+                <button type="button" class="btn btn-outline active" id="tabRankingActual" onclick="switchRankingView('actual')">Ranking del Mes Actual</button>
+                <button type="button" class="btn btn-outline" id="tabRankingHistorico" onclick="switchRankingView('historico')">Historial de Rankings</button>
+            </div>
+
+            <!-- Vista Mes Actual -->
+            <div id="rankingActualContainer" class="table-card">
+                <div class="table-title">Top Donantes del Período</div>
+                <div class="table-scroll">
+                    <table class="data-table">
+                        <thead>
+                        <tr>
+                            <th>Puesto</th>
+                            <th>Donante</th>
+                            <th>Tipo</th>
+                            <th>Misiones Cumplidas</th>
+                        </tr>
+                        </thead>
+                        <tbody id="rankingActualTableBody">
+                        <tr th:each="item, iterStat : ${rankingActual}">
+                            <td th:text="${iterStat.count}">1</td>
+                            <td th:text="${item.nombreDonante}">María González</td>
+                            <td th:text="${item.tipoPersona}">Humana</td>
+                            <td><b th:text="${item.misionesCompletadas}">12</b></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Vista Historial -->
+            <div id="rankingHistoricoContainer" class="table-card" style="display: none;">
+                <div class="table-title">Historial de Rankings Anteriores</div>
+                <div class="table-scroll">
+                    <table class="data-table">
+                        <thead>
+                        <tr>
+                            <th>Período (Mes/Año)</th>
+                            <th>Donante Destacado #1</th>
+                            <th>Misiones</th>
+                            <th>Acciones</th>
+                        </tr>
+                        </thead>
+                        <tbody id="rankingHistoricoTableBody">
+                        <tr th:each="hist : ${historialRankings}">
+                            <td th:text="${hist.periodo}">Agosto 2026</td>
+                            <td th:text="${hist.primerPuesto}">Carlos López</td>
+                            <td th:text="${hist.misionesPrimerPuesto}">15</td>
+                            <td><button class="btn btn-sm btn-outline" th:onclick="'verDetalleRanking(\'' + ${hist.id} + '\')'">Ver Detalle</button></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </section>
         <section id="view-importar" class="admin-view">
             <div class="page-head"><h1>Importar Donantes</h1></div>
