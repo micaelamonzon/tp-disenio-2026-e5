@@ -28,11 +28,6 @@ public class AuthApiService {
         this.authServiceUrl = authServiceUrl;
     }
 
-    /**
-     * POST /api/auth. Devuelve null si las credenciales son incorrectas
-     * (autenticacion-service responde 401 o 400 si falta el email o la contraseña).
-     * Cualquier otro error (servicio caído, 500) se lanza como excepción.
-     */
     public AuthResponseDTO login(String email, String password) {
         try {
             return webClient.post()
@@ -68,6 +63,26 @@ public class AuthApiService {
         } catch (Exception e) {
             log.warn("No se pudo extraer el claim 'rol' del JWT: {}", e.getMessage());
             return "DONANTE_HUMANO";
+        }
+    }
+
+    // Se valida antes de crear el donante/entidad: si el email ya tiene cuenta no se crea nada
+    public void validarEmailDisponible(String email) {
+        Map respuesta;
+        try {
+            respuesta = webClient.get()
+                    .uri(authServiceUrl + "/usuarios/disponible?email={email}", email)
+                    .retrieve()
+                    .bodyToMono(Map.class)
+                    .block();
+        } catch (WebClientResponseException e) {
+            throw new RuntimeException(motivoDelError(e), e); // 400: email con formato inválido
+        } catch (Exception e) {
+            log.error("Error consultando email disponible en servicio de autenticación: {}", e.getMessage());
+            throw new RuntimeException("El servicio de autenticación no está disponible", e);
+        }
+        if (respuesta == null || !Boolean.TRUE.equals(respuesta.get("disponible"))) {
+            throw new RuntimeException("Ya existe una cuenta con ese email");
         }
     }
 

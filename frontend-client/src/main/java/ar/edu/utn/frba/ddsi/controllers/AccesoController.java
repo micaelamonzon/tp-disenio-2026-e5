@@ -23,41 +23,18 @@ import java.util.List;
 @RequestMapping("/acceso")
 public class AccesoController {
     private final DonacionesService donacionesService;
-    private final Long idHumanoEtapa1;
-    private final Long idJuridicoEtapa1;
     private final DonacionesApiService donacionesApiService;
     private final AuthApiService authApiService;
 
     public AccesoController(DonacionesService donacionesService,
-                            @Value("${etapa1.donante.id:1}") Long idHumanoEtapa1,
-                            @Value("${etapa1.juridico.id:1}") Long idJuridicoEtapa1, DonacionesApiService donacionesApiService, AuthApiService authApiService) {
+                            DonacionesApiService donacionesApiService, AuthApiService authApiService) {
         this.donacionesService = donacionesService;
-        this.idHumanoEtapa1 = idHumanoEtapa1;
-        this.idJuridicoEtapa1 = idJuridicoEtapa1;
         this.donacionesApiService = donacionesApiService;
         this.authApiService = authApiService;
     }
 
     private List<DonacionDTO> obtenerTodasLasDonacionesPublicas() {
-        List<DonacionDTO> donacionesTotales = new ArrayList<>();
-        try {
-            List<DonacionDTO> humanas = donacionesService.obtenerDonacionesDeHumano(idHumanoEtapa1);
-            if (humanas != null) {
-                donacionesTotales.addAll(humanas);
-            }
-        } catch (RuntimeException e) {
-            // Manejo en caso de fallo parcial del endpoint
-        }
-        try {
-            List<DonacionDTO> juridicas = donacionesService.obtenerDonacionesDeJuridico(idJuridicoEtapa1);
-            if (juridicas != null) {
-                donacionesTotales.addAll(juridicas);
-            }
-        } catch (RuntimeException e) {
-            // Manejo en caso de fallo parcial del endpoint
-        }
-
-        return donacionesTotales;
+        return donacionesService.obtenerDonacionesEntregadas();
     }
 
     @GetMapping({"", "/", "/landing"})
@@ -187,6 +164,8 @@ public class AccesoController {
     @PostMapping("/registro/donante-humana")
     public String registrarPersonaHumana(@ModelAttribute RegistroPersonaHumanaDTO dto, Model model) {
         try {
+            // Primero se valida el email: si ya tiene cuenta no se crea nada en donaciones
+            authApiService.validarEmailDisponible(dto.getEmail());
             Long idDominio = donacionesApiService.registrarDonanteHumano(dto);
 
             try {
@@ -198,7 +177,7 @@ public class AccesoController {
                         dto.getNombre() + " " + dto.getApellido()
                 );
             } catch (RuntimeException e) {
-                // Sin usuario no puede entrar: se deshace el alta para que pueda volver a registrarse
+                // Sin usuario no puede entrar: se intenta deshacer el alta
                 donacionesApiService.eliminarDonanteHumano(idDominio);
                 throw e;
             }
@@ -216,6 +195,7 @@ public class AccesoController {
     @PostMapping("/registro/donante-juridica")
     public String registrarPersonaJuridica(@ModelAttribute RegistroPersonaJuridicaDTO dto, Model model) {
         try {
+            authApiService.validarEmailDisponible(dto.getEmail());
             Long idDominio = donacionesApiService.registrarDonanteJuridico(dto);
 
             try {
@@ -244,6 +224,7 @@ public class AccesoController {
     @PostMapping("/registro/entidad-beneficiaria")
     public String registrarEntidadBeneficiaria(@ModelAttribute RegistroEntidadBeneficiariaDTO dto, Model model) {
         try {
+            authApiService.validarEmailDisponible(dto.getEmail());
             Long idDominio = donacionesApiService.registrarEntidadBeneficiaria(dto);
 
             try {

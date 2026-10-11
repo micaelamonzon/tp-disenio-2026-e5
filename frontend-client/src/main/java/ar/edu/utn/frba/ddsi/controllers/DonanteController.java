@@ -7,6 +7,7 @@ import ar.edu.utn.frba.ddsi.services.DonacionesApiService.DonanteNoEncontradoExc
 import ar.edu.utn.frba.ddsi.services.DonacionesApiService.EntidadNoEncontradaException;
 import ar.edu.utn.frba.ddsi.services.DonacionesService;
 import ar.edu.utn.frba.ddsi.services.IncentivosService;
+import ar.edu.utn.frba.ddsi.services.internal.SesionExpiradaException;
 import ar.edu.utn.frba.ddsi.utils.UsuarioActual;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -66,6 +67,8 @@ public class DonanteController {
             model.addAttribute("donaciones", donacionesService.filtrar(todas, estado, categoria, subcategoria));
         } catch (DonanteNoEncontradoException e) {
             model.addAttribute("error", e.getMessage());
+        } catch (SesionExpiradaException e) {
+            throw e; // la maneja SesionExpiradaHandler: vuelve al login
         } catch (RuntimeException e) {
             model.addAttribute("error", "El servicio de donaciones no está disponible. Intentá de nuevo en unos minutos.");
         }
@@ -85,6 +88,8 @@ public class DonanteController {
             model.addAttribute("totalEntidades", todas.size());
             model.addAttribute("entidades",
                     donacionesService.buscarEntidades(todas, q));
+        } catch (SesionExpiradaException e) {
+            throw e;
         } catch (RuntimeException e) {
             model.addAttribute("error",
                     "El servicio de donaciones no está disponible. "
@@ -106,6 +111,8 @@ public class DonanteController {
         } catch (EntidadNoEncontradaException e) {
             model.addAttribute("error", e.getMessage());
             return "acceso/donante/entidadDetalle";
+        } catch (SesionExpiradaException e) {
+            throw e;
         } catch (RuntimeException e) {
             model.addAttribute("error",
                     "El servicio de donaciones no está disponible. "
@@ -114,6 +121,8 @@ public class DonanteController {
         }
         try {
             model.addAttribute("necesidades", donacionesService.obtenerNecesidades(idEntidad));
+        } catch (SesionExpiradaException e) {
+            throw e;
         } catch (RuntimeException e) {
             model.addAttribute("errorNecesidades",
                     "No pudimos obtener las necesidades de esta entidad en este momento.");

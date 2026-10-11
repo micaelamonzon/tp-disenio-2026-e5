@@ -13,6 +13,7 @@ import ar.edu.utn.frba.ddsi.donaciones.models.entities.importadorDeCSV.Resultado
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.mediosDeNotificacion.MedioDeNotificacion;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.DonacionSegmentada;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.DonacionSinSegmentar;
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.EstadoDonacion;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.Segmentador;
 import ar.edu.utn.frba.ddsi.donaciones.repositories.DonacionesRepository;
 import ar.edu.utn.frba.ddsi.donaciones.repositories.DonantesHumanosRepository;
@@ -253,25 +254,30 @@ public class DonacionesServiceImpl implements DonacionesService {
             }
 
 
-            List<DonacionSegmentadaDTO> dtos = new ArrayList<>();
+            return donacionesSegmentadas.stream().map(this::aDonacionSegmentadaDTO).toList();
+    }
 
-            donacionesSegmentadas.forEach(d -> {
-                dtos.add(
-                    new DonacionSegmentadaDTO(
-                            d.getId(),
-                            d.getEstadoActual().toString(),
-                            null,
-                            this.obtenerBienesDTO(d.getBienesDelMismoTipo()),
-                            d.getFechaDeIngreso(),
-                            d.getDonacionEntregada(),
-                            d.getEntidadBeneficiaria() != null ? d.getEntidadBeneficiaria().getId() : null,
-                            d.getFotoPath()
-                    )
-                );
-            }
-            );
+    // Para el mapa y la galería públicos de la landing (TP: "mostrar las donaciones ya
+    // entregadas a entidades beneficiarias en un mapa"). No incluye datos del donante.
+    @Override
+    public List<DonacionSegmentadaDTO> obtenerDonacionesEntregadas() {
+        return this.donacionesRepository.findByEstado(EstadoDonacion.ENTREGADA)
+                .stream()
+                .map(this::aDonacionSegmentadaDTO)
+                .toList();
+    }
 
-             return dtos;
+    private DonacionSegmentadaDTO aDonacionSegmentadaDTO(DonacionSegmentada d) {
+        return new DonacionSegmentadaDTO(
+                d.getId(),
+                d.getEstadoActual().toString(),
+                null,
+                this.obtenerBienesDTO(d.getBienesDelMismoTipo()),
+                d.getFechaDeIngreso(),
+                d.getDonacionEntregada(),
+                d.getEntidadBeneficiaria() != null ? d.getEntidadBeneficiaria().getId() : null,
+                d.getFotoPath()
+        );
     }
 
     @Override

@@ -6,6 +6,8 @@ import ar.edu.utn.frba.ddsi.dtos.donaciones.RegistroPersonaHumanaDTO;
 import ar.edu.utn.frba.ddsi.dtos.donaciones.RegistroPersonaJuridicaDTO;
 import ar.edu.utn.frba.ddsi.dtos.entidades.EntidadBeneficiariaDTO;
 import ar.edu.utn.frba.ddsi.dtos.entidades.NecesidadDTO;
+import ar.edu.utn.frba.ddsi.services.internal.SesionExpiradaException;
+import ar.edu.utn.frba.ddsi.services.internal.WebApiCallerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,25 +23,27 @@ import java.util.Map;
 public class DonacionesApiService {
 
     private static final Logger log = LoggerFactory.getLogger(DonacionesApiService.class);
+    // Registro (sin usuario logueado todavía): llamadas directas, sin token
     private final WebClient webClient = WebClient.builder().build();
+    // Consultas: pasan por el caller, que agrega el token del usuario y lo renueva si vence
+    private final WebApiCallerService apiCaller;
     private final String donacionesServiceUrl;
 
-    public DonacionesApiService(@Value("${donaciones.service.url}") String donacionesServiceUrl) {
+    public DonacionesApiService(@Value("${donaciones.service.url}") String donacionesServiceUrl,
+                                WebApiCallerService apiCaller) {
         this.donacionesServiceUrl = donacionesServiceUrl;
+        this.apiCaller = apiCaller;
     }
 
 
+    // GET /servicioDeDonaciones/donaciones/humano/{id}
     public List<DonacionDTO> obtenerDonacionesDeHumano(Long idDonante) {
         try {
-            List<DonacionDTO> donaciones = webClient.get()
-                    .uri(donacionesServiceUrl + "/donaciones/humano/{id}", idDonante)
-                    .retrieve()
-                    .bodyToFlux(DonacionDTO.class)
-                    .collectList()
-                    .block();
-            return donaciones != null ? donaciones : List.of();
+            return apiCaller.getList(donacionesServiceUrl + "/donaciones/humano/{id}", DonacionDTO.class, idDonante);
         } catch (WebClientResponseException.NotFound e) {
             throw new DonanteNoEncontradoException(idDonante);
+        } catch (SesionExpiradaException e) {
+            throw e;
         } catch (Exception e) {
             log.error("Error llamando a donaciones-service", e);
             throw new RuntimeException("No se pudieron obtener las donaciones", e);
@@ -49,18 +53,26 @@ public class DonacionesApiService {
     // GET /servicioDeDonaciones/donaciones/juridico/{id}
     public List<DonacionDTO> obtenerDonacionesDeJuridico(Long idDonante) {
         try {
-            List<DonacionDTO> donaciones = webClient.get()
-                    .uri(donacionesServiceUrl + "/donaciones/juridico/{id}", idDonante)
-                    .retrieve()
-                    .bodyToFlux(DonacionDTO.class)
-                    .collectList()
-                    .block();
-            return donaciones != null ? donaciones : List.of();
+            return apiCaller.getList(donacionesServiceUrl + "/donaciones/juridico/{id}", DonacionDTO.class, idDonante);
         } catch (WebClientResponseException.NotFound e) {
             throw new DonanteNoEncontradoException(idDonante);
+        } catch (SesionExpiradaException e) {
+            throw e;
         } catch (Exception e) {
             log.error("Error llamando a donaciones-service", e);
             throw new RuntimeException("No se pudieron obtener las donaciones", e);
+        }
+    }
+
+    // GET /servicioDeDonaciones/donaciones/entregadas (público: mapa y galería de la landing)
+    public List<DonacionDTO> obtenerDonacionesEntregadas() {
+        try {
+            return apiCaller.getList(donacionesServiceUrl + "/donaciones/entregadas", DonacionDTO.class);
+        } catch (SesionExpiradaException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Error obteniendo las donaciones entregadas de donaciones-service", e);
+            throw new RuntimeException("No se pudieron obtener las donaciones entregadas", e);
         }
     }
 
@@ -70,47 +82,38 @@ public class DonacionesApiService {
         }
     }
 
+    // GET /servicioDeDonaciones/entidades
     public List<EntidadBeneficiariaDTO> obtenerEntidades() {
         try {
-            List<EntidadBeneficiariaDTO> entidades = webClient.get()
-                    .uri(donacionesServiceUrl + "/obtenerEntidades")
-                    .retrieve()
-                    .bodyToFlux(EntidadBeneficiariaDTO.class)
-                    .collectList()
-                    .block();
-            return entidades != null ? entidades : List.of();
+            return apiCaller.getList(donacionesServiceUrl + "/entidades", EntidadBeneficiariaDTO.class);
+        } catch (SesionExpiradaException e) {
+            throw e;
         } catch (Exception e) {
             log.error("Error obteniendo entidades de donaciones-service", e);
             throw new RuntimeException("No se pudieron obtener las entidades", e);
         }
     }
 
-
+    // GET /servicioDeDonaciones/entidad/{id}
     public EntidadBeneficiariaDTO obtenerEntidad(Long idEntidad) {
         try {
-            return webClient.get()
-                    .uri(donacionesServiceUrl + "/obtenerEntidad/{id}", idEntidad)
-                    .retrieve()
-                    .bodyToMono(EntidadBeneficiariaDTO.class)
-                    .block();
+            return apiCaller.get(donacionesServiceUrl + "/entidad/{id}", EntidadBeneficiariaDTO.class, idEntidad);
         } catch (WebClientResponseException.NotFound e) {
             throw new EntidadNoEncontradaException(idEntidad);
+        } catch (SesionExpiradaException e) {
+            throw e;
         } catch (Exception e) {
             log.error("Error obteniendo la entidad {} de donaciones-service", idEntidad, e);
             throw new RuntimeException("No se pudo obtener la entidad", e);
         }
     }
 
-
+    // GET /servicioDeDonaciones/entidad/{id}/necesidades
     public List<NecesidadDTO> obtenerNecesidades(Long idEntidad) {
         try {
-            List<NecesidadDTO> necesidades = webClient.get()
-                    .uri(donacionesServiceUrl + "/entidad/{id}/necesidades", idEntidad)
-                    .retrieve()
-                    .bodyToFlux(NecesidadDTO.class)
-                    .collectList()
-                    .block();
-            return necesidades != null ? necesidades : List.of();
+            return apiCaller.getList(donacionesServiceUrl + "/entidad/{id}/necesidades", NecesidadDTO.class, idEntidad);
+        } catch (SesionExpiradaException e) {
+            throw e;
         } catch (Exception e) {
             log.error("Error obteniendo necesidades de la entidad {}", idEntidad, e);
             throw new RuntimeException("No se pudieron obtener las necesidades", e);

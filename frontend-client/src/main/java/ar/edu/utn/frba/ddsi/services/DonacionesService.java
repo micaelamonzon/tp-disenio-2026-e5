@@ -22,6 +22,10 @@ public class DonacionesService {
         return donacionesApiService.obtenerDonacionesDeHumano(idDonante);
     }
 
+    public List<DonacionDTO> obtenerDonacionesEntregadas() {
+        return donacionesApiService.obtenerDonacionesEntregadas();
+    }
+
     public List<DonacionDTO> obtenerDonacionesDeJuridico(Long idDonante) {
         return donacionesApiService.obtenerDonacionesDeJuridico(idDonante);
     }
