@@ -1,5 +1,6 @@
 package ar.edu.utn.frba.ddsi.controller;
 import ar.edu.utn.frba.ddsi.dto.PosicionDTO;
+import ar.edu.utn.frba.ddsi.dto.RutaEntregaDTO;
 import ar.edu.utn.frba.ddsi.services.MonitoreoService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,7 +17,6 @@ import java.util.List;
 public class MonitoreoController {
 
     private final MonitoreoService monitoreoService;
-
 
     public MonitoreoController(MonitoreoService monitoreoService) {
         this.monitoreoService = monitoreoService;
@@ -43,6 +43,14 @@ public class MonitoreoController {
         }
         return ResponseEntity.ok(recorrido);
     }
+
+    // Rutas (depósito -> entidad beneficiaria) de las entregas que llevan donaciones del donante
+    @GetMapping("donante/{idDonante}/recorrido")
+    public ResponseEntity<List<RutaEntregaDTO>> obtenerRecorridoDeDonacionesDeDonante(@PathVariable Long idDonante) {
+        return ResponseEntity.ok(monitoreoService.obtenerRecorridoDeDonacionesDeDonante(idDonante));
+    }
+
+
 
 
 }

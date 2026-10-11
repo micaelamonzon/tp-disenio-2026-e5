@@ -20,6 +20,6 @@ public class Ruta {
     private List<PuntosDeEntrega> puntosDeEntrega;
     private LocalTime horaEstimadaInicio;
     private LocalTime horaEstimadaFin;
-    private Integer distanciaTotal;
+    private Double distanciaTotal;
     private Integer duracionTotalMins;
 }

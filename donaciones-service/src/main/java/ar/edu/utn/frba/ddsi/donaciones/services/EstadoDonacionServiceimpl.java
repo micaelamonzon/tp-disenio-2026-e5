@@ -98,9 +98,12 @@ public class EstadoDonacionServiceimpl implements EstadoDonacionService{
                         d.getEstadoActual().toString(),
                         d.calcularPeso(),
                         d.calcularVolumen(),
+                        d.getEntidadBeneficiaria().getId(),
+                        d.getDonanteHumano()!= null ? d.getDonanteHumano().getId() : d.getDonanteJuridico().getId(),
                         d.getEntidadBeneficiaria().getDireccion(),
                         d.getEntidadBeneficiaria().getLatitud(),
-                        d.getEntidadBeneficiaria().getLongitud()
+                        d.getEntidadBeneficiaria().getLongitud(),
+                        d.getSubcategoria().getNombre()
                         )));
         return donacionesDTO;
     }

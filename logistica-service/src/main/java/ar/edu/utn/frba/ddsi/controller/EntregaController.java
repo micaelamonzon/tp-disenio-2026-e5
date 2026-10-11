@@ -26,10 +26,10 @@ public class EntregaController {
     public ResponseEntity<EntregaDTO> crearEntrega(
             @RequestParam List<Long> donacionesIds,
             @RequestParam Long entidadId,
-            @RequestParam Long donanteId) {
+            @RequestParam List<Long> donantesIds) {
         try {
             return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(entregaService.crearEntrega(donacionesIds, entidadId, donanteId));
+                    .body(entregaService.crearEntregaDTO(donacionesIds, entidadId, donantesIds));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().build();
         }
