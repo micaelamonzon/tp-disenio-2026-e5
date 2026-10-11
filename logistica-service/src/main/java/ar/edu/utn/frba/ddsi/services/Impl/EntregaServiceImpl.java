@@ -113,16 +113,20 @@ public class EntregaServiceImpl {
                     && !entidad.representantes().isEmpty()
                     && !entidad.representantes().get(0).mediosDeNotificacion().isEmpty()) {
                 MedioDeNotificacionDTO medio = entidad.representantes().get(0).mediosDeNotificacion().get(0);
-                notificacionesPublisher.publicar(medio.datoDeContacto(), mensaje, medio.tipoDeNotificacion());
+                notificacionesPublisher.publicarParaEntidad(entrega.getEntidadBeneficiariaId(),
+                        medio.datoDeContacto(), mensaje, medio.tipoDeNotificacion());
             }
         } catch (Exception e) {
             System.out.println("No se pudo notificar a la entidad: " + e.getMessage());
         }
-//        // El contacto del donante ya no se resuelve aca, se publica solo el id
-//        // y notificaciones-service lo resuelve al consumir el mensaje de la cola
-//        if (entrega.getDonanteId() != null) {
-//            notificacionesPublisher.publicarParaDonante(entrega.getDonanteId(), mensaje, "SMS");
-//        }
+
+        // Un aviso por cada donante de la entrega. Solo se manda el id:
+        // notificaciones-service resuelve el contacto y su medio preferido
+        if (entrega.getDonantesId() != null) {
+            for (Long donanteId : entrega.getDonantesId()) {
+                notificacionesPublisher.publicarParaDonante(donanteId, mensaje, null);
+            }
+        }
     }
 
     private Entrega buscar(String id) {

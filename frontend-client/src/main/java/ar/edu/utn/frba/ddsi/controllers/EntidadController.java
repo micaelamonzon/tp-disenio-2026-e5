@@ -65,7 +65,7 @@ public class EntidadController {
             List<EntregaDTO> entregasDeLaEntidad = logisticaApiService.obtenerEntregas().stream()
                     .filter(e -> idEntidadActual().equals(e.getEntidadBeneficiariaId()))
                     .toList();
-            model.addAttribute("pendientes", filtrarPorEstado(entregasDeLaEntidad, "EN_CAMINO"));
+            model.addAttribute("pendientes", filtrarPorEstado(entregasDeLaEntidad, "EN_TRASLADO"));
             model.addAttribute("confirmadas", filtrarPorEstado(entregasDeLaEntidad, "ENTREGADA"));
         } catch (RuntimeException e) {
             model.addAttribute("pendientes", List.of());
