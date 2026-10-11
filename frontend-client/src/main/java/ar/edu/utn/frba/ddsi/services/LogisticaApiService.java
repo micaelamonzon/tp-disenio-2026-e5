@@ -2,6 +2,7 @@ package ar.edu.utn.frba.ddsi.services;
 
 import ar.edu.utn.frba.ddsi.dtos.logistica.CamionDTO;
 import ar.edu.utn.frba.ddsi.dtos.logistica.EntregaDTO;
+import ar.edu.utn.frba.ddsi.dtos.logistica.RutaEntregaDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -79,6 +80,24 @@ public class LogisticaApiService {
         } catch (Exception e) {
             log.error("Error confirmando la recepción de la entrega {}", entregaId, e);
             throw new RuntimeException("No se pudo confirmar la recepción", e);
+        }
+    }
+
+    public List<RutaEntregaDTO> obtenerRutasDeDonante(Long idDonante) {
+        try {
+            List<RutaEntregaDTO> rutas = webClient.get()
+                    .uri(logisticaServiceUrl + "/camiones/monitoreo/ruta/donante/"
+                            + idDonante + "/recorrido")
+                    .retrieve()
+                    .bodyToFlux(RutaEntregaDTO.class)
+                    .collectList()
+                    .block();
+
+            log.info(rutas.toString());
+            return rutas != null ? rutas : List.of();
+        } catch (Exception e) {
+            log.error("Error obteniendo las rutas del donante {}", idDonante, e);
+            return List.of();
         }
     }
 }

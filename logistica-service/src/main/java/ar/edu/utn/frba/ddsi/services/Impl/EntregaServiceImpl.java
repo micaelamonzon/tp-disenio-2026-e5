@@ -32,10 +32,19 @@ public class EntregaServiceImpl {
         this.adminContacto = adminContacto;
     }
 
-    public EntregaDTO crearEntrega(List<Long> donacionesIds, Long entidadId, Long donanteId) {
-        Entrega entrega = new Entrega(donacionesIds, entidadId, donanteId);
+    public Entrega crearEntrega(List<Long> donacionesIds, Long entidadId,List<Long> donantesIds) {
+        Entrega entrega = new Entrega(donacionesIds, entidadId);
+        donantesIds.forEach(entrega::agregarDonanteId);
         repositoryEntregas.save(entrega);
-        return toDTO(entrega);
+
+        return entrega;
+    }
+
+    public EntregaDTO crearEntregaDTO(List<Long> donacionesIds, Long entidadId, List<Long> donantesIds) {
+        Entrega entrega = new Entrega(donacionesIds, entidadId);
+        donantesIds.forEach(entrega::agregarDonanteId);
+        repositoryEntregas.save(entrega);
+        return this.toDTO(entrega);
     }
 
     public EntregaDTO iniciarTraslado(String entregaId, String responsableId) {
@@ -109,11 +118,11 @@ public class EntregaServiceImpl {
         } catch (Exception e) {
             System.out.println("No se pudo notificar a la entidad: " + e.getMessage());
         }
-        // El contacto del donante ya no se resuelve aca, se publica solo el id
-        // y notificaciones-service lo resuelve al consumir el mensaje de la cola
-        if (entrega.getDonanteId() != null) {
-            notificacionesPublisher.publicarParaDonante(entrega.getDonanteId(), mensaje, "SMS");
-        }
+//        // El contacto del donante ya no se resuelve aca, se publica solo el id
+//        // y notificaciones-service lo resuelve al consumir el mensaje de la cola
+//        if (entrega.getDonanteId() != null) {
+//            notificacionesPublisher.publicarParaDonante(entrega.getDonanteId(), mensaje, "SMS");
+//        }
     }
 
     private Entrega buscar(String id) {
