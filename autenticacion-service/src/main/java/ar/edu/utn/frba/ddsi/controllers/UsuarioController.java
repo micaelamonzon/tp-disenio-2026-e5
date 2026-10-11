@@ -28,6 +28,13 @@ public class UsuarioController {
         return usuarioService.crear(body);
     }
 
+    // El registro lo consulta ANTES de crear el donante/entidad en donaciones,
+    // así un email repetido no deja un donante sin usuario
+    @GetMapping("/disponible")
+    public Map<String, Boolean> emailDisponible(@RequestParam String email) {
+        return Map.of("disponible", usuarioService.emailDisponible(email));
+    }
+
     @ExceptionHandler(DatosInvalidosException.class)
     public ResponseEntity<Map<String, String>> datosInvalidos(DatosInvalidosException e) {
         return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));

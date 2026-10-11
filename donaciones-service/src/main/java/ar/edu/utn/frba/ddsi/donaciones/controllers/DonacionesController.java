@@ -133,6 +133,13 @@ public class DonacionesController {
     }
 
     // Donaciones
+
+    // Público: mapa y galería de la landing (donaciones ya entregadas, sin datos del donante)
+    @GetMapping("/donaciones/entregadas")
+    public List<DonacionSegmentadaDTO> obtenerDonacionesEntregadas() {
+        return this.donacionesService.obtenerDonacionesEntregadas();
+    }
+
     @GetMapping("donaciones/humano/{id}")//FUNCIONA -> TESTEE CON POSTMAN
     public ResponseEntity<List<DonacionSegmentadaDTO>> obtenerDonacionesDeHumano(
             @PathVariable Long id) {

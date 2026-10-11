@@ -31,7 +31,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth", "/api/auth/refresh").permitAll()
                         // TODO: proteger con rol SERVICIO/ADMIN. Mientras tanto queda abierto
                         // y el alta rechaza el rol ADMIN.
-                        .requestMatchers("/api/usuarios").permitAll()
+                        .requestMatchers("/api/usuarios", "/api/usuarios/disponible").permitAll()
                         // Spring arma las respuestas de error en /error: si se bloquea,
                         // cualquier 400/404/500 se vería como 403
                         .requestMatchers("/error").permitAll()

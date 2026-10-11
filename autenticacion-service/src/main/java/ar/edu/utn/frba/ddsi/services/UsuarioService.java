@@ -65,6 +65,10 @@ public class UsuarioService {
                 usuario.getIdEnDominio(), usuario.getNombre(), passwordTemporal);
     }
 
+    public boolean emailDisponible(String email) {
+        return usuarioRepository.findByEmail(normalizarEmail(email)).isEmpty();
+    }
+
     private String normalizarEmail(String email) {
         if (vacio(email) || !email.trim().matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")) {
             throw new DatosInvalidosException("El email es obligatorio y debe tener un formato válido");

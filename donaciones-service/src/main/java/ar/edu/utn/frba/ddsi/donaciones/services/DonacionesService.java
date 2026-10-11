@@ -16,6 +16,7 @@ public interface DonacionesService {
     PersonaJuridicaDTO obtenerJuridicoPorId(Long id);
     List<DonacionSegmentadaDTO>  obtenerDonacionesDeHumano(Long id);
     List<DonacionSegmentadaDTO>  obtenerDonacionesDeJuridico(Long id);
+    List<DonacionSegmentadaDTO> obtenerDonacionesEntregadas();
     PersonaHumanaDTO crearDonanteHumano(PersonaHumanaDTO body);
     PersonaJuridicaDTO crearDonanteJuridico(PersonaJuridicaDTO request);
     List<DonacionSegmentadaDTO> crearDonacionDeJuridico(DonacionSinSegmentarDTO body, Long id);
