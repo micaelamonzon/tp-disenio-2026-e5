@@ -5,6 +5,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import ar.edu.utn.frba.ddsi.services.NotificacionesApiService;
+import ar.edu.utn.frba.ddsi.services.SeguimientoService;
 import java.util.List;
 
 @Controller
@@ -15,9 +16,12 @@ public class EntidadController {
     private static final Long ENTIDAD_ID_PRUEBA = 1L;
 
     private final NotificacionesApiService notificacionesApiService;
+    private final SeguimientoService seguimientoService;
 
-    public EntidadController(NotificacionesApiService notificacionesApiService) {
+    public EntidadController(NotificacionesApiService notificacionesApiService,
+                             SeguimientoService seguimientoService) {
         this.notificacionesApiService = notificacionesApiService;
+        this.seguimientoService = seguimientoService;
     }
 
     @GetMapping("/estadoDeDonaciones")
@@ -47,6 +51,14 @@ public class EntidadController {
     public String seguimientoDeEntrega(Model model) {
         model.addAttribute("titulo", "Seguimiento de entrega");
         model.addAttribute("tabActiva", "seguimiento");
+        try {
+            model.addAttribute("camiones",
+                    seguimientoService.obtenerCamionesEnCaminoAEntidad(ENTIDAD_ID_PRUEBA));
+        } catch (RuntimeException e) {
+            model.addAttribute("camiones", List.of());
+            model.addAttribute("errorSeguimiento",
+                    "No pudimos obtener la ubicación de los camiones. Intentá de nuevo en unos minutos.");
+        }
         return "acceso/entidadBeneficiaria/seguimientoDeEntrega";
     }
 

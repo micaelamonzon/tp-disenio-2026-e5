@@ -1,54 +1,52 @@
 <html th:replace="~{layoutEntidad/base :: html}">
-    <div th:fragment="contenido" class="row">
-        <section id="view-seguimiento">
-            <div class="page-head">
-                <h1>Seguimiento de Entrega</h1>
-            </div>
+<div th:fragment="contenido" class="row">
+    <!-- Leaflet: librería de mapas (OpenStreetMap), solo para esta pantalla -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
-            <div class="tracking-map" id="trackingMap">
-                <div class="tracking-map-legend">
-                    <span><span class="map-dot" style="background:#ef4444"></span>Ubicación actual</span>
-                    <span><span class="map-dot" style="background:#22c55e"></span>Destino</span>
-                </div>
-                <div class="tracking-map-route">
-                    <div class="tracking-map-point current"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div>
-                    <div class="tracking-map-line"></div>
-                    <div class="tracking-map-point destination"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
-                </div>
-                <div class="tracking-map-callout">
-                    <strong>Última ubicación registrada</strong>
-                    <p id="lastLocationAddress">Av. Corrientes 1234, Buenos Aires</p>
-                    <span class="page-sub" id="lastLocationTime">Actualizado hace 2 minutos</span>
-                </div>
-            </div>
+    <section id="view-seguimiento">
+        <div class="page-head">
+            <h1>Seguimiento de Entrega</h1>
+            <p class="page-sub">Seguí en el mapa los camiones que están llevando donaciones a tu entidad</p>
+        </div>
+
+        <!-- Error al obtener los datos -->
+        <p th:if="${errorSeguimiento}" class="page-sub" role="alert" th:text="${errorSeguimiento}">
+            No pudimos obtener la ubicación de los camiones.
+        </p>
+
+        <!-- Sin entregas en camino -->
+        <p th:if="${errorSeguimiento == null and #lists.isEmpty(camiones)}" class="page-sub">
+            No tenés entregas en camino en este momento.
+        </p>
+
+        <div th:unless="${#lists.isEmpty(camiones)}">
+            <!-- El mapa lo dibuja seguimiento.js con los datos de las tarjetas de abajo -->
+            <div id="mapaSeguimiento" role="region" aria-label="Mapa de camiones en camino"
+                 style="height: 380px; border-radius: 12px; overflow: hidden;"></div>
 
             <div class="grid-two-columns" style="margin-top: 20px;">
-                <div class="card">
-                    <h2 class="card-title">Información del Camión</h2>
-                    <div class="field"><span>Patente</span><p id="truckPlate">ABC 123</p></div>
-                    <div class="field"><span>Conductor</span><p id="truckDriver">Juan Carlos Rodríguez</p></div>
-                    <div class="field"><span>Teléfono de contacto</span><p id="truckPhone">+54 11 5555-1234</p></div>
-                    <div class="field"><span>Dirección de origen</span><p id="truckOrigin">Av. Libertador 5000, Buenos Aires</p></div>
-                </div>
-
-                <div class="card">
-                    <h2 class="card-title">Estado de la Entrega</h2>
+                <!-- Una tarjeta por camión. Los data-* guardan las coordenadas para el mapa -->
+                <div class="card camion-card" th:each="c : ${camiones}"
+                     th:attr="data-lat=${c.latitud}, data-lng=${c.longitud},
+                                  data-destino-lat=${c.destinoLatitud}, data-destino-lng=${c.destinoLongitud},
+                                  data-patente=${c.patente}, data-destino=${c.destinoDireccion}">
+                    <h2 class="card-title" th:text="'Camión ' + ${c.patente}">Camión AB 123 CD</h2>
+                    <div class="field"><span>Lleva</span><p th:text="${c.descripcionEntrega}">50 paquetes de fideos</p></div>
+                    <div class="field"><span>Destino</span><p th:text="${c.destinoDireccion}">Av. Rivadavia 4500</p></div>
                     <div class="field">
-                        <div class="field-label-row">
-                            <span>Progreso</span>
-                            <span id="deliveryProgressLabel">65%</span>
-                        </div>
-                        <div class="progress-bar"><div class="progress-bar-fill" id="deliveryProgressFill" style="width: 65%"></div></div>
+                        <span>Estado actual</span>
+                        <span class="status-tag status-en-proceso" th:text="${c.estado}">En traslado</span>
                     </div>
-                    <div class="field"><span>Tiempo estimado de llegada</span><p id="deliveryETA">2 horas 15 minutos</p></div>
-                    <div class="field"><span>Estado actual</span><span class="status-tag status-en-proceso" id="deliveryCurrentStatus">En tránsito</span></div>
                     <div class="field">
-                        <span>Seguimiento de ruta</span>
-                        <ul class="location-history" id="locationHistory"></ul>
+                        <span>Última actualización</span>
+                        <p th:text="${c.ultimaActualizacion != null} ? ${#temporals.format(c.ultimaActualizacion, 'dd/MM/yyyy HH:mm')} : 'Sin datos'">10/10/2026 15:30</p>
                     </div>
                 </div>
             </div>
-        </section>
-        <script th:src="@{/js/entidades/seguimiento.js}"></script>
-    </div>
+        </div>
+    </section>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script th:src="@{/js/entidades/seguimiento.js}"></script>
+</div>
 </html>
