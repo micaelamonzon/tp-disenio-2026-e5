@@ -12,7 +12,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ar.edu.utn.frba.ddsi.services.NotificacionesPublisher;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class EntregaServiceImpl {
@@ -47,28 +49,35 @@ public class EntregaServiceImpl {
         return this.toDTO(entrega);
     }
 
-    public EntregaDTO iniciarTraslado(String entregaId, String responsableId) {
-        Entrega entrega = buscar(entregaId);
-        entrega.iniciarTraslado();
-        repositoryEntregas.save(entrega);
+    public List<EntregaDTO> iniciarTraslado(Long idDonante, String responsableId) {
+        List<Entrega> entregas = buscarEntregas(idDonante);
+
+        entregas.forEach(entrega -> {
+            entrega.iniciarTraslado();
+            repositoryEntregas.save(entrega);
+            this.persistirCambiosEnDonaciones(entrega,responsableId);
+        });
+
+        return entregas.stream().map(entrega -> this.toDTO(entrega)).collect(Collectors.toList());
+    }
+
+    public void persistirCambiosEnDonaciones(Entrega entrega,String responsableId) {
         for (Long donacionId : entrega.getDonacionesIds()) {
             donacionesClient.iniciarTraslado(donacionId, responsableId);
         }
-        return toDTO(entrega);
     }
-
-    public List<EntregaDTO> iniciarRuta(List<String> entregaIds, String choferId) {
-        List<EntregaDTO> resultado = new java.util.ArrayList<>();
-        for (String entregaId : entregaIds) {
-            resultado.add(this.iniciarTraslado(entregaId, choferId));
-        }
-        String aviso = "El+camion+inicio+la+ruta.+Segui+tu+entrega+en:+"
-                + "http://localhost:8083/logistica-service/camiones/monitoreo/ruta/camion/1/recorrido";
-        for (String entregaId : entregaIds) {
-            notificarInteresados(buscar(entregaId), aviso);
-        }
-        return resultado;
-    }
+//    public List<EntregaDTO> iniciarRuta(List<String> entregaIds, String choferId) {
+//        List<EntregaDTO> resultado = new java.util.ArrayList<>();
+//        for (String entregaId : entregaIds) {
+//            resultado.add(this.iniciarTraslado(entregaId, choferId));
+//        }
+//        String aviso = "El+camion+inicio+la+ruta.+Segui+tu+entrega+en:+"
+//                + "http://localhost:8083/logistica-service/camiones/monitoreo/ruta/camion/1/recorrido";
+//        for (String entregaId : entregaIds) {
+//            notificarInteresados(buscar(entregaId), aviso);
+//        }
+//        return resultado;
+//    }
 
     public EntregaDTO confirmarRecepcion(String entregaId, ConfirmarRecepcionDTO body,
                                          String responsableId) {
@@ -128,6 +137,25 @@ public class EntregaServiceImpl {
             }
         }
     }
+
+    private List<Entrega> buscarEntregas(Long donanteId){
+        List<Long> idsDonantes = new ArrayList<Long>();
+        idsDonantes.add(donanteId);
+        return repositoryEntregas.findByDonantesId(idsDonantes);
+    }
+
+    public void iniciarTrasladoDeEntrega(String entregaId, String responsableId) {
+        Entrega entrega = buscar(entregaId);
+        entrega.iniciarTraslado();
+        repositoryEntregas.save(entrega);
+        try {
+            persistirCambiosEnDonaciones(entrega, responsableId);
+        } catch (Exception e) {
+            System.out.println("No se pudo avisar a donaciones (iniciarTraslado, entrega "
+                    + entregaId + "): " + e.getMessage());
+        }
+    }
+
 
     private Entrega buscar(String id) {
         return repositoryEntregas.findById(id)

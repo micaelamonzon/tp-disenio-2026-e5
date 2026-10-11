@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -41,18 +40,26 @@ public class SimuladorGpsService {
         repositoryEntregas.findAll().stream()
                 .filter(e -> e.getCamionId() != null)
                 .collect(Collectors.groupingBy(Entrega::getCamionId))
-                .forEach(this::avanzar);
+                .forEach((camionId, entregas) -> {
+                    try {
+                        avanzar(camionId, entregas);
+                    } catch (Exception ex) {
+                        System.out.println("Simulador: error con camión " + camionId + ": " + ex);
+                        ex.printStackTrace();
+                    }
+                });
     }
 
     private void avanzar(String camionId, List<Entrega> entregas) {
         boolean hayActivas = entregas.stream().anyMatch(e ->
-                e.getEstadoActual() == EstadoEntrega.PENDIENTE || e.getEstadoActual() == EstadoEntrega.EN_TRASLADO);
+                e.getEstadoActual() == EstadoEntrega.EN_TRASLADO);
         if (!hayActivas) return;
 
         Camion camion = repositoryCamiones.findById(camionId).orElse(null);
         if (camion == null) return;
 
-        List<PosicionDTO> ruta = rutaCamionService.armarRuta(entregas).ruta();
+        RutaCamionService.RutaCamion rutaCamion = rutaCamionService.armarRuta(entregas);
+        List<PosicionDTO> ruta = rutaCamion.ruta();
         int ultimo = ruta.size() - 1;
 
         // Por qué punto de la ruta iba: se lee de la última posición simulada (no se deduce por cercanía)
@@ -71,5 +78,26 @@ public class SimuladorGpsService {
         nueva.setIndiceRuta(siguiente);
         camion.agregarPosicion(nueva);
         repositoryCamiones.save(camion);
+
+        this.marcarEntregasCompletadas(entregas, rutaCamion, siguiente);
     }
+
+    //solo las marca completadas en el servicio de logistica, para que se seteen como entregdas en Donaciones, la entidad debe confirmar la entrega
+    private void marcarEntregasCompletadas(List<Entrega> entregas,
+                                           RutaCamionService.RutaCamion rutaCamion,
+                                           int indiceRuta) {
+        entregas.stream()
+                .filter(e -> e.getEstadoActual() == EstadoEntrega.EN_TRASLADO
+                        || e.getEstadoActual() == EstadoEntrega.PENDIENTE)
+                .filter(e -> {
+                    Integer indiceParada = rutaCamion.indiceDe(e.getId());
+                    return indiceParada != null && indiceRuta >= indiceParada;
+                })
+                .forEach(e -> {
+                    e.setEstadoActual(EstadoEntrega.ENTREGADA);
+                    repositoryEntregas.save(e);
+                });
+    }
+
+
 }

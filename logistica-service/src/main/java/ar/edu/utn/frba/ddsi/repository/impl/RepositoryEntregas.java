@@ -10,5 +10,6 @@ import java.util.List;
 public interface RepositoryEntregas extends MongoRepository<Entrega, String> {
     List<Entrega> findByEstadoActual(EstadoEntrega estado);
     List<Entrega> findByDonacionesIdsIn(Collection<Long> donacionesIds);
+    List<Entrega> findByDonantesId(List<Long> donantesId);
     List<Entrega> findByCamionId(String camionId);
 }

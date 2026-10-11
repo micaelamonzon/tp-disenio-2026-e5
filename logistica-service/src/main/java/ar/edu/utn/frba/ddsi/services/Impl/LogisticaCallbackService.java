@@ -237,7 +237,6 @@ public class LogisticaCallbackService implements ILogisticaCallbackService {
         entregas.forEach(entrega -> {
             Long donacionId = entrega.getDonacionesIds().get(0);
             Donacion donacion = this.repositoryDonacion.findByIdEnDonaciones(donacionId);
-            entrega.setEstadoActual(EstadoEntrega.EN_TRASLADO);
             entrega.setDireccion(donacion.getDestino());
             entrega.setLatitud(donacion.getLatitud().toString());
             entrega.setLongitud(donacion.getLongitud().toString());

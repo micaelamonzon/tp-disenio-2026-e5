@@ -8,9 +8,8 @@
 
   const ESTADOS = {
     PENDIENTE:   { texto: "Pendiente",   clase: "status-orange" },
-    EN_CAMINO:   { texto: "En traslado", clase: "status-blue" },
-    ENTREGADA:   { texto: "Entregada",   clase: "status-green" },
-    NO_RECIBIDA: { texto: "No recibida", clase: "status-red" }
+    EN_TRASLADO:   { texto: "En traslado", clase: "status-blue" },
+    ENTREGADA:   { texto: "Entregada",   clase: "status-green" }
   };
   const estadoInfo = (e) => ESTADOS[e] || { texto: e, clase: "status-orange" };
 
@@ -158,10 +157,15 @@
   function actualizarParada(p) {
     const c = p.camion;
     p.llego = c.indice >= p.indiceParada;
-    // avance hacia ESTA parada (cuenta todo el camino desde el depósito hasta ella)
+    if (p.llego) p.estado = "ENTREGADA";
     p.fraccion = p.llego ? 1 : Math.min(c.indice / Math.max(p.indiceParada, 1), 1);
 
     if (!p.card) return;
+
+    // <-- nuevo: actualiza el badge de la tarjeta
+    const badge = p.card.querySelector("[data-estado]");
+    if (badge) aplicarEstadoABadge(badge, p.estado);
+
     const pct = Math.round(p.fraccion * 100);
     const fill = p.card.querySelector("[data-progress-fill]");
     const label = p.card.querySelector("[data-progress-label]");
