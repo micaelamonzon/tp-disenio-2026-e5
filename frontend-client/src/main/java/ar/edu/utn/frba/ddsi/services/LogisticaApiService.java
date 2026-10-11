@@ -100,4 +100,22 @@ public class LogisticaApiService {
             return List.of();
         }
     }
+
+
+    // Rutas de las entregas activas de una entidad, recortadas hasta su parada (req. 14)
+    public List<RutaEntregaDTO> obtenerRutasDeEntidad(Long idEntidad) {
+        try {
+            List<RutaEntregaDTO> rutas = webClient.get()
+                    .uri(logisticaServiceUrl + "/logistica-service/camiones/monitoreo/ruta/entidad/"
+                            + idEntidad + "/recorrido")
+                    .retrieve()
+                    .bodyToFlux(RutaEntregaDTO.class)
+                    .collectList()
+                    .block();
+            return rutas != null ? rutas : List.of();
+        } catch (Exception e) {
+            log.error("Error obteniendo las rutas de la entidad {}", idEntidad, e);
+            throw new RuntimeException("No se pudieron obtener las rutas de la entidad", e);
+        }
+    }
 }

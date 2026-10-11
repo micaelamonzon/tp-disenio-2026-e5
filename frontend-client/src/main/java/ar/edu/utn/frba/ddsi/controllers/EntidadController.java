@@ -13,7 +13,9 @@ import ar.edu.utn.frba.ddsi.dtos.logistica.EntregaDTO;
 import ar.edu.utn.frba.ddsi.services.FotoStorageService;
 import ar.edu.utn.frba.ddsi.services.LogisticaApiService;
 import ar.edu.utn.frba.ddsi.services.NotificacionesApiService;
-import ar.edu.utn.frba.ddsi.services.SeguimientoService;
+import ar.edu.utn.frba.ddsi.dtos.logistica.RutaEntregaDTO;
+import org.springframework.web.bind.annotation.ResponseBody;
+import tools.jackson.databind.ObjectMapper;
 import ar.edu.utn.frba.ddsi.utils.UsuarioActual;
 import java.util.List;
 
@@ -24,18 +26,18 @@ public class EntidadController {
     private static final String REDIRECT_RECEPCION = "redirect:/entidadBeneficiaria/recepcionDeDonaciones";
 
     private final NotificacionesApiService notificacionesApiService;
-    private final SeguimientoService seguimientoService;
+    private final ObjectMapper objectMapper;
     private final LogisticaApiService logisticaApiService;
     private final FotoStorageService fotoStorageService;
     private final UsuarioActual usuarioActual;
 
     public EntidadController(NotificacionesApiService notificacionesApiService,
-                             SeguimientoService seguimientoService,
+                             ObjectMapper objectMapper,
                              LogisticaApiService logisticaApiService,
                              FotoStorageService fotoStorageService,
                              UsuarioActual usuarioActual) {
         this.notificacionesApiService = notificacionesApiService;
-        this.seguimientoService = seguimientoService;
+        this.objectMapper = objectMapper;
         this.logisticaApiService = logisticaApiService;
         this.fotoStorageService = fotoStorageService;
         this.usuarioActual = usuarioActual;
@@ -114,19 +116,34 @@ public class EntidadController {
     }
 
 
+    // Req. 14: mapa con los camiones que traen donaciones a la entidad
+    // Usa el mismo mapa que el donante (js/donante/seguimiento.js)
+    // logística ya devuelve la ruta recortada hasta la parada de esta entidad
     @GetMapping("/seguimientoDeEntrega")
     public String seguimientoDeEntrega(Model model) {
         model.addAttribute("titulo", "Seguimiento de entrega");
         model.addAttribute("tabActiva", "seguimiento");
+        List<RutaEntregaDTO> entregas = List.of();
         try {
-            model.addAttribute("camiones",
-                    seguimientoService.obtenerCamionesEnCaminoAEntidad(idEntidadActual()));
+            entregas = logisticaApiService.obtenerRutasDeEntidad(idEntidadActual());
         } catch (RuntimeException e) {
-            model.addAttribute("camiones", List.of());
             model.addAttribute("errorSeguimiento",
                     "No pudimos obtener la ubicación de los camiones. Intentá de nuevo en unos minutos.");
         }
+        model.addAttribute("entregas", entregas);
+        model.addAttribute("entregasJson", objectMapper.writeValueAsString(entregas));
         return "acceso/entidadBeneficiaria/seguimientoDeEntrega";
+    }
+
+    // El mapa consulta esto cada 5 segundos para mover el camión (mismo esquema que el donante)
+    @GetMapping("/seguimientoDeEntrega/datos")
+    @ResponseBody
+    public List<RutaEntregaDTO> seguimientoDeEntregaDatos() {
+        try {
+            return logisticaApiService.obtenerRutasDeEntidad(idEntidadActual());
+        } catch (RuntimeException e) {
+            return List.of(); // el JS reintenta en el próximo ciclo
+        }
     }
 
     @GetMapping("/notificaciones")
