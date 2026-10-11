@@ -65,9 +65,20 @@ public class EstadoDonacionServiceimpl implements EstadoDonacionService{
 
     @Override
     public DonacionSegmentadaDTO entregar(Long id, String responsableId) {
+        return entregar(id, responsableId, null);
+    }
+
+    // Confirma la entrega y guarda la foto de la recepción
+    // fotoPath es un solo campo (lo usa la landing): guardamos la primera foto
+    // La lista completa de fotos queda en la entrega en logística
+    public DonacionSegmentadaDTO entregar(Long id, String responsableId, List<String> fotosUrl) {
         DonacionSegmentada d = buscar(id);
         d.cambiarEstado(EstadoDonacion.ENTREGADA,
                 "Entidad beneficiaria confirmó recepción", responsableId);
+        if (fotosUrl != null && !fotosUrl.isEmpty()) {
+            d.setFotoPath(fotosUrl.get(0));
+        }
+        this.donacionesRepository.save(d); // sin esto el cambio de estado no se persistía
         return toDTO(d);
     }
 

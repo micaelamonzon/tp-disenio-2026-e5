@@ -32,10 +32,14 @@ public class DonacionesClient {
         restTemplate.patchForObject(url, null, String.class);
     }
 
-    public void confirmarEntrega(Long donacionId, String responsableId) {
+    // Confirma la entrega de la donación en donaciones-service y le manda las URLs
+    // de las fotos que cargó la entidad (donaciones guarda la primera para la landing)
+    public void confirmarEntrega(Long donacionId, String responsableId, List<String> fotosUrl) {
         String url = donacionesUrl + "/servicioDeDonaciones/donacion/"
                 + donacionId + "/entregar?responsableId=" + responsableId;
-        restTemplate.patchForObject(url, null, String.class);
+        java.util.Map<String, List<String>> body =
+                java.util.Map.of("fotosUrl", fotosUrl != null ? fotosUrl : List.of());
+        restTemplate.patchForObject(url, body, String.class);
     }
 
    /* public void marcarEntregaFallida(Long donacionId, String motivo, String responsableId) {
