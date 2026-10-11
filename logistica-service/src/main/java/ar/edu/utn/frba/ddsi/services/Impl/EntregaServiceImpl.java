@@ -76,7 +76,7 @@ public class EntregaServiceImpl {
         entrega.confirmarRecepcion(body.getFotosUrl());
         repositoryEntregas.save(entrega);
         for (Long donacionId : entrega.getDonacionesIds()) {
-            donacionesClient.confirmarEntrega(donacionId, responsableId);
+            donacionesClient.confirmarEntrega(donacionId, responsableId, body.getFotosUrl());
         }
         String comprobante = "Entrega+realizada+con+exito.+Fecha:+" + entrega.getFechaEntrega()
                 + ".+Entrega+nro+" + entrega.getId();

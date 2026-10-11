@@ -3,7 +3,6 @@ package ar.edu.utn.frba.ddsi.donaciones.controllers;
 import ar.edu.utn.frba.ddsi.donaciones.dto.CambioEstadoRequestDTO;
 import ar.edu.utn.frba.ddsi.donaciones.dto.DonacionDTO;
 import ar.edu.utn.frba.ddsi.donaciones.dto.DonacionSegmentadaDTO;
-
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.Subcategoria;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.DonacionSegmentada;
 import ar.edu.utn.frba.ddsi.donaciones.services.EstadoDonacionServiceimpl;
@@ -12,7 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import ar.edu.utn.frba.ddsi.donaciones.dto.FotosEntregaDTO;
 import java.util.List;
 
 @RestController
@@ -76,12 +75,15 @@ public class EstadoDonacionController {
         }
     }
 
+    // El body con las fotos es opcional: si no viene, se confirma la entrega igual que antes
     @PatchMapping("/donacion/{id}/entregar")
     public ResponseEntity<DonacionSegmentadaDTO> entregar(
             @PathVariable Long id,
-            @RequestParam String responsableId) {
+            @RequestParam String responsableId,
+            @RequestBody(required = false) FotosEntregaDTO body) {
         try {
-            return ResponseEntity.ok(estadoDonacionService.entregar(id, responsableId));
+            List<String> fotosUrl = body != null ? body.fotosUrl() : null;
+            return ResponseEntity.ok(estadoDonacionService.entregar(id, responsableId, fotosUrl));
         } catch (IllegalStateException e) {
             return ResponseEntity.badRequest().build();
         }
