@@ -4,6 +4,8 @@ import java.time.Instant;
 
 public record UltimoAvanceDTO(
         PosicionDTO posicion,
-        Instant fecha
+        Instant fecha,
+        Integer indiceRuta
+
 ) {
 }

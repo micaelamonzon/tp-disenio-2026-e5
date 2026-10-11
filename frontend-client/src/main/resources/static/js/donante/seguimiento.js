@@ -2,8 +2,7 @@
   const TRUCK_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 17h4V5H10z"/><path d="M20 17h2v-7l-3-4h-3v11h4z"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>`;
   const PIN_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>`;
 
-  // false: el camión se ubica en su último avance real (o en el depósito si no hay).
-  // true: recorre la ruta solo, útil para demos sin GPS.
+  // false: el camión se ubica donde indica el backend. true: recorre la ruta solo (demo sin simulador).
   const SIMULAR_AVANCE = false;
   const DURACION_SIMULADA_MS = 120000;
 
@@ -25,7 +24,7 @@
   }).addTo(map);
 
   const layer = L.layerGroup().addTo(map);
-  let seguimientos = [];
+  let camiones = [];          // uno por camión: una ruta, un marcador
   let inicio = Date.now();
 
   const esc = (s) => String(s ?? "").replace(/[&<>"']/g, c =>
@@ -60,30 +59,19 @@
     });
   }
 
+  function aplicarEstadoABadge(badge, estado) {
+    const est = estadoInfo(estado);
+    Object.values(ESTADOS).forEach(x => badge.classList.remove(x.clase));
+    badge.dataset.estado = estado;
+    badge.textContent = est.texto;
+    badge.classList.add(est.clase);
+  }
+
   function aplicarEstados() {
-    document.querySelectorAll("[data-estado]").forEach(el => {
-      const est = estadoInfo(el.dataset.estado);
-      el.textContent = est.texto;
-      el.classList.add(est.clase);
-    });
+    document.querySelectorAll("[data-estado]").forEach(el => aplicarEstadoABadge(el, el.dataset.estado));
   }
 
   /* ---------- datos ---------- */
-  function normalizar(e, i) {
-    const ruta = (e.rutaCompleta || [])
-        .filter(p => p.latitud != null && p.longitud != null)
-        .map(p => [p.latitud, p.longitud]);
-    const destino = e.destino ? [e.destino.latitud, e.destino.longitud] : ruta[ruta.length - 1];
-    const av = e.ultimoAvance && e.ultimoAvance.posicion ? e.ultimoAvance : null;
-    return {
-      id: e.entregaId, numero: i + 1, estado: e.estadoActual, direccion: e.direccion,
-      ruta, destino, subcategorias: e.subcategorias || [],
-      real: av ? [av.posicion.latitud, av.posicion.longitud] : null,
-      ultimaActualizacion: av ? av.fecha : null,
-      fraccion: 0
-    };
-  }
-
   function indiceMasCercano(ruta, p) {
     let mejor = 0, mejorD = Infinity;
     ruta.forEach(([lat, lon], i) => {
@@ -93,95 +81,144 @@
     return mejor;
   }
 
-  // Dónde está el camión y qué parte de la ruta lleva hecha
-  function calcularPosicion(s) {
-    if (SIMULAR_AVANCE) {
-      const f = Math.min((Date.now() - inicio) / DURACION_SIMULADA_MS, 1);
-      const pos = f * (s.ruta.length - 1);
-      const i = Math.min(Math.floor(pos), s.ruta.length - 2);
-      const t = pos - i, a = s.ruta[i], b = s.ruta[i + 1];
-      return { indice: i, punto: [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t], fraccion: f };
-    }
-    if (s.real) {
-      const i = indiceMasCercano(s.ruta, s.real);
-      return { indice: i, punto: s.real, fraccion: i / (s.ruta.length - 1) };
-    }
-    return { indice: 0, punto: s.ruta[0], fraccion: 0 };
+  // Guarda el último avance del camión (si es más nuevo que el que ya tenía)
+  function aplicarAvance(c, av) {
+    if (!av || !av.posicion) return;
+    if (c.ultimaActualizacion && new Date(av.fecha) <= new Date(c.ultimaActualizacion)) return;
+    c.real = [av.posicion.latitud, av.posicion.longitud];
+    c.indiceReal = av.indiceRuta ?? null;
+    c.ultimaActualizacion = av.fecha;
   }
 
-  function popupHtml(s) {
-    const est = estadoInfo(s.estado);
-    const subs = s.subcategorias.length
-        ? `<div class="popover-row"><span>Donaciones:</span> <b>${s.subcategorias.map(esc).join(", ")}</b></div>` : "";
-    const actualizacion = s.ultimaActualizacion
+  // Agrupa las entregas por camión: una ruta compartida y una parada por entrega
+  function construir(entregas) {
+    const porCamion = new Map();
+    entregas.forEach((e, i) => {
+      const ruta = (e.rutaCompleta || [])
+          .filter(p => p.latitud != null && p.longitud != null)
+          .map(p => [p.latitud, p.longitud]);
+      if (ruta.length < 2) return;
+
+      const clave = e.camionId || ("entrega-" + e.entregaId);
+      let c = porCamion.get(clave);
+      if (!c) {
+        c = { clave, ruta, real: null, indiceReal: null, ultimaActualizacion: null,
+          indice: 0, fraccion: 0, paradas: [] };
+        porCamion.set(clave, c);
+      }
+      c.paradas.push({
+        id: e.entregaId, numero: i + 1, estado: e.estadoActual, direccion: e.direccion,
+        destino: e.destino ? [e.destino.latitud, e.destino.longitud] : ruta[ruta.length - 1],
+        subcategorias: e.subcategorias || [],
+        indiceParada: e.indiceParada ?? ruta.length - 1,
+        fraccion: 0, llego: false, camion: c
+      });
+      aplicarAvance(c, e.ultimoAvance);
+    });
+    return [...porCamion.values()];
+  }
+
+  // Dónde está el camión y cuánto de la ruta completa lleva hecho
+  function calcularPosicion(c) {
+    const n = c.ruta.length - 1;
+    if (SIMULAR_AVANCE) {
+      const f = Math.min((Date.now() - inicio) / DURACION_SIMULADA_MS, 1);
+      const pos = f * n;
+      const i = Math.min(Math.floor(pos), n - 1);
+      const t = pos - i, a = c.ruta[i], b = c.ruta[i + 1];
+      return { indice: i, punto: [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t], fraccion: f };
+    }
+    if (c.real) {
+      const i = c.indiceReal != null ? Math.min(c.indiceReal, n) : indiceMasCercano(c.ruta, c.real);
+      return { indice: i, punto: c.real, fraccion: i / n };
+    }
+    return { indice: 0, punto: c.ruta[0], fraccion: 0 };
+  }
+
+  function popupHtml(p) {
+    const est = estadoInfo(p.estado);
+    const c = p.camion;
+    const subs = p.subcategorias.length
+        ? `<div class="popover-row"><span>Donaciones:</span> <b>${p.subcategorias.map(esc).join(", ")}</b></div>` : "";
+    const avance = p.llego ? "El camión llegó a este destino"
+        : `${Math.round(p.fraccion * 100)}% del recorrido`;
+    const actualizacion = c.ultimaActualizacion
         ? `<div class="popover-time">Último avance:
-             <b data-ultimo-avance data-ts="${esc(s.ultimaActualizacion)}">${tiempoRelativo(s.ultimaActualizacion)}</b></div>`
+             <b data-ultimo-avance data-ts="${esc(c.ultimaActualizacion)}">${tiempoRelativo(c.ultimaActualizacion)}</b></div>`
         : `<div class="popover-time">Sin avances registrados todavía</div>`;
     return `
-      <div class="popover-title"><span>${TRUCK_SVG} <b>Entrega ${s.numero}</b></span></div>
+      <div class="popover-title"><span>${TRUCK_SVG} <b>Entrega ${p.numero}</b></span></div>
       ${subs}
       <div class="popover-row"><span>Estado:</span> <span class="badge-status ${est.clase}">${est.texto}</span></div>
-      <div class="popover-dest">${PIN_SVG}<div><b>Destino:</b><br>${esc(s.direccion)}</div></div>
-      <div class="popover-pct">${Math.round(s.fraccion * 100)}% completado</div>
+      <div class="popover-dest">${PIN_SVG}<div><b>Destino:</b><br>${esc(p.direccion)}</div></div>
+      <div class="popover-pct">${avance}</div>
       ${actualizacion}`;
   }
 
-  function actualizar(s) {
-    const { indice, punto, fraccion } = calcularPosicion(s);
-    s.fraccion = fraccion;
-    s.camion.setLatLng(punto);
-    s.hecho.setLatLngs([...s.ruta.slice(0, indice + 1), punto]);       // tramo recorrido (sólido)
-    s.pendiente.setLatLngs([punto, ...s.ruta.slice(indice + 1)]);      // tramo faltante (punteado)
+  function actualizarParada(p) {
+    const c = p.camion;
+    p.llego = c.indice >= p.indiceParada;
+    // avance hacia ESTA parada (cuenta todo el camino desde el depósito hasta ella)
+    p.fraccion = p.llego ? 1 : Math.min(c.indice / Math.max(p.indiceParada, 1), 1);
 
-    if (s.card) {
-      const pct = Math.round(fraccion * 100);
-      const fill = s.card.querySelector("[data-progress-fill]");
-      const label = s.card.querySelector("[data-progress-label]");
-      if (fill) fill.style.width = pct + "%";
-      if (label) label.textContent = pct + "% del recorrido";
-    }
+    if (!p.card) return;
+    const pct = Math.round(p.fraccion * 100);
+    const fill = p.card.querySelector("[data-progress-fill]");
+    const label = p.card.querySelector("[data-progress-label]");
+    if (fill) fill.style.width = pct + "%";
+    if (label) label.textContent = p.llego ? "El camión llegó a este destino" : pct + "% del recorrido";
+  }
+
+  function actualizar(c) {
+    const { indice, punto, fraccion } = calcularPosicion(c);
+    c.indice = indice;
+    c.fraccion = fraccion;
+    c.marker.setLatLng(punto);
+    c.hecho.setLatLngs([...c.ruta.slice(0, indice + 1), punto]);       // tramo recorrido (sólido)
+    c.pendiente.setLatLngs([punto, ...c.ruta.slice(indice + 1)]);      // tramo faltante (punteado)
+    c.paradas.forEach(actualizarParada);
   }
 
   function render(entregas) {
     layer.clearLayers();
-    seguimientos = entregas.map(normalizar).filter(s => s.ruta.length > 1);
+    camiones = construir(entregas);
     const bounds = [];
 
-    seguimientos.forEach(s => {
-      s.card = document.querySelector(`[data-entrega-id="${s.id}"]`);
-      s.hecho = L.polyline([], { color: "#3b82f6", weight: 4, opacity: 0.9 }).addTo(layer);
-      s.pendiente = L.polyline(s.ruta, { color: "#3b82f6", weight: 3, dashArray: "6 6", opacity: 0.8 }).addTo(layer);
+    camiones.forEach(c => {
+      c.hecho = L.polyline([], { color: "#3b82f6", weight: 4, opacity: 0.9 }).addTo(layer);
+      c.pendiente = L.polyline(c.ruta, { color: "#3b82f6", weight: 3, dashArray: "6 6", opacity: 0.8 }).addTo(layer);
 
       // Punto de partida: primer punto de la ruta (el depósito)
-      L.circleMarker(s.ruta[0], {
+      L.circleMarker(c.ruta[0], {
         radius: 8, color: "#3b82f6", weight: 5, fillColor: "#ffffff", fillOpacity: 1, interactive: false
       }).addTo(layer);
 
-      // Pin de destino: es el que abre el popup
-      s.destMarker = L.marker(s.destino, { icon: destIcon, title: s.direccion })
-          .bindPopup(() => popupHtml(s), { className: "tracking-popup", minWidth: 250, maxWidth: 250 })
-          .addTo(layer);
+      // Un pin por entrega: es el que abre el popup
+      c.paradas.forEach(p => {
+        p.card = document.querySelector(`[data-entrega-id="${p.id}"]`);
+        p.destMarker = L.marker(p.destino, { icon: destIcon, title: p.direccion })
+            .bindPopup(() => popupHtml(p), { className: "tracking-popup", minWidth: 250, maxWidth: 250 })
+            .addTo(layer);
+      });
 
-      // Camión: solo se ve, no responde al click
-      s.camion = L.marker(s.ruta[0], {
-        icon: truckIcon, title: `Entrega ${s.numero}`, zIndexOffset: 500, interactive: false
-      }).addTo(layer);
+      // Un solo camión por ruta: solo se ve, no responde al click
+      c.marker = L.marker(c.ruta[0], { icon: truckIcon, zIndexOffset: 500, interactive: false }).addTo(layer);
 
-      bounds.push(...s.ruta);
+      bounds.push(...c.ruta);
     });
 
     if (bounds.length) map.fitBounds(bounds, { padding: [60, 60], maxZoom: 16 });
     inicio = Date.now();
-    seguimientos.forEach(actualizar);
+    camiones.forEach(actualizar);
   }
 
-  // Click en una tarjeta del panel lateral -> centra el mapa en ese camión
+  // Click en una tarjeta del panel lateral -> centra el mapa en su destino y abre su popup
   document.querySelectorAll("[data-entrega-id]").forEach(card => {
     card.addEventListener("click", () => {
-      const s = seguimientos.find(x => x.id === card.dataset.entregaId);
-      if (s) {
-        map.setView(s.destMarker.getLatLng(), Math.max(map.getZoom(), 14));
-        s.destMarker.openPopup();
+      const p = camiones.flatMap(c => c.paradas).find(x => x.id === card.dataset.entregaId);
+      if (p) {
+        map.setView(p.destMarker.getLatLng(), Math.max(map.getZoom(), 14));
+        p.destMarker.openPopup();
       }
     });
   });
@@ -190,43 +227,53 @@
   render(Array.isArray(window.ENTREGAS_ACTIVAS) ? window.ENTREGAS_ACTIVAS : []);
   actualizarTiempos();
 
+
+  function recorridoTerminado() {
+    return camiones.length > 0 &&
+        camiones.every(c => c.indiceReal != null && c.indiceReal >= c.ruta.length - 1);
+  }
+
   async function refrescar() {
+    if (!window.SEGUIMIENTO_URL) return;
     try {
-      if (!window.SEGUIMIENTO_URL) return;
       const r = await fetch(window.SEGUIMIENTO_URL, { headers: { Accept: "application/json" } });
       if (!r.ok) return;
       const datos = await r.json();
+      const paradas = camiones.flatMap(c => c.paradas);
 
       datos.forEach(e => {
-        const s = seguimientos.find(x => x.id === e.entregaId);
-        if (!s) return;
+        const p = paradas.find(x => x.id === e.entregaId);
+        if (!p) return;
+        p.estado = e.estadoActual;
+        aplicarAvance(p.camion, e.ultimoAvance);
+      });
 
-        const av = e.ultimoAvance && e.ultimoAvance.posicion ? e.ultimoAvance : null;
-        s.real = av ? [av.posicion.latitud, av.posicion.longitud] : null;
-        s.ultimaActualizacion = av ? av.fecha : null;
-        s.estado = e.estadoActual;
+      camiones.forEach(actualizar);
 
-        actualizar(s); // mueve el camión y los tramos sólido/punteado, y la barra de la tarjeta
-
-        const footer = s.card && s.card.querySelector(".delivery-footer");
-        if (footer) {
-          footer.innerHTML = s.ultimaActualizacion
-              ? `Último avance: <b data-ultimo-avance data-ts="${esc(s.ultimaActualizacion)}"></b>`
-              : "Sin avances registrados todavía";
+      paradas.forEach(p => {
+        if (p.card) {
+          const badge = p.card.querySelector("[data-estado]");
+          if (badge) aplicarEstadoABadge(badge, p.estado);
+          const footer = p.card.querySelector(".delivery-footer");
+          if (footer) {
+            footer.innerHTML = p.camion.ultimaActualizacion
+                ? `Último avance: <b data-ultimo-avance data-ts="${esc(p.camion.ultimaActualizacion)}"></b>`
+                : "Sin avances registrados todavía";
+          }
         }
-
-        if (s.destMarker.isPopupOpen()) s.destMarker.getPopup().update();
+        if (p.destMarker.isPopupOpen()) p.destMarker.getPopup().update();
       });
       actualizarTiempos();
+      // Si el camión ya pasó por todas las paradas, no hace falta seguir consultando
+      if (recorridoTerminado()) clearInterval(timerRefresco);
     } catch (e) {
-
+      // ante un fallo de red se reintenta en el próximo ciclo
     }
   }
-
-  setInterval(refrescar, 5000);
-
+  const timerRefresco = setInterval(refrescar, 5000);
+  if (recorridoTerminado()) clearInterval(timerRefresco);
   setInterval(actualizarTiempos, 1000);
-  if (SIMULAR_AVANCE) setInterval(() => seguimientos.forEach(actualizar), 250);
+  if (SIMULAR_AVANCE) setInterval(() => camiones.forEach(actualizar), 250);
 
   window.actualizarSeguimiento = render;
 })();

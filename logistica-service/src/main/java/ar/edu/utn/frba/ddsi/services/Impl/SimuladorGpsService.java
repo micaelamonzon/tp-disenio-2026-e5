@@ -23,65 +23,53 @@ public class SimuladorGpsService {
 
     private final RepositoryEntregas repositoryEntregas;
     private final RepositoryCamiones repositoryCamiones;
-    private final OsrmRutaService osrmRutaService;
+    private final RutaCamionService rutaCamionService;
     private final int paso;
 
     public SimuladorGpsService(RepositoryEntregas repositoryEntregas,
                                RepositoryCamiones repositoryCamiones,
-                               OsrmRutaService osrmRutaService,
+                               RutaCamionService rutaCamionService,
                                @Value("${logistica.simulador.paso:5}") int paso) {
         this.repositoryEntregas = repositoryEntregas;
         this.repositoryCamiones = repositoryCamiones;
-        this.osrmRutaService = osrmRutaService;
+        this.rutaCamionService = rutaCamionService;
         this.paso = paso;
     }
 
     @Scheduled(fixedRateString = "${logistica.simulador.intervalo-ms:5000}")
     public void avanzarCamiones() {
-
         repositoryEntregas.findAll().stream()
                 .filter(e -> e.getCamionId() != null)
-                .filter(e -> e.getEstadoActual() == EstadoEntrega.PENDIENTE
-                        || e.getEstadoActual() == EstadoEntrega.EN_CAMINO)
-                .collect(Collectors.toMap(Entrega::getCamionId, Function.identity(), (a, b) -> a))
-                .values()
+                .collect(Collectors.groupingBy(Entrega::getCamionId))
                 .forEach(this::avanzar);
     }
 
-    private void avanzar(Entrega entrega) {
-        Camion camion = repositoryCamiones.findById(entrega.getCamionId()).orElse(null);
+    private void avanzar(String camionId, List<Entrega> entregas) {
+        boolean hayActivas = entregas.stream().anyMatch(e ->
+                e.getEstadoActual() == EstadoEntrega.PENDIENTE || e.getEstadoActual() == EstadoEntrega.EN_TRASLADO);
+        if (!hayActivas) return;
+
+        Camion camion = repositoryCamiones.findById(camionId).orElse(null);
         if (camion == null) return;
 
-        List<PosicionDTO> ruta = osrmRutaService.obtenerRutaDesdeDeposito(
-                Double.parseDouble(entrega.getLatitud()),
-                Double.parseDouble(entrega.getLongitud()));
+        List<PosicionDTO> ruta = rutaCamionService.armarRuta(entregas).ruta();
         int ultimo = ruta.size() - 1;
 
-
+        // Por qué punto de la ruta iba: se lee de la última posición simulada (no se deduce por cercanía)
         int actual = camion.getPosiciones().stream()
-                .filter(p -> p.getFecha() != null)
+                .filter(p -> p.getFecha() != null && p.getIndiceRuta() != null)
                 .max(Comparator.comparing(Posicion::getFecha))
-                .map(p -> indiceMasCercano(ruta, p))
+                .map(Posicion::getIndiceRuta)
                 .orElse(-1);
 
-        if (actual >= ultimo) return;
+        if (actual >= ultimo) return; // terminó el recorrido completo
 
         int siguiente = actual < 0 ? 0 : Math.min(actual + paso, ultimo);
         PosicionDTO punto = ruta.get(siguiente);
 
-        camion.agregarPosicion(new Posicion(punto.latitud(), punto.longitud()));
+        Posicion nueva = new Posicion(punto.latitud(), punto.longitud());
+        nueva.setIndiceRuta(siguiente);
+        camion.agregarPosicion(nueva);
         repositoryCamiones.save(camion);
-    }
-
-    private int indiceMasCercano(List<PosicionDTO> ruta, Posicion p) {
-        int mejor = 0;
-        double mejorD = Double.MAX_VALUE;
-        for (int i = 0; i < ruta.size(); i++) {
-            double dLat = ruta.get(i).latitud() - p.getLatitud();
-            double dLon = ruta.get(i).longitud() - p.getLongitud();
-            double d = dLat * dLat + dLon * dLon;
-            if (d < mejorD) { mejorD = d; mejor = i; }
-        }
-        return mejor;
     }
 }

@@ -12,6 +12,7 @@ public class Posicion {
     private Double latitud;
     private Double longitud;
     private Instant fecha;
+    private Integer indiceRuta;
 
     public Posicion(Double latitud, Double longitud) {
         this.latitud = latitud;

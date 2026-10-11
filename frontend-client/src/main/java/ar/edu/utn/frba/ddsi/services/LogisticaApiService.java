@@ -86,7 +86,7 @@ public class LogisticaApiService {
     public List<RutaEntregaDTO> obtenerRutasDeDonante(Long idDonante) {
         try {
             List<RutaEntregaDTO> rutas = webClient.get()
-                    .uri(logisticaServiceUrl + "/camiones/monitoreo/ruta/donante/"
+                    .uri(logisticaServiceUrl + "/logistica-service/camiones/monitoreo/ruta/donante/"
                             + idDonante + "/recorrido")
                     .retrieve()
                     .bodyToFlux(RutaEntregaDTO.class)

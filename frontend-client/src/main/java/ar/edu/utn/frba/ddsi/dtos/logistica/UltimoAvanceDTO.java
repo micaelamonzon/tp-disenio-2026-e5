@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 
 public record UltimoAvanceDTO(
         PosicionDTO posicion,
-        Instant fecha
+        Instant fecha,
+        Integer indiceRuta
 ) {
 }
