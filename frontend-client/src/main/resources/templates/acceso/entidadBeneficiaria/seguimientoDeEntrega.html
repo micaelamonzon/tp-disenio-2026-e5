@@ -1,52 +1,82 @@
 <html th:replace="~{layoutEntidad/base :: html}">
 <div th:fragment="contenido" class="row">
-    <!-- Leaflet: librería de mapas (OpenStreetMap), solo para esta pantalla -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+    <!-- Estilos del mapa (los mismos que usa la pantalla del donante) -->
+    <link rel="stylesheet" th:href="@{/css/donante/seguimiento.css}">
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
     <section id="view-seguimiento">
         <div class="page-head">
             <h1>Seguimiento de Entrega</h1>
-            <p class="page-sub">Seguí en el mapa los camiones que están llevando donaciones a tu entidad</p>
+            <p class="page-sub">Seguí en tiempo real los camiones que traen donaciones a tu entidad</p>
         </div>
 
-        <!-- Error al obtener los datos -->
         <p th:if="${errorSeguimiento}" class="page-sub" role="alert" th:text="${errorSeguimiento}">
             No pudimos obtener la ubicación de los camiones.
         </p>
 
-        <!-- Sin entregas en camino -->
-        <p th:if="${errorSeguimiento == null and #lists.isEmpty(camiones)}" class="page-sub">
-            No tenés entregas en camino en este momento.
-        </p>
-
-        <div th:unless="${#lists.isEmpty(camiones)}">
-            <!-- El mapa lo dibuja seguimiento.js con los datos de las tarjetas de abajo -->
-            <div id="mapaSeguimiento" role="region" aria-label="Mapa de camiones en camino"
-                 style="height: 380px; border-radius: 12px; overflow: hidden;"></div>
-
-            <div class="grid-two-columns" style="margin-top: 20px;">
-                <!-- Una tarjeta por camión. Los data-* guardan las coordenadas para el mapa -->
-                <div class="card camion-card" th:each="c : ${camiones}"
-                     th:attr="data-lat=${c.latitud}, data-lng=${c.longitud},
-                                  data-destino-lat=${c.destinoLatitud}, data-destino-lng=${c.destinoLongitud},
-                                  data-patente=${c.patente}, data-destino=${c.destinoDireccion}">
-                    <h2 class="card-title" th:text="'Camión ' + ${c.patente}">Camión AB 123 CD</h2>
-                    <div class="field"><span>Lleva</span><p th:text="${c.descripcionEntrega}">50 paquetes de fideos</p></div>
-                    <div class="field"><span>Destino</span><p th:text="${c.destinoDireccion}">Av. Rivadavia 4500</p></div>
-                    <div class="field">
-                        <span>Estado actual</span>
-                        <span class="status-tag status-en-proceso" th:text="${c.estado}">En traslado</span>
-                    </div>
-                    <div class="field">
-                        <span>Última actualización</span>
-                        <p th:text="${c.ultimaActualizacion != null} ? ${#temporals.format(c.ultimaActualizacion, 'dd/MM/yyyy HH:mm')} : 'Sin datos'">10/10/2026 15:30</p>
-                    </div>
+        <div class="tracking-container">
+            <div class="map-card" id="mapCard">
+                <div class="map-badge">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                    Seguimiento en tiempo real
                 </div>
+                <div class="map-viewport" id="mapViewport"></div>
             </div>
+
+            <aside class="tracking-sidebar" aria-label="Entregas activas">
+                <div class="sidebar-header">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 17h4V5H10z"/><path d="M20 17h2v-7l-3-4h-3v11h4z"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>
+                    Entregas en camino
+                </div>
+                <div class="deliveries-list" id="deliveriesList">
+                    <p class="page-sub" th:if="${errorSeguimiento == null and #lists.isEmpty(entregas)}">
+                        No tenés entregas en camino en este momento.
+                    </p>
+
+                    <article class="delivery-card" th:each="e, st : ${entregas}" th:attr="data-entrega-id=${e.entregaId}">
+                        <div class="delivery-card-head">
+                            <div>
+                                <span class="delivery-id">
+                                    <span th:replace="~{fragments/iconosSeguimientoEntrega::iconoCamion}"></span>
+                                    Entrega <span th:text="${st.count}">1</span>
+                                </span>
+                                <span class="badge-status" th:text="${e.estadoActual}"
+                                      th:attr="data-estado=${e.estadoActual}">PENDIENTE</span>
+                            </div>
+                        </div>
+
+                        <div class="progress-track"><div class="progress-fill" data-progress-fill style="width:0%"></div></div>
+                        <span class="progress-label" data-progress-label>0% del recorrido</span>
+
+                        <div class="delivery-items" th:if="${!#lists.isEmpty(e.subcategorias)}">
+                            <span>Donaciones:</span>
+                            <ul>
+                                <li th:each="sub : ${e.subcategorias}" th:text="${sub}">Alimentos</li>
+                            </ul>
+                        </div>
+
+                        <div class="delivery-footer">
+                            <span th:if="${e.ultimoAvance != null}">
+                                Último avance: <b data-ultimo-avance th:attr="data-ts=${e.ultimoAvance.fecha}">...</b>
+                            </span>
+                            <span th:unless="${e.ultimoAvance != null}">Sin avances registrados todavía</span>
+                        </div>
+                    </article>
+                </div>
+            </aside>
         </div>
     </section>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script th:src="@{/js/entidades/seguimiento.js}"></script>
+    <!-- Datos para el mapa: el mismo JS que el donante, apuntando a los datos de la entidad -->
+    <script th:inline="javascript">
+        window.ENTREGAS_ACTIVAS = JSON.parse(/*[[${entregasJson}]]*/ "[]");
+        window.SEGUIMIENTO_URL = /*[[@{/entidadBeneficiaria/seguimientoDeEntrega/datos}]]*/ "/entidadBeneficiaria/seguimientoDeEntrega/datos";
+    </script>
+    <script th:src="@{/js/donante/seguimiento.js}"></script>
 </div>
 </html>
