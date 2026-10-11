@@ -14,4 +14,6 @@ public interface MonitoreoService {
     List<PosicionDTO> obtenerRecorrido(String idCamion);
 
     public List<RutaEntregaDTO> obtenerRecorridoDeDonacionesDeDonante(Long idDonante);
+
+    List<RutaEntregaDTO> obtenerRecorridoDeEntregasDeEntidad(Long idEntidad);
 }
