@@ -97,12 +97,25 @@ public class NotificacionesListener {
         notificacion.setEntidadBeneficiariaId(dto.entidadId()); // null si no es para una entidad
         notificacion.setMensaje(dto.mensaje());
 
-        MedioDeNotificacion medioDeNotificacion = switch (dto.medio().toUpperCase()) {
+        // Si el mensaje no trae medio (por ejemplo, los avisos de incentivos),
+        // usamos el medio preferido del donante, que viene de donaciones-service
+        String medio = dto.medio() != null ? dto.medio()
+                : (donante != null ? donante.getTipoDeNotificacion() : null);
+
+        MedioDeNotificacion medioDeNotificacion = switch (medio == null ? "" : medio.toUpperCase()) {
             case "EMAIL" -> email;
             case "SMS" -> sms;
             case "WHATSAPP" -> whatsApp;
-            default -> throw new IllegalArgumentException("Medio no soportado: " + dto.medio());
+            default -> null;
         };
+
+        // Sin un medio válido no se puede enviar. No lanzamos excepción a propósito:
+        // RabbitMQ reintentaría el mensaje indefinidamente (loop infinito).
+        if (medioDeNotificacion == null) {
+            System.err.println("Medio no soportado o ausente para el evento "
+                    + dto.idEvento() + ": " + medio);
+            return;
+        }
 
         notificacion.setMedioDeNotificacion(medioDeNotificacion);
         notificacion.enviar();
