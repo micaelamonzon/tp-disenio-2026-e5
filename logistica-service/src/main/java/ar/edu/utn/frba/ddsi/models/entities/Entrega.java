@@ -44,8 +44,8 @@ public class Entrega {
     }
 
     public void iniciarTraslado() {
-        estadoActual.validarTransicion(EstadoEntrega.EN_CAMINO);
-        this.estadoActual = EstadoEntrega.EN_CAMINO;
+        estadoActual.validarTransicion(EstadoEntrega.EN_TRASLADO);
+        this.estadoActual = EstadoEntrega.EN_TRASLADO;
     }
 
     public void confirmarRecepcion(List<String> fotos) {

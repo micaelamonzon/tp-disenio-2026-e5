@@ -6,6 +6,7 @@ import ar.edu.utn.frba.ddsi.dto.UltimoAvanceDTO;
 import ar.edu.utn.frba.ddsi.models.entities.Camion;
 import ar.edu.utn.frba.ddsi.models.entities.Donacion;
 import ar.edu.utn.frba.ddsi.models.entities.Entrega;
+import ar.edu.utn.frba.ddsi.models.entities.EstadoEntrega;
 import ar.edu.utn.frba.ddsi.models.entities.Posicion;
 import ar.edu.utn.frba.ddsi.repository.RepositoryCamiones;
 import ar.edu.utn.frba.ddsi.repository.impl.RepositoryDonacion;
@@ -34,15 +35,16 @@ public class MonitoreoServiceImpl implements MonitoreoService {
     private final RepositoryDonacion repositoryDonacion;
     private final RepositoryEntregas repositoryEntregas;
     private final OsrmRutaService osrmRutaService;
+    private final RutaCamionService rutaCamionService;
 
 
 
-
-    public MonitoreoServiceImpl(RepositoryCamiones repositoryCamiones,RepositoryDonacion repositoryDonacion, RepositoryEntregas repositoryEntregas, OsrmRutaService osrmRutaService) {
+    public MonitoreoServiceImpl(RepositoryCamiones repositoryCamiones,RepositoryDonacion repositoryDonacion, RepositoryEntregas repositoryEntregas, OsrmRutaService osrmRutaService, RutaCamionService rutaCamionService) {
         this.repositoryCamiones = repositoryCamiones;
         this.repositoryDonacion = repositoryDonacion;
         this.repositoryEntregas = repositoryEntregas;
         this.osrmRutaService = osrmRutaService;
+        this.rutaCamionService = rutaCamionService;
     }
 
     @Override
@@ -89,6 +91,7 @@ public class MonitoreoServiceImpl implements MonitoreoService {
                  .toList();
     }
 
+
     private RutaEntregaDTO armarRutaDeEntrega(Entrega entrega, List<Donacion> donacionesDelDonante) {
         double lat = Double.parseDouble(entrega.getLatitud());
         double lon = Double.parseDouble(entrega.getLongitud());
@@ -99,20 +102,30 @@ public class MonitoreoServiceImpl implements MonitoreoService {
                 .distinct()
                 .toList();
 
-        RutaEntregaDTO rutaEntregaDTO= new RutaEntregaDTO(
+        RutaCamionService.RutaCamion rutaCamion = rutaCamionService.armarRutaPara(entrega);
+
+        return new RutaEntregaDTO(
                 entrega.getId(),
+                entrega.getCamionId(),
                 entrega.getEstadoActual().toString(),
                 entrega.getDireccion(),
                 new PosicionDTO(lat, lon),
-                osrmRutaService.obtenerRutaDesdeDeposito(lat, lon),
+                rutaCamion.ruta(),
+                rutaCamion.indiceDe(entrega.getId()),
                 subcategorias,
                 obtenerUltimoAvance(entrega)
         );
-
-        return rutaEntregaDTO;
     }
 
-
+    public String convertirEstado(EstadoEntrega estadoEntrega) {
+        if(EstadoEntrega.EN_TRASLADO.equals(estadoEntrega)){
+            return "EN TRASLADO";
+        } else if (EstadoEntrega.ENTREGADA.equals(estadoEntrega)) {
+            return "ENTREGADA";
+        }else {
+            return " ";
+        }
+    }
     private UltimoAvanceDTO obtenerUltimoAvance(Entrega entrega) {
         if (entrega.getCamionId() == null) return null;
 
@@ -122,9 +135,8 @@ public class MonitoreoServiceImpl implements MonitoreoService {
                         .max(Comparator.comparing(Posicion::getFecha)))
                 .map(p -> new UltimoAvanceDTO(
                         new PosicionDTO(p.getLatitud(), p.getLongitud()),
-                        p.getFecha()))
+                        p.getFecha(),
+                        p.getIndiceRuta()))
                 .orElse(null);
     }
-
-
 }
