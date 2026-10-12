@@ -1,6 +1,7 @@
 package ar.edu.utn.frba.ddsi.controllers;
 
 import ar.edu.utn.frba.ddsi.dtos.donaciones.DonacionDTO;
+import ar.edu.utn.frba.ddsi.dtos.donaciones.misiones.TipoDeDonante;
 import ar.edu.utn.frba.ddsi.dtos.entidades.EntidadBeneficiariaDTO;
 import ar.edu.utn.frba.ddsi.dtos.donaciones.misiones.MisionFrontDTO;
 import ar.edu.utn.frba.ddsi.dtos.logistica.RutaEntregaDTO;
@@ -55,6 +56,9 @@ public class DonanteController {
         return usuarioActual.idEnDominio();
     }
 
+    private TipoDeDonante tipoDonanteActual() {
+        return usuarioActual.obtener().tipoDeDonante();
+    }
     @GetMapping("/misDonaciones")
     public String misDonaciones(@RequestParam(required = false) String estado,
                                 @RequestParam(required = false) String categoria,
@@ -139,7 +143,7 @@ public class DonanteController {
         model.addAttribute("titulo", "Incentivos");
         model.addAttribute("tabActiva", "incentivos");
         try {
-            List<MisionFrontDTO> misiones = incentivosService.obtenerMisiones(idDonanteActual()).stream()
+            List<MisionFrontDTO> misiones = incentivosService.obtenerMisiones(idDonanteActual(), tipoDonanteActual()).stream()
                     .sorted(Comparator.comparing(MisionFrontDTO::categoria)
                             .thenComparing(MisionFrontDTO::ordenSecuencial))
                     .toList();
@@ -154,7 +158,7 @@ public class DonanteController {
     @PostMapping("/incentivos/comenzar/{misionId}")
     public String comenzarMision(@PathVariable Long misionId, RedirectAttributes redirect) {
         try {
-            incentivosService.comenzarMision(idDonanteActual(), misionId);
+            incentivosService.comenzarMision(idDonanteActual(), misionId, tipoDonanteActual());
         } catch (RuntimeException e) {
             redirect.addFlashAttribute("errorComenzar",
                     "No pudimos comenzar la misión. Intentá de nuevo en unos minutos.");
@@ -170,7 +174,7 @@ public class DonanteController {
                         || m.estado().name().equals("COMPLETADA"));
         if (!sinMisionEnCurso) return false;
         try {
-            return incentivosService.obtenerPerfil(idDonanteActual()).categoriaActual() == null;
+            return incentivosService.obtenerPerfil(idDonanteActual(), tipoDonanteActual()).categoriaActual() == null;
         } catch (RuntimeException e) {
             return false;
         }
@@ -220,7 +224,7 @@ public class DonanteController {
         model.addAttribute("titulo", "Mi Perfil");
         model.addAttribute("tabActiva", "");
         try {
-            model.addAttribute("perfil", incentivosService.obtenerPerfil(idDonanteActual()));
+            model.addAttribute("perfil", incentivosService.obtenerPerfil(idDonanteActual(), tipoDonanteActual()));
         } catch (RuntimeException e) {
             model.addAttribute("error", "El servicio de incentivos no está disponible. Intentá de nuevo en unos minutos.");
         }

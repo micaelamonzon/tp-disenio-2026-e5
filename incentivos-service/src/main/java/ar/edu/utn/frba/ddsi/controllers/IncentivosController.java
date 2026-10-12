@@ -203,8 +203,8 @@ public class IncentivosController {
     }
 
     @GetMapping("/misiones/todas/{id}")
-    public ResponseEntity<List<MisionFrontDTO>> obtenerTodasLasMisionesPorId(@PathVariable Long id) {
-        List<MisionFrontDTO> misiones = incentivosService.obtenerTodasLasMisionesPorId(id);
+    public ResponseEntity<List<MisionFrontDTO>> obtenerTodasLasMisionesPorId(@PathVariable Long id,  @RequestParam TipoDeDonante tipoDeDonante) {
+        List<MisionFrontDTO> misiones = incentivosService.obtenerTodasLasMisionesPorId(id, tipoDeDonante);
         if (misiones.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
