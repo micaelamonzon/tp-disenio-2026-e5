@@ -765,3 +765,49 @@ svg{ width: 18px; height: 18px; flex-shrink:0; }
     max-width: none !important;
     width: 100% !important;
 }
+/* Pegar al FINAL de personaAdmin.css.
+   Deja el usuario del panel admin igual al del header de Home:
+   avatar circular con degradé violeta-rosa y nombre/rol sin la píldora azul. */
+.topbar .admin-badge {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    gap: 12px;
+    color: inherit;
+    cursor: pointer;
+}
+
+.topbar .admin-badge .admin-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #a855f7, #ec4899);
+    color: #fff;
+    font-size: 1.05rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.topbar .admin-badge .admin-badge-text {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+}
+
+.topbar .admin-badge .admin-name {
+    color: #0f172a;
+    font-size: 0.95rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.topbar .admin-badge .admin-role {
+    color: #94a3b8;
+    font-size: 0.85rem;
+    font-weight: 400;
+}
