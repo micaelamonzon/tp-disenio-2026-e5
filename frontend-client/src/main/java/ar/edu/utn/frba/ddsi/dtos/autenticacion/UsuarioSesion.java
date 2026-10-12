@@ -1,5 +1,7 @@
 package ar.edu.utn.frba.ddsi.dtos.autenticacion;
 
+import ar.edu.utn.frba.ddsi.dtos.donaciones.misiones.TipoDeDonante;
+
 import java.io.Serializable;
 
 // Usuario logueado, guardado en la sesión (atributo "usuario") al iniciar sesión.
@@ -27,5 +29,9 @@ public record UsuarioSesion(String email, String nombre, Rol codigoRol, Long idE
 
     public boolean esDonanteHumano() {
         return codigoRol == Rol.DONANTE_HUMANO;
+    }
+
+    public TipoDeDonante tipoDeDonante() {
+        return codigoRol.tipoDeDonante();
     }
 }

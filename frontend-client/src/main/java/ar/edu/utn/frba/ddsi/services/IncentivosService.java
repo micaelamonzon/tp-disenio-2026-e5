@@ -3,6 +3,7 @@ package ar.edu.utn.frba.ddsi.services;
 import ar.edu.utn.frba.ddsi.dtos.donaciones.misiones.MisionFrontDTO;
 import ar.edu.utn.frba.ddsi.dtos.donaciones.misiones.PerfilDTO;
 import ar.edu.utn.frba.ddsi.dtos.donaciones.misiones.RankingMensualDTO;
+import ar.edu.utn.frba.ddsi.dtos.donaciones.misiones.TipoDeDonante;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,14 +17,14 @@ public class IncentivosService {
         this.incentivosApiService = incentivosApiService;
     }
 
-    public List<MisionFrontDTO> obtenerMisiones(Long idDonante) {
-        return incentivosApiService.obtenerTodasLasMisiones(idDonante);
+    public List<MisionFrontDTO> obtenerMisiones(Long idDonante, TipoDeDonante tipo) {
+        return incentivosApiService.obtenerTodasLasMisiones(idDonante,  tipo);
     }
-    public PerfilDTO obtenerPerfil(Long idDonante) {
-        return incentivosApiService.obtenerPerfil(idDonante);
+    public PerfilDTO obtenerPerfil(Long idDonante, TipoDeDonante tipo) {
+        return incentivosApiService.obtenerPerfil(idDonante, tipo);
     }
-    public void comenzarMision(Long idDonante, Long misionId) {
-        incentivosApiService.comenzarMision(idDonante, misionId);
+    public void comenzarMision(Long idDonante, Long misionId,TipoDeDonante tipo) {
+        incentivosApiService.comenzarMision(idDonante, misionId,  tipo);
     }
     public RankingMensualDTO obtenerUltimoRanking() {
         return incentivosApiService.obtenerUltimoRanking();

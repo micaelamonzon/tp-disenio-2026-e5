@@ -636,10 +636,10 @@ public class IncentivosServiceImpl implements IncentivosService {
     }
 
     @Transactional(readOnly = true)
-    public List<MisionFrontDTO> obtenerTodasLasMisionesPorId(Long id) {
-        Donante donante = incentivosRepository.findByIdEnDonaciones(id, TipoDeDonante.HUMANO);
+    public List<MisionFrontDTO> obtenerTodasLasMisionesPorId(Long id, TipoDeDonante tipoDeDonante) {
+        Donante donante = incentivosRepository.findByIdEnDonaciones(id,tipoDeDonante);
         if (donante == null) {
-            throw new RuntimeException("No se encontró el donante con id: " + id);
+            throw new RuntimeException("No se encontró el donante con id : " + id + "TIPO" + tipoDeDonante);
         }
 
         List<MisionFrontDTO> misionesParaFront = donante.getMisiones().stream()
