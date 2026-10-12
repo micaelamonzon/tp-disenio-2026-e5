@@ -45,6 +45,7 @@ public class InactividadScheduler {
     // los otros procesos nocturnos (0, 2 y 3 AM).
     // @Transactional porque las donaciones del donante se cargan de forma LAZY.
     @Scheduled(cron = "0 0 4 * * *")
+    // @Scheduled(cron = "0 * * * * *") // TEMPORAL PARA PROBAR
     @Transactional
     public void notificarDonantesInactivos() {
         LocalDateTime ahora = LocalDateTime.now();
