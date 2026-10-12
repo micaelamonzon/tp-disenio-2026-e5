@@ -5,34 +5,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="${titulo} + ' - DonaTrack'">Mapa de Donaciones - DonaTrack</title>
 
-    <!-- CSS Estático y FontAwesome -->
+
     <link rel="stylesheet" th:href="@{/css/landingPage/landingPage.css}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <!-- CSS de Leaflet -->
+
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 </head>
 <body style="background-color: #f8fafc; color: #334155; font-family: system-ui, -apple-system, sans-serif;">
 
-<!-- HEADER Y NAVBAR -->
+
 <header th:replace="~{layoutAcceso/layoutAcceso :: header}"></header>
 <nav th:replace="~{layoutAcceso/layoutAcceso :: navBar}"></nav>
 
 <main style="max-width: 1100px; margin: 0 auto; padding: 2.5rem 1rem 4rem 1rem;">
 
-    <!-- ENCABEZADO CENTRADO -->
     <div style="text-align: center; margin-bottom: 2rem;">
         <h1 style="font-size: 2.25rem; font-weight: 800; color: #0f172a; margin-bottom: 0.5rem;">Mapa de Donaciones Entregadas</h1>
         <p style="color: #64748b; font-size: 1rem; margin: 0;">Explorá la ubicación de cada donación entregada a través de UTN Solidaria. Hacé clic en los marcadores para ver los detalles de cada entrega.</p>
     </div>
 
-    <!-- CONTENEDOR DEL MAPA -->
+
     <div style="position: relative; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.06); border: 1px solid #e2e8f0; margin-bottom: 3rem; background-color: #e2e8f0;">
 
-        <!-- MAPA REAL LEAFLET (Altura obligatoria e inline z-index) -->
+
         <div id="real-map" style="width: 100%; height: 480px; min-height: 480px; display: block; z-index: 1;"></div>
 
-        <!-- CUADRO DE LEYENDA -->
+
         <div style="position: absolute; top: 20px; left: 20px; z-index: 1000; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(4px); padding: 1rem 1.25rem; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; font-size: 0.88rem;">
             <div style="display: flex; align-items: center; gap: 0.5rem; font-weight: 700; color: #1e293b; margin-bottom: 0.6rem;">
                 <i class="fa-regular fa-compass" style="color: #2563eb;"></i>
@@ -96,13 +95,13 @@
 
 <footer th:replace="~{layoutAcceso/layoutAcceso :: footer}"></footer>
 
-<!-- JS LEAFLET -->
+
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-<!-- SCRIPT DE INTEGRACIÓN DINÁMICA DE SPRING BOOT CON LEAFLET -->
+
 <script th:inline="javascript">
     document.addEventListener("DOMContentLoaded", function() {
-        // 1. Obtener la cadena JSON serializada de forma segura
+
         const jsonRaw = /*[[${donacionesMapaJson}]]*/ '[]';
 
         let donacionesServidor = [];

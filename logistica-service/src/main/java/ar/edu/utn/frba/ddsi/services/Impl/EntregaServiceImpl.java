@@ -12,7 +12,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ar.edu.utn.frba.ddsi.services.NotificacionesPublisher;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class EntregaServiceImpl {
@@ -32,34 +34,50 @@ public class EntregaServiceImpl {
         this.adminContacto = adminContacto;
     }
 
-    public EntregaDTO crearEntrega(List<Long> donacionesIds, Long entidadId, Long donanteId) {
-        Entrega entrega = new Entrega(donacionesIds, entidadId, donanteId);
+    public Entrega crearEntrega(List<Long> donacionesIds, Long entidadId,List<Long> donantesIds) {
+        Entrega entrega = new Entrega(donacionesIds, entidadId);
+        donantesIds.forEach(entrega::agregarDonanteId);
         repositoryEntregas.save(entrega);
-        return toDTO(entrega);
+
+        return entrega;
     }
 
-    public EntregaDTO iniciarTraslado(String entregaId, String responsableId) {
-        Entrega entrega = buscar(entregaId);
-        entrega.iniciarTraslado();
+    public EntregaDTO crearEntregaDTO(List<Long> donacionesIds, Long entidadId, List<Long> donantesIds) {
+        Entrega entrega = new Entrega(donacionesIds, entidadId);
+        donantesIds.forEach(entrega::agregarDonanteId);
         repositoryEntregas.save(entrega);
+        return this.toDTO(entrega);
+    }
+
+    public List<EntregaDTO> iniciarTraslado(Long idDonante, String responsableId) {
+        List<Entrega> entregas = buscarEntregas(idDonante);
+
+        entregas.forEach(entrega -> {
+            entrega.iniciarTraslado();
+            repositoryEntregas.save(entrega);
+            this.persistirCambiosEnDonaciones(entrega,responsableId);
+        });
+
+        return entregas.stream().map(entrega -> this.toDTO(entrega)).collect(Collectors.toList());
+    }
+
+    public void persistirCambiosEnDonaciones(Entrega entrega,String responsableId) {
         for (Long donacionId : entrega.getDonacionesIds()) {
             donacionesClient.iniciarTraslado(donacionId, responsableId);
         }
-        return toDTO(entrega);
     }
-
-    public List<EntregaDTO> iniciarRuta(List<String> entregaIds, String choferId) {
-        List<EntregaDTO> resultado = new java.util.ArrayList<>();
-        for (String entregaId : entregaIds) {
-            resultado.add(this.iniciarTraslado(entregaId, choferId));
-        }
-        String aviso = "El+camion+inicio+la+ruta.+Segui+tu+entrega+en:+"
-                + "http://localhost:8083/logistica-service/camiones/monitoreo/ruta/camion/1/recorrido";
-        for (String entregaId : entregaIds) {
-            notificarInteresados(buscar(entregaId), aviso);
-        }
-        return resultado;
-    }
+//    public List<EntregaDTO> iniciarRuta(List<String> entregaIds, String choferId) {
+//        List<EntregaDTO> resultado = new java.util.ArrayList<>();
+//        for (String entregaId : entregaIds) {
+//            resultado.add(this.iniciarTraslado(entregaId, choferId));
+//        }
+//        String aviso = "El+camion+inicio+la+ruta.+Segui+tu+entrega+en:+"
+//                + "http://localhost:8083/logistica-service/camiones/monitoreo/ruta/camion/1/recorrido";
+//        for (String entregaId : entregaIds) {
+//            notificarInteresados(buscar(entregaId), aviso);
+//        }
+//        return resultado;
+//    }
 
     public EntregaDTO confirmarRecepcion(String entregaId, ConfirmarRecepcionDTO body,
                                          String responsableId) {
@@ -67,7 +85,7 @@ public class EntregaServiceImpl {
         entrega.confirmarRecepcion(body.getFotosUrl());
         repositoryEntregas.save(entrega);
         for (Long donacionId : entrega.getDonacionesIds()) {
-            donacionesClient.confirmarEntrega(donacionId, responsableId);
+            donacionesClient.confirmarEntrega(donacionId, responsableId, body.getFotosUrl());
         }
         String comprobante = "Entrega+realizada+con+exito.+Fecha:+" + entrega.getFechaEntrega()
                 + ".+Entrega+nro+" + entrega.getId();
@@ -104,17 +122,40 @@ public class EntregaServiceImpl {
                     && !entidad.representantes().isEmpty()
                     && !entidad.representantes().get(0).mediosDeNotificacion().isEmpty()) {
                 MedioDeNotificacionDTO medio = entidad.representantes().get(0).mediosDeNotificacion().get(0);
-                notificacionesPublisher.publicar(medio.datoDeContacto(), mensaje, medio.tipoDeNotificacion());
+                notificacionesPublisher.publicarParaEntidad(entrega.getEntidadBeneficiariaId(),
+                        medio.datoDeContacto(), mensaje, medio.tipoDeNotificacion());
             }
         } catch (Exception e) {
             System.out.println("No se pudo notificar a la entidad: " + e.getMessage());
         }
-        // El contacto del donante ya no se resuelve aca, se publica solo el id
-        // y notificaciones-service lo resuelve al consumir el mensaje de la cola
-        if (entrega.getDonanteId() != null) {
-            notificacionesPublisher.publicarParaDonante(entrega.getDonanteId(), mensaje, "SMS");
+
+        // Un aviso por cada donante de la entrega. Solo se manda el id:
+        // notificaciones-service resuelve el contacto y su medio preferido
+        if (entrega.getDonantesId() != null) {
+            for (Long donanteId : entrega.getDonantesId()) {
+                notificacionesPublisher.publicarParaDonante(donanteId, mensaje, null);
+            }
         }
     }
+
+    private List<Entrega> buscarEntregas(Long donanteId){
+        List<Long> idsDonantes = new ArrayList<Long>();
+        idsDonantes.add(donanteId);
+        return repositoryEntregas.findByDonantesId(idsDonantes);
+    }
+
+    public void iniciarTrasladoDeEntrega(String entregaId, String responsableId) {
+        Entrega entrega = buscar(entregaId);
+        entrega.iniciarTraslado();
+        repositoryEntregas.save(entrega);
+        try {
+            persistirCambiosEnDonaciones(entrega, responsableId);
+        } catch (Exception e) {
+            System.out.println("No se pudo avisar a donaciones (iniciarTraslado, entrega "
+                    + entregaId + "): " + e.getMessage());
+        }
+    }
+
 
     private Entrega buscar(String id) {
         return repositoryEntregas.findById(id)
@@ -131,5 +172,14 @@ public class EntregaServiceImpl {
                 e.getFotosUrl(),
                 e.getMotivoNoRecepcion()
         );
+    }
+    public List<EntregaDTO> listarEntregas() {
+        return repositoryEntregas.findAll().stream()
+                .map(this::toDTO)
+                .toList();
+    }
+
+    public EntregaDTO obtenerEntrega(String id) {
+        return toDTO(buscar(id));
     }
 }

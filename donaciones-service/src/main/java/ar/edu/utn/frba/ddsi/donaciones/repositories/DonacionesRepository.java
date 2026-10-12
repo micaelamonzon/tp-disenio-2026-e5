@@ -15,4 +15,6 @@ public interface DonacionesRepository extends JpaRepository<DonacionSegmentada, 
     List<DonacionSegmentada> findDonacionesPorIdJuridico(Long idDeJuridico);
     @Query("SELECT ds FROM DonacionSegmentada  ds WHERE ds.estadoActual = :estado")
     List<DonacionSegmentada> findByEstado(EstadoDonacion estado);
+    @Query("SELECT ds FROM DonacionSegmentada  ds WHERE ds.entidadBeneficiaria.id = :entidadId")
+    List<DonacionSegmentada> findByEntidadBeneficiariaId(Long entidadId);
 }

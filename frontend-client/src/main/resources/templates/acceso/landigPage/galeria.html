@@ -5,29 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="${titulo != null ? titulo + ' - DonaTrack' : 'Galería de Donaciones - DonaTrack'}">Galería de Donaciones - DonaTrack</title>
 
-    <!-- CSS Estático -->
+
     <link rel="stylesheet" th:href="@{/css/landingPage/landingPage.css}">
-    <!-- FontAwesome para los íconos de la tarjeta -->
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 
-<!-- HEADER Y NAVBAR -->
+
 <header th:replace="~{layoutAcceso/layoutAcceso :: header}"></header>
 <nav th:replace="~{layoutAcceso/layoutAcceso :: navBar}"></nav>
 
 <main class="container" style="max-width: 1140px; margin: 0 auto; padding: 3rem 1rem 4rem 1rem;">
 
-    <!-- SECCIÓN DE TÍTULO PRINCIPAL DE LA GALERÍA -->
     <div style="text-align: center; margin-bottom: 2.5rem;">
         <h1 style="font-size: 2.25rem; font-weight: 800; color: #0f172a; margin-bottom: 0.5rem;">Galería de Donaciones</h1>
         <p style="color: #64748b; font-size: 1rem;">Conocé el impacto de cada donación entregada a través de UTN Solidaria</p>
     </div>
 
-    <!-- GRILLA DE DONACIONES (3 COLUMNAS) -->
+
     <section class="section" style="padding: 0;">
 
-        <!-- 1. SI LA LISTA VIENE DE SPRING BOOT CON DATOS -->
+
         <div th:if="${donaciones != null and !#lists.isEmpty(donaciones)}"
              style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.75rem;">
 
@@ -43,7 +42,7 @@
                          data-desc=${'Donación correspondiente a la categoría ' + (donacion.categoria != null ? donacion.categoria : 'General') + ' con un total de ' + donacion.cantidadTotalItems + ' ítems recibidos.'}">
 
                 <div style="height: 200px; width: 100%; overflow: hidden;">
-                    <!-- Muestra la foto de la Donación y usa default.jpg si la URL falla -->
+
                     <img th:src="${donacion.imagenUrlEfectiva != null ? donacion.imagenUrlEfectiva : '/img/default.jpg'}"
                          onerror="this.onerror=null; this.src='/img/default.jpg';"
                          th:alt="${donacion.subcategoria != null ? donacion.subcategoria : 'Donación'}"
@@ -76,7 +75,7 @@
 
         </div>
 
-        <!-- 2. DATOS ESTÁTICOS DE RESPALDO (SI LA LISTA VIENE VACÍA) -->
+
         <div th:if="${donaciones == null or #lists.isEmpty(donaciones)}" style="text-align: center; padding: 3rem 1rem; color: #64748b;">
             <i class="fa-solid fa-box-open" style="font-size: 3rem; margin-bottom: 1rem; color: #cbd5e1;"></i>
             <p style="font-size: 1.1rem; font-weight: 500;">No hay donaciones registradas en la galería en este momento.</p>
@@ -85,7 +84,7 @@
     </section>
 </main>
 
-<!-- MODAL DE DETALLE -->
+
 <div id="detail-modal" class="hidden" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); display: flex; align-items: center; justify-content: center; z-index: 1000;" onclick="closeModalOnOverlay(event)">
     <div style="background: #ffffff; width: 90%; max-width: 600px; padding: 2rem; border-radius: 16px; position: relative;">
         <button onclick="closeModal()" style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #64748b;">&times;</button>
@@ -100,7 +99,7 @@
     </div>
 </div>
 
-<!-- FOOTER -->
+
 <footer th:replace="~{layoutAcceso/layoutAcceso :: footer}"></footer>
 
 <script>

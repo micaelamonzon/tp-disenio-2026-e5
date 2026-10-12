@@ -55,7 +55,6 @@ const ICONS = {
    ============================================================ */
 const userMenuTrigger = document.getElementById("userMenuTrigger");
 const userMenu = document.getElementById("userMenu");
-const logoutBtn = document.getElementById("logoutBtn");
 
 function closeUserMenu() {
     userMenu.hidden = true;
@@ -68,13 +67,10 @@ userMenuTrigger.addEventListener("click", (e) => {
     isOpen ? closeUserMenu() : (userMenu.hidden = false, userMenuTrigger.setAttribute("aria-expanded", "true"));
 });
 document.addEventListener("click", (e) => {
-    if (!userMenu.hidden && !userMenu.contains(e.target) && e.target !== userMenuTrigger) closeUserMenu();
+    if (!userMenu.hidden && !userMenu.contains(e.target) && !userMenuTrigger.contains(e.target)) closeUserMenu();
 });
 document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeUserMenu(); });
-logoutBtn.addEventListener("click", () => {
-    closeUserMenu();
-    alert("Sesión cerrada");
-});
+// El logout lo resuelve el <form th:action="@{/logout}"> del HTML (Spring Security).
 
 const sidebarLinks = document.querySelectorAll(".sidebar-link");
 const adminViews = document.querySelectorAll(".admin-view");
@@ -84,6 +80,7 @@ const sidebarOverlay = document.getElementById("sidebarOverlay");
 
 // Cada vista se carga (fetch) cuando se abre, para que siempre muestre
 // datos frescos del backend y no algo que haya quedado obsoleto.
+// Camiones no necesita cargador: Thymeleaf ya renderizó la tabla en el servidor.
 const cargadoresDeVista = {
     dashboard: cargarDashboard,
     inventario: cargarInventario,
@@ -91,9 +88,11 @@ const cargadoresDeVista = {
 };
 
 function activarVista(view) {
+    if (!document.getElementById(`view-${view}`)) view = "dashboard";
     sidebarLinks.forEach(l => l.classList.toggle("active", l.dataset.view === view));
     adminViews.forEach(v => v.classList.toggle("active", v.id === `view-${view}`));
     adminShell.classList.remove("sidebar-open");
+    history.replaceState(null, "", `#${view}`);
     window.scrollTo({ top: 0, behavior: "smooth" });
     if (cargadoresDeVista[view]) cargadoresDeVista[view]();
 }
@@ -729,6 +728,28 @@ async function cargarAsignacion() {
     }
 }
 
+// funcion para manejar la alternacnia de pestañas dentro de la secicon del ranking
+function switchRankingView(tipo) {
+    const btnActual = document.getElementById('tabRankingActual');
+    const btnHistorico = document.getElementById('tabRankingHistorico');
+    const contActual = document.getElementById('rankingActualContainer');
+    const contHistorico = document.getElementById('rankingHistoricoContainer');
+
+    if (tipo === 'actual') {
+        btnActual.classList.add('active');
+        btnHistorico.classList.remove('active');
+        contActual.style.display = 'block';
+        contHistorico.style.display = 'none';
+    } else {
+        btnHistorico.classList.add('active');
+        btnActual.classList.remove('active');
+        contHistorico.style.display = 'block';
+        contActual.style.display = 'none';
+    }
+}
+
+
+
 // El backend ejecuta el matchmaking para TODAS las donaciones "En Depósito" de una sola vez
 // (MotorDeMatchmaking / MatchmakingScheduler),no hay un endpoint para ejecutarlo donación por donación.
 // Por eso el botón de cada card dispara el mismo proceso batch y después busca el resultado puntual de esa donación.
@@ -899,6 +920,194 @@ function renderMatchCards() {
 }
 
 /* ============================================================
+   GESTIÓN DE CAMIONES
+   La tabla y los contadores los renderiza Thymeleaf en el servidor;
+   acá solo se muestra/oculta el formulario "Nuevo Camión".
+   ============================================================ */
+const nuevoCamionBtn = document.getElementById("nuevoCamionBtn");
+const nuevoCamionCard = document.getElementById("nuevoCamionCard");
+const cancelarCamionBtn = document.getElementById("cancelarCamionBtn");
+
+function mostrarFormCamion(mostrar) {
+    nuevoCamionCard.hidden = !mostrar;
+    if (mostrar) nuevoCamionCard.querySelector("input")?.focus();
+}
+nuevoCamionBtn.addEventListener("click", () => mostrarFormCamion(nuevoCamionCard.hidden));
+cancelarCamionBtn.addEventListener("click", () => {
+    nuevoCamionCard.querySelector("form").reset();
+    mostrarFormCamion(false);
+});
+
+/* Utilidad compartida */
+function escapeHTML(valor) {
+    return String(valor ?? "").replace(/[&<>"']/g, c => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+    }[c]));
+}
+
+/* ============================================================
+   IMPORTAR DONANTES (CSV)
+   ============================================================ */
+// Endpoint del frontend-client que recibe el archivo (multipart, campo "archivo").
+// TODAVÍA NO EXISTE en AdminController: hay que crearlo.
+const IMPORTAR_URL = "/personaAdministradora/importar";
+
+const csvDropzone = document.getElementById("csvDropzone");
+const csvInput = document.getElementById("csvInput");
+const archivoElegido = document.getElementById("archivoElegido");
+const archivoNombre = document.getElementById("archivoNombre");
+const archivoTamano = document.getElementById("archivoTamano");
+const importarBtn = document.getElementById("importarBtn");
+const quitarArchivoBtn = document.getElementById("quitarArchivoBtn");
+const importarError = document.getElementById("importarError");
+const historialImportaciones = document.getElementById("historialImportaciones");
+
+let archivoCSV = null;
+let historial = [];
+
+function formatearTamano(bytes) {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function mostrarErrorImportar(msg) {
+    importarError.hidden = !msg;
+    importarError.textContent = msg || "";
+}
+
+function limpiarArchivo() {
+    archivoCSV = null;
+    csvInput.value = "";
+    archivoElegido.hidden = true;
+}
+
+function elegirArchivo(file) {
+    mostrarErrorImportar("");
+    if (!file) return;
+    if (!/\.csv$/i.test(file.name)) {
+        limpiarArchivo();
+        mostrarErrorImportar("El archivo tiene que ser un .csv.");
+        return;
+    }
+    archivoCSV = file;
+    archivoNombre.textContent = file.name;
+    archivoTamano.textContent = formatearTamano(file.size);
+    archivoElegido.hidden = false;
+}
+
+function renderHistorial() {
+    if (!historial.length) {
+        historialImportaciones.innerHTML = `<p class="empty-state">Todavía no hay importaciones en esta sesión.</p>`;
+        return;
+    }
+    historialImportaciones.innerHTML = historial.map(h => `
+      <div class="history-item">
+        <div>
+          <div class="history-name">${escapeHTML(h.nombre)}</div>
+          <div class="history-date">${escapeHTML(h.fecha)}</div>
+        </div>
+        <div class="history-right">
+          ${h.registros != null ? `<div class="history-count">${Number(h.registros).toLocaleString("es-AR")} registros</div>` : ""}
+          <div class="history-status">Completado</div>
+        </div>
+      </div>`).join("");
+}
+
+csvDropzone.addEventListener("click", () => csvInput.click());
+csvDropzone.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); csvInput.click(); }
+});
+csvInput.addEventListener("change", () => elegirArchivo(csvInput.files[0]));
+["dragenter", "dragover"].forEach(ev => csvDropzone.addEventListener(ev, (e) => {
+    e.preventDefault();
+    csvDropzone.classList.add("dragover");
+}));
+["dragleave", "drop"].forEach(ev => csvDropzone.addEventListener(ev, (e) => {
+    e.preventDefault();
+    csvDropzone.classList.remove("dragover");
+}));
+csvDropzone.addEventListener("drop", (e) => elegirArchivo(e.dataTransfer.files[0]));
+quitarArchivoBtn.addEventListener("click", () => { limpiarArchivo(); mostrarErrorImportar(""); });
+
+importarBtn.addEventListener("click", async () => {
+    if (!archivoCSV) return;
+    mostrarErrorImportar("");
+    importarBtn.disabled = true;
+    importarBtn.textContent = "Importando...";
+    try {
+        const datos = new FormData();
+        datos.append("archivo", archivoCSV);
+
+        // Si Spring Security tiene CSRF activo, el token viene en los <meta> del head.
+        const headers = {};
+        const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
+        const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
+        if (csrfToken && csrfHeader) headers[csrfHeader] = csrfToken;
+
+        const res = await fetch(IMPORTAR_URL, { method: "POST", body: datos, headers });
+        if (!res.ok) throw new Error(`POST ${IMPORTAR_URL} -> ${res.status}`);
+        const respuesta = await res.json().catch(() => null);
+
+        historial.unshift({
+            nombre: archivoCSV.name,
+            fecha: new Date().toLocaleString("es-AR", { dateStyle: "long", timeStyle: "short" }),
+            registros: respuesta?.registros ?? respuesta?.cantidad ?? null,
+        });
+        renderHistorial();
+        limpiarArchivo();
+    } catch (err) {
+        console.error(err);
+        mostrarErrorImportar("No se pudo importar el archivo. Verificá que el servicio de importación esté disponible.");
+    } finally {
+        importarBtn.disabled = false;
+        importarBtn.textContent = "Importar";
+    }
+});
+
+/* ============================================================
+   CONFIRMAR ELIMINACIÓN DE CAMIÓN (reemplaza el confirm() del navegador)
+   ============================================================ */
+const confirmOverlay = document.getElementById("confirmOverlay");
+const confirmText = document.getElementById("confirmText");
+const confirmAccept = document.getElementById("confirmAccept");
+const confirmCancel = document.getElementById("confirmCancel");
+let formPorConfirmar = null;
+
+function abrirConfirmacion(form) {
+    formPorConfirmar = form;
+    const patente = form.dataset.patente;
+    confirmText.textContent = patente
+        ? `Vas a eliminar el camión ${patente}. Esta acción no se puede deshacer.`
+        : "Vas a eliminar este camión. Esta acción no se puede deshacer.";
+    confirmOverlay.hidden = false;
+    confirmCancel.focus();
+}
+function cerrarConfirmacion() {
+    confirmOverlay.hidden = true;
+    formPorConfirmar = null;
+}
+
+if (confirmOverlay) {
+    // Delegación: captura el envío de cualquier formulario de baja de camión.
+    document.addEventListener("submit", (e) => {
+        const form = e.target.closest && e.target.closest(".form-eliminar-camion");
+        if (!form) return;
+        e.preventDefault();
+        abrirConfirmacion(form);
+    });
+    confirmAccept.addEventListener("click", () => {
+        const form = formPorConfirmar;
+        cerrarConfirmacion();
+        if (form) form.submit(); // submit() no vuelve a disparar el evento "submit"
+    });
+    confirmCancel.addEventListener("click", cerrarConfirmacion);
+    confirmOverlay.addEventListener("click", (e) => { if (e.target === confirmOverlay) cerrarConfirmacion(); });
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !confirmOverlay.hidden) cerrarConfirmacion(); });
+}
+
+/* ============================================================
    INICIO
    ============================================================ */
-cargarDashboard();
+// Abre la vista indicada en la URL (#camiones, #inventario...) o el dashboard.
+activarVista(location.hash.slice(1) || "dashboard");

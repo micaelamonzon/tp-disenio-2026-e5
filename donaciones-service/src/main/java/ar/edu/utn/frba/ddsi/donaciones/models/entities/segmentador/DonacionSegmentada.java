@@ -63,7 +63,10 @@ public class DonacionSegmentada  {
     private EntidadBeneficiaria entidadBeneficiaria;
 
     @Column(name = "fecha_de_entrega")
-    private LocalDate fechaEntrega;
+    private LocalDateTime fechaEntrega;
+
+    @Column(name = "fecha_de_asignacion")
+    private LocalDateTime fechaDeAsignacion;
 
     @Column
     private String fotoPath;
@@ -84,7 +87,11 @@ public class DonacionSegmentada  {
         registrarCambio(null, EstadoDonacion.EN_DEPOSITO,"Donación registrada en depósito", "SISTEMA");
     }
 
+    public String calcularDescripcion(){
+        String cant = this.calcularCantidadDeBienes().toString();
 
+        return cant + " unidades de " + this.getSubcategoria().getNombre();
+    }
 
     public void agregarBien(Bien bien) {
         this.bienesDelMismoTipo.add(bien);

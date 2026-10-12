@@ -2,6 +2,8 @@ package ar.edu.utn.frba.ddsi.controller;
 
 import ar.edu.utn.frba.ddsi.dto.CamionDTO;
 import ar.edu.utn.frba.ddsi.dto.CamionResponseDTO;
+import ar.edu.utn.frba.ddsi.repository.RepositoryCamiones;
+import ar.edu.utn.frba.ddsi.repository.impl.RepositoryRutas;
 import ar.edu.utn.frba.ddsi.services.Impl.CamionServiceImpl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,9 +16,11 @@ import java.util.List;
 public class CamionController {
 
     private final CamionServiceImpl camionService;
+    private final RepositoryRutas repositoryRutas;
 
-    public CamionController(CamionServiceImpl camionService) {
+    public CamionController(CamionServiceImpl camionService, RepositoryRutas repositoryRutas) {
         this.camionService = camionService;
+        this.repositoryRutas = repositoryRutas;
     }
 
     @PostMapping("/camiones")

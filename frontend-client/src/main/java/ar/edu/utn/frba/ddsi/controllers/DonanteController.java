@@ -3,11 +3,13 @@ package ar.edu.utn.frba.ddsi.controllers;
 import ar.edu.utn.frba.ddsi.dtos.donaciones.DonacionDTO;
 import ar.edu.utn.frba.ddsi.dtos.entidades.EntidadBeneficiariaDTO;
 import ar.edu.utn.frba.ddsi.dtos.donaciones.misiones.MisionFrontDTO;
+import ar.edu.utn.frba.ddsi.dtos.logistica.RutaEntregaDTO;
 import ar.edu.utn.frba.ddsi.services.DonacionesApiService.DonanteNoEncontradoException;
 import ar.edu.utn.frba.ddsi.services.DonacionesApiService.EntidadNoEncontradaException;
 import ar.edu.utn.frba.ddsi.services.DonacionesService;
 import ar.edu.utn.frba.ddsi.services.IncentivosService;
 import ar.edu.utn.frba.ddsi.services.internal.SesionExpiradaException;
+import ar.edu.utn.frba.ddsi.services.LogisticaApiService;
 import ar.edu.utn.frba.ddsi.utils.UsuarioActual;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -16,8 +18,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ar.edu.utn.frba.ddsi.services.NotificacionesApiService;
+import tools.jackson.databind.ObjectMapper;
+
 import java.util.Comparator;
 import java.util.List;
 
@@ -29,15 +34,21 @@ public class DonanteController {
     private final IncentivosService incentivosService;
     private final NotificacionesApiService notificacionesApiService;
     private final UsuarioActual usuarioActual;
+    private final LogisticaApiService logisticaApiService;
+    private final ObjectMapper objectMapper;
 
     public DonanteController(DonacionesService donacionesService,
                              IncentivosService incentivosService,
                              NotificacionesApiService notificacionesApiService,
-                             UsuarioActual usuarioActual) {
+                             UsuarioActual usuarioActual,
+                             LogisticaApiService logisticaApiService,
+                             ObjectMapper objectMapper) {
         this.donacionesService = donacionesService;
         this.incentivosService = incentivosService;
         this.notificacionesApiService = notificacionesApiService;
         this.usuarioActual = usuarioActual;
+        this.logisticaApiService = logisticaApiService;
+        this.objectMapper = objectMapper;
     }
 
     // Id del donante logueado (viene del token de autenticacion-service, guardado en la sesión)
@@ -130,6 +141,8 @@ public class DonanteController {
         return "acceso/donante/entidadDetalle";
     }
 
+
+
     @GetMapping("/incentivos")
     public String incentivos(Model model) {
         model.addAttribute("titulo", "Incentivos");
@@ -176,7 +189,15 @@ public class DonanteController {
     public String seguimiento(Model model) {
         model.addAttribute("titulo", "Seguimiento de entregas");
         model.addAttribute("tabActiva", "seguimiento");
-        return "acceso/donante/seguimiento";
+        List<RutaEntregaDTO> entregas = logisticaApiService.obtenerRutasDeDonante(idDonanteActual());
+        model.addAttribute("entregas", entregas);
+        model.addAttribute("entregasJson", objectMapper.writeValueAsString(entregas));
+        return  "acceso/donante/seguimiento";
+    }
+    @GetMapping("/seguimiento/datos")
+    @ResponseBody
+    public List<RutaEntregaDTO> seguimientoDatos() {
+        return logisticaApiService.obtenerRutasDeDonante(idDonanteActual());
     }
 
     @GetMapping("/notificaciones")

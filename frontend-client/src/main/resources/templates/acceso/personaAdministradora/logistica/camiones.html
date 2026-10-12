@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DonaTrack - Gestión de Camiones</title>
+    <link rel="stylesheet" th:href="@{/css/admin/personaAdmin.css}">
+</head>
+<body>
+
+<header class="topbar">
+    <div class="topbar-left">
+        <span class="logo-text">DonaTrack</span>
+        <nav class="main-nav">
+            <a th:href="@{/personaAdministradora/home}" class="main-nav-link">Panel Admin</a>
+        </nav>
+    </div>
+    <div class="topbar-right">
+        <form th:action="@{/logout}" method="post">
+            <button type="submit" class="user-menu-item">Cerrar sesión</button>
+        </form>
+    </div>
+</header>
+
+<div class="admin-shell">
+    <aside class="admin-sidebar">
+        <div class="sidebar-title">Gestión</div>
+        <nav class="sidebar-nav">
+            <a class="sidebar-link" th:href="@{/personaAdministradora/home}">Dashboard</a>
+            <a class="sidebar-link active" th:href="@{/logistica/camiones}">Gestión de Camiones</a>
+            <a class="sidebar-link" th:href="@{/logistica/entregas}">Entregas</a>
+        </nav>
+    </aside>
+
+    <main class="admin-content">
+        <div class="page-head">
+            <h1>Gestión de Camiones</h1>
+        </div>
+
+        <div class="table-card">
+            <div class="table-title">Camiones registrados</div>
+            <div class="table-scroll">
+                <table class="data-table">
+                    <thead>
+                    <tr>
+                        <th>Patente</th>
+                        <th>Volumen (m³)</th>
+                        <th>Altura (m)</th>
+                        <th>Capacidad (kg)</th>
+                        <th>Disponible</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="camion : ${camiones}">
+                        <td th:text="${camion.patente}">ABC123</td>
+                        <td th:text="${camion.volumen}">10</td>
+                        <td th:text="${camion.altura}">2.5</td>
+                        <td th:text="${camion.capacidadCarga}">1000</td>
+                        <td>
+                            <span th:if="${camion.disponible}" class="status-tag status-activo">Disponible</span>
+                            <span th:unless="${camion.disponible}" class="status-tag status-inactivo">No disponible</span>
+                        </td>
+                    </tr>
+                    <tr th:if="${camiones == null or camiones.isEmpty()}">
+                        <td colspan="5" class="empty-state">No hay camiones registrados.</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+
+</body>
+</html>

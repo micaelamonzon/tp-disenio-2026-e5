@@ -94,7 +94,7 @@ public class DonacionesApiService {
         }
     }
 
-    // GET /servicioDeDonaciones/entidad/{id}
+
     public EntidadBeneficiariaDTO obtenerEntidad(Long idEntidad) {
         try {
             return apiCaller.get(donacionesServiceUrl + "/entidad/{id}", EntidadBeneficiariaDTO.class, idEntidad);

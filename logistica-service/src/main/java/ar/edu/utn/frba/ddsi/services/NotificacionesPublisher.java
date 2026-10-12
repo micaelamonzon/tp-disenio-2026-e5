@@ -28,7 +28,7 @@ public class NotificacionesPublisher {
         try {
             String idEvento = UUID.randomUUID().toString();
             NotificacionMensajeDTO notificacion =
-                    new NotificacionMensajeDTO(idEvento, destinatario, null, mensaje, medio);
+                    new NotificacionMensajeDTO(idEvento, destinatario, null, null, mensaje, medio);
             rabbitTemplate.convertAndSend(queueName, notificacion);
         } catch (Exception e) {
             System.out.println("Error al publicar notificación en la cola: " + e.getMessage());
@@ -41,7 +41,21 @@ public class NotificacionesPublisher {
         try {
             String idEvento = UUID.randomUUID().toString();
             NotificacionMensajeDTO notificacion =
-                    new NotificacionMensajeDTO(idEvento, null, donanteId, mensaje, medio);
+                    new NotificacionMensajeDTO(idEvento, null, donanteId, null, mensaje, medio);
+            rabbitTemplate.convertAndSend(queueName, notificacion);
+        } catch (Exception e) {
+            System.out.println("Error al publicar notificación en la cola: " + e.getMessage());
+        }
+    }
+
+
+    // Publica una notificación para una entidad beneficiaria: el contacto ya viene
+    // resuelto y además se manda su id, para que aparezca en su pantalla de notificaciones
+    public void publicarParaEntidad(Long entidadId, String destinatario, String mensaje, String medio) {
+        try {
+            String idEvento = UUID.randomUUID().toString();
+            NotificacionMensajeDTO notificacion =
+                    new NotificacionMensajeDTO(idEvento, destinatario, null, entidadId, mensaje, medio);
             rabbitTemplate.convertAndSend(queueName, notificacion);
         } catch (Exception e) {
             System.out.println("Error al publicar notificación en la cola: " + e.getMessage());
