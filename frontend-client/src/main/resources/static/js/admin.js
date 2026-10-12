@@ -728,6 +728,28 @@ async function cargarAsignacion() {
     }
 }
 
+// funcion para manejar la alternacnia de pestañas dentro de la secicon del ranking
+function switchRankingView(tipo) {
+    const btnActual = document.getElementById('tabRankingActual');
+    const btnHistorico = document.getElementById('tabRankingHistorico');
+    const contActual = document.getElementById('rankingActualContainer');
+    const contHistorico = document.getElementById('rankingHistoricoContainer');
+
+    if (tipo === 'actual') {
+        btnActual.classList.add('active');
+        btnHistorico.classList.remove('active');
+        contActual.style.display = 'block';
+        contHistorico.style.display = 'none';
+    } else {
+        btnHistorico.classList.add('active');
+        btnActual.classList.remove('active');
+        contHistorico.style.display = 'block';
+        contActual.style.display = 'none';
+    }
+}
+
+
+
 // El backend ejecuta el matchmaking para TODAS las donaciones "En Depósito" de una sola vez
 // (MotorDeMatchmaking / MatchmakingScheduler),no hay un endpoint para ejecutarlo donación por donación.
 // Por eso el botón de cada card dispara el mismo proceso batch y después busca el resultado puntual de esa donación.

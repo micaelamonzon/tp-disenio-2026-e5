@@ -1,8 +1,8 @@
 package ar.edu.utn.frba.ddsi.providers;
 
-import ar.edu.utn.frba.ddsi.dtos.AuthResponseDTO;
-import ar.edu.utn.frba.ddsi.dtos.Rol;
-import ar.edu.utn.frba.ddsi.dtos.UsuarioSesion;
+import ar.edu.utn.frba.ddsi.dtos.autenticacion.AuthResponseDTO;
+import ar.edu.utn.frba.ddsi.dtos.autenticacion.Rol;
+import ar.edu.utn.frba.ddsi.dtos.autenticacion.UsuarioSesion;
 import ar.edu.utn.frba.ddsi.services.AuthApiService;
 import ar.edu.utn.frba.ddsi.utils.JwtClaimsReader;
 import ar.edu.utn.frba.ddsi.utils.UsuarioActual;
