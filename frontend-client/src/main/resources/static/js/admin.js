@@ -1066,6 +1066,47 @@ importarBtn.addEventListener("click", async () => {
 });
 
 /* ============================================================
+   CONFIRMAR ELIMINACIÓN DE CAMIÓN (reemplaza el confirm() del navegador)
+   ============================================================ */
+const confirmOverlay = document.getElementById("confirmOverlay");
+const confirmText = document.getElementById("confirmText");
+const confirmAccept = document.getElementById("confirmAccept");
+const confirmCancel = document.getElementById("confirmCancel");
+let formPorConfirmar = null;
+
+function abrirConfirmacion(form) {
+    formPorConfirmar = form;
+    const patente = form.dataset.patente;
+    confirmText.textContent = patente
+        ? `Vas a eliminar el camión ${patente}. Esta acción no se puede deshacer.`
+        : "Vas a eliminar este camión. Esta acción no se puede deshacer.";
+    confirmOverlay.hidden = false;
+    confirmCancel.focus();
+}
+function cerrarConfirmacion() {
+    confirmOverlay.hidden = true;
+    formPorConfirmar = null;
+}
+
+if (confirmOverlay) {
+    // Delegación: captura el envío de cualquier formulario de baja de camión.
+    document.addEventListener("submit", (e) => {
+        const form = e.target.closest && e.target.closest(".form-eliminar-camion");
+        if (!form) return;
+        e.preventDefault();
+        abrirConfirmacion(form);
+    });
+    confirmAccept.addEventListener("click", () => {
+        const form = formPorConfirmar;
+        cerrarConfirmacion();
+        if (form) form.submit(); // submit() no vuelve a disparar el evento "submit"
+    });
+    confirmCancel.addEventListener("click", cerrarConfirmacion);
+    confirmOverlay.addEventListener("click", (e) => { if (e.target === confirmOverlay) cerrarConfirmacion(); });
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !confirmOverlay.hidden) cerrarConfirmacion(); });
+}
+
+/* ============================================================
    INICIO
    ============================================================ */
 // Abre la vista indicada en la URL (#camiones, #inventario...) o el dashboard.
