@@ -854,3 +854,52 @@ svg{ width: 18px; height: 18px; flex-shrink:0; }
 .notif-title { margin: 0; font-size: 1rem; font-weight: 600; color: #0f172a; }
 .notif-desc { margin: 0; font-size: 0.9rem; color: #64748b; }
 .notif-time { font-size: 0.8rem; color: #94a3b8; }
+
+/* Pegar al FINAL de personaAdmin.css. Ventana de confirmación para eliminar un camión. */
+.confirm-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(15, 23, 42, 0.5);
+}
+.confirm-overlay[hidden] { display: none; }
+
+.confirm-box {
+    width: 100%;
+    max-width: 400px;
+    padding: 28px 24px 22px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 20px 50px rgba(15, 23, 42, 0.25);
+    text-align: center;
+}
+.confirm-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    margin-bottom: 12px;
+    border-radius: 50%;
+    background: #fee2e2;
+    color: #dc2626;
+}
+.confirm-icon svg { width: 24px; height: 24px; }
+.confirm-box h2 { margin: 0 0 8px; font-size: 1.2rem; color: #0f172a; }
+.confirm-box p { margin: 0 0 22px; font-size: 0.95rem; color: #64748b; }
+.confirm-actions { display: flex; justify-content: center; gap: 10px; }
+.confirm-danger {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 10px;
+    background: #dc2626;
+    color: #fff;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+.confirm-danger:hover { background: #b91c1c; }
