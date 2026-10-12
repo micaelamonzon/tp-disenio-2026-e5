@@ -811,3 +811,46 @@ svg{ width: 18px; height: 18px; flex-shrink:0; }
     font-size: 0.85rem;
     font-weight: 400;
 }
+
+/* Pegar al FINAL de personaAdmin.css. Estilos de la página de notificaciones del admin
+   y de los links <a> dentro del menú de usuario. */
+.user-menu a.user-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: inherit;
+}
+.user-menu a.user-menu-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+.notifications-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 16px;
+}
+.notif-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 16px 18px;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+}
+.notif-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: #e0e7ff;
+    color: #4338ca;
+    flex-shrink: 0;
+}
+.notif-icon svg { width: 20px; height: 20px; }
+.notif-body { display: flex; flex-direction: column; gap: 4px; }
+.notif-title { margin: 0; font-size: 1rem; font-weight: 600; color: #0f172a; }
+.notif-desc { margin: 0; font-size: 0.9rem; color: #64748b; }
+.notif-time { font-size: 0.8rem; color: #94a3b8; }

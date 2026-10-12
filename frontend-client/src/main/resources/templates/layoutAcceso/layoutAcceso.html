@@ -41,6 +41,7 @@
 
         <!-- Parte derecha (Perfil o Botón Iniciar Sesión) -->
         <!-- Parte derecha: menú desplegable solo para la persona administradora; el resto igual que antes -->
+        <!-- Parte derecha: menú desplegable solo para la persona administradora; el resto igual que antes -->
         <div class="topbar-right">
 
             <div th:if="${session.usuario != null and #strings.containsIgnoreCase(session.usuario.rol, 'administrador')}" class="lp-user-menu-wrap">
@@ -59,6 +60,10 @@
                     <a th:href="@{/personaAdministradora/home}" class="lp-user-menu-item">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
                         Panel de administración
+                    </a>
+                    <a th:href="@{/personaAdministradora/notificaciones}" class="lp-user-menu-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                        Notificaciones
                     </a>
 
 
