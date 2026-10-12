@@ -1,12 +1,16 @@
 package ar.edu.utn.frba.ddsi.controllers;
 
+import ar.edu.utn.frba.ddsi.dtos.entidades.EntidadBeneficiariaDTO;
 import ar.edu.utn.frba.ddsi.dtos.entidades.NecesidadDTO;
+import ar.edu.utn.frba.ddsi.dtos.entidades.NecesidadesDTO;
+import ar.edu.utn.frba.ddsi.dtos.entidades.PerfilEntidadDTO;
 import ar.edu.utn.frba.ddsi.services.EntidadesApiService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -132,17 +136,48 @@ public class EntidadController {
     }
 
     @PostMapping("/necesidades")
-    @ResponseBody
-    public ResponseEntity<?> registrarNecesidad(@RequestBody NecesidadDTO body) {
-        try {
-            NecesidadDTO creada = entidadesApiService.crearNecesidad(idEntidadActual(), body);
-            return ResponseEntity.status(HttpStatus.CREATED).body(creada);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest()
-                    .body(Map.of("error", "No pudimos registrar la necesidad."));
+    public String enviarNecesidades(@ModelAttribute NecesidadesDTO necesidades,
+                                    RedirectAttributes redirect) {
+        int enviadas = 0;
+        int fallidas = 0;
+
+        for (NecesidadDTO n : necesidades.getNecesidades()) {
+            try {
+                String periodo = (n.getPeriodo() == null || n.getPeriodo().isBlank()) ? null : n.getPeriodo();
+                NecesidadDTO dto = new NecesidadDTO(null, n.getTipo(), n.getSubcategoria(),
+                        n.getDescripcion(), false, n.getCantidad(), periodo);
+                entidadesApiService.crearNecesidad(idEntidadActual(), dto);
+                enviadas++;
+            } catch (RuntimeException e) {
+                fallidas++;
+            }
         }
+
+        redirect.addFlashAttribute("enviadas", enviadas);
+        redirect.addFlashAttribute("fallidas", fallidas);
+        return "redirect:/entidadBeneficiaria/registrarNecesidades";
     }
 
+    @GetMapping("/perfil")
+    public String perfil(Model model) {
+        model.addAttribute("titulo", "Mi perfil");
+        model.addAttribute("tabActiva", " ");
+        try {
+            EntidadBeneficiariaDTO entidad = entidadesApiService.obtenerPerfil(idEntidadActual());
+            model.addAttribute("entidad", entidad);
+            model.addAttribute("iniciales", iniciales(entidad.getRazonSocial()));
+        } catch (RuntimeException e) {
+            model.addAttribute("errorPerfil",
+                    "No pudimos cargar los datos de tu entidad. Intentá de nuevo en unos minutos.");
+        }
+        return "acceso/entidadBeneficiaria/perfil";
+    }
+
+    private String iniciales(String nombre) {
+        if (nombre == null || nombre.isBlank()) return "?";
+        String n = nombre.trim();
+        return n.substring(0, Math.min(2, n.length())).toUpperCase();
+    }
 
 
     // Req. 14: mapa con los camiones que traen donaciones a la entidad
@@ -193,12 +228,12 @@ public class EntidadController {
         return "acceso/entidadBeneficiaria/notificaciones";
     }
 
-    @GetMapping("/perfil")
-    public String pefil(Model model) {
-        model.addAttribute("titulo", "Mi perfil");
-        model.addAttribute("tabActiva", " ");
-        return "acceso/entidadBeneficiaria/perfil";
-    }
+//    @GetMapping("/perfil")
+//    public String pefil(Model model) {
+//        model.addAttribute("titulo", "Mi perfil");
+//        model.addAttribute("tabActiva", " ");
+//        return "acceso/entidadBeneficiaria/perfil";
+//    }
 
     private List<EntregaDTO> filtrarPorEstado(List<EntregaDTO> entregas, String estado) {
         return entregas.stream()

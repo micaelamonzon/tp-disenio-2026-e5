@@ -1,13 +1,12 @@
 const registeredNeeds = [];
 const needForm = document.getElementById("needForm");
 const registeredNeedsList = document.getElementById("registeredNeedsList");
-const sendNeedsBtn = document.getElementById("sendNeedsBtn");
-const needType = document.getElementById("needType");
+const sendNeedsForm = document.getElementById("sendNeedsForm");
+const hiddenInputs = document.getElementById("hiddenInputs");const needType = document.getElementById("needType");
 const periodField = document.getElementById("periodField");
 const needPeriod = document.getElementById("needPeriod");
 const quantityLabel = document.getElementById("quantityLabel");
 
-const ENDPOINT = "/entidadBeneficiaria/necesidades";
 
 function escapeHtml(text) {
     const div = document.createElement("div");
@@ -15,11 +14,6 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
-function csrfHeaders() {
-    const token = document.querySelector('meta[name="_csrf"]')?.content;
-    const header = document.querySelector('meta[name="_csrf_header"]')?.content;
-    return token && header ? { [header]: token } : {};
-}
 
 const TIPO_LABEL = { RECURRENTE: "Recurrente", EXTRAORDINARIA: "Extraordinaria" };
 const PERIODO_LABEL = { DIAS: "días", SEMANAS: "semanas", MESES: "meses" };
@@ -77,7 +71,7 @@ if (needForm) {
 
         const tipo = needType.value;
         registeredNeeds.unshift({
-            id: Date.now(),                       // id local, solo para el borrado en la lista
+            id: Date.now(),
             tipo,
             subcategoria: document.getElementById("needCategory").value,
             descripcion: document.getElementById("needDescription").value.trim(),
@@ -92,45 +86,50 @@ if (needForm) {
         quantityLabel.textContent = "Cantidad estimada";
     });
 }
-
-async function enviarNecesidad(need) {
-    const { id, ...payload } = need;              // el id local no viaja
-    const resp = await fetch(ENDPOINT, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", ...csrfHeaders() },
-        body: JSON.stringify(payload)
-    });
-    if (!resp.ok) throw new Error("HTTP " + resp.status);
-}
-
-if (sendNeedsBtn) {
-    sendNeedsBtn.addEventListener("click", async () => {
+if (sendNeedsForm) {
+    sendNeedsForm.addEventListener("submit", (e) => {
         if (registeredNeeds.length === 0) {
-            alert("No hay necesidades registradas para enviar.");
+            e.preventDefault();
+            showModal("Sin necesidades", "No hay necesidades registradas para enviar.", "warning");
             return;
         }
 
-        sendNeedsBtn.disabled = true;
-        let enviadas = 0;
+        hiddenInputs.innerHTML = "";
+        registeredNeeds.forEach((need, i) => {
+            ["tipo", "subcategoria", "descripcion", "cantidad", "periodo"].forEach(campo => {
+                const input = document.createElement("input");
+                input.type = "hidden";
+                input.name = `necesidades[${i}].${campo}`;
+                input.value = need[campo] ?? "";
+                hiddenInputs.appendChild(input);
+            });
+        });
 
-        // Una por una: las que salen bien se quitan de la lista,
-        // las que fallan quedan para reintentar.
-        for (const need of [...registeredNeeds]) {
-            try {
-                await enviarNecesidad(need);
-                deleteNeed(need.id);
-                enviadas++;
-            } catch (err) {
-                console.error("Falló el envío de la necesidad", need, err);
-            }
-        }
-
-        sendNeedsBtn.disabled = false;
-        const fallidas = registeredNeeds.length;
-        alert(fallidas === 0
-            ? `Se enviaron ${enviadas} necesidad(es) correctamente.`
-            : `Se enviaron ${enviadas}. ${fallidas} no se pudieron enviar, intentá de nuevo.`);
     });
 }
+
+
+
+const modal = document.getElementById("messageModal");
+const modalIcon = document.getElementById("modalIcon");
+const modalTitle = document.getElementById("modalTitle");
+const modalMessage = document.getElementById("modalMessage");
+
+const MODAL_ICONS = { success: "✓", error: "✕", warning: "!" };
+
+function showModal(title, message, type = "success") {
+    modalIcon.className = "modal-icon " + type;
+    modalIcon.textContent = MODAL_ICONS[type];
+    modalTitle.textContent = title;
+    modalMessage.textContent = message;
+    modal.showModal();
+}
+
+document.getElementById("modalClose").addEventListener("click", () => modal.close());
+
+
+modal.addEventListener("click", (e) => {
+    if (e.target === modal) modal.close();
+});
 
 renderRegisteredNeeds();

@@ -56,15 +56,39 @@
                     <h2 class="card-title">Necesidades Registradas</h2>
                     <div class="needs-list" id="registeredNeedsList">
                     </div>
-                    <div class="contendedor-button">
-                        <button type="button" class="btn btn-submit" id="sendNeedsBtn">
-                            Enviar Necesidades
-                        </button>
-                    </div>
+                    <form id="sendNeedsForm" th:action="@{/entidadBeneficiaria/necesidades}" method="post">
+                        <div id="hiddenInputs"></div>
+                        <div class="contendedor-button">
+                            <button type="submit" class="btn btn-submit" id="sendNeedsBtn">
+                                Enviar Necesidades
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </section>
+        <dialog id="messageModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-icon" id="modalIcon"></div>
+                <h3 id="modalTitle"></h3>
+                <p id="modalMessage"></p>
+                <button type="button" class="btn btn-submit" id="modalClose">Aceptar</button>
+            </div>
+        </dialog>
         <script th:src="@{/js/entidades/necesidades.js}"></script>
+        <script th:if="${enviadas != null}" th:inline="javascript">
+            document.addEventListener("DOMContentLoaded", () => {
+                const enviadas = /*[[${enviadas}]]*/ 0;
+                const fallidas = /*[[${fallidas}]]*/ 0;
+                if (fallidas === 0) {
+                    showModal("¡Listo!", `Se registraron ${enviadas} necesidad(es) exitosamente.`, "success");
+                } else {
+                    showModal("Envío incompleto",
+                        `Se registraron ${enviadas}. ${fallidas} no se pudieron registrar, intentá de nuevo.`,
+                        enviadas > 0 ? "warning" : "error");
+                }
+            });
+        </script>
     </div>
 
 </html>
