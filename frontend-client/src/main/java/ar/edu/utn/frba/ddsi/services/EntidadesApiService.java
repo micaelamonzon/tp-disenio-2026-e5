@@ -1,6 +1,9 @@
 package ar.edu.utn.frba.ddsi.services;
 
+import ar.edu.utn.frba.ddsi.dtos.donaciones.misiones.PerfilDTO;
+import ar.edu.utn.frba.ddsi.dtos.entidades.EntidadBeneficiariaDTO;
 import ar.edu.utn.frba.ddsi.dtos.entidades.NecesidadDTO;
+import ar.edu.utn.frba.ddsi.dtos.entidades.PerfilEntidadDTO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
@@ -34,6 +37,14 @@ public class EntidadesApiService {
                 .uri(baseUrl + "/subcategorias/todas")
                 .retrieve()
                 .bodyToMono(new ParameterizedTypeReference<List<String>>() {})
+                .block();
+    }
+
+    public EntidadBeneficiariaDTO obtenerPerfil(Long idEntidad) {
+        return webClient.get()
+                .uri(baseUrl + "/entidad/{id}", idEntidad)
+                .retrieve()
+                .bodyToMono(EntidadBeneficiariaDTO.class)
                 .block();
     }
 }
