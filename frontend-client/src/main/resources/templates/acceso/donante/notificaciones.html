@@ -6,17 +6,17 @@
             <p class="page-sub">Mantente al día con tus actividades de donación</p>
         </div>
 
-        <!-- Error: notificaciones-service no respondió -->
+
         <p th:if="${error}" class="page-sub" role="alert" th:text="${error}">
             El servicio de notificaciones no está disponible.
         </p>
 
-        <!-- Aviso para personas jurídicas -->
+
         <p th:if="${avisoNotificaciones}" class="page-sub" th:text="${avisoNotificaciones}">
             Las notificaciones para personas jurídicas todavía no están disponibles.
         </p>
 
-        <!-- Estado vacío -->
+
         <p th:if="${error == null and avisoNotificaciones == null and #lists.isEmpty(notificaciones)}" class="page-sub">
             Todavía no tenés notificaciones.
         </p>

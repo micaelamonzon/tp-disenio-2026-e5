@@ -6,11 +6,11 @@
             <p class="page-sub">Mantente al día con tus entregas, donaciones recibidas y más</p>
         </div>
 
-        <!-- Aviso si notificaciones-service no respondió -->
+
         <p th:if="${errorNotificaciones}" class="page-sub" role="alert"
            th:text="${errorNotificaciones}">No pudimos cargar tus notificaciones.</p>
 
-        <!-- Estado vacío: el servicio respondió bien pero no hay notificaciones -->
+
         <p th:if="${errorNotificaciones == null and #lists.isEmpty(notificaciones)}" class="page-sub">
             Todavía no tenés notificaciones.
         </p>
@@ -21,7 +21,7 @@
             </div>
 
             <div class="notifications-list" id="notificationsList">
-                <!-- Una tarjeta por cada notificación (ya vienen ordenadas, la más nueva primero) -->
+
                 <article class="notification-card" th:each="n : ${notificaciones}">
                     <span th:replace="~{fragments/iconosDeNotificacion :: iconoGeneral}"></span>
                     <div>

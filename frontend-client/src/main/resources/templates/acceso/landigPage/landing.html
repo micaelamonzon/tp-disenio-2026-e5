@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DonaTrack - UTN Solidaria</title>
 
-    <!-- CSS Estático con Spring / Thymeleaf -->
+
     <link rel="stylesheet" th:href="@{/css/landingPage/landingPage.css}">
 
-    <!-- Leaflet CSS y JS -->
+
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
@@ -17,14 +17,14 @@
 <header th:replace="~{layoutAcceso/layoutAcceso :: header}"></header>
 <nav th:replace="~{layoutAcceso/layoutAcceso :: navBar}"></nav>
 
-<!-- ===================== PAGE: HOME ===================== -->
+
 <section id="page-home" class="page-section active">
     <header class="hero-banner">
         <div class="hero-content">
             <h1>Transparencia en cada donación</h1>
             <p>DonaTrack es la plataforma de gestión y trazabilidad de donaciones de UTN Solidaria. Registramos y monitoreamos cada donación desde su recepción hasta su entrega, fortaleciendo la confianza y la distribución eficiente de recursos.</p>
 
-            <!-- BOTONES CORREGIDOS SEGÚN EL DISEÑO DE LA SEGUNDA IMAGEN -->
+
             <div class="hero-actions" style="display: flex; gap: 1rem; justify-content: center; align-items: center; margin-top: 1.5rem;">
                 <a th:href="@{/acceso/registro}" class="btn btn-hero-white" style="background-color: #ffffff; color: #2563eb; padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                     Registrarse
@@ -72,7 +72,7 @@
         </div>
     </section>
 
-    <!-- DONACIONES DESTACADAS -->
+
     <section class="section container">
         <h2 class="section-title">Donaciones destacadas del último mes</h2>
         <p class="section-subtitle">Estos son algunos ejemplos del impacto que generamos juntos</p>
@@ -89,13 +89,13 @@
                     <h3 th:text="${donacion.subcategoria != null ? donacion.subcategoria : (donacion.categoria != null ? donacion.categoria : 'Donación')}">Título de Donación</h3>
 
                     <div class="donation-meta">
-                        <!-- Muestra la cantidad total de ítems o estado -->
+
                         <span th:text="${donacion.cantidadTotalItems + ' ítems'}">100 ítems</span>
 
-                        <!-- Si no tienes nombre de entidad directo en el DTO, mostramos el estado legible -->
+
                         <span th:text="${donacion.estadoLegible}">Entregada</span>
 
-                        <!-- Fecha formateada -->
+
                         <span th:if="${donacion.fechaDeIngreso != null}"
                               th:text="${#temporals.format(donacion.fechaDeIngreso, 'dd/MM/yyyy')}">01/01/2026</span>
                     </div>
@@ -104,7 +104,7 @@
         </div>
     </section>
 
-    <!-- ACCESOS RÁPIDOS -->
+
     <section class="section container">
         <h2 class="section-title">Accesos rápidos</h2>
         <div class="grid-3">
@@ -145,7 +145,7 @@
 
 <footer th:replace="~{layoutAcceso/layoutAcceso :: footer}"></footer>
 
-<!-- JS Estático con Thymeleaf -->
+
 <script th:src="@{/js/landigPage.js}"></script>
 </body>
 </html>

@@ -5,16 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DonaTrack - UTN Solidaria</title>
 
-    <!-- CSS Estático con Spring / Thymeleaf -->
     <link rel="stylesheet" th:href="@{/css/landingPage/landingPage.css}">
 </head>
 <body>
 
-<!-- REEMPLAZO DE HEADER Y NAVBAR POR FRAGMENTOS DESDE layoutAcceso -->
+
 <header th:replace="~{layoutAcceso/layoutAcceso :: header}"></header>
 <nav th:replace="~{layoutAcceso/layoutAcceso :: navBar}"></nav>
 
-<!-- HERO SECTION / BANNER PRINCIPAL -->
+
 <section class="blue-header-banner" style="text-align: center; padding: 4rem 1rem;">
     <div class="container">
         <h1 style="font-size: 2.5rem; margin-bottom: 1rem;">Gestión y Trazabilidad de Donaciones</h1>
@@ -28,7 +27,7 @@
     </div>
 </section>
 
-<!-- SECCIÓN DE MÉTRICAS / IMPACTO -->
+
 <main class="container" style="padding-top: 3rem; padding-bottom: 4rem;">
     <section class="grid-3" style="margin-bottom: 3rem;">
         <article class="form-container-card" style="text-align: center; padding: 2rem;">
@@ -45,7 +44,7 @@
         </article>
     </section>
 
-    <!-- CARACTERÍSTICAS PRINCIPALES -->
+
     <section class="legal-card" style="margin-bottom: 2rem;">
         <h2>¿Cómo funciona DonaTrack?</h2>
         <div class="grid-3" style="margin-top: 1.5rem; gap: 1.5rem;">
@@ -65,7 +64,7 @@
     </section>
 </main>
 
-<!-- REEMPLAZO DE FOOTER POR FRAGMENTO DESDE layoutAcceso -->
+
 <footer th:replace="~{layoutAcceso/layoutAcceso :: footer}"></footer>
 
 </body>

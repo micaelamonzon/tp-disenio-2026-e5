@@ -2,7 +2,7 @@
   const TRUCK_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 17h4V5H10z"/><path d="M20 17h2v-7l-3-4h-3v11h4z"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>`;
   const PIN_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>`;
 
-  // false: el camión se ubica donde indica el backend. true: recorre la ruta solo (demo sin simulador).
+
   const SIMULAR_AVANCE = false;
   const DURACION_SIMULADA_MS = 120000;
 
@@ -23,7 +23,7 @@
   }).addTo(map);
 
   const layer = L.layerGroup().addTo(map);
-  let camiones = [];          // uno por camión: una ruta, un marcador
+  let camiones = [];
   let inicio = Date.now();
 
   const esc = (s) => String(s ?? "").replace(/[&<>"']/g, c =>
@@ -38,7 +38,6 @@
     iconSize: [34, 34], iconAnchor: [17, 17], popupAnchor: [0, -20]
   });
 
-  /* ---------- "hace X segundos / minutos / horas" ---------- */
   function tiempoRelativo(ts) {
     const ms = new Date(ts).getTime();
     if (isNaN(ms)) return "";
@@ -70,7 +69,7 @@
     document.querySelectorAll("[data-estado]").forEach(el => aplicarEstadoABadge(el, el.dataset.estado));
   }
 
-  /* ---------- datos ---------- */
+
   function indiceMasCercano(ruta, p) {
     let mejor = 0, mejorD = Infinity;
     ruta.forEach(([lat, lon], i) => {
@@ -80,7 +79,7 @@
     return mejor;
   }
 
-  // Guarda el último avance del camión (si es más nuevo que el que ya tenía)
+
   function aplicarAvance(c, av) {
     if (!av || !av.posicion) return;
     if (c.ultimaActualizacion && new Date(av.fecha) <= new Date(c.ultimaActualizacion)) return;
@@ -89,7 +88,7 @@
     c.ultimaActualizacion = av.fecha;
   }
 
-  // Agrupa las entregas por camión: una ruta compartida y una parada por entrega
+
   function construir(entregas) {
     const porCamion = new Map();
     entregas.forEach((e, i) => {
@@ -117,7 +116,7 @@
     return [...porCamion.values()];
   }
 
-  // Dónde está el camión y cuánto de la ruta completa lleva hecho
+
   function calcularPosicion(c) {
     const n = c.ruta.length - 1;
     if (SIMULAR_AVANCE) {
@@ -162,7 +161,7 @@
 
     if (!p.card) return;
 
-    // <-- nuevo: actualiza el badge de la tarjeta
+
     const badge = p.card.querySelector("[data-estado]");
     if (badge) aplicarEstadoABadge(badge, p.estado);
 
@@ -178,8 +177,8 @@
     c.indice = indice;
     c.fraccion = fraccion;
     c.marker.setLatLng(punto);
-    c.hecho.setLatLngs([...c.ruta.slice(0, indice + 1), punto]);       // tramo recorrido (sólido)
-    c.pendiente.setLatLngs([punto, ...c.ruta.slice(indice + 1)]);      // tramo faltante (punteado)
+    c.hecho.setLatLngs([...c.ruta.slice(0, indice + 1), punto]);
+    c.pendiente.setLatLngs([punto, ...c.ruta.slice(indice + 1)]);
     c.paradas.forEach(actualizarParada);
   }
 
@@ -216,7 +215,7 @@
     camiones.forEach(actualizar);
   }
 
-  // Click en una tarjeta del panel lateral -> centra el mapa en su destino y abre su popup
+
   document.querySelectorAll("[data-entrega-id]").forEach(card => {
     card.addEventListener("click", () => {
       const p = camiones.flatMap(c => c.paradas).find(x => x.id === card.dataset.entregaId);
@@ -268,10 +267,10 @@
         if (p.destMarker.isPopupOpen()) p.destMarker.getPopup().update();
       });
       actualizarTiempos();
-      // Si el camión ya pasó por todas las paradas, no hace falta seguir consultando
+
       if (recorridoTerminado()) clearInterval(timerRefresco);
     } catch (e) {
-      // ante un fallo de red se reintenta en el próximo ciclo
+
     }
   }
   const timerRefresco = setInterval(refrescar, 5000);
