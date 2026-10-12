@@ -55,7 +55,6 @@ const ICONS = {
    ============================================================ */
 const userMenuTrigger = document.getElementById("userMenuTrigger");
 const userMenu = document.getElementById("userMenu");
-const logoutBtn = document.getElementById("logoutBtn");
 
 function closeUserMenu() {
     userMenu.hidden = true;
@@ -68,13 +67,10 @@ userMenuTrigger.addEventListener("click", (e) => {
     isOpen ? closeUserMenu() : (userMenu.hidden = false, userMenuTrigger.setAttribute("aria-expanded", "true"));
 });
 document.addEventListener("click", (e) => {
-    if (!userMenu.hidden && !userMenu.contains(e.target) && e.target !== userMenuTrigger) closeUserMenu();
+    if (!userMenu.hidden && !userMenu.contains(e.target) && !userMenuTrigger.contains(e.target)) closeUserMenu();
 });
 document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeUserMenu(); });
-logoutBtn.addEventListener("click", () => {
-    closeUserMenu();
-    alert("Sesión cerrada");
-});
+// El logout lo resuelve el <form th:action="@{/logout}"> del HTML (Spring Security).
 
 const sidebarLinks = document.querySelectorAll(".sidebar-link");
 const adminViews = document.querySelectorAll(".admin-view");
@@ -84,6 +80,7 @@ const sidebarOverlay = document.getElementById("sidebarOverlay");
 
 // Cada vista se carga (fetch) cuando se abre, para que siempre muestre
 // datos frescos del backend y no algo que haya quedado obsoleto.
+// Camiones no necesita cargador: Thymeleaf ya renderizó la tabla en el servidor.
 const cargadoresDeVista = {
     dashboard: cargarDashboard,
     inventario: cargarInventario,
@@ -91,9 +88,11 @@ const cargadoresDeVista = {
 };
 
 function activarVista(view) {
+    if (!document.getElementById(`view-${view}`)) view = "dashboard";
     sidebarLinks.forEach(l => l.classList.toggle("active", l.dataset.view === view));
     adminViews.forEach(v => v.classList.toggle("active", v.id === `view-${view}`));
     adminShell.classList.remove("sidebar-open");
+    history.replaceState(null, "", `#${view}`);
     window.scrollTo({ top: 0, behavior: "smooth" });
     if (cargadoresDeVista[view]) cargadoresDeVista[view]();
 }
@@ -899,6 +898,223 @@ function renderMatchCards() {
 }
 
 /* ============================================================
+   GESTIÓN DE CAMIONES
+   La tabla y los contadores los renderiza Thymeleaf en el servidor;
+   acá solo se muestra/oculta el formulario "Nuevo Camión".
+   ============================================================ */
+const nuevoCamionBtn = document.getElementById("nuevoCamionBtn");
+const nuevoCamionCard = document.getElementById("nuevoCamionCard");
+const cancelarCamionBtn = document.getElementById("cancelarCamionBtn");
+
+function mostrarFormCamion(mostrar) {
+    nuevoCamionCard.hidden = !mostrar;
+    if (mostrar) nuevoCamionCard.querySelector("input")?.focus();
+}
+nuevoCamionBtn.addEventListener("click", () => mostrarFormCamion(nuevoCamionCard.hidden));
+cancelarCamionBtn.addEventListener("click", () => {
+    nuevoCamionCard.querySelector("form").reset();
+    mostrarFormCamion(false);
+});
+
+/* ============================================================
+   RANKING DE DONANTES
+   ============================================================ */
+ICONS.trophy = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>';
+
+function escapeHTML(valor) {
+    return String(valor ?? "").replace(/[&<>"']/g, c => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+    }[c]));
+}
+
+// DATOS DE DEMO (tomados de la maqueta de la entrega anterior).
+// Reemplazar por la respuesta del servicio de incentivos cuando el endpoint esté probado:
+// misma forma -> { "AAAA-MM": { etiqueta, donantes: [{ nombre, categorias[], donaciones, ultima }] } }
+const RANKING_POR_PERIODO = {
+    "2026-04": {
+        etiqueta: "Abril 2026",
+        donantes: [
+            { nombre: "María González", categorias: ["Alimentos", "Ropa"], donaciones: 15, ultima: "2026-04-20" },
+            { nombre: "Juan Pérez", categorias: ["Abrigo", "Alimentos"], donaciones: 12, ultima: "2026-04-18" },
+            { nombre: "Ana Martínez", categorias: ["Ropa", "Mobiliario"], donaciones: 10, ultima: "2026-04-15" },
+        ],
+    },
+    "2026-03": {
+        etiqueta: "Marzo 2026",
+        donantes: [
+            { nombre: "Juan Pérez", categorias: ["Abrigo", "Alimentos"], donaciones: 14, ultima: "2026-03-28" },
+            { nombre: "María González", categorias: ["Alimentos"], donaciones: 11, ultima: "2026-03-25" },
+            { nombre: "Ana Martínez", categorias: ["Mobiliario"], donaciones: 8, ultima: "2026-03-12" },
+        ],
+    },
+};
+
+const rankingPeriodoSelect = document.getElementById("rankingPeriodo");
+const rankingContenido = document.getElementById("rankingContenido");
+
+function renderRanking() {
+    const periodo = RANKING_POR_PERIODO[rankingPeriodoSelect.value];
+    if (!periodo || !periodo.donantes.length) {
+        rankingContenido.innerHTML = `<p class="empty-state">No hay datos de ranking para este período.</p>`;
+        return;
+    }
+    const ordenados = [...periodo.donantes].sort((a, b) => b.donaciones - a.donaciones).slice(0, 5);
+    const top = ordenados[0];
+    const clases = ["gold", "silver", "bronze"];
+
+    rankingContenido.innerHTML = `
+      <div class="donor-month">
+        <div class="donor-month-icon">${ICONS.trophy}</div>
+        <div>
+          <div class="donor-month-label">Donante del Mes</div>
+          <div class="donor-month-name">${escapeHTML(top.nombre)}</div>
+          <div class="donor-month-sub">${top.donaciones} donaciones realizadas</div>
+        </div>
+      </div>
+      <div class="rank-list">
+        ${ordenados.map((d, i) => `
+          <div class="rank-item ${clases[i] || ""}">
+            <div class="rank-pos">${i + 1}</div>
+            <div class="rank-body">
+              <div class="rank-name">${escapeHTML(d.nombre)}</div>
+              <div class="rank-tags">${(d.categorias || []).map(c => `<span class="tag">${escapeHTML(c)}</span>`).join("")}</div>
+            </div>
+            <div class="rank-count">
+              <strong>${d.donaciones}</strong>
+              <span>donaciones</span>
+              <span class="rank-last">Última: ${escapeHTML(d.ultima)}</span>
+            </div>
+          </div>`).join("")}
+      </div>`;
+}
+
+rankingPeriodoSelect.innerHTML = Object.keys(RANKING_POR_PERIODO).sort().reverse()
+    .map(k => `<option value="${k}">${escapeHTML(RANKING_POR_PERIODO[k].etiqueta)}</option>`).join("");
+rankingPeriodoSelect.addEventListener("change", renderRanking);
+renderRanking();
+
+/* ============================================================
+   IMPORTAR DONANTES (CSV)
+   ============================================================ */
+// Endpoint del frontend-client que recibe el archivo (multipart, campo "archivo").
+// TODAVÍA NO EXISTE en AdminController: hay que crearlo.
+const IMPORTAR_URL = "/personaAdministradora/importar";
+
+const csvDropzone = document.getElementById("csvDropzone");
+const csvInput = document.getElementById("csvInput");
+const archivoElegido = document.getElementById("archivoElegido");
+const archivoNombre = document.getElementById("archivoNombre");
+const archivoTamano = document.getElementById("archivoTamano");
+const importarBtn = document.getElementById("importarBtn");
+const quitarArchivoBtn = document.getElementById("quitarArchivoBtn");
+const importarError = document.getElementById("importarError");
+const historialImportaciones = document.getElementById("historialImportaciones");
+
+let archivoCSV = null;
+let historial = [];
+
+function formatearTamano(bytes) {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function mostrarErrorImportar(msg) {
+    importarError.hidden = !msg;
+    importarError.textContent = msg || "";
+}
+
+function limpiarArchivo() {
+    archivoCSV = null;
+    csvInput.value = "";
+    archivoElegido.hidden = true;
+}
+
+function elegirArchivo(file) {
+    mostrarErrorImportar("");
+    if (!file) return;
+    if (!/\.csv$/i.test(file.name)) {
+        limpiarArchivo();
+        mostrarErrorImportar("El archivo tiene que ser un .csv.");
+        return;
+    }
+    archivoCSV = file;
+    archivoNombre.textContent = file.name;
+    archivoTamano.textContent = formatearTamano(file.size);
+    archivoElegido.hidden = false;
+}
+
+function renderHistorial() {
+    if (!historial.length) {
+        historialImportaciones.innerHTML = `<p class="empty-state">Todavía no hay importaciones en esta sesión.</p>`;
+        return;
+    }
+    historialImportaciones.innerHTML = historial.map(h => `
+      <div class="history-item">
+        <div>
+          <div class="history-name">${escapeHTML(h.nombre)}</div>
+          <div class="history-date">${escapeHTML(h.fecha)}</div>
+        </div>
+        <div class="history-right">
+          ${h.registros != null ? `<div class="history-count">${Number(h.registros).toLocaleString("es-AR")} registros</div>` : ""}
+          <div class="history-status">Completado</div>
+        </div>
+      </div>`).join("");
+}
+
+csvDropzone.addEventListener("click", () => csvInput.click());
+csvDropzone.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); csvInput.click(); }
+});
+csvInput.addEventListener("change", () => elegirArchivo(csvInput.files[0]));
+["dragenter", "dragover"].forEach(ev => csvDropzone.addEventListener(ev, (e) => {
+    e.preventDefault();
+    csvDropzone.classList.add("dragover");
+}));
+["dragleave", "drop"].forEach(ev => csvDropzone.addEventListener(ev, (e) => {
+    e.preventDefault();
+    csvDropzone.classList.remove("dragover");
+}));
+csvDropzone.addEventListener("drop", (e) => elegirArchivo(e.dataTransfer.files[0]));
+quitarArchivoBtn.addEventListener("click", () => { limpiarArchivo(); mostrarErrorImportar(""); });
+
+importarBtn.addEventListener("click", async () => {
+    if (!archivoCSV) return;
+    mostrarErrorImportar("");
+    importarBtn.disabled = true;
+    importarBtn.textContent = "Importando...";
+    try {
+        const datos = new FormData();
+        datos.append("archivo", archivoCSV);
+
+        // Si Spring Security tiene CSRF activo, el token viene en los <meta> del head.
+        const headers = {};
+        const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
+        const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
+        if (csrfToken && csrfHeader) headers[csrfHeader] = csrfToken;
+
+        const res = await fetch(IMPORTAR_URL, { method: "POST", body: datos, headers });
+        if (!res.ok) throw new Error(`POST ${IMPORTAR_URL} -> ${res.status}`);
+        const respuesta = await res.json().catch(() => null);
+
+        historial.unshift({
+            nombre: archivoCSV.name,
+            fecha: new Date().toLocaleString("es-AR", { dateStyle: "long", timeStyle: "short" }),
+            registros: respuesta?.registros ?? respuesta?.cantidad ?? null,
+        });
+        renderHistorial();
+        limpiarArchivo();
+    } catch (err) {
+        console.error(err);
+        mostrarErrorImportar("No se pudo importar el archivo. Verificá que el servicio de importación esté disponible.");
+    } finally {
+        importarBtn.disabled = false;
+        importarBtn.textContent = "Importar";
+    }
+});
+
+/* ============================================================
    INICIO
    ============================================================ */
-cargarDashboard();
+// Abre la vista indicada en la URL (#camiones, #inventario...) o el dashboard.
+activarVista(location.hash.slice(1) || "dashboard");

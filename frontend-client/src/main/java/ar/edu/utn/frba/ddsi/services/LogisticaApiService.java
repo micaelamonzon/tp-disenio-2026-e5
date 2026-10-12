@@ -37,6 +37,37 @@ public class LogisticaApiService {
         }
     }
 
+    // Alta de un camión desde el panel de administración.
+    // SUPUESTO: logistica-service expone POST /logistica-service/camiones. Si la ruta es otra, cambiarla acá.
+    public void crearCamion(CamionDTO camion) {
+        try {
+            webClient.post()
+                    .uri(logisticaServiceUrl + "/logistica-service/camiones")
+                    .bodyValue(camion)
+                    .retrieve()
+                    .toBodilessEntity()
+                    .block();
+        } catch (Exception e) {
+            log.error("Error creando el camión {}", camion.getPatente(), e);
+            throw new RuntimeException("No se pudo crear el camión", e);
+        }
+    }
+
+    // Baja de un camión.
+    // SUPUESTO: logistica-service expone DELETE /logistica-service/camiones/{id}.
+    public void eliminarCamion(String id) {
+        try {
+            webClient.delete()
+                    .uri(logisticaServiceUrl + "/logistica-service/camiones/" + id)
+                    .retrieve()
+                    .toBodilessEntity()
+                    .block();
+        } catch (Exception e) {
+            log.error("Error eliminando el camión {}", id, e);
+            throw new RuntimeException("No se pudo eliminar el camión", e);
+        }
+    }
+
     public List<EntregaDTO> obtenerEntregas() {
         try {
             List<EntregaDTO> entregas = webClient.get()
@@ -93,8 +124,12 @@ public class LogisticaApiService {
                     .collectList()
                     .block();
 
-            log.info(rutas.toString());
-            return rutas != null ? rutas : List.of();
+            // Antes: log.info(rutas.toString()) corría antes del null-check y tiraba NPE si rutas era null.
+            if (rutas == null) {
+                return List.of();
+            }
+            log.debug("Rutas del donante {}: {}", idDonante, rutas);
+            return rutas;
         } catch (Exception e) {
             log.error("Error obteniendo las rutas del donante {}", idDonante, e);
             return List.of();
