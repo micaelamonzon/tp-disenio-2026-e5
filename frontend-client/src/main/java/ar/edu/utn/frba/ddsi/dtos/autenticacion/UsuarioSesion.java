@@ -1,4 +1,4 @@
-package ar.edu.utn.frba.ddsi.dtos;
+package ar.edu.utn.frba.ddsi.dtos.autenticacion;
 
 import java.io.Serializable;
 

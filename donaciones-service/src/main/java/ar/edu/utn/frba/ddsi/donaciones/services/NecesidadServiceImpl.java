@@ -35,7 +35,7 @@ public class NecesidadServiceImpl implements NecesidadService{
     @Transactional
     public NecesidadDTO crearNecesidad(Long idEntidad, NecesidadDTO body) {
         EntidadBeneficiaria entidad = entidadBeneficiariaRepository.findById(idEntidad)
-                .orElseThrow(() -> new RuntimeException("Entidad beneficiaria no encontrada"));
+                .orElseThrow(() -> new RuntimeException("Entidad beneficiaria no encontrada con id "+ idEntidad));
         Necesidad nueva = construir(body);
         nueva.setEntidadBeneficiaria(entidad);
         return toDTO(necesidadesRepository.save(nueva));
@@ -91,12 +91,20 @@ public class NecesidadServiceImpl implements NecesidadService{
     }
 
     private Necesidad construir(NecesidadDTO body) {
-        // La necesidad solo informa el nombre de la subcategoría: se busca en el catálogo
-        // para que el matchmaking la cruce con donaciones de exactamente la misma subcategoría.
+
+        if (body.subcategoria() == null || body.subcategoria().isBlank()) {
+            throw new IllegalArgumentException("La subcategoría es obligatoria");
+        }
+        if (body.cantidad() <= 0) {
+            throw new IllegalArgumentException("La cantidad debe ser mayor a 0");
+        }
         Subcategoria sub = catalogoSubcategorias.obtenerOCrear(body.subcategoria(), false, null);
         if (esRecurrente(body)) {
+            if (body.periodo() == null) {
+                throw new IllegalArgumentException("El período es obligatorio para necesidades recurrentes");
+            }
             return new NecesidadRecurrente(sub, body.descripcion(),
-                    body.cantidad(), TipoPeriodo.valueOf(body.periodo()));
+                    body.cantidad(), TipoPeriodo.valueOf(body.periodo().toUpperCase()));
         }
         return new NecesidadExtraordinaria(sub, body.descripcion(), body.cantidad());
     }

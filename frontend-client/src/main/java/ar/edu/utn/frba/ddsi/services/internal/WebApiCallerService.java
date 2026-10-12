@@ -1,7 +1,7 @@
 package ar.edu.utn.frba.ddsi.services.internal;
 
-import ar.edu.utn.frba.ddsi.dtos.AuthResponseDTO;
-import ar.edu.utn.frba.ddsi.dtos.RefreshTokenDTO;
+import ar.edu.utn.frba.ddsi.dtos.autenticacion.AuthResponseDTO;
+import ar.edu.utn.frba.ddsi.dtos.autenticacion.RefreshTokenDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
