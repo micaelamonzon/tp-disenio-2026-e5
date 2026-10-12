@@ -1208,3 +1208,64 @@ a:hover {
         grid-template-columns: 1fr;
     }
 }
+
+/* Pegar al FINAL de landigPage.css.
+   Menú desplegable del usuario en el header de las páginas públicas. */
+.lp-user-menu-wrap {
+    position: relative;
+}
+
+/* El widget del usuario ahora es un <button>: se le quita el aspecto de botón nativo. */
+.lp-user-trigger {
+    background: none;
+    border: none;
+    padding: 0;
+    font: inherit;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.lp-user-menu {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    min-width: 230px;
+    display: flex;
+    flex-direction: column;
+    padding: 6px;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+    z-index: 100;
+}
+.lp-user-menu[hidden] { display: none; }
+
+.lp-user-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 10px 12px;
+    border: none;
+    border-radius: 8px;
+    background: none;
+    color: #0f172a;
+    font: inherit;
+    font-size: 0.95rem;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+}
+.lp-user-menu-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+.lp-user-menu-item:hover { background: #f1f5f9; }
+
+.lp-user-menu-divider {
+    height: 1px;
+    margin: 6px 4px;
+    background: #e2e8f0;
+}
+
+.lp-user-menu-logout { color: #dc2626; }
+.lp-user-menu-logout:hover { background: #fef2f2; }

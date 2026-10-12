@@ -40,14 +40,67 @@
         </nav>
 
         <!-- Parte derecha (Perfil o Botón Iniciar Sesión) -->
+        <!-- Parte derecha: menú desplegable solo para la persona administradora; el resto igual que antes -->
         <div class="topbar-right">
-            <div th:if="${session.usuario != null}" class="user-profile-widget">
+
+            <div th:if="${session.usuario != null and #strings.containsIgnoreCase(session.usuario.rol, 'administrador')}" class="lp-user-menu-wrap">
+                <button type="button" class="user-profile-widget lp-user-trigger" id="lpUserMenuTrigger"
+                        aria-haspopup="true" aria-expanded="false">
+                    <div class="avatar" th:text="${session.usuario.iniciales}">U</div>
+                    <div class="user-info">
+                        <span class="user-name" th:text="${session.usuario.nombre}">Usuario</span>
+                        <span class="user-role" th:text="${session.usuario.rol}">Donante</span>
+                    </div>
+                </button>
+
+                <div class="lp-user-menu" id="lpUserMenu" hidden>
+
+                    <!-- Persona administradora -->
+                    <a th:href="@{/personaAdministradora/home}" class="lp-user-menu-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+                        Panel de administración
+                    </a>
+
+
+
+                    <div class="lp-user-menu-divider" role="separator"></div>
+                    <form th:action="@{/logout}" method="post">
+                        <button type="submit" class="lp-user-menu-item lp-user-menu-logout">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                            Cerrar sesión
+                        </button>
+                    </form>
+                </div>
+
+                <script>
+                    (function () {
+                        var trigger = document.getElementById('lpUserMenuTrigger');
+                        var menu = document.getElementById('lpUserMenu');
+                        if (!trigger || !menu) return;
+                        function cerrar() { menu.hidden = true; trigger.setAttribute('aria-expanded', 'false'); }
+                        trigger.addEventListener('click', function (e) {
+                            e.stopPropagation();
+                            var abrir = menu.hidden;
+                            menu.hidden = !abrir;
+                            trigger.setAttribute('aria-expanded', String(abrir));
+                        });
+                        document.addEventListener('click', function (e) {
+                            if (!menu.hidden && !menu.contains(e.target) && !trigger.contains(e.target)) cerrar();
+                        });
+                        document.addEventListener('keydown', function (e) { if (e.key === 'Escape') cerrar(); });
+                    })();
+                </script>
+            </div>
+
+            <!-- Resto de los usuarios (donante, entidad): se muestra igual que antes, sin menú -->
+            <div th:if="${session.usuario != null and !#strings.containsIgnoreCase(session.usuario.rol, 'administrador')}" class="user-profile-widget">
                 <div class="avatar" th:text="${session.usuario.iniciales}">U</div>
                 <div class="user-info">
                     <span class="user-name" th:text="${session.usuario.nombre}">Usuario</span>
                     <span class="user-role" th:text="${session.usuario.rol}">Donante</span>
                 </div>
             </div>
+
             <a th:if="${session.usuario == null}" th:href="@{/acceso/login}" class="btn btn-login-figma">Iniciar sesión</a>
         </div>
 
