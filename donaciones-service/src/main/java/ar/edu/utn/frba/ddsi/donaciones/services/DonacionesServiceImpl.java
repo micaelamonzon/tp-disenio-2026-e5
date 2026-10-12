@@ -156,7 +156,7 @@ public class DonacionesServiceImpl implements DonacionesService {
                 .map(donacionSegmentada ->
                         new DonacionIncentivosDTO(
                                 donacionSegmentada.getDonacionEntregada(),
-                                donacionSegmentada.getEntidadBeneficiaria().getId(),
+                                donacionSegmentada.getEntidadBeneficiaria() != null ? donacionSegmentada.getEntidadBeneficiaria().getId() : null,
                                 donacionSegmentada.getFechaDeIngreso(),
                                 donacionSegmentada.getBienesDelMismoTipo().size(),
                                 donacionSegmentada.getBienesDelMismoTipo().get(0).getSubcategoria().getCategoria().getNombre()

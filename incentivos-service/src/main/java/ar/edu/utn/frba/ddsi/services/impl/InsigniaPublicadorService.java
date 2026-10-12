@@ -25,7 +25,7 @@ public class InsigniaPublicadorService {
         this.incentivosRepository = incentivosRepository;
     }
 
-    public String publicarYDifundirInsignia(String nombreDonante, Insignia insignia) {
+    public String publicarYDifundirInsignia(String nombreDonante, String insignia) {
         URI uri = UriComponentsBuilder
                 .fromUriString(properties.getBaseURL())
                 .path(PATH_INSIGNIA)
@@ -34,9 +34,9 @@ public class InsigniaPublicadorService {
 
         InsigniaWebhookRequestDTO request = new InsigniaWebhookRequestDTO(
                 nombreDonante,
-                insignia.name()
+                insignia
         );
-        System.out.println(">>> Llamando a n8n en: " + uri);
+
         String respuesta = restTemplate.postForObject(uri, request, String.class);
         return respuesta == null || respuesta.isBlank() ? null : respuesta;
     }

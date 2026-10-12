@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ranking de Donantes - Panel de Administración</title>
+    <link rel="stylesheet" th:href="@{/css/admin/personaAdmin.css}">
+</head>
+<body>
+
+<header class="topbar">
+    <div class="topbar-left">
+        <span class="logo-text">DonaTrack - Administración</span>
+    </div>
+    <div class="topbar-right">
+        <a th:href="@{/personaAdministradora/home}" class="btn btn-outline" style="color: white; border-color: white;">Volver al Home</a>
+    </div>
+</header>
+
+<main class="admin-content" style="padding: 30px;">
+    <div class="page-head">
+        <h1>Ranking de Donantes Más Activos</h1>
+        <p class="page-sub">Visualiza el ranking mensual persistido y el historial de períodos anteriores.</p>
+    </div>
+
+    <!-- Pestañas -->
+    <div class="ranking-tabs" style="display: flex; gap: 10px; margin-bottom: 20px;">
+        <button type="button" class="btn btn-outline active" id="btnActual" onclick="mostrarSeccion('actual')">Ranking del Mes Actual</button>
+        <button type="button" class="btn btn-outline" id="btnHistorico" onclick="mostrarSeccion('historico')">Historial de Rankings</button>
+    </div>
+
+    <!-- Vista Mes Actual -->
+    <div id="seccionActual" class="table-card">
+        <div class="table-title">Top Donantes del Período</div>
+        <div class="table-scroll">
+            <table class="data-table">
+                <thead>
+                <tr>
+                    <th>Puesto</th>
+                    <th>Donante</th>
+                    <th>Tipo</th>
+                    <th>Misiones Cumplidas</th>
+                </tr>
+                </thead>
+                <tbody>
+                <!-- Primer Puesto -->
+                <tr th:if="${rankingActual != null and rankingActual.primerPuesto != null}">
+                    <td>1</td>
+                    <td th:text="${rankingActual.primerPuesto}">-</td>
+                    <td>Humana</td>
+                    <td><b>-</b></td>
+                </tr>
+                <!-- Segundo Puesto -->
+                <tr th:if="${rankingActual != null and rankingActual.segundoPuesto != null}">
+                    <td>2</td>
+                    <td th:text="${rankingActual.segundoPuesto}">-</td>
+                    <td>Humana</td>
+                    <td><b>-</b></td>
+                </tr>
+                <!-- Tercer Puesto -->
+                <tr th:if="${rankingActual != null and rankingActual.tercerPuesto != null}">
+                    <td>3</td>
+                    <td th:text="${rankingActual.tercerPuesto}">-</td>
+                    <td>Humana</td>
+                    <td><b>-</b></td>
+                </tr>
+                <!-- Mensaje si no hay datos -->
+                <tr th:unless="${rankingActual != null and rankingActual.primerPuesto != null}">
+                    <td colspan="4" style="text-align: center; color: #64748b; padding: 20px;">No hay registros de ranking para este período.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Vista Historial -->
+    <div id="seccionHistorico" class="table-card" style="display: none;">
+        <div class="table-title">Historial de Rankings Anteriores</div>
+        <div class="table-scroll">
+            <table class="data-table">
+                <thead>
+                <tr>
+                    <th>Período (Mes/Año)</th>
+                    <th>Donante Destacado #1</th>
+                    <th>Misiones</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="hist : ${historialRankings}">
+                    <td th:text="${hist.periodo}">Agosto 2026</td>
+                    <td th:text="${hist.primerPuesto}">Carlos López</td>
+                    <td th:text="${hist.misionesPrimerPuesto}">15</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<script>
+    function mostrarSeccion(tipo) {
+        const actual = document.getElementById('seccionActual');
+        const historico = document.getElementById('seccionHistorico');
+        const btnActual = document.getElementById('btnActual');
+        const btnHistorico = document.getElementById('btnHistorico');
+
+        if (tipo === 'actual') {
+            actual.style.display = 'block';
+            historico.style.display = 'none';
+            btnActual.classList.add('active');
+            btnHistorico.classList.remove('active');
+        } else {
+            actual.style.display = 'none';
+            historico.style.display = 'block';
+            btnHistorico.classList.add('active');
+            btnActual.classList.remove('active');
+        }
+    }
+</script>
+
+</body>
+</html>

@@ -1,10 +1,14 @@
 package ar.edu.utn.frba.ddsi.controllers;
 
+import ar.edu.utn.frba.ddsi.dtos.donaciones.misiones.RankingMensualDTO;
 import ar.edu.utn.frba.ddsi.services.IncentivosService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.List;
 
 @Controller
 @RequestMapping("/personaAdministradora")
@@ -15,7 +19,7 @@ public class AdminController {
         this.incentivosService = incentivosService;
     }
 
-    /*
+
     @GetMapping("/ranking")
     public String verRankingAdmin(@RequestParam(required = false) Integer mes, @RequestParam(required = false) Integer anio, Model model) {
         RankingMensualDTO rankingActual = incentivosService.obtenerUltimoRanking();
@@ -24,8 +28,8 @@ public class AdminController {
         model.addAttribute("rankingActual", rankingActual);
         model.addAttribute("historialRankings", historialRankings);
 
-        return "admin/personaAdmin";
-    } todavia no esta probado*/
+        return "acceso/personaAdministradora/ranking";
+    }
 
     @GetMapping("/index")
     public String index() {

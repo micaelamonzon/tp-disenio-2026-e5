@@ -7,6 +7,7 @@ public record PerfilDTO(
         Integer cantidadDeInsigniasGanadas,
         String nombreDeUsuario,
         List<InsigniaDTO> insignias,
-        String categoriaActual
+        String categoriaActual,
+        Integer puestoRanking
 ) {
 }
