@@ -28,79 +28,54 @@
                     Entregas Activas
                 </div>
                 <div class="deliveries-list" id="deliveriesList">
-                    <article class="delivery-card" data-truck-id="CAMION-A1">
+                    <p class="page-sub" th:if="${#lists.isEmpty(entregas)}">No tenés entregas en curso.</p>
+
+                    <article class="delivery-card" th:each="e, st : ${entregas}" th:attr="data-entrega-id=${e.entregaId}">
                         <div class="delivery-card-head">
                             <div>
-                                <span class="delivery-id" th:replace="~{fragments/iconosSeguimientoEntrega:: iconoCamion}">DON-001</span>
-                                <span class="badge-status status-blue">En traslado</span>
-                            </div>
-                            <div class="delivery-meta-right">
-                                <span class="truck-code">CAMION-A1</span>
-
+                <span class="delivery-id">
+                    <span th:replace="~{fragments/iconosSeguimientoEntrega::iconoCamion}"></span>
+                    Entrega <span th:text="${st.count}">1</span>
+                </span>
+                                <span class="badge-status" th:text="${e.estadoActual}"
+                                      th:attr="data-estado=${e.estadoActual}">PENDIENTE</span>
                             </div>
                         </div>
 
                         <div class="delivery-dest">
-                            <span th:replace="~{fragments/iconosSeguimientoEntrega::iconoPin}">
-                            </span>
+                            <span th:replace="~{fragments/iconosSeguimientoEntrega::iconoPin}"></span>
                             <div>
                                 <b>Destino:</b><br>
-                                Centro Comunitario San Martín, Av. Rivadavia 1234, CABA
+                                <span th:text="${e.direccion}">Dirección</span>
                             </div>
                         </div>
 
-                        <div class="delivery-items">
+                        <div class="progress-track"><div class="progress-fill" data-progress-fill style="width:0%"></div></div>
+                        <span class="progress-label" data-progress-label>0% del recorrido</span>
+
+                        <div class="delivery-items" th:if="${!#lists.isEmpty(e.subcategorias)}">
                             <span>Donaciones:</span>
                             <ul>
-                                <li>Alimentos no perecederos</li>
-                                <li>Agua mineral</li>
-                                <li>Ropa de invierno</li>
+                                <li th:each="sub : ${e.subcategorias}" th:text="${sub}">Alimentos</li>
                             </ul>
                         </div>
 
                         <div class="delivery-footer">
-                            Última actualización: hace menos de 1 minuto
-                        </div>
-                    </article>
-
-                    <article class="delivery-card" data-truck-id="CAMION-B2">
-                        <div class="delivery-card-head">
-                            <div>
-                                <span class="delivery-id" th:replace="~{fragments/iconosSeguimientoEntrega:: iconoCamion}">DON-002</span>
-                                <span class="badge-status status-blue">En traslado</span>
-                            </div>
-                            <div class="delivery-meta-right">
-                                <span class="truck-code">CAMION-B2</span>
-
-                            </div>
-                        </div>
-
-                        <div class="delivery-dest">
-                            <span th:replace="~{fragments/iconosSeguimientoEntrega::iconoPin}">
-                            </span>
-                            <div>
-                                <b>Destino:</b><br>
-                                Fundación Esperanza, Calle Bolívar 567, Buenos Aires
-                            </div>
-                        </div>
-
-                        <div class="delivery-items">
-                            <span>Donaciones:</span>
-                            <ul>
-                                <li>Medicamentos</li>
-                                <li>Artículos de higiene</li>
-
-                            </ul>
-                        </div>
-
-                        <div class="delivery-footer">
-                            Última actualización: hace menos de 1 minuto
+            <span th:if="${e.ultimoAvance != null}">
+                Último avance: <b data-ultimo-avance th:attr="data-ts=${e.ultimoAvance.fecha}">...</b>
+            </span>
+                            <span th:unless="${e.ultimoAvance != null}">Sin avances registrados todavía</span>
                         </div>
                     </article>
                 </div>
             </aside>
         </div>
     </section>
+    <script th:inline="javascript">
+        window.ENTREGAS_ACTIVAS = JSON.parse(/*[[${entregasJson}]]*/ "[]");
+        window.SEGUIMIENTO_URL = /*[[@{/donante/seguimiento/datos}]]*/ "/donante/seguimiento/datos";
+    </script>
+    </script>
     <script th:src="@{/js/donante/seguimiento.js}"></script>
 </div>
 </html>

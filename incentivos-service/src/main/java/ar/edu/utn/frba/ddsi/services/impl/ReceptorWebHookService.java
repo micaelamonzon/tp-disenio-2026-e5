@@ -11,12 +11,15 @@ import ar.edu.utn.frba.ddsi.models.entities.persona.TipoDeDonante;
 import ar.edu.utn.frba.ddsi.repositories.CategoriaDeBien;
 import ar.edu.utn.frba.ddsi.repositories.CategoriaDeMisionRepository;
 import ar.edu.utn.frba.ddsi.repositories.IncentivosRepository;
+import ar.edu.utn.frba.ddsi.services.IncentivosService;
 import org.springframework.transaction.annotation.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ReceptorWebHookService {
@@ -25,11 +28,13 @@ public class ReceptorWebHookService {
     private final CategoriaDeBien categoriaRepository;
     private final CategoriaDeMisionRepository categoriaDeMisionRepository;
     private static final Logger logger = LoggerFactory.getLogger(ReceptorWebHookService.class);
+    private final IncentivosService incentivosService;
 
-    public ReceptorWebHookService(IncentivosRepository incentivosRepository,CategoriaDeBien categoriaRepository, CategoriaDeMisionRepository categoriaDeMisionRepository) {
+    public ReceptorWebHookService(IncentivosRepository incentivosRepository, CategoriaDeBien categoriaRepository, CategoriaDeMisionRepository categoriaDeMisionRepository, IncentivosService incentivosService) {
         this.incentivosRepository = incentivosRepository;
         this.categoriaRepository = categoriaRepository;
         this.categoriaDeMisionRepository = categoriaDeMisionRepository;
+        this.incentivosService = incentivosService;
     }
 
 
@@ -61,6 +66,8 @@ public class ReceptorWebHookService {
         Donante nuevoDonante = tipoDeDonante == TipoDeDonante.HUMANO
                 ? crearDonanteHumano(dto, donaciones)
                 : crearDonanteJuridico(dto, donaciones);
+
+        donaciones.forEach(d -> d.setDonante(nuevoDonante));
 
         nuevoDonante.setPerfil(new Perfil(obtenerNombreDeUsuario(dto, tipoDeDonante), null));
 
@@ -122,6 +129,11 @@ public class ReceptorWebHookService {
             donante.agregarDonacion(donacion);
 
             this.incentivosRepository.save(donante);
+            try {
+                this.incentivosService.obtenerMisionesCompletadas(id, tipo);
+            } catch (Exception e) {
+                logger.error("Error al verificar misiones automáticamente para el donante {}: {}", id, e.getMessage());
+            }
         } else {
             logger.warn("Intento de registrar una donación para un donante inexistente: {}", id);
 
@@ -130,24 +142,23 @@ public class ReceptorWebHookService {
     @Transactional
     public void registrarDonaciones(List<DonacionIncentivosDTO> nuevasDonaciones, TipoDeDonante tipo, Long id){
         nuevasDonaciones.forEach(donacion -> registrarDonacion(donacion, tipo, id));
-
+        try {
+            this.incentivosService.obtenerMisionesCompletadas(id, tipo);
+        } catch (Exception e) {
+            logger.error("Error al verificar misiones para el donante {}: {}", id, e.getMessage());
+        }
     }
 
     public List<DonacionSegmentada> convertirDonacionesDTO(List<DonacionIncentivosDTO> donacionesDTO) {
-
-        List<DonacionSegmentada> donaciones = donacionesDTO.stream().map(
-                donacion -> {
-
-                    return new DonacionSegmentada(
-                            donacion.fechaDeIngreso(),
-                            donacion.donacionEntregada(),
-                            donacion.entidadBeneficiariaId(),
-                            donacion.cantidadDeBienes(),
-                            this.obtenerOCrearCategoria(donacion.categoria())
-                    );
-                }).toList();
-
-        return donaciones;
+        if (donacionesDTO == null) return new ArrayList<>();
+        return donacionesDTO.stream()
+                .map(d -> new DonacionSegmentada(
+                        d.fechaDeIngreso(),
+                        d.donacionEntregada(),
+                        d.entidadBeneficiariaId(),
+                        d.cantidadDeBienes(),
+                        this.obtenerOCrearCategoria(d.categoria())))
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     private Categoria obtenerOCrearCategoria(String nombre) {

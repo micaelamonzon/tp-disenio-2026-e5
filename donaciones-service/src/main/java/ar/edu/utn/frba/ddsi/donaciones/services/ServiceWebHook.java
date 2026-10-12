@@ -34,7 +34,7 @@ public class ServiceWebHook {
     @Async("webhookExecutor")
     public void notificarNuevosDonantes(List<PersonaDonanteDTO> donantes) {
         if (donantes == null || donantes.isEmpty()) return;
-        enviar("incentivos/webhooks/donantes/lote", donantes);
+        enviar("incentivos/webhooks/donantes", donantes);
     }
 
     @Async("webhookExecutor")
@@ -60,7 +60,7 @@ public class ServiceWebHook {
     private void enviarDonacion(String path, Object body, TipoDonante tipo, Long id) {
         try {
             client.post()
-                    .uri("incentivos/webhooks/donaciones/lote/{tipoDonante}/{id}", tipo, id)
+                    .uri("incentivos/webhooks/donaciones/lote/{tipoDonante}/{id}", tipo.name(), id)
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(body)
                     .retrieve()

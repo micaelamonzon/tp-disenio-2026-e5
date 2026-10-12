@@ -991,3 +991,6 @@ a{
     gap: 10px;
     margin-top: 12px;
 }
+.field[hidden] {
+    display: none;
+}

@@ -89,7 +89,7 @@ public class SecurityConfig {
                 case "ROLE_ENTIDAD_BENEFICIARIA":
                     return "/entidadBeneficiaria/recepcionDeDonaciones";
                 case "ROLE_ADMIN":
-                    return "/personaAdministradora/index";
+                    return "/personaAdministradora/home";
                 default:
                     break;
             }

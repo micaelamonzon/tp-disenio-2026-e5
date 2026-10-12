@@ -13,14 +13,9 @@
                             <span>Subcategoría</span>
                             <select id="needCategory" required>
                                 <option value="" selected disabled>Seleccionar subcategoría</option>
-                                <option value="Arroz">Arroz</option>
-                                <option value="Abrigos">Abrigos</option>
-                                <option value="Cuadernos escolares">Cuadernos escolares</option>
-                                <option value="Cepillos Dentales">Cepillos dentales</option>
-                                <option value="Mesas">Mesas</option>
-                                <option value="Zapatillas">Zapatillas</option>
-                                <option value="Leche">Leche</option>
+                                <option th:each="sub : ${subcategorias}" th:value="${sub}" th:text="${sub}"></option>
                             </select>
+                            <small th:if="${errorSubcategorias}" th:text="${errorSubcategorias}"></small>
                         </div>
                         <div class="field">
                             <span>Descripción detallada</span>
@@ -28,28 +23,29 @@
                         </div>
                         <div class="field-row">
                             <div class="field">
-                                <span>Cantidad estimada</span>
-                                <input type="number" id="needQuantity" required>
-                            </div>
-                            <div class="field">
-                                <span>Unidad</span>
-                                <select id="needUnit" required>
-                                    <option value="" selected disabled>Seleccionar</option>
-                                    <option value="Kilogramos">Kilogramos</option>
-                                    <option value="Litros">Litros</option>
-                                    <option value="Unidades">Unidades</option>
-                                    <option value="Paquetes">Paquetes</option>
-                                    <option value="Cajas">Cajas</option>
+                                <span>Tipo de necesidad</span>
+                                <select id="needType" required>
+                                    <option value="" selected disabled>Seleccionar tipo de necesidad</option>
+                                    <option value="RECURRENTE">Recurrente</option>
+                                    <option value="EXTRAORDINARIA">Extraordinaria</option>
                                 </select>
                             </div>
-                        </div>
-                        <div class="field">
-                            <span>Prioridad</span>
-                            <select id="needPriority" required>
-                                <option value="" selected disabled>Seleccionar tipo de necesidad</option>
-                                <option value="recurrente">Recurrente</option>
-                                <option value="extraordinaria">Extraordinaria</option>
-                            </select>
+
+
+                            <div class="field" id="periodField" hidden>
+                                <span>Período</span>
+                                <select id="needPeriod">
+                                    <option value="" selected disabled>Seleccionar período</option>
+                                    <option value="DIAS">Días</option>
+                                    <option value="SEMANAS">Semanas</option>
+                                    <option value="MESES">Meses</option>
+                                </select>
+                            </div>
+
+                            <div class="field">
+                                <span id="quantityLabel">Cantidad estimada</span>
+                                <input type="number" id="needQuantity" min="1" step="1" required>
+                            </div>
                         </div>
 
                         <button type="submit" class="btn btn-submit">+ Agregar Necesidad</button>
@@ -60,15 +56,39 @@
                     <h2 class="card-title">Necesidades Registradas</h2>
                     <div class="needs-list" id="registeredNeedsList">
                     </div>
-                    <div class="contendedor-button">
-                        <button type="button" class="btn btn-submit" id="sendNeedsBtn">
-                            Enviar Necesidades
-                        </button>
-                    </div>
+                    <form id="sendNeedsForm" th:action="@{/entidadBeneficiaria/necesidades}" method="post">
+                        <div id="hiddenInputs"></div>
+                        <div class="contendedor-button">
+                            <button type="submit" class="btn btn-submit" id="sendNeedsBtn">
+                                Enviar Necesidades
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </section>
+        <dialog id="messageModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-icon" id="modalIcon"></div>
+                <h3 id="modalTitle"></h3>
+                <p id="modalMessage"></p>
+                <button type="button" class="btn btn-submit" id="modalClose">Aceptar</button>
+            </div>
+        </dialog>
         <script th:src="@{/js/entidades/necesidades.js}"></script>
+        <script th:if="${enviadas != null}" th:inline="javascript">
+            document.addEventListener("DOMContentLoaded", () => {
+                const enviadas = /*[[${enviadas}]]*/ 0;
+                const fallidas = /*[[${fallidas}]]*/ 0;
+                if (fallidas === 0) {
+                    showModal("¡Listo!", `Se registraron ${enviadas} necesidad(es) exitosamente.`, "success");
+                } else {
+                    showModal("Envío incompleto",
+                        `Se registraron ${enviadas}. ${fallidas} no se pudieron registrar, intentá de nuevo.`,
+                        enviadas > 0 ? "warning" : "error");
+                }
+            });
+        </script>
     </div>
 
 </html>

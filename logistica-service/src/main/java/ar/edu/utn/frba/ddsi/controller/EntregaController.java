@@ -26,20 +26,20 @@ public class EntregaController {
     public ResponseEntity<EntregaDTO> crearEntrega(
             @RequestParam List<Long> donacionesIds,
             @RequestParam Long entidadId,
-            @RequestParam Long donanteId) {
+            @RequestParam List<Long> donantesIds) {
         try {
             return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(entregaService.crearEntrega(donacionesIds, entidadId, donanteId));
+                    .body(entregaService.crearEntregaDTO(donacionesIds, entidadId, donantesIds));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().build();
         }
     }
-    @PatchMapping("/entrega/{id}/iniciarTraslado")
-    public ResponseEntity<EntregaDTO> iniciarTraslado(
-            @PathVariable String id,
+    @PatchMapping("/entrega/{idDonante}/iniciarTraslado")
+    public ResponseEntity<List<EntregaDTO>> iniciarTraslado(
+            @PathVariable Long idDonante,
             @RequestParam String responsableId) {
         try {
-            return ResponseEntity.ok(entregaService.iniciarTraslado(id,responsableId));
+            return ResponseEntity.ok(entregaService.iniciarTraslado(idDonante,responsableId));
         } catch (IllegalStateException e) {
             return ResponseEntity.badRequest().build();
         }
@@ -79,15 +79,28 @@ public class EntregaController {
         }
     }
 
-    // El chofer informa el comienzo de su ruta: todas las entregas pasan a En traslado
-    @PatchMapping("/ruta/iniciar")
-    public ResponseEntity<List<EntregaDTO>> iniciarRuta(
-            @RequestParam List<String> entregaIds,
-            @RequestParam String choferId) {
+//    // El chofer informa el comienzo de su ruta: todas las entregas pasan a En traslado
+//    @PatchMapping("/ruta/iniciar")
+//    public ResponseEntity<List<EntregaDTO>> iniciarRuta(
+//            @RequestParam List<String> entregaIds,
+//            @RequestParam String choferId) {
+//        try {
+//            return ResponseEntity.ok(entregaService.iniciarRuta(entregaIds, choferId));
+//        } catch (IllegalStateException e) {
+//            return ResponseEntity.badRequest().build();
+//        }
+//    }
+    @GetMapping("/entregas")
+    public ResponseEntity<List<EntregaDTO>> listarEntregas() {
+        return ResponseEntity.ok(entregaService.listarEntregas());
+    }
+
+    @GetMapping("/entrega/{id}")
+    public ResponseEntity<EntregaDTO> obtenerEntrega(@PathVariable String id) {
         try {
-            return ResponseEntity.ok(entregaService.iniciarRuta(entregaIds, choferId));
-        } catch (IllegalStateException e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.ok(entregaService.obtenerEntrega(id));
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
         }
     }
 }

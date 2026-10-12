@@ -1,6 +1,6 @@
 package ar.edu.utn.frba.ddsi.utils;
 
-import ar.edu.utn.frba.ddsi.dtos.UsuarioSesion;
+import ar.edu.utn.frba.ddsi.dtos.autenticacion.UsuarioSesion;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;

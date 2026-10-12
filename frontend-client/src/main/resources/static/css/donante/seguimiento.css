@@ -187,3 +187,7 @@
     display: block;
     margin: 0;
 }
+.delivery-card[data-entrega-id] { cursor: pointer; }
+
+.status-green { background: var(--green-bg); color: var(--green); }
+.status-red { background: #fee2e2; color: var(--red); }

@@ -5,19 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="${titulo} + ' - DonaTrack'">Sobre Nosotros - DonaTrack</title>
 
-    <!-- CSS Principal -->
+
     <link rel="stylesheet" th:href="@{/css/landingPage/landingPage.css}">
-    <!-- Iconos FontAwesome -->
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 
-<!-- HEADER & NAVBAR -->
+
 <header th:replace="~{layoutAcceso/layoutAcceso :: header}"></header>
 <nav th:replace="~{layoutAcceso/layoutAcceso :: navBar}"></nav>
 
 <main class="page">
-    <!-- BANNER DE ENCABEZADO -->
+
     <section class="blue-header-banner" style="background-color: #1a61ff; color: #ffffff; text-align: center; padding: 4rem 1rem;">
         <h1 style="font-size: 2.75rem; font-weight: 800; margin-bottom: 0.75rem;">Sobre Nosotros</h1>
         <p style="font-size: 1.15rem; opacity: 0.95;">Construyendo puentes entre la universidad y la comunidad desde el corazón de UTN</p>
@@ -25,7 +25,7 @@
 
     <div class="container" style="max-width: 1000px; margin: 0 auto; padding: 3rem 1rem 5rem 1rem;">
 
-        <!-- 1. NUESTRA HISTORIA -->
+
         <article class="about-block" style="background: #ffffff; padding: 2.5rem; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.04); margin-bottom: 2rem;">
             <h2 style="font-size: 1.6rem; font-weight: 800; color: #1e293b; display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.25rem;">
                 <i class="fa-solid fa-heart" style="color: #1a61ff;"></i> Nuestra Historia
@@ -38,7 +38,6 @@
             </div>
         </article>
 
-        <!-- 2. NUESTRA MISIÓN -->
         <article class="about-block" style="background: #ffffff; padding: 2.5rem; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.04); margin-bottom: 3rem;">
             <h2 style="font-size: 1.6rem; font-weight: 800; color: #1e293b; display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.25rem;">
                 <i class="fa-solid fa-bullseye" style="color: #1a61ff;"></i> Nuestra Misión
@@ -48,13 +47,13 @@
             </p>
         </article>
 
-        <!-- 3. NUESTROS VALORES -->
+
         <section class="values-section" style="margin-bottom: 3.5rem;">
             <h2 style="text-align: center; font-size: 2rem; font-weight: 800; color: #1e293b; margin-bottom: 2rem;">Nuestros Valores</h2>
 
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
 
-                <!-- Solidaridad -->
+
                 <div class="value-card" style="background: #ffffff; padding: 1.75rem; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.04);">
                     <div style="background: #dbeafe; color: #1a61ff; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; margin-bottom: 1rem;">
                         <i class="fa-regular fa-heart"></i>
@@ -63,7 +62,7 @@
                     <p style="color: #64748b; font-size: 0.9rem; line-height: 1.6; margin: 0;">Creemos en la importancia de tender la mano a quienes más lo necesitan, actuando con empatía y compromiso genuino con el bienestar de nuestra comunidad.</p>
                 </div>
 
-                <!-- Transparencia -->
+
                 <div class="value-card" style="background: #ffffff; padding: 1.75rem; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.04);">
                     <div style="background: #dbeafe; color: #1a61ff; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; margin-bottom: 1rem;">
                         <i class="fa-regular fa-bookmark"></i>
@@ -72,7 +71,7 @@
                     <p style="color: #64748b; font-size: 0.9rem; line-height: 1.6; margin: 0;">Cada donación cuenta con trazabilidad total. Creemos que la confianza se construye con claridad y honestidad en cada una de nuestras acciones.</p>
                 </div>
 
-                <!-- Trabajo en Equipo -->
+
                 <div class="value-card" style="background: #ffffff; padding: 1.75rem; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.04);">
                     <div style="background: #dbeafe; color: #1a61ff; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; margin-bottom: 1rem;">
                         <i class="fa-solid fa-users"></i>
@@ -81,7 +80,7 @@
                     <p style="color: #64748b; font-size: 0.9rem; line-height: 1.6; margin: 0;">Fomentamos la colaboración entre estudiantes, docentes, graduados y la comunidad, porque juntos logramos mucho más que individualmente.</p>
                 </div>
 
-                <!-- Innovación -->
+
                 <div class="value-card" style="background: #ffffff; padding: 1.75rem; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.04);">
                     <div style="background: #dbeafe; color: #1a61ff; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; margin-bottom: 1rem;">
                         <i class="fa-regular fa-lightbulb"></i>
@@ -90,7 +89,7 @@
                     <p style="color: #64748b; font-size: 0.9rem; line-height: 1.6; margin: 0;">Aplicamos conocimiento técnico para crear soluciones que optimicen el impacto social, como DonaTrack, nuestra plataforma de gestión de donaciones.</p>
                 </div>
 
-                <!-- Responsabilidad Social -->
+
                 <div class="value-card" style="background: #ffffff; padding: 1.75rem; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.04);">
                     <div style="background: #dbeafe; color: #1a61ff; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; margin-bottom: 1rem;">
                         <i class="fa-solid fa-hand-holding-heart"></i>
@@ -99,7 +98,7 @@
                     <p style="color: #64748b; font-size: 0.9rem; line-height: 1.6; margin: 0;">Formamos profesionales conscientes de su rol en la sociedad, comprometidos con la transformación positiva de su entorno.</p>
                 </div>
 
-                <!-- Impacto Sostenible -->
+
                 <div class="value-card" style="background: #ffffff; padding: 1.75rem; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.04);">
                     <div style="background: #dbeafe; color: #1a61ff; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; margin-bottom: 1rem;">
                         <i class="fa-solid fa-bullseye"></i>
@@ -111,7 +110,7 @@
             </div>
         </section>
 
-        <!-- 4. ¿POR QUÉ ELEGIMOS ESTA ACTIVIDAD? -->
+
         <section class="why-banner" style="background-color: #1a61ff; color: #ffffff; padding: 3rem 2.5rem; border-radius: 16px; margin-bottom: 3rem;">
             <h2 style="font-size: 2rem; font-weight: 800; text-align: center; margin-bottom: 1.75rem;">¿Por qué elegimos esta actividad?</h2>
             <div style="font-size: 1rem; line-height: 1.75; opacity: 0.95; display: flex; flex-direction: column; gap: 1.25rem;">
@@ -122,30 +121,30 @@
             </div>
         </section>
 
-        <!-- 5. NUESTRO IMPACTO -->
+
         <section class="impact-section" style="background: #ffffff; padding: 2.5rem; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.04);">
             <h2 style="text-align: center; font-size: 1.85rem; font-weight: 800; color: #1e293b; margin-bottom: 2rem;">Nuestro Impacto</h2>
 
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.25rem;">
-                <!-- Métrica 1 -->
+
                 <div style="background: #f1f5f9; padding: 1.5rem; border-radius: 12px; text-align: center;">
                     <span style="font-size: 2.25rem; font-weight: 800; color: #1a61ff; display: block; margin-bottom: 0.25rem;">+15,000</span>
-                    <span style="color: #64748b; font-size: 0.88rem; font-weight: 600;">Viandas entregadas</span>
+                    <span style="color: #64748b; font-size: 0.88rem; font-weight: 600;">Donaciones entregadas</span>
                 </div>
 
-                <!-- Métrica 2 -->
+
                 <div style="background: #f1f5f9; padding: 1.5rem; border-radius: 12px; text-align: center;">
                     <span style="font-size: 2.25rem; font-weight: 800; color: #1a61ff; display: block; margin-bottom: 0.25rem;">+250</span>
-                    <span style="color: #64748b; font-size: 0.88rem; font-weight: 600;">Voluntarios activos</span>
+                    <span style="color: #64748b; font-size: 0.88rem; font-weight: 600;">Donante activos</span>
                 </div>
 
-                <!-- Métrica 3 -->
+
                 <div style="background: #f1f5f9; padding: 1.5rem; border-radius: 12px; text-align: center;">
                     <span style="font-size: 2.25rem; font-weight: 800; color: #1a61ff; display: block; margin-bottom: 0.25rem;">+30</span>
                     <span style="color: #64748b; font-size: 0.88rem; font-weight: 600;">Instituciones beneficiadas</span>
                 </div>
 
-                <!-- Métrica 4 -->
+
                 <div style="background: #f1f5f9; padding: 1.5rem; border-radius: 12px; text-align: center;">
                     <span style="font-size: 2.25rem; font-weight: 800; color: #1a61ff; display: block; margin-bottom: 0.25rem;">8</span>
                     <span style="color: #64748b; font-size: 0.88rem; font-weight: 600;">Años de trayectoria</span>
@@ -156,7 +155,7 @@
     </div>
 </main>
 
-<!-- FOOTER -->
+
 <footer th:replace="~{layoutAcceso/layoutAcceso :: footer}"></footer>
 
 </body>

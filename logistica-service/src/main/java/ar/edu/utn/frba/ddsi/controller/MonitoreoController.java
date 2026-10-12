@@ -1,5 +1,6 @@
 package ar.edu.utn.frba.ddsi.controller;
 import ar.edu.utn.frba.ddsi.dto.PosicionDTO;
+import ar.edu.utn.frba.ddsi.dto.RutaEntregaDTO;
 import ar.edu.utn.frba.ddsi.services.MonitoreoService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,14 +17,16 @@ import java.util.List;
 public class MonitoreoController {
 
     private final MonitoreoService monitoreoService;
+    private final EntregaController entregaController;
 
-
-    public MonitoreoController(MonitoreoService monitoreoService) {
+    public MonitoreoController(MonitoreoService monitoreoService,EntregaController entregaController) {
         this.monitoreoService = monitoreoService;
+        this.entregaController = entregaController;
 
     }
 
-    //Endpoint para registrar la posición de un camión en tiempo real, es lo que recibimos del GPS.
+    //Endpoint para registrar la posición de un camión en tiempo real, es lo que recibimos del GPS
+    //NO LO USAMOS, AHORA TENEMOS UN SIMULADOR DE GPS!!!
     @PostMapping("camion/{idCamion}/posicionActual")
     public ResponseEntity<PosicionDTO> obtenerPosicionActual(@PathVariable String idCamion, @RequestBody PosicionDTO posicionDTO) {
 
@@ -44,5 +47,16 @@ public class MonitoreoController {
         return ResponseEntity.ok(recorrido);
     }
 
+    // Rutas de las entregas que llevan donaciones del donante
+    @GetMapping("donante/{idDonante}/recorrido")
+    public ResponseEntity<List<RutaEntregaDTO>> obtenerRecorridoDeDonacionesDeDonante(@PathVariable Long idDonante) {
 
+        return ResponseEntity.ok(monitoreoService.obtenerRecorridoDeDonacionesDeDonante(idDonante));
+    }
+
+    // Rutas de las entregas activas de la entidad, recortadas hasta su parada (req. 14)
+    @GetMapping("entidad/{idEntidad}/recorrido")
+    public ResponseEntity<List<RutaEntregaDTO>> obtenerRecorridoDeEntregasDeEntidad(@PathVariable Long idEntidad) {
+        return ResponseEntity.ok(monitoreoService.obtenerRecorridoDeEntregasDeEntidad(idEntidad));
+    }
 }

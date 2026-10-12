@@ -2,8 +2,6 @@ package ar.edu.utn.frba.ddsi.services.Impl;
 
 import ar.edu.utn.frba.ddsi.config.LogisticaProperties;
 import ar.edu.utn.frba.ddsi.dto.*;
-import ar.edu.utn.frba.ddsi.models.entities.Camion;
-import ar.edu.utn.frba.ddsi.models.entities.SolicitudPlanificacion;
 import ar.edu.utn.frba.ddsi.repository.impl.SolicitudPlanificacionRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -24,10 +22,10 @@ import java.util.UUID;
 @Service
 public class PlanificacionRutas {
 
-    private static final int MAXIMO_DONACIONES = 100;
-    private static final String WAREHOUSE_ADRESS = "Av. Corrientes 1234, CABA";
-    private static final double WAREHOUSE_LAT = -34.3556;
-    private static final double WAREHOUSE_LON = -58.42015;
+    private final int MAXIMO_DONACIONES;
+    private final String DEPOSITO_DIRECCION;
+    private final double DEPOSITO_LAT;
+    private final double DEPOSITO_LON;
 
 
     private  final SolicitudPlanificacionRepository solicitudRepository;
@@ -35,7 +33,12 @@ public class PlanificacionRutas {
     private final LogisticaProperties properties;
     private final SolicitudPlanificacionServiceImpl servicePlani;
 
-    public PlanificacionRutas(RestTemplate restTemplate, LogisticaProperties properties, SolicitudPlanificacionRepository solicitudRepository, SolicitudPlanificacionServiceImpl servicePlani) {
+    public PlanificacionRutas(RestTemplate restTemplate, LogisticaProperties properties, SolicitudPlanificacionRepository solicitudRepository, SolicitudPlanificacionServiceImpl servicePlani, @Value("${logistica.deposito.lat}") double depositoLat,
+                              @Value("${logistica.deposito.lon}") double depositoLon, @Value("${logistica.max.donaciones}") int maxDonaciones, @Value("${logistica.deposito.direccion}") String depositoDireccion) {
+        this.DEPOSITO_LAT = depositoLat;
+        this.DEPOSITO_LON = depositoLon;
+        this.DEPOSITO_DIRECCION = depositoDireccion;
+        this.MAXIMO_DONACIONES = maxDonaciones;
         this.restTemplate = restTemplate;
         this.properties = properties;
         this.solicitudRepository = solicitudRepository;
@@ -61,7 +64,7 @@ public class PlanificacionRutas {
                         mañana.toString() + "Z",
                         fin.toString() + "Z"
                 ),
-                new WarehouseDTO(WAREHOUSE_LAT, WAREHOUSE_LON, WAREHOUSE_ADRESS),
+                new WarehouseDTO(DEPOSITO_LAT, DEPOSITO_LON, DEPOSITO_DIRECCION),
                 lote.stream().map(this::convertirADelivery).toList(),
                 camiones.stream().map(this::convertirATruck).toList(),
                 properties.getCallbackUrl()
@@ -79,6 +82,8 @@ public class PlanificacionRutas {
         headers.setBearerAuth(properties.getTokenPlanificador());
 
         HttpEntity<PlanRouteDTO> request = new HttpEntity<>(solicitud, headers);
+
+        System.out.println("Enviando al planificador: " + solicitud);
 
         restTemplate.exchange(uri, HttpMethod.POST, request, String.class);
     }

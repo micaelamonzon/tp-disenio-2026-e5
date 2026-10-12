@@ -6,8 +6,11 @@ public record DonacionDTO(
         String estado,
         Double pesoKg,
         Double volumenM3,
+        Long entidadBeneficiariaId,
+        Long donanteId,
         String direccionEntidad,
         double latitudEntidad,
-        double longitudEntidad
+        double longitudEntidad,
+        String subcategoria
 ) {
 }
