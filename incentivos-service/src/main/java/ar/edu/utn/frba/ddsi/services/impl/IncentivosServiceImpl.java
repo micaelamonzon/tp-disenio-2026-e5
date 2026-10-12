@@ -173,7 +173,7 @@ public class IncentivosServiceImpl implements IncentivosService {
             return;
         }
         donante.getPerfil().setCategoria(categoriaSiguiente);
-        this.agregarMisionADonante(donante.getId(),donante.getTipoDeDonante(), categoriaSiguiente.getMisiones().get(0).getId());
+        this.agregarMisionADonante(donante.getIdEnDonaciones(),donante.getTipoDeDonante(), categoriaSiguiente.getMisiones().get(0).getId());
 
     }
 
@@ -187,7 +187,7 @@ public class IncentivosServiceImpl implements IncentivosService {
 
         if (misionEnCurso.getMision().getOrdenSecuencial() < misionesDeCategoriaActual.size()) {
             Mision siguienteMision = misionesDeCategoriaActual.get(misionEnCurso.getMision().getOrdenSecuencial() - 1);
-            this.agregarMisionADonante(donante.getId(),donante.getTipoDeDonante(),siguienteMision.getId());
+            this.agregarMisionADonante(donante.getIdEnDonaciones(),donante.getTipoDeDonante(),siguienteMision.getId());
         } else {
             donante.setMisionEnCurso(null);
         }
