@@ -938,82 +938,12 @@ cancelarCamionBtn.addEventListener("click", () => {
     mostrarFormCamion(false);
 });
 
-/* ============================================================
-   RANKING DE DONANTES
-   ============================================================ */
-ICONS.trophy = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>';
-
+/* Utilidad compartida */
 function escapeHTML(valor) {
     return String(valor ?? "").replace(/[&<>"']/g, c => ({
         "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
     }[c]));
 }
-
-// DATOS DE DEMO (tomados de la maqueta de la entrega anterior).
-// Reemplazar por la respuesta del servicio de incentivos cuando el endpoint esté probado:
-// misma forma -> { "AAAA-MM": { etiqueta, donantes: [{ nombre, categorias[], donaciones, ultima }] } }
-const RANKING_POR_PERIODO = {
-    "2026-04": {
-        etiqueta: "Abril 2026",
-        donantes: [
-            { nombre: "María González", categorias: ["Alimentos", "Ropa"], donaciones: 15, ultima: "2026-04-20" },
-            { nombre: "Juan Pérez", categorias: ["Abrigo", "Alimentos"], donaciones: 12, ultima: "2026-04-18" },
-            { nombre: "Ana Martínez", categorias: ["Ropa", "Mobiliario"], donaciones: 10, ultima: "2026-04-15" },
-        ],
-    },
-    "2026-03": {
-        etiqueta: "Marzo 2026",
-        donantes: [
-            { nombre: "Juan Pérez", categorias: ["Abrigo", "Alimentos"], donaciones: 14, ultima: "2026-03-28" },
-            { nombre: "María González", categorias: ["Alimentos"], donaciones: 11, ultima: "2026-03-25" },
-            { nombre: "Ana Martínez", categorias: ["Mobiliario"], donaciones: 8, ultima: "2026-03-12" },
-        ],
-    },
-};
-
-const rankingPeriodoSelect = document.getElementById("rankingPeriodo");
-const rankingContenido = document.getElementById("rankingContenido");
-
-function renderRanking() {
-    const periodo = RANKING_POR_PERIODO[rankingPeriodoSelect.value];
-    if (!periodo || !periodo.donantes.length) {
-        rankingContenido.innerHTML = `<p class="empty-state">No hay datos de ranking para este período.</p>`;
-        return;
-    }
-    const ordenados = [...periodo.donantes].sort((a, b) => b.donaciones - a.donaciones).slice(0, 5);
-    const top = ordenados[0];
-    const clases = ["gold", "silver", "bronze"];
-
-    rankingContenido.innerHTML = `
-      <div class="donor-month">
-        <div class="donor-month-icon">${ICONS.trophy}</div>
-        <div>
-          <div class="donor-month-label">Donante del Mes</div>
-          <div class="donor-month-name">${escapeHTML(top.nombre)}</div>
-          <div class="donor-month-sub">${top.donaciones} donaciones realizadas</div>
-        </div>
-      </div>
-      <div class="rank-list">
-        ${ordenados.map((d, i) => `
-          <div class="rank-item ${clases[i] || ""}">
-            <div class="rank-pos">${i + 1}</div>
-            <div class="rank-body">
-              <div class="rank-name">${escapeHTML(d.nombre)}</div>
-              <div class="rank-tags">${(d.categorias || []).map(c => `<span class="tag">${escapeHTML(c)}</span>`).join("")}</div>
-            </div>
-            <div class="rank-count">
-              <strong>${d.donaciones}</strong>
-              <span>donaciones</span>
-              <span class="rank-last">Última: ${escapeHTML(d.ultima)}</span>
-            </div>
-          </div>`).join("")}
-      </div>`;
-}
-
-rankingPeriodoSelect.innerHTML = Object.keys(RANKING_POR_PERIODO).sort().reverse()
-    .map(k => `<option value="${k}">${escapeHTML(RANKING_POR_PERIODO[k].etiqueta)}</option>`).join("");
-rankingPeriodoSelect.addEventListener("change", renderRanking);
-renderRanking();
 
 /* ============================================================
    IMPORTAR DONANTES (CSV)

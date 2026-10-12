@@ -757,3 +757,11 @@ svg{ width: 18px; height: 18px; flex-shrink:0; }
 .history-right{ text-align: right; }
 .history-count{ color: var(--green); font-size: 14px; font-weight: 700; }
 .history-status{ font-size: 12.5px; color: var(--text-soft); }
+/*
+   Neutraliza el padding/ancho del <main> de ranking.html cuando se muestra dentro del panel. */
+.admin-view-embebida main {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: none !important;
+    width: 100% !important;
+}
