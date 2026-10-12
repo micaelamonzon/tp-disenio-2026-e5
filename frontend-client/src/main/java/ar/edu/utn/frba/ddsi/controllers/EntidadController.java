@@ -65,6 +65,14 @@ public class EntidadController {
     public String estadoDeDonaciones(Model model) {
         model.addAttribute("titulo", "Estado de donaciones");
         model.addAttribute("tabActiva", "estado");
+        try {
+            model.addAttribute("donaciones",
+                    entidadesApiService.obtenerDonacionesAsignadas(idEntidadActual()));
+        } catch (RuntimeException e) {
+            model.addAttribute("donaciones", List.of());
+            model.addAttribute("errorDonaciones",
+                    "No pudimos cargar tus donaciones asignadas. Intenta de nuevo en unos minutos.");
+        }
         return "acceso/entidadBeneficiaria/estadoDeDonaciones";
     }
 

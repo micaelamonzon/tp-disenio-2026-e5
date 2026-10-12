@@ -252,27 +252,9 @@ public class DonacionesServiceImpl implements DonacionesService {
                 donacionesSegmentadas = this.donacionesRepository.findDonacionesPorIdJuridico(idDeDonante);
             }
 
-
-            List<DonacionSegmentadaDTO> dtos = new ArrayList<>();
-
-            donacionesSegmentadas.forEach(d -> {
-                dtos.add(
-                    new DonacionSegmentadaDTO(
-                            d.getId(),
-                            d.getEstadoActual().toString(),
-                            null,
-                            this.obtenerBienesDTO(d.getBienesDelMismoTipo()),
-                            d.getFechaDeIngreso(),
-                            d.getDonacionEntregada(),
-                            d.getEntidadBeneficiaria() != null ? d.getEntidadBeneficiaria().getId() : null,
-                            d.getFotoPath()
-                    )
-                );
-            }
-            );
-
-             return dtos;
+             return this.convertirDonacionesSegADTO(donacionesSegmentadas);
     }
+
 
     @Override
     public PersonaHumanaDTO obtenerHumanoPorId(Long id) {
@@ -861,23 +843,7 @@ public class DonacionesServiceImpl implements DonacionesService {
         )).collect(Collectors.toCollection(ArrayList::new));
     }
 
-    public List<DonacionSegmentadaDTO> obtenerDonacionesSegmentadasDTODePersonaDonante(List<DonacionSinSegmentar> donacionesSinSegmentar){
-        return donacionesSinSegmentar.stream()
-                .flatMap(donacionSinSegmentar -> donacionSinSegmentar.getDonacionesSegmentadas().stream())
-                .map(donacionSegmentada ->
-                        new DonacionSegmentadaDTO(
-                        donacionSegmentada.getId(),
-                        donacionSegmentada.getEstadoActual().toString(),
-                        null,
-                        this.obtenerBienesDTO(donacionSegmentada.getBienesDelMismoTipo()),
-                        donacionSegmentada.getFechaDeIngreso(),
-                        donacionSegmentada.getDonacionEntregada(),
-                        donacionSegmentada.getEntidadBeneficiaria().getId(),
-                                donacionSegmentada.getFotoPath()
 
-                ))
-                .collect(Collectors.toList());
-    }
     public List<MedioDeNotificacionDTO> obtenerMediosDTO(List<MedioDeNotificacion> mediosDeNotificacion){
         List<MedioDeNotificacionDTO> mediosDTO = new ArrayList<>();
         mediosDeNotificacion.forEach(m -> mediosDTO.add(this.obtenerAMedioDTO(m)));
@@ -931,6 +897,7 @@ public class DonacionesServiceImpl implements DonacionesService {
                         null,
                         this.obtenerBienesDTO(d.getBienesDelMismoTipo()),
                         d.getFechaDeIngreso(),
+                        d.getFechaDeAsignacion(),
                         d.getDonacionEntregada(),
                         d.getEntidadBeneficiaria() != null ? d.getEntidadBeneficiaria().getId() : null,
                         d.getFotoPath()
@@ -962,6 +929,50 @@ public class DonacionesServiceImpl implements DonacionesService {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public List<DonacionAsignadaDTO> obtenerDonacionesAsiganadasAUnaEntidad(Long idEntidad){
+        List<DonacionSegmentada> donacionesASignadas = this.donacionesRepository.findByEntidadBeneficiariaId(idEntidad);
+
+        return  this.convertirADonacionesAsignadasDTO(donacionesASignadas);
+    }
+
+    public List<DonacionAsignadaDTO> convertirADonacionesAsignadasDTO(List<DonacionSegmentada> donacionesASignadas){
+        List<DonacionAsignadaDTO> dtos = new ArrayList<>();
+        donacionesASignadas.forEach(d -> {dtos.add(
+                new DonacionAsignadaDTO(
+                  d.getId(),
+                  d.getEstadoActual().toString(),
+                  d.calcularCantidadDeBienes(),
+                  d.getFechaDeAsignacion(),
+                  d.getSubcategoria().getNombre(),
+                  d.calcularDescripcion(),
+                  d.getDonacionEntregada()
+        ));});
+        return dtos;
+    }
+
+    public List<DonacionSegmentadaDTO> convertirDonacionesSegADTO(List<DonacionSegmentada> donacionesSegmentadas){
+
+        List<DonacionSegmentadaDTO> dtos = new ArrayList<>();
+
+        donacionesSegmentadas.forEach(d -> {
+                    dtos.add(
+                            new DonacionSegmentadaDTO(
+                                    d.getId(),
+                                    d.getEstadoActual().toString(),
+                                    null,
+                                    this.obtenerBienesDTO(d.getBienesDelMismoTipo()),
+                                    d.getFechaDeIngreso(),
+                                    d.getFechaDeAsignacion(),
+                                    d.getDonacionEntregada(),
+                                    d.getEntidadBeneficiaria() != null ? d.getEntidadBeneficiaria().getId() : null,
+                                    d.getFotoPath()
+                            )
+                    );
+                }
+        );
+        return dtos;
     }
 }
 
