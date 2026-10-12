@@ -1,4 +1,4 @@
-package ar.edu.utn.frba.ddsi.dtos;
+package ar.edu.utn.frba.ddsi.dtos.autenticacion;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class RefreshTokenDTO {
+public class AuthResponseDTO {
+    private String accessToken;
     private String refreshToken;
 }

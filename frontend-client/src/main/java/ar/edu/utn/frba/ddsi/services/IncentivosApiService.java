@@ -2,6 +2,7 @@ package ar.edu.utn.frba.ddsi.services;
 
 import ar.edu.utn.frba.ddsi.dtos.donaciones.misiones.MisionFrontDTO;
 import ar.edu.utn.frba.ddsi.dtos.donaciones.misiones.PerfilDTO;
+import ar.edu.utn.frba.ddsi.dtos.donaciones.misiones.RankingMensualDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -78,6 +79,49 @@ public class IncentivosApiService {
         } catch (Exception e) {
             log.error("Error comenzando misión {} del donante {}", misionId, idDonante, e);
             throw new RuntimeException("No se pudo comenzar la misión", e);
+        }
+    }
+
+    // ==========================================
+    // MÉTODOS DE RANKING Y MÉTRICAS
+    // ==========================================
+
+    public RankingMensualDTO obtenerUltimoRanking() {
+        try {
+            URI uri = UriComponentsBuilder.fromUriString(incentivosServiceUrl)
+                    .path("/ranking/ultimo")
+                    .build()
+                    .toUri();
+
+            return webClient.get()
+                    .uri(uri)
+                    .retrieve()
+                    .bodyToMono(RankingMensualDTO.class)
+                    .block();
+        } catch (Exception e) {
+            log.error("Error obteniendo el último ranking", e);
+            return null; // O manejar según necesidad
+        }
+    }
+
+    public List<RankingMensualDTO> buscarRankings(Integer mes, Integer anio) {
+        try {
+            UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(incentivosServiceUrl)
+                    .path("/ranking/buscar");
+
+            if (mes != null) builder.queryParam("mes", mes);
+            if (anio != null) builder.queryParam("anio", anio);
+
+            List<RankingMensualDTO> list = webClient.get()
+                    .uri(builder.build().toUri())
+                    .retrieve()
+                    .bodyToFlux(RankingMensualDTO.class)
+                    .collectList()
+                    .block();
+            return list != null ? list : List.of();
+        } catch (Exception e) {
+            log.error("Error buscando historial de rankings", e);
+            return List.of();
         }
     }
 }

@@ -28,19 +28,13 @@ import ar.edu.utn.frba.ddsi.services.IncentivosService;
 import org.hibernate.Hibernate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.support.ResourceTransactionManager;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.net.URI;
-import java.time.LocalDate;
 import java.time.YearMonth;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -97,14 +91,12 @@ public class IncentivosServiceImpl implements IncentivosService {
 
        this.estadoMisionRepository.save(nuevoEstado);
 
-       if(donante != null){
-           donante.agregarMision(misionParticular);
-           donante.setMisionEnCurso(misionParticular);
-           donante.getPerfil().setCategoria(misionParticular.getMision().getCategoria());
-           return;
-       }
-        throw new RuntimeException("No se encontro el donante con id: " + id + " tipo " + tipoDeDonante);
+        donante.agregarMision(misionParticular);
+        donante.setMisionEnCurso(misionParticular);
 
+        if(donante.getPerfil() != null && misionParticular.getMision().getCategoria() != null) {
+            donante.getPerfil().setCategoria(misionParticular.getMision().getCategoria());
+        }
     }
 
     @Override
@@ -122,7 +114,14 @@ public class IncentivosServiceImpl implements IncentivosService {
         if (misionesCompletadas != null && !misionesCompletadas.isEmpty()) {
             for (MisionParticular mision : misionesCompletadas) {
                 String nombreMision = mision.getMision().getNombre().toString();
+                String insigniaGanadora = mision.getMision().getInsigniaGanadora();
 
+                try {
+                    this.publicarYDifundirInsignia(donante.getIdEnDonaciones(), insigniaGanadora, tipoDeDonante.name());
+                } catch (Exception e) {
+                    System.out.println("Error al difundir la insignia automáticamente en n8n: " + e.getMessage());
+                }
+                
                 notificar(
                         donante.getIdEnDonaciones(),
                         "Felicitaciones!+Completaste+la+mision+" + nombreMision
@@ -220,7 +219,7 @@ public class IncentivosServiceImpl implements IncentivosService {
     //TODO: Hacer que tome el query param de tipoDeDonante para que tambien pubique y difunda  insignias para los donantes juridicos
 
     @Override
-    public String publicarYDifundirInsignia(Long id, Insignia insignia,
+    public String publicarYDifundirInsignia(Long id, String insignia,
                                             String tipoDeDonante) {
 
         TipoDeDonante tipo = TipoDeDonante.valueOf(tipoDeDonante);
@@ -272,6 +271,7 @@ public class IncentivosServiceImpl implements IncentivosService {
         return publicadorService.publicarYDifundirInsignia(nombre, insignia);
     }
 
+    @Transactional
     @Override
     public void calcularYGuardarRanking() {
         URI uri = UriComponentsBuilder
@@ -285,49 +285,55 @@ public class IncentivosServiceImpl implements IncentivosService {
         PersonaDonanteDTO[] array = response.getBody();
         if (array == null || array.length == 0) return;
 
-        YearMonth mesPasado = YearMonth.now().minusMonths(1);
+        //YearMonth mesPasado = YearMonth.now().minusMonths(1);
+        YearMonth mesActual = YearMonth.now();
 
-        List <Donante> donantes = Arrays.stream(array)
+        List<Donante> donantes = Arrays.stream(array)
                 .map(dto -> {
-                    if(dto.idHumano() != null){
-                        return incentivosRepository
-                                .findByIdEnDonaciones(
-                                        dto.idHumano(), TipoDeDonante.HUMANO
-                                );
-                    } else if (dto.idJuridico() != null){
-                        return incentivosRepository
-                                .findByIdEnDonaciones(
-                                        dto.idJuridico(), TipoDeDonante.JURIDICO
-                                );
+                    if (dto.idHumano() != null) {
+                        return incentivosRepository.findByIdEnDonaciones(dto.idHumano(), TipoDeDonante.HUMANO);
+                    } else if (dto.idJuridico() != null) {
+                        return incentivosRepository.findByIdEnDonaciones(dto.idJuridico(), TipoDeDonante.JURIDICO);
                     }
                     return null;
                 })
                 .filter(d -> d != null)
                 .toList();
 
-        this.rankingCompletoOrdenado = donantes.stream()
+        List<Donante> ordenados = donantes.stream()
                 .sorted(Comparator.comparingInt(
-                        (Donante d) -> -d.calcularMisionesCumplidasEn(mesPasado)))
+                        (Donante d) -> -d.calcularMisionesCumplidasEn(mesActual)))
                 .toList();
-        if(rankingCompletoOrdenado.size() < 3) return;
+        if (ordenados.isEmpty()) return;
 
-        RankingMensual nuevoRanking = new RankingMensual(
-                LocalDate.now().minusMonths(1),
-                rankingCompletoOrdenado.get(0),
-                rankingCompletoOrdenado.get(1),
-                rankingCompletoOrdenado.get(2),
-                rankingCompletoOrdenado
-        );
+        // recalcular reemplaza el ranking de ese mes en vez de duplicarlo
+        rankingMensualRepository.findAll().stream()
+                .filter(r -> YearMonth.from(r.getFecha()).equals(mesActual))
+                .forEach(rankingMensualRepository::delete);
 
-        rankingMensualRepository.save(nuevoRanking);
-        this.ultimoRanking = nuevoRanking;
+        RankingMensual nuevo = new RankingMensual(
+                mesActual.atDay(1),
+                ordenados.get(0),
+                ordenados.size() > 1 ? ordenados.get(1) : null,
+                ordenados.size() > 2 ? ordenados.get(2) : null,
+                ordenados);
+
+        rankingMensualRepository.save(nuevo);
+
     }
-
     @Override
+    @Transactional(readOnly = true)
     public RankingMensual obtenerUltimoRanking() {
-        return ultimoRanking;
+        return rankingMensualRepository.findTopByOrderByFechaDesc().orElse(null);
     }
 
+    @Transactional(readOnly = true)
+    public Integer obtenerPosicion(Long idEnDonaciones, TipoDeDonante tipo) {
+        RankingMensual ranking = rankingMensualRepository.findTopByOrderByFechaDesc().orElse(null);
+        Donante donante = incentivosRepository.findByIdEnDonaciones(idEnDonaciones, tipo);
+        if (ranking == null || donante == null) return null;
+        return ranking.getPosicion(donante);
+    }
 
     public List<DonacionSegmentada> convertirDonacionesDTO(List<DonacionIncentivosDTO> donacionesDTO) {
 
@@ -402,7 +408,7 @@ public class IncentivosServiceImpl implements IncentivosService {
 
 
     @Override
-    public String procesarLogro(Long id, Insignia insignia, TipoDeDonante tipoDeDonante) {
+    public String procesarLogro(Long id, String insignia, TipoDeDonante tipoDeDonante) {
         Donante donante = incentivosRepository.findByIdEnDonaciones(id,tipoDeDonante);
 
         String nombre = donante.getNombre() != null
@@ -499,6 +505,7 @@ public class IncentivosServiceImpl implements IncentivosService {
                 ranking.getTercerPuesto() != null ? ranking.getTercerPuesto().getNombre() : "N/A"
         );
     }
+    @Transactional
     @Override
     public List<RankingMensualDTO> buscarRankings(Integer mes, Integer anio) {
         List<RankingMensual> todosLosRankings = rankingMensualRepository.findAll();
@@ -688,7 +695,7 @@ public class IncentivosServiceImpl implements IncentivosService {
         };
     }
 
-    @Transactional(readOnly = true)
+    @Transactional()
     public PerfilDTO obtenerPerfilPorId(Long idEnDonaciones, TipoDeDonante tipoDeDonante) {
         Donante donante = incentivosRepository.findByIdEnDonaciones(idEnDonaciones, tipoDeDonante);
         if (donante == null) {
@@ -698,7 +705,24 @@ public class IncentivosServiceImpl implements IncentivosService {
         Integer cantMisionesCumplidas = donante.obtenerMisionesCompletadas().size();
         Integer cantInsignias = perfil.getInsignias().size();
         List<InsigniaDTO> insigniasDTO = this.obtenerInsigniasDTO(donante);
-        return new PerfilDTO(cantMisionesCumplidas, cantInsignias,perfil.getNombreDeUsuario(),insigniasDTO,perfil.getCategoria()!= null ? perfil.getCategoria().getNombre().toString() : null);
+        RankingMensual rankingActual = obtenerUltimoRanking();
+        if (rankingActual == null) {
+            calcularYGuardarRanking();
+            rankingActual = obtenerUltimoRanking();
+        }
+        
+        Integer puestoRanking = null;
+        if (rankingActual != null) {
+            puestoRanking = rankingActual.getPosicion(donante);
+        }
 
+        return new PerfilDTO(
+                cantMisionesCumplidas,
+                cantInsignias,
+                perfil.getNombreDeUsuario(),
+                insigniasDTO,
+                perfil.getCategoria() != null ? perfil.getCategoria().getNombre().toString() : null,
+                puestoRanking
+        );
     }
 }

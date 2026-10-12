@@ -73,7 +73,7 @@ public class DonacionesApiService {
     public List<EntidadBeneficiariaDTO> obtenerEntidades() {
         try {
             List<EntidadBeneficiariaDTO> entidades = webClient.get()
-                    .uri(donacionesServiceUrl + "/obtenerEntidades")
+                    .uri(donacionesServiceUrl + "/entidades")
                     .retrieve()
                     .bodyToFlux(EntidadBeneficiariaDTO.class)
                     .collectList()
@@ -89,7 +89,7 @@ public class DonacionesApiService {
     public EntidadBeneficiariaDTO obtenerEntidad(Long idEntidad) {
         try {
             return webClient.get()
-                    .uri(donacionesServiceUrl + "/obtenerEntidad/{id}", idEntidad)
+                    .uri(donacionesServiceUrl + "/entidad/{id}", idEntidad)
                     .retrieve()
                     .bodyToMono(EntidadBeneficiariaDTO.class)
                     .block();

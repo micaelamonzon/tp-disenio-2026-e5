@@ -17,7 +17,7 @@ public interface IncentivosService {
     public void agregarMisionADonante(Long id, TipoDeDonante tipoDeDonante, Long misionId);
     public MisionParticularDTO buscarMisionActualPorId(Long id, TipoDeDonante tipoDeDonante);
 
-    public String publicarYDifundirInsignia(Long id, Insignia insignia, String tipoDeDonante);
+    public String publicarYDifundirInsignia(Long id, String insignia, String tipoDeDonante);
     public List<MisionParticularDTO> obtenerMisionesCompletadas(Long id, TipoDeDonante tipoDeDonante);
     Boolean pasaSiguienteCategoria(Donante donante);
     public void pasaASiguienteMisionDeLaMismaCategoria(Donante donante);
@@ -27,10 +27,10 @@ public interface IncentivosService {
 
     RankingMensual obtenerUltimoRanking();
     void calcularYGuardarRanking();
-
+    public Integer obtenerPosicion(Long idEnDonaciones, TipoDeDonante tipo);
     MetricasImpactoDTO obtenerMetricasDeImpacto(Long idDonante);
 
-    public String procesarLogro(Long id, Insignia insignia, TipoDeDonante tipoDeDonante);
+    public String procesarLogro(Long id, String insignia, TipoDeDonante tipoDeDonante);
 
     MetricasSistemaDTO obtenerMetricasDelSistema();
 

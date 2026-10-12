@@ -1,5 +1,6 @@
 package ar.edu.utn.frba.ddsi.donaciones.services;
 
+import ar.edu.utn.frba.ddsi.donaciones.dto.DonacionAsignadaDTO;
 import ar.edu.utn.frba.ddsi.donaciones.dto.DonacionSegmentadaDTO;
 import ar.edu.utn.frba.ddsi.donaciones.dto.DonacionSinSegmentarDTO;
 import ar.edu.utn.frba.ddsi.donaciones.dto.PersonaDonanteDTO;
@@ -31,7 +32,7 @@ public interface DonacionesService {
     PersonaJuridicaDTO modificarDonanteJuridico(Long id, PersonaJuridicaDTO request);
     void eliminarDonanteHumano(Long id);
 
-    public void arrancarImportacionDeCSV( String file);
+     void arrancarImportacionDeCSV( String file);
 
-
+     List<DonacionAsignadaDTO> obtenerDonacionesAsiganadasAUnaEntidad(Long idEntidad);
 }

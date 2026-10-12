@@ -50,7 +50,7 @@ public class Donante extends Persistente {
     private Perfil perfil;
 
 
-    @OneToMany(mappedBy = "donante", fetch = FetchType.LAZY,cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "donante", fetch = FetchType.EAGER,cascade = CascadeType.ALL)
     private List<MisionParticular> misiones = new ArrayList<>();; //historial de misiones tanto en curso como pasadas
 
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)

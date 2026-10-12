@@ -1,8 +1,17 @@
 package ar.edu.utn.frba.ddsi.controllers;
 
+import ar.edu.utn.frba.ddsi.dtos.entidades.EntidadBeneficiariaDTO;
+import ar.edu.utn.frba.ddsi.dtos.entidades.NecesidadDTO;
+import ar.edu.utn.frba.ddsi.dtos.entidades.NecesidadesDTO;
+import ar.edu.utn.frba.ddsi.dtos.entidades.PerfilEntidadDTO;
+import ar.edu.utn.frba.ddsi.services.EntidadesApiService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,6 +27,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import tools.jackson.databind.ObjectMapper;
 import ar.edu.utn.frba.ddsi.utils.UsuarioActual;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/entidadBeneficiaria")
@@ -26,6 +36,7 @@ public class EntidadController {
     private static final String REDIRECT_RECEPCION = "redirect:/entidadBeneficiaria/recepcionDeDonaciones";
 
     private final NotificacionesApiService notificacionesApiService;
+    private final EntidadesApiService entidadesApiService;
     private final ObjectMapper objectMapper;
     private final LogisticaApiService logisticaApiService;
     private final FotoStorageService fotoStorageService;
@@ -35,10 +46,12 @@ public class EntidadController {
                              ObjectMapper objectMapper,
                              LogisticaApiService logisticaApiService,
                              FotoStorageService fotoStorageService,
+                             EntidadesApiService entidadesApiService,
                              UsuarioActual usuarioActual) {
         this.notificacionesApiService = notificacionesApiService;
         this.objectMapper = objectMapper;
         this.logisticaApiService = logisticaApiService;
+        this.entidadesApiService = entidadesApiService;
         this.fotoStorageService = fotoStorageService;
         this.usuarioActual = usuarioActual;
     }
@@ -52,6 +65,14 @@ public class EntidadController {
     public String estadoDeDonaciones(Model model) {
         model.addAttribute("titulo", "Estado de donaciones");
         model.addAttribute("tabActiva", "estado");
+        try {
+            model.addAttribute("donaciones",
+                    entidadesApiService.obtenerDonacionesAsignadas(idEntidadActual()));
+        } catch (RuntimeException e) {
+            model.addAttribute("donaciones", List.of());
+            model.addAttribute("errorDonaciones",
+                    "No pudimos cargar tus donaciones asignadas. Intenta de nuevo en unos minutos.");
+        }
         return "acceso/entidadBeneficiaria/estadoDeDonaciones";
     }
 
@@ -112,7 +133,58 @@ public class EntidadController {
     public String registrarNecesidades(Model model) {
         model.addAttribute("titulo", "Registrar necesidades");
         model.addAttribute("tabActiva", "registrar");
+        try {
+            model.addAttribute("subcategorias", entidadesApiService.obtenerSubcategorias());
+        } catch (RuntimeException e) {
+            model.addAttribute("subcategorias", List.of());
+            model.addAttribute("errorSubcategorias",
+                    "No pudimos cargar las subcategorías. Intentá de nuevo en unos minutos.");
+        }
         return "acceso/entidadBeneficiaria/registrarNecesidades";
+    }
+
+    @PostMapping("/necesidades")
+    public String enviarNecesidades(@ModelAttribute NecesidadesDTO necesidades,
+                                    RedirectAttributes redirect) {
+        int enviadas = 0;
+        int fallidas = 0;
+
+        for (NecesidadDTO n : necesidades.getNecesidades()) {
+            try {
+                String periodo = (n.getPeriodo() == null || n.getPeriodo().isBlank()) ? null : n.getPeriodo();
+                NecesidadDTO dto = new NecesidadDTO(null, n.getTipo(), n.getSubcategoria(),
+                        n.getDescripcion(), false, n.getCantidad(), periodo);
+                entidadesApiService.crearNecesidad(idEntidadActual(), dto);
+                enviadas++;
+            } catch (RuntimeException e) {
+                fallidas++;
+            }
+        }
+
+        redirect.addFlashAttribute("enviadas", enviadas);
+        redirect.addFlashAttribute("fallidas", fallidas);
+        return "redirect:/entidadBeneficiaria/registrarNecesidades";
+    }
+
+    @GetMapping("/perfil")
+    public String perfil(Model model) {
+        model.addAttribute("titulo", "Mi perfil");
+        model.addAttribute("tabActiva", " ");
+        try {
+            EntidadBeneficiariaDTO entidad = entidadesApiService.obtenerPerfil(idEntidadActual());
+            model.addAttribute("entidad", entidad);
+            model.addAttribute("iniciales", iniciales(entidad.getRazonSocial()));
+        } catch (RuntimeException e) {
+            model.addAttribute("errorPerfil",
+                    "No pudimos cargar los datos de tu entidad. Intentá de nuevo en unos minutos.");
+        }
+        return "acceso/entidadBeneficiaria/perfil";
+    }
+
+    private String iniciales(String nombre) {
+        if (nombre == null || nombre.isBlank()) return "?";
+        String n = nombre.trim();
+        return n.substring(0, Math.min(2, n.length())).toUpperCase();
     }
 
 
@@ -164,12 +236,12 @@ public class EntidadController {
         return "acceso/entidadBeneficiaria/notificaciones";
     }
 
-    @GetMapping("/perfil")
-    public String pefil(Model model) {
-        model.addAttribute("titulo", "Mi perfil");
-        model.addAttribute("tabActiva", " ");
-        return "acceso/entidadBeneficiaria/perfil";
-    }
+//    @GetMapping("/perfil")
+//    public String pefil(Model model) {
+//        model.addAttribute("titulo", "Mi perfil");
+//        model.addAttribute("tabActiva", " ");
+//        return "acceso/entidadBeneficiaria/perfil";
+//    }
 
     private List<EntregaDTO> filtrarPorEstado(List<EntregaDTO> entregas, String estado) {
         return entregas.stream()
