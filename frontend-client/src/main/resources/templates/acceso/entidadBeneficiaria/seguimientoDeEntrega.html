@@ -1,7 +1,7 @@
 <html th:replace="~{layoutEntidad/base :: html}">
 <div th:fragment="contenido" class="row">
 
-    <!-- Estilos del mapa (los mismos que usa la pantalla del donante) -->
+
     <link rel="stylesheet" th:href="@{/css/donante/seguimiento.css}">
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -72,7 +72,7 @@
         </div>
     </section>
 
-    <!-- Datos para el mapa: el mismo JS que el donante, apuntando a los datos de la entidad -->
+
     <script th:inline="javascript">
         window.ENTREGAS_ACTIVAS = JSON.parse(/*[[${entregasJson}]]*/ "[]");
         window.SEGUIMIENTO_URL = /*[[@{/entidadBeneficiaria/seguimientoDeEntrega/datos}]]*/ "/entidadBeneficiaria/seguimientoDeEntrega/datos";

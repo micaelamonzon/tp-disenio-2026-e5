@@ -6,7 +6,7 @@
             <p class="page-sub">Confirme la recepción de cada donación asignada, adjuntando las fotos correspondientes</p>
         </div>
 
-        <!-- Mensajes del resultado de confirmar (vienen del redirect) -->
+
         <p th:if="${mensajeRecepcion}" class="page-sub" role="status" th:text="${mensajeRecepcion}">¡Recepción confirmada!</p>
         <p th:if="${errorRecepcion}" class="page-sub" role="alert" th:text="${errorRecepcion}">No pudimos confirmar la recepción.</p>
         <p th:if="${errorCarga}" class="page-sub" role="alert" th:text="${errorCarga}">No pudimos obtener tus entregas.</p>
@@ -19,7 +19,7 @@
             </p>
 
             <div id="pendingDonationsList" class="status-list-container">
-                <!-- Una tarjeta por cada entrega EN_CAMINO -->
+
                 <article class="status-card donation-card" th:each="e : ${pendientes}">
                     <div class="status-card-row">
                         <div class="status-card-left">
@@ -37,7 +37,7 @@
                         </div>
                     </div>
 
-                    <!-- El panel es un formulario: recepcionConfirmar.js lo envía con las fotos -->
+
                     <form class="photos-panel form-confirmar" method="post" enctype="multipart/form-data"
                           th:action="@{/entidadBeneficiaria/recepcionDeDonaciones/{id}/confirmar(id=${e.id})}"
                           th:attr="data-volver=@{/entidadBeneficiaria/recepcionDeDonaciones}">

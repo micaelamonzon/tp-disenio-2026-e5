@@ -167,7 +167,7 @@
 <footer th:replace="~{layoutAcceso/layoutAcceso :: footer}"></footer>
 
 <script th:inline="javascript">
-    // Si el registro falló, el controller indica qué formulario volver a mostrar
+
     const tipoFormulario = /*[[${tipoFormulario}]]*/ null;
 
     function setMainRole(role) {
@@ -185,7 +185,7 @@
             subPersoneriaWrapper.style.display = 'block';
             formEntidad.style.display = 'none';
 
-            // Verificamos qué radio button está marcado
+
             const selectedPersoneria = document.querySelector('input[name="tipoDonanteRadio"]:checked').value;
             switchDonanteForm(selectedPersoneria);
         } else {
