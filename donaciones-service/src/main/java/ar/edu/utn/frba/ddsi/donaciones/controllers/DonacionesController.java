@@ -244,4 +244,10 @@ public class DonacionesController {
         }
     }
 
+    @GetMapping("/entidadBeneficiaria/{idEntidad}/donaciones")
+    public ResponseEntity<List<DonacionAsignadaDTO>>obtenerDonacionesAsignadas(@PathVariable Long idEntidad) {
+        List<DonacionAsignadaDTO> donaciones = this.donacionesService.obtenerDonacionesAsiganadasAUnaEntidad(idEntidad);
+
+        return ResponseEntity.ok(donaciones);
+    }
 }

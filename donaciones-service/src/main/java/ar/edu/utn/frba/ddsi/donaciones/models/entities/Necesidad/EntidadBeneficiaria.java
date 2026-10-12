@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -75,7 +76,7 @@ public class EntidadBeneficiaria {
     }
 
     public int obtenerCantidadDonacionesUltimoTrimestre() {
-        LocalDate haceTresMeses = LocalDate.now().minusMonths(3);
+        LocalDateTime haceTresMeses = LocalDateTime.now().minusMonths(3);
 
         return this.necesidades.stream()
                 .mapToInt(n -> n.contarDonacionesDesde(haceTresMeses))

@@ -1,6 +1,7 @@
 package ar.edu.utn.frba.ddsi.services;
 
 import ar.edu.utn.frba.ddsi.dtos.donaciones.misiones.PerfilDTO;
+import ar.edu.utn.frba.ddsi.dtos.entidades.DonacionAsignadaDTO;
 import ar.edu.utn.frba.ddsi.dtos.entidades.EntidadBeneficiariaDTO;
 import ar.edu.utn.frba.ddsi.dtos.entidades.NecesidadDTO;
 import ar.edu.utn.frba.ddsi.dtos.entidades.PerfilEntidadDTO;
@@ -45,6 +46,14 @@ public class EntidadesApiService {
                 .uri(baseUrl + "/entidad/{id}", idEntidad)
                 .retrieve()
                 .bodyToMono(EntidadBeneficiariaDTO.class)
+                .block();
+    }
+
+    public List<DonacionAsignadaDTO> obtenerDonacionesAsignadas(Long idEntidad) {
+        return webClient.get()
+                .uri(baseUrl + "/entidadBeneficiaria/{idEntidad}/donaciones", idEntidad)
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<List<DonacionAsignadaDTO>>() {})
                 .block();
     }
 }

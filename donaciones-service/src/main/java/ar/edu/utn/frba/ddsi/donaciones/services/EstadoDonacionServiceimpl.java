@@ -149,6 +149,7 @@ public class EstadoDonacionServiceimpl implements EstadoDonacionService{
                 historialDTO,
                 this.obtenerBienesDTO(d.getBienesDelMismoTipo()),
                 d.getFechaDeIngreso(),
+                d.getFechaDeAsignacion(),
                 d.getDonacionEntregada(),
                 d.getEntidadBeneficiaria().getId(),
                 d.getFotoPath()
