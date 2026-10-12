@@ -14,7 +14,7 @@ public enum TipoCategoria {
         }else if(actual == SOSTENEDOR) {
             return TipoCategoria.TRANSFORMADOR;
         }else if(actual == TRANSFORMADOR){
-                return TipoCategoria.TRANSFORMADOR;
+                return null;
         } else {
             return null;
         }
