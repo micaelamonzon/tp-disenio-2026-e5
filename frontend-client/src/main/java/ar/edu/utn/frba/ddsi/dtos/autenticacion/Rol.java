@@ -1,4 +1,4 @@
-package ar.edu.utn.frba.ddsi.dtos;
+package ar.edu.utn.frba.ddsi.dtos.autenticacion;
 
 // Roles de DonaTrack: los mismos nombres que emite autenticacion-service en el claim "rol"
 public enum Rol {

@@ -1,6 +1,6 @@
 package ar.edu.utn.frba.ddsi.services;
 
-import ar.edu.utn.frba.ddsi.dtos.AuthResponseDTO;
+import ar.edu.utn.frba.ddsi.dtos.autenticacion.AuthResponseDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;

@@ -14,12 +14,12 @@ public class NecesidadDTO {
     private int cantidad;           // objetivo por período o cantidad requerida
     private String periodo;         // DIAS / SEMANAS / MESES (null si es extraordinaria)
 
-    public boolean isExtraordinaria() {
+    public boolean esExtraordinaria() {
         return "EXTRAORDINARIA".equals(tipo);
     }
 
     public String getTipoLegible() {
-        return isExtraordinaria() ? "Extraordinaria" : "Recurrente";
+        return esExtraordinaria() ? "Extraordinaria" : "Recurrente";
     }
 
     public String getPeriodoLegible() {

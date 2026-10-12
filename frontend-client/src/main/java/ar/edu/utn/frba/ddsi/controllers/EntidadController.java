@@ -1,8 +1,13 @@
 package ar.edu.utn.frba.ddsi.controllers;
 
+import ar.edu.utn.frba.ddsi.dtos.entidades.NecesidadDTO;
+import ar.edu.utn.frba.ddsi.services.EntidadesApiService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,6 +23,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import tools.jackson.databind.ObjectMapper;
 import ar.edu.utn.frba.ddsi.utils.UsuarioActual;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/entidadBeneficiaria")
@@ -26,6 +32,7 @@ public class EntidadController {
     private static final String REDIRECT_RECEPCION = "redirect:/entidadBeneficiaria/recepcionDeDonaciones";
 
     private final NotificacionesApiService notificacionesApiService;
+    private final EntidadesApiService entidadesApiService;
     private final ObjectMapper objectMapper;
     private final LogisticaApiService logisticaApiService;
     private final FotoStorageService fotoStorageService;
@@ -35,10 +42,12 @@ public class EntidadController {
                              ObjectMapper objectMapper,
                              LogisticaApiService logisticaApiService,
                              FotoStorageService fotoStorageService,
+                             EntidadesApiService entidadesApiService,
                              UsuarioActual usuarioActual) {
         this.notificacionesApiService = notificacionesApiService;
         this.objectMapper = objectMapper;
         this.logisticaApiService = logisticaApiService;
+        this.entidadesApiService = entidadesApiService;
         this.fotoStorageService = fotoStorageService;
         this.usuarioActual = usuarioActual;
     }
@@ -112,8 +121,28 @@ public class EntidadController {
     public String registrarNecesidades(Model model) {
         model.addAttribute("titulo", "Registrar necesidades");
         model.addAttribute("tabActiva", "registrar");
+        try {
+            model.addAttribute("subcategorias", entidadesApiService.obtenerSubcategorias());
+        } catch (RuntimeException e) {
+            model.addAttribute("subcategorias", List.of());
+            model.addAttribute("errorSubcategorias",
+                    "No pudimos cargar las subcategorías. Intentá de nuevo en unos minutos.");
+        }
         return "acceso/entidadBeneficiaria/registrarNecesidades";
     }
+
+    @PostMapping("/necesidades")
+    @ResponseBody
+    public ResponseEntity<?> registrarNecesidad(@RequestBody NecesidadDTO body) {
+        try {
+            NecesidadDTO creada = entidadesApiService.crearNecesidad(idEntidadActual(), body);
+            return ResponseEntity.status(HttpStatus.CREATED).body(creada);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", "No pudimos registrar la necesidad."));
+        }
+    }
+
 
 
     // Req. 14: mapa con los camiones que traen donaciones a la entidad

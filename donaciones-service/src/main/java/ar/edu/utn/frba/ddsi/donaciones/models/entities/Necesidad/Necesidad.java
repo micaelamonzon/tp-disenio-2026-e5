@@ -8,13 +8,15 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-@Data
+
 @Getter
+@Setter
 @NoArgsConstructor
 @Entity
 @Table(name = "necesidad")
@@ -26,9 +28,7 @@ public abstract class Necesidad{
 
     @ManyToOne
     @JoinColumn(name = "entidad_beneficiaria_id")
-    private EntidadBeneficiaria entidadBeneficiaria; //cambair por id
-    @Transient
-    private DonacionSegmentada donacionQueSatisface;
+    private EntidadBeneficiaria entidadBeneficiaria; 
 
     @ManyToOne
     @JoinColumn(name = "subcategoria_id")
@@ -67,7 +67,7 @@ public abstract class Necesidad{
     }
 
     public boolean estaSatisfecha() {
-        return true;
+        return this.estaSatisfecha;
     }
 
 
