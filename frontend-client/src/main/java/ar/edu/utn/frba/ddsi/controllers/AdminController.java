@@ -39,6 +39,15 @@ public class AdminController {
         return "acceso/personaAdministradora/ranking";
     }
 
+    // Notificaciones de la persona administradora. Por ahora no hay una fuente de datos para el admin
+    // (se va a definir con el cron-job): la vista queda lista y muestra "Todavía no tenés notificaciones".
+    // Cuando exista el servicio, cargar acá "notificaciones" (cada una con mensaje, medio y fechaEnvio).
+    @GetMapping("/notificaciones")
+    public String notificaciones(Model model) {
+        model.addAttribute("notificaciones", java.util.List.of());
+        return "acceso/personaAdministradora/notificaciones";
+    }
+
     @GetMapping("/index")
     public String index() {
         return "redirect:/personaAdministradora/home";
