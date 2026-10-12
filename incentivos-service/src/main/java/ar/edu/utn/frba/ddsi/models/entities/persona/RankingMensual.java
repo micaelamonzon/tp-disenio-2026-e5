@@ -38,7 +38,7 @@ public class RankingMensual {
     @JoinColumn(name = "id_tercer_puesto")
     private Donante tercerPuesto;
 
-    @OneToMany(mappedBy = "ranking")
+    @OneToMany(mappedBy = "ranking", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("posicion ASC")
     private List<RankingPosicion> posiciones = new ArrayList<>();
 
@@ -55,9 +55,13 @@ public class RankingMensual {
     }
 
     public Integer getPosicion(Donante donante) {
-        return (donante != null) ? getPosicionPorId(donante.getId()) : null;
+        if (donante == null || this.posiciones == null) return null;
+        return this.posiciones.stream()
+                .filter(rp -> rp.getDonante() != null && rp.getDonante().getId().equals(donante.getId()))
+                .map(RankingPosicion::getPosicion)
+                .findFirst()
+                .orElse(null);
     }
-
     public Integer getPosicionPorId(Long idDonante) {
         return posiciones.stream()
                 .filter(rp -> rp.getDonante().getId().equals(idDonante))
