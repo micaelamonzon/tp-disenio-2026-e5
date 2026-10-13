@@ -1,10 +1,5 @@
 package ar.edu.utn.frba.ddsi.donaciones.services;
-import ar.edu.utn.frba.ddsi.donaciones.dto.BienDTO;
-import ar.edu.utn.frba.ddsi.donaciones.dto.CambioEstadoDTO;
-import ar.edu.utn.frba.ddsi.donaciones.dto.CategoriaDTO;
-import ar.edu.utn.frba.ddsi.donaciones.dto.DonacionDTO;
-import ar.edu.utn.frba.ddsi.donaciones.dto.DonacionSegmentadaDTO;
-import ar.edu.utn.frba.ddsi.donaciones.dto.SubcategoriaDTO;
+import ar.edu.utn.frba.ddsi.donaciones.dto.*;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.Bien;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.algoritmos.Estado;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.DonacionSegmentada;
@@ -25,6 +20,29 @@ public class EstadoDonacionServiceimpl implements EstadoDonacionService{
 
     public EstadoDonacionServiceimpl(DonacionesRepository donacionesRepository) {
         this.donacionesRepository = donacionesRepository;
+    }
+
+    public List<DonacionAdminDTO> listarParaAdmin(String estado) {
+        return donacionesRepository.findByEstado(EstadoDonacion.valueOf(estado))
+                .stream().map(this::toAdminDTO).toList();
+    }
+
+    private DonacionAdminDTO toAdminDTO(DonacionSegmentada d) {
+        boolean esHumano = d.getDonanteHumano() != null;
+        var sub = d.getSubcategoria();
+        return new DonacionAdminDTO(
+                d.getId(),
+                d.getEstadoActual().toString(),
+                new SubcategoriaDTO(sub.getNombre(), sub.getEsPerecedero(),
+                        new CategoriaDTO(sub.getCategoria().getNombre())),
+                obtenerBienesDTO(d.getBienesDelMismoTipo()),
+                d.getFechaDeIngreso(),
+                esHumano ? "HUMANO" : "JURIDICO",
+                esHumano ? d.getDonanteHumano().getId() : d.getDonanteJuridico().getId(),
+                esHumano ? d.getDonanteHumano().getNombre() + " " + d.getDonanteHumano().getApellido()
+                        : d.getDonanteJuridico().getRazonSocial(),
+                d.getEstadoActual().puedeTransicionarA(EstadoDonacion.VENCIDA)
+        );
     }
 
     @Override
@@ -97,6 +115,7 @@ public class EstadoDonacionServiceimpl implements EstadoDonacionService{
         DonacionSegmentada d = buscar(id);
         d.cambiarEstado(EstadoDonacion.VENCIDA,
                 "Marcada como vencida", responsableId);
+        this.donacionesRepository.save(d);
         return toDTO(d);
     }
 
@@ -151,7 +170,7 @@ public class EstadoDonacionServiceimpl implements EstadoDonacionService{
                 d.getFechaDeIngreso(),
                 d.getFechaDeAsignacion(),
                 d.getDonacionEntregada(),
-                d.getEntidadBeneficiaria().getId(),
+                d.getEntidadBeneficiaria() != null ? d.getEntidadBeneficiaria().getId() : null,
                 d.getFotoPath()
         );
     }

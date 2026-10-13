@@ -2,10 +2,8 @@ package ar.edu.utn.frba.ddsi.dtos.donaciones;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -31,6 +29,10 @@ public class DonacionDTO {
     private Boolean donacionEntregada;
     private Long organizacionId;
     private String fotoPath;
+    private String tipoDonante;
+    private Long idDelDonante;
+    private String nombreDonante;
+    private Boolean puedeVencerse;
 
     public String getEstadoLegible() {
         if (estadoActual == null) return "";
@@ -53,6 +55,26 @@ public class DonacionDTO {
         if (bienes == null || bienes.isEmpty() || bienes.get(0).getSubcategoria() == null) return null;
         return bienes.get(0).getSubcategoria().getNombre();
     }
+
+    public String getArticulos() {
+        if (bienes == null) return "";
+        return bienes.stream().map(BienDTO::getNombre).filter(Objects::nonNull)
+                .collect(Collectors.joining(", "));
+    }
+
+    // Unidad del primer bien; es una aproximación si mezclan unidades
+    public String getUnidad() {
+        return (bienes == null || bienes.isEmpty() || bienes.get(0).getTipoUnidad() == null)
+                ? "" : bienes.get(0).getTipoUnidad().toLowerCase();
+    }
+
+    // El vencimiento más próximo entre los bienes
+    public LocalDateTime getVencimiento() {
+        if (bienes == null) return null;
+        return bienes.stream().map(BienDTO::getFechaDeVencimiento).filter(Objects::nonNull)
+                .min(Comparator.naturalOrder()).orElse(null);
+    }
+
 
     public String getCategoria() {
         if (bienes == null || bienes.isEmpty() || bienes.get(0).getSubcategoria() == null

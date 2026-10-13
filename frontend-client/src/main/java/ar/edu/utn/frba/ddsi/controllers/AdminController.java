@@ -1,17 +1,21 @@
 package ar.edu.utn.frba.ddsi.controllers;
 
+import ar.edu.utn.frba.ddsi.dtos.donaciones.DonacionDTO;
 import ar.edu.utn.frba.ddsi.dtos.donaciones.misiones.RankingMensualDTO;
 import ar.edu.utn.frba.ddsi.dtos.logistica.CamionDTO;
+import ar.edu.utn.frba.ddsi.services.DonacionesService;
 import ar.edu.utn.frba.ddsi.services.IncentivosService;
 import ar.edu.utn.frba.ddsi.services.LogisticaApiService;
+import ar.edu.utn.frba.ddsi.services.internal.SesionExpiradaException;
+import ar.edu.utn.frba.ddsi.utils.UsuarioActual;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -21,10 +25,17 @@ public class AdminController {
 
     private final IncentivosService incentivosService;
     private final LogisticaApiService logisticaApiService;
+    private final DonacionesService donacionesService;
+    private final UsuarioActual usuarioActual;
 
-    public AdminController(IncentivosService incentivosService, LogisticaApiService logisticaApiService) {
+    public AdminController(IncentivosService incentivosService,
+                           LogisticaApiService logisticaApiService,
+                           DonacionesService donacionesService,
+                           UsuarioActual usuarioActual) {
         this.incentivosService = incentivosService;
         this.logisticaApiService = logisticaApiService;
+        this.donacionesService = donacionesService;
+        this.usuarioActual = usuarioActual;
     }
 
 
@@ -75,6 +86,33 @@ public class AdminController {
             log.warn("No se pudo obtener el ranking de incentivos", e);
             model.addAttribute("historialRankings", java.util.List.<RankingMensualDTO>of());
         }
+
+        try {
+            List<DonacionDTO> inventario = new ArrayList<>();
+            inventario.addAll(donacionesService.obtenerDonacionesPorEstado("EN_DEPOSITO"));
+            inventario.addAll(donacionesService.obtenerDonacionesPorEstado("VENCIDA"));
+            model.addAttribute("inventario", inventario);
+        } catch (SesionExpiradaException e) {
+            throw e;
+        } catch (Exception e) {
+            log.warn("No se pudo obtener el inventario", e);
+            model.addAttribute("inventario", List.<DonacionDTO>of());
+            model.addAttribute("errorInventario", "No se pudo conectar con el servicio de donaciones.");
+        }
         return "acceso/personaAdministradora/home";
+    }
+
+    @PostMapping("/inventario/{id}/vencer")
+    public String vencer(@PathVariable Long id, RedirectAttributes redirect) {
+        try {
+            donacionesService.vencerDonacion(id, usuarioActual.obtener().email());
+            redirect.addFlashAttribute("mensajeInventario", "Donación #" + id + " marcada como vencida.");
+        } catch (SesionExpiradaException e) {
+            throw e;
+        } catch (Exception e) {
+            log.warn("No se pudo vencer la donación {}", id, e);
+            redirect.addFlashAttribute("errorInventario", "No se pudo marcar la donación como vencida.");
+        }
+        return "redirect:/personaAdministradora/home#inventario";
     }
 }

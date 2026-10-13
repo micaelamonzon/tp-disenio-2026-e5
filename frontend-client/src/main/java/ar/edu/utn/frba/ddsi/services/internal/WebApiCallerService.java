@@ -74,6 +74,15 @@ public class WebApiCallerService {
                 .block());
     }
 
+    public <T> T patch(String url, Class<T> responseType, Object... uriVariables) {
+        return ejecutar(token -> webClient.patch()
+                .uri(url, uriVariables)
+                .headers(h -> agregarToken(h, token))
+                .retrieve()
+                .bodyToMono(responseType)
+                .block());
+    }
+
     public void delete(String url, Object... uriVariables) {
         ejecutar(token -> webClient.delete()
                 .uri(url, uriVariables)

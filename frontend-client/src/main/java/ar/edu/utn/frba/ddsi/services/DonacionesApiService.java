@@ -64,6 +64,33 @@ public class DonacionesApiService {
         }
     }
 
+    // GET /servicioDeDonaciones/admin/donaciones?estado=...
+    public List<DonacionDTO> obtenerDonacionesPorEstado(String estado) {
+        try {
+            return apiCaller.getList(donacionesServiceUrl + "/admin/donaciones?estado={estado}",
+                    DonacionDTO.class, estado);
+        } catch (SesionExpiradaException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Error obteniendo donaciones por estado", e);
+            throw new RuntimeException("No se pudieron obtener las donaciones", e);
+        }
+    }
+
+    // PATCH /servicioDeDonaciones/donacion/{id}/vencer?responsableId=...
+    public void vencerDonacion(Long id, String responsableId) {
+        try {
+            apiCaller.patch(donacionesServiceUrl + "/donacion/{id}/vencer?responsableId={resp}",
+                    DonacionDTO.class, id, responsableId);
+        } catch (SesionExpiradaException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Error marcando donación como vencida", e);
+            throw new RuntimeException("No se pudo marcar la donación como vencida", e);
+        }
+    }
+
+
     // GET /servicioDeDonaciones/donaciones/entregadas (público: mapa y galería de la landing)
     public List<DonacionDTO> obtenerDonacionesEntregadas() {
         try {

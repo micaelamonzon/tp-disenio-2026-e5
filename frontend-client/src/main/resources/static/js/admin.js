@@ -83,7 +83,6 @@ const sidebarOverlay = document.getElementById("sidebarOverlay");
 // Camiones no necesita cargador: Thymeleaf ya renderizó la tabla en el servidor.
 const cargadoresDeVista = {
     dashboard: cargarDashboard,
-    inventario: cargarInventario,
     asignacion: cargarAsignacion,
 };
 
@@ -626,84 +625,21 @@ const inventoryEmpty = document.getElementById("inventoryEmpty");
 const inventorySearch = document.getElementById("inventorySearch");
 const inventoryFilterEstado = document.getElementById("inventoryFilterEstado");
 
-let inventarioItems = [];
-
-async function cargarInventario() {
-    inventoryTableBody.innerHTML = `<tr><td colspan="8"><div class="loading-inline"><span class="spinner"></span> Cargando inventario...</div></td></tr>`;
-    inventoryEmpty.hidden = true;
-    try {
-        const [disponibles, vencidas] = await Promise.all([
-            apiGet(`/donaciones?estado=${ESTADOS.EN_DEPOSITO}`),
-            apiGet(`/donaciones?estado=${ESTADOS.VENCIDA}`).catch(() => []),
-        ]);
-        const cacheDonantes = await getDonantesCache();
-        inventarioItems = [...(disponibles || []), ...(vencidas || [])].map(d => mapDonacion(d, cacheDonantes));
-        renderInventory();
-    } catch (err) {
-        console.error(err);
-        inventoryTableBody.innerHTML = "";
-        inventoryEmpty.hidden = false;
-        inventoryEmpty.textContent = "No se pudo cargar el inventario. ¿Está corriendo el backend en " + API_BASE + "?";
-    }
-}
-
-function inventoryRowHTML(item) {
-    const esDisponible = item.estado === ESTADOS.EN_DEPOSITO;
-    // El backend sólo expone PATCH /donacion/{id}/vencer (no existe la
-    // acción inversa), así que una vez vencida sólo se puede consultar.
-    const accion = esDisponible
-        ? `<button class="action-link expire" data-vencer="${item.id}">Marcar vencida</button>`
-        : `<span class="reciente-item-meta">—</span>`;
-    return `
-    <tr>
-      <td>${item.id}</td>
-      <td>${item.articulo}</td>
-      <td>${item.cantidad} ${item.unidad}</td>
-      <td>${item.categoria}</td>
-      <td>${item.fechaIngreso}</td>
-      <td>${item.vencimiento}</td>
-      <td><span class="pill pill-${esDisponible ? "Disponible" : "Vencida"}">${esDisponible ? "Disponible" : "Vencida"}</span></td>
-      <td>${accion}</td>
-    </tr>
-  `;
-}
-
-function renderInventory() {
+function filtrarInventario() {
     const query = inventorySearch.value.trim().toLowerCase();
     const estadoFiltro = inventoryFilterEstado.value;
-
-    const filtrados = inventarioItems.filter(item => {
-        const esDisponible = item.estado === ESTADOS.EN_DEPOSITO;
-        if (estadoFiltro === "Disponible" && !esDisponible) return false;
-        if (estadoFiltro === "Vencida" && esDisponible) return false;
-        if (query && !item.articulo.toLowerCase().includes(query)) return false;
-        return true;
+    let visibles = 0;
+    inventoryTableBody.querySelectorAll("tr[data-estado]").forEach(fila => {
+        const coincide = (estadoFiltro === "todos" || fila.dataset.estado === estadoFiltro)
+            && (!query || fila.dataset.articulo.includes(query));
+        fila.hidden = !coincide;
+        if (coincide) visibles++;
     });
-
-    inventoryTableBody.innerHTML = filtrados.map(inventoryRowHTML).join("");
-    inventoryEmpty.hidden = filtrados.length !== 0;
-    if (!filtrados.length) inventoryEmpty.textContent = "No hay donaciones que coincidan con la búsqueda.";
-
-    inventoryTableBody.querySelectorAll("[data-vencer]").forEach(btn => {
-        btn.addEventListener("click", async () => {
-            const id = btn.dataset.vencer;
-            btn.disabled = true;
-            btn.textContent = "Actualizando...";
-            try {
-                await apiPatch(`/donacion/${id}/vencer?responsableId=${RESPONSABLE_ACTUAL_ID}`);
-                await cargarInventario();
-            } catch (err) {
-                console.error(err);
-                alert("No se pudo marcar la donación como vencida.");
-                btn.disabled = false;
-                btn.textContent = "Marcar vencida";
-            }
-        });
-    });
+    inventoryEmpty.hidden = visibles !== 0;
 }
-
-inventorySearch.addEventListener("input", renderInventory);
-inventoryFilterEstado.addEventListener("change", renderInventory);
+inventorySearch.addEventListener("input", filtrarInventario);
+inventoryFilterEstado.addEventListener("change", filtrarInventario);
+filtrarInventario();
 
 /* ============================================================
    ASIGNACIÓN DE DONACIONES — Matchmaking (motor real del backend)
