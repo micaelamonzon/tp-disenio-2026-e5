@@ -1,17 +1,15 @@
-package ar.edu.utn.frba.ddsi.donaciones.security;
+package ar.edu.utn.frba.ddsi.common.seguridad;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 
 // Solo LEE tokens: los emite autenticacion-service. Verifica la firma con el
 // mismo jwt.secret (HS256) y el vencimiento, sin llamar a autenticación.
-@Component
+// La crea SeguridadComunConfig con el jwt.secret de cada servicio.
 public class JwtUtil {
 
     // Mismos nombres de claims que JwtService de autenticacion-service
@@ -24,7 +22,7 @@ public class JwtUtil {
 
     private final Key key;
 
-    public JwtUtil(@Value("${jwt.secret}") String secret) {
+    public JwtUtil(String secret) {
         this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 

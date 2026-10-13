@@ -62,14 +62,14 @@
                         <div class="need-card-top">
                             <h3 class="need-title" th:text="${n.subcategoria}">Arroz</h3>
                             <span class="need-tag"
-                                  th:classappend="${n.extraordinaria} ? 'need-tag-urgent' : 'need-tag-recurrent'"
+                                  th:classappend="${n.esExtraordinaria()} ? 'need-tag-urgent' : 'need-tag-recurrent'"
                                   th:text="${n.tipoLegible}">Recurrente</span>
                         </div>
                         <p class="need-desc" th:text="${n.descripcion}">Descripción</p>
                         <div class="need-footer">
-                            <span th:if="${n.extraordinaria}"
+                            <span th:if="${n.esExtraordinaria()}"
                                   th:text="|Cantidad requerida: ${n.cantidad}|">Cantidad requerida: 30</span>
-                            <span th:unless="${n.extraordinaria}"
+                            <span th:unless="${n.esExtraordinaria()}"
                                   th:text="|Objetivo: ${n.cantidad} ${n.periodoLegible}|">Objetivo: 100 por semana</span>
                             <span class="need-status"
                                   th:text="${n.estaSatisfecha} ? 'Satisfecha' : 'Pendiente'">Pendiente</span>

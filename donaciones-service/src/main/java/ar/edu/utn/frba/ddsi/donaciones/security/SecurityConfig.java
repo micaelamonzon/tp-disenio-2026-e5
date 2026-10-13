@@ -1,8 +1,14 @@
 package ar.edu.utn.frba.ddsi.donaciones.security;
 
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import ar.edu.utn.frba.ddsi.common.seguridad.ApiTokensProperties;
+import ar.edu.utn.frba.ddsi.common.seguridad.JwtUtil;
+import ar.edu.utn.frba.ddsi.common.seguridad.SeguridadComunConfig;
+import ar.edu.utn.frba.ddsi.common.seguridad.servlet.ApiTokenFilter;
+import ar.edu.utn.frba.ddsi.common.seguridad.servlet.JwtAuthenticationFilter;
+import ar.edu.utn.frba.ddsi.common.seguridad.servlet.ReglaDeDuenio;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.Customizer;
@@ -14,12 +20,12 @@ import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
-@EnableConfigurationProperties(ApiTokensProperties.class)
+@Import(SeguridadComunConfig.class)
 public class SecurityConfig {
 
     private static final String P = "/servicioDeDonaciones";
 
-    private static final String HUMANO = "DONANTE_HanyUMANO";
+    private static final String HUMANO = "DONANTE_HUMANO";
     private static final String JURIDICO = "DONANTE_JURIDICO";
     private static final String ADMIN = "ADMIN";
     private static final String SERVICIO = ApiTokenFilter.ROL_SERVICIO;
@@ -33,7 +39,6 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                // Usa la configuración de CorsConfig (admin.js llama desde el navegador)
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
                         // ---------- Públicos ----------
@@ -69,6 +74,10 @@ public class SecurityConfig {
                         .requestMatchers(P + "/entidad/{idEntidad}/necesidad", P + "/entidad/{idEntidad}/necesidad/*").access(ReglaDeDuenio.entidad())
                         .requestMatchers(HttpMethod.PUT, P + "/entidad/{idEntidad}").access(ReglaDeDuenio.entidad())
                         .requestMatchers(HttpMethod.DELETE, P + "/entidad/{idEntidad}").access(ReglaDeDuenio.entidad())
+                        // Donaciones asignadas a la entidad (pantalla Recepción de donaciones): solo la propia entidad
+                        .requestMatchers(HttpMethod.GET, P + "/entidadBeneficiaria/{idEntidad}/donaciones").access(ReglaDeDuenio.entidad())
+                        // Catálogo de subcategorías (formulario de necesidades): cualquier usuario logueado
+                        .requestMatchers(HttpMethod.GET, P + "/subcategorias/**").authenticated()
 
                         // ---------- Donantes y sus donaciones: solo el propio donante o ADMIN ----------
                         .requestMatchers(HttpMethod.GET, P + "/donaciones/humano/{idDonante}").access(ReglaDeDuenio.donante(HUMANO))

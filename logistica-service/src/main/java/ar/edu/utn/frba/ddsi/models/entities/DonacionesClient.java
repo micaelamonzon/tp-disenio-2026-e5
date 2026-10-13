@@ -35,23 +35,14 @@ public class DonacionesClient {
 
     // PATCH /donacion/{id}/iniciarTraslado
     public void iniciarTraslado(Long donacionId, String responsableId) {
-        String url = donacionesUrl + "/donacion/"
-                + donacionId + "/iniciarTraslado?responsableId=" + responsableId;
-        restTemplate.patchForObject(url, null, String.class);
         cambiarEstado(donacionId, "iniciarTraslado", responsableId, null);
     }
 
-    // Confirma la entrega de la donación en donaciones-service y le manda las URLs
-    // de las fotos que cargó la entidad (donaciones guarda la primera para la landing)
+    // PATCH /donacion/{id}/entregar con las URLs de las fotos que cargó la entidad
+    // (donaciones guarda la primera para la landing)
     public void confirmarEntrega(Long donacionId, String responsableId, List<String> fotosUrl) {
-        String url = donacionesUrl + "/donacion/"
-                + donacionId + "/entregar?responsableId=" + responsableId;
-        java.util.Map<String, List<String>> body =
-                java.util.Map.of("fotosUrl", fotosUrl != null ? fotosUrl : List.of());
-        restTemplate.patchForObject(url, body, String.class);
-    // PATCH /donacion/{id}/entregar
-    public void confirmarEntrega(Long donacionId, String responsableId) {
-        cambiarEstado(donacionId, "entregar", responsableId, null);
+        cambiarEstado(donacionId, "entregar", responsableId,
+                Map.of("fotosUrl", fotosUrl != null ? fotosUrl : List.of()));
     }
 
     // PATCH /donacion/{id}/fallarEntrega (donaciones exige la justificación en el body)

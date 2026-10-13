@@ -1,5 +1,7 @@
-package ar.edu.utn.frba.ddsi.donaciones.security;
+package ar.edu.utn.frba.ddsi.common.seguridad.servlet;
 
+import ar.edu.utn.frba.ddsi.common.seguridad.ApiTokensProperties;
+import ar.edu.utn.frba.ddsi.common.seguridad.UsuarioAutenticado;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,15 +15,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
 import java.util.List;
-import java.util.Map;
 
 // Llamadas entre servicios
-// El servicio que llama manda "X-Api-Token: <su token>". Si coincide con alguno de
-// api.tokens.*, queda autenticado como ROLE_SERVICIO y en el log figura qué servicio fue.
-// Los usuarios siguen usando el JWT (Authorization: Bearer), que valida JwtAuthenticationFilter.
 public class ApiTokenFilter extends OncePerRequestFilter {
 
     public static final String HEADER = "X-Api-Token";
@@ -29,10 +25,10 @@ public class ApiTokenFilter extends OncePerRequestFilter {
 
     private static final Logger log = LoggerFactory.getLogger(ApiTokenFilter.class);
 
-    private final Map<String, String> tokensPorServicio;
+    private final ApiTokensProperties apiTokens;
 
-    public ApiTokenFilter(ApiTokensProperties properties) {
-        this.tokensPorServicio = properties.tokens();
+    public ApiTokenFilter(ApiTokensProperties apiTokens) {
+        this.apiTokens = apiTokens;
     }
 
     @Override
@@ -46,7 +42,7 @@ public class ApiTokenFilter extends OncePerRequestFilter {
         }
 
         String peticion = request.getMethod() + " " + request.getRequestURI();
-        String servicio = buscarServicio(token);
+        String servicio = apiTokens.buscarServicio(token);
         if (servicio == null) {
             log.warn("{} -> API token desconocido", peticion);
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -62,16 +58,5 @@ public class ApiTokenFilter extends OncePerRequestFilter {
         log.debug("{} -> servicio {}", peticion, servicio);
 
         filterChain.doFilter(request, response);
-    }
-
-    private String buscarServicio(String token) {
-        byte[] recibido = token.getBytes(StandardCharsets.UTF_8);
-        for (Map.Entry<String, String> entrada : tokensPorServicio.entrySet()) {
-            // Comparación en tiempo constante: no revela cuántos caracteres coinciden
-            if (MessageDigest.isEqual(recibido, entrada.getValue().getBytes(StandardCharsets.UTF_8))) {
-                return entrada.getKey();
-            }
-        }
-        return null;
     }
 }

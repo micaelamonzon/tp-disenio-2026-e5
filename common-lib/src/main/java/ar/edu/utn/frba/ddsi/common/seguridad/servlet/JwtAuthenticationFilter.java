@@ -1,4 +1,7 @@
-package ar.edu.utn.frba.ddsi.donaciones.security;
+package ar.edu.utn.frba.ddsi.common.seguridad.servlet;
+
+import ar.edu.utn.frba.ddsi.common.seguridad.JwtUtil;
+import ar.edu.utn.frba.ddsi.common.seguridad.UsuarioAutenticado;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;

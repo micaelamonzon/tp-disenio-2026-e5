@@ -12,7 +12,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @Document(collection = "camiones")
-public class nCamion {
+public class Camion {
     @Id
     private String id;
     @Indexed(unique = true)
@@ -24,7 +24,7 @@ public class nCamion {
     private List<Posicion> posiciones = new ArrayList<>();
     private String rutaId;
 
-    public nCamion(String patente, Double volumen, Double altura, Double capacidadCarga, Boolean disponible) {
+    public Camion(String patente, Double volumen, Double altura, Double capacidadCarga, Boolean disponible) {
         this.patente = patente;
         this.volumen = volumen;
         this.altura = altura;

@@ -4,38 +4,38 @@ import ar.edu.utn.frba.ddsi.dtos.donaciones.misiones.MisionFrontDTO;
 import ar.edu.utn.frba.ddsi.dtos.donaciones.misiones.PerfilDTO;
 import ar.edu.utn.frba.ddsi.dtos.donaciones.misiones.RankingMensualDTO;
 import ar.edu.utn.frba.ddsi.dtos.donaciones.misiones.TipoDeDonante;
+import ar.edu.utn.frba.ddsi.services.internal.SesionExpiradaException;
+import ar.edu.utn.frba.ddsi.services.internal.WebApiCallerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.net.URI;
 import java.util.List;
 
 @Service
 public class IncentivosApiService {
     private static final Logger log = LoggerFactory.getLogger(IncentivosApiService.class);
-    private final WebClient webClient = WebClient.builder().build();
+    private final WebApiCallerService apiCaller;
     private final String incentivosServiceUrl;
 
-    public IncentivosApiService(@Value("${incentivos.service.url}") String incentivosServiceUrl) {
+    public IncentivosApiService(@Value("${incentivos.service.url}") String incentivosServiceUrl,
+                                WebApiCallerService apiCaller) {
         this.incentivosServiceUrl = incentivosServiceUrl;
+        this.apiCaller = apiCaller;
     }
 
 
     public List<MisionFrontDTO> obtenerTodasLasMisiones(Long idDonante, TipoDeDonante tipo) {
         try {
-            List<MisionFrontDTO> misiones = webClient.get()
-                    .uri(incentivosServiceUrl + "/misiones/todas/{id}?tipoDeDonante={tipo}",
-                            idDonante, tipo)
-                    .retrieve()
-                    .bodyToFlux(MisionFrontDTO.class)
-                    .collectList()
-                    .block();
+            List<MisionFrontDTO> misiones = apiCaller.getList(
+                    incentivosServiceUrl + "/misiones/todas/{id}?tipoDeDonante={tipo}",
+                    MisionFrontDTO.class, idDonante, tipo);
             System.out.println("Obtener todas las misiones  con" + idDonante + tipo);
             return misiones != null ? misiones : List.of();
+        } catch (SesionExpiradaException e) {
+            throw e;
         } catch (Exception e) {
             log.error("Error llamando a incentivos-service", e);
             throw new RuntimeException("No se pudieron obtener las misiones", e);
@@ -44,22 +44,16 @@ public class IncentivosApiService {
 
     public PerfilDTO obtenerPerfil(Long idDonante, TipoDeDonante tipo) {
         try {
-            URI uri = UriComponentsBuilder.fromUriString(incentivosServiceUrl)
-                    .path("/perfil/{id}")
-                    .queryParam("tipoDeDonante", tipo)
-                    .buildAndExpand(idDonante)
-                    .toUri();
-            System.out.println("Obtener perfil con " + uri);
-            PerfilDTO perfil = webClient.get()
-                    .uri(uri)
-                    .retrieve()
-                    .bodyToMono(PerfilDTO.class)
-                    .block();
+            System.out.println("Obtener perfil con " + idDonante + " " + tipo);
+            PerfilDTO perfil = apiCaller.get(incentivosServiceUrl + "/perfil/{id}?tipoDeDonante={tipo}",
+                    PerfilDTO.class, idDonante, tipo);
 
             if (perfil == null) {
                 throw new IllegalStateException("El servicio de incentivos devolvió un perfil vacío");
             }
             return perfil;
+        } catch (SesionExpiradaException e) {
+            throw e;
         } catch (Exception e) {
             log.error("Error llamando a incentivos-service", e);
             throw new RuntimeException("No se pudo obtener el perfil", e);
@@ -68,17 +62,11 @@ public class IncentivosApiService {
 
     public void comenzarMision(Long idDonante, Long misionId, TipoDeDonante tipo) {
         try {
-            URI uri = UriComponentsBuilder.fromUriString(incentivosServiceUrl)
-                    .path("/donante/{id}/mision/{misionId}")
-                    .queryParam("tipoDeDonante", tipo)
-                    .buildAndExpand(idDonante, misionId)
-                    .toUri();
-        System.out.println("Comenzar mision con" + uri);
-            webClient.post()
-                    .uri(uri)
-                    .retrieve()
-                    .toBodilessEntity()
-                    .block();
+            System.out.println("Comenzar mision con " + idDonante + " " + misionId + " " + tipo);
+            apiCaller.post(incentivosServiceUrl + "/donante/{id}/mision/{misionId}?tipoDeDonante={tipo}",
+                    "", Void.class, idDonante, misionId, tipo);
+        } catch (SesionExpiradaException e) {
+            throw e;
         } catch (Exception e) {
             log.error("Error comenzando misión {} del donante {}", misionId, idDonante, e);
             throw new RuntimeException("No se pudo comenzar la misión", e);
@@ -91,16 +79,9 @@ public class IncentivosApiService {
 
     public RankingMensualDTO obtenerUltimoRanking() {
         try {
-            URI uri = UriComponentsBuilder.fromUriString(incentivosServiceUrl)
-                    .path("/ranking/ultimo")
-                    .build()
-                    .toUri();
-
-            return webClient.get()
-                    .uri(uri)
-                    .retrieve()
-                    .bodyToMono(RankingMensualDTO.class)
-                    .block();
+            return apiCaller.get(incentivosServiceUrl + "/ranking/ultimo", RankingMensualDTO.class);
+        } catch (SesionExpiradaException e) {
+            throw e;
         } catch (Exception e) {
             log.error("Error obteniendo el último ranking", e);
             return null; // O manejar según necesidad
@@ -115,13 +96,10 @@ public class IncentivosApiService {
             if (mes != null) builder.queryParam("mes", mes);
             if (anio != null) builder.queryParam("anio", anio);
 
-            List<RankingMensualDTO> list = webClient.get()
-                    .uri(builder.build().toUri())
-                    .retrieve()
-                    .bodyToFlux(RankingMensualDTO.class)
-                    .collectList()
-                    .block();
+            List<RankingMensualDTO> list = apiCaller.getList(builder.toUriString(), RankingMensualDTO.class);
             return list != null ? list : List.of();
+        } catch (SesionExpiradaException e) {
+            throw e;
         } catch (Exception e) {
             log.error("Error buscando historial de rankings", e);
             return List.of();
