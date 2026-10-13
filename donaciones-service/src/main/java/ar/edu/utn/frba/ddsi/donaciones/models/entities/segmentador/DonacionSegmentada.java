@@ -75,6 +75,14 @@ public class DonacionSegmentada  {
     @JoinColumn(name = "necesidad_id")
     private Necesidad necesidad;
 
+    public void asignarA(Necesidad necesidad, String responsableId) {
+        cambiarEstado(EstadoDonacion.ASIGNACION_REALIZADA,
+                "Asignada a entidad beneficiaria", responsableId);
+        this.necesidad = necesidad;
+        this.entidadBeneficiaria = necesidad.getEntidadBeneficiaria();
+        this.fechaDeAsignacion = LocalDateTime.now();
+    }
+
     private void registrarCambio(EstadoDonacion anterior, EstadoDonacion nuevo,
                                  String justificacion, String responsableId) {
         CambioEstado cambio = new CambioEstado(anterior, nuevo, justificacion, responsableId);
