@@ -319,14 +319,17 @@
                 <p class="page-sub">Gestione el estado de las donaciones disponibles en el depósito.</p>
             </div>
 
+            <p class="form-error" th:if="${errorInventario}" th:text="${errorInventario}"></p>
+            <p class="alert-info" th:if="${mensajeInventario}" th:text="${mensajeInventario}"></p>
+
             <div class="inventory-toolbar">
                 <input type="search" id="inventorySearch" class="search-input" placeholder="Buscar por artículo...">
                 <label class="field field-inline field-compact">
                     <span>Estado</span>
                     <select id="inventoryFilterEstado">
                         <option value="todos">Todos</option>
-                        <option value="Disponible">Disponible</option>
-                        <option value="Vencida">Vencida</option>
+                        <option value="EN_DEPOSITO">En depósito</option>
+                        <option value="VENCIDA">Vencida</option>
                     </select>
                 </label>
             </div>
@@ -347,7 +350,30 @@
                             <th>Acciones</th>
                         </tr>
                         </thead>
-                        <tbody id="inventoryTableBody"></tbody>
+                        <tbody id="inventoryTableBody">
+                        <tr th:each="d : ${inventario}"
+                            th:data-articulo="${#strings.toLowerCase(d.articulos)}"
+                            th:data-estado="${d.estadoActual}">
+                            <td th:text="${d.id}"></td>
+                            <td th:text="${d.articulos}"></td>
+                            <td th:text="${d.cantidadTotalItems + ' ' + d.unidad}"></td>
+                            <td th:text="${d.categoria}"></td>
+                            <td th:text="${#temporals.format(d.fechaDeIngreso, 'dd/MM/yyyy')}"></td>
+                            <td th:text="${d.vencimiento != null ? #temporals.format(d.vencimiento, 'dd/MM/yyyy') : '—'}"></td>
+                            <td>
+                                <span class="pill"
+                                    th:classappend="${d.estadoActual == 'VENCIDA'} ? 'pill-Vencida' : 'pill-Disponible'"
+                                    th:text="${d.estadoLegible}"></span>
+                            </td>
+                            <td>
+                                <form th:if="${d.puedeVencerse}" method="post"
+                                      th:action="@{/personaAdministradora/inventario/{id}/vencer(id=${d.id})}">
+                                    <button type="submit" class="action-link expire">Marcar vencida</button>
+                                </form>
+                                <span th:unless="${d.puedeVencerse}" class="reciente-item-meta">—</span>
+                            </td>
+                        </tr>
+                        </tbody>
                     </table>
                 </div>
                 <p class="empty-state" id="inventoryEmpty" hidden>No hay donaciones que coincidan con la búsqueda.</p>

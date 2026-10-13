@@ -30,6 +30,14 @@ public class DonacionesService {
         return donacionesApiService.obtenerDonacionesDeJuridico(idDonante);
     }
 
+    public List<DonacionDTO> obtenerDonacionesPorEstado(String estado) {
+        return donacionesApiService.obtenerDonacionesPorEstado(estado);
+    }
+
+    public void vencerDonacion(Long id, String responsableId) {
+        donacionesApiService.vencerDonacion(id, responsableId);
+    }
+
     public List<DonacionDTO> filtrar(List<DonacionDTO> donaciones,
                                      String estado, String categoria, String subcategoria) {
         return donaciones.stream()

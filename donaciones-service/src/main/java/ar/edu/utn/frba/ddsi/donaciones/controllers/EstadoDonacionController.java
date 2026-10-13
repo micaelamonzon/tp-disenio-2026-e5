@@ -1,8 +1,6 @@
 package ar.edu.utn.frba.ddsi.donaciones.controllers;
 
-import ar.edu.utn.frba.ddsi.donaciones.dto.CambioEstadoRequestDTO;
-import ar.edu.utn.frba.ddsi.donaciones.dto.DonacionDTO;
-import ar.edu.utn.frba.ddsi.donaciones.dto.DonacionSegmentadaDTO;
+import ar.edu.utn.frba.ddsi.donaciones.dto.*;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.Subcategoria;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.DonacionSegmentada;
 import ar.edu.utn.frba.ddsi.donaciones.services.EstadoDonacionServiceimpl;
@@ -11,7 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ar.edu.utn.frba.ddsi.donaciones.dto.FotosEntregaDTO;
+
 import java.util.List;
 
 @RestController
@@ -121,5 +119,9 @@ public class EstadoDonacionController {
         return ResponseEntity.ok(encontradas);
     }
 
+    @GetMapping("/admin/donaciones")
+    public List<DonacionAdminDTO> listarParaAdmin(@RequestParam String estado) {
+        return estadoDonacionService.listarParaAdmin(estado);
+    }
 
 }

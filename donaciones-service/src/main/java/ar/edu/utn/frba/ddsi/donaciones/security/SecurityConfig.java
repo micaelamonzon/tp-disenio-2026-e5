@@ -19,7 +19,7 @@ public class SecurityConfig {
 
     private static final String P = "/servicioDeDonaciones";
 
-    private static final String HUMANO = "DONANTE_HUMANO";
+    private static final String HUMANO = "DONANTE_HanyUMANO";
     private static final String JURIDICO = "DONANTE_JURIDICO";
     private static final String ADMIN = "ADMIN";
     private static final String SERVICIO = ApiTokenFilter.ROL_SERVICIO;
@@ -51,9 +51,8 @@ public class SecurityConfig {
 
                         // ---------- TEMPORAL hasta que admin.js pase por el front ----------
                         // admin.js llama desde el navegador y no tiene el token (está en la sesión del front).
-                        // GET /donaciones y vencer también los usa logística, que ya manda su API token.
+                        // GET /donaciones también lo usa logística, que ya manda su API token.
                         .requestMatchers(HttpMethod.GET, P + "/donaciones").permitAll()
-                        .requestMatchers(HttpMethod.PATCH, P + "/donacion/*/vencer").permitAll()
                         .requestMatchers(HttpMethod.GET, P + "/donantes", P + "/matcheos/*").permitAll()
                         .requestMatchers(HttpMethod.POST, P + "/humano/donacion/*", P + "/juridico/donacion/*",
                                 P + "/matcheos/ejecutar", P + "/matcheos/*/seleccion").permitAll()
@@ -82,6 +81,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, P + "/donantes/humanos", P + "/donantes/juridicos").hasRole(ADMIN)
                         .requestMatchers(HttpMethod.POST, P + "/importadorCSV", P + "/donacion/registrar").hasRole(ADMIN)
                         .requestMatchers(P + "/matchmaking/**").hasRole(ADMIN)
+                        .requestMatchers(HttpMethod.GET, P + "/admin/**").hasRole(ADMIN)
 
                         // Cualquier endpoint nuevo queda protegido hasta que se decida quién lo usa
                         .anyRequest().authenticated()
