@@ -1,5 +1,6 @@
 package ar.edu.utn.frba.ddsi.donaciones.services;
 import ar.edu.utn.frba.ddsi.donaciones.dto.*;
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.Necesidad.Necesidad;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.Bien;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.algoritmos.Estado;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.DonacionSegmentada;
@@ -20,6 +21,13 @@ public class EstadoDonacionServiceimpl implements EstadoDonacionService{
 
     public EstadoDonacionServiceimpl(DonacionesRepository donacionesRepository) {
         this.donacionesRepository = donacionesRepository;
+    }
+
+    public DonacionSegmentadaDTO asignar(Long id, Necesidad necesidad, String responsableId) {
+        DonacionSegmentada d = buscar(id);
+        d.asignarA(necesidad, responsableId);
+        this.donacionesRepository.save(d);   // explícito, igual que en vencer
+        return toDTO(d);
     }
 
     public List<DonacionAdminDTO> listarParaAdmin(String estado) {
