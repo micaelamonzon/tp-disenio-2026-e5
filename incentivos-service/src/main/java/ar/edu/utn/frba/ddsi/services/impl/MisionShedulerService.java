@@ -46,14 +46,10 @@ public class MisionShedulerService {
             try {
                 MisionParticular misionParticular = donante.getMisionEnCurso();
 
-                // para un usurio que es nuevo o que ya esta en la ultimaa mision
-                if (misionParticular == null) return;
-
-
-                if (misionParticular.getEstado() == EstadoDeMision.COMPLETADA) {
-                    donante.setMisionEnCurso(null);
+                // para un usurio que es nuevo o que ya pasó la ultimaa mision de la ultima categoria
+                if (misionParticular == null)
                     return;
-                }
+
 
                 if (misionParticular != null) {
                     misionParticular.avanzarMision();
