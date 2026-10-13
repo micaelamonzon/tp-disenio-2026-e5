@@ -99,6 +99,7 @@ public class IncentivosServiceImpl implements IncentivosService {
         }
     }
 
+    @Transactional
     @Override
     public List<MisionParticularDTO> obtenerMisionesCompletadas(Long id,TipoDeDonante tipoDeDonante) {
 
@@ -301,6 +302,7 @@ public class IncentivosServiceImpl implements IncentivosService {
                 .toList();
 
         List<Donante> ordenados = donantes.stream()
+                .filter(d -> d.calcularMisionesCumplidasEn(mesActual) > 0)
                 .sorted(Comparator.comparingInt(
                         (Donante d) -> -d.calcularMisionesCumplidasEn(mesActual)))
                 .toList();
@@ -497,14 +499,22 @@ public class IncentivosServiceImpl implements IncentivosService {
         return mapearDto(ranking);
     }
 
-    private RankingMensualDTO mapearDto(RankingMensual ranking) {
+    private RankingMensualDTO mapearDto(RankingMensual r) {
         return new RankingMensualDTO(
-                ranking.getFecha(),
-                ranking.getPrimerPuesto() != null ? ranking.getPrimerPuesto().getNombre() : "N/A",
-                ranking.getSegundoPuesto() != null ? ranking.getSegundoPuesto().getNombre() : "N/A",
-                ranking.getTercerPuesto() != null ? ranking.getTercerPuesto().getNombre() : "N/A"
-        );
+                r.getFecha(),
+                nombreDe(r.getPrimerPuesto()),
+                nombreDe(r.getSegundoPuesto()),
+                nombreDe(r.getTercerPuesto()),
+                r.getMisionesPrimerPuesto(),
+                r.getMisionesSegundoPuesto(),
+                r.getMisionesTercerPuesto() );
     }
+
+    private String nombreDe(Donante d) {
+        if (d == null) return null;
+        return d.getNombre() != null ? d.getNombre() + " " + d.getApellido() : d.getRazonSocial();
+    }
+
     @Transactional
     @Override
     public List<RankingMensualDTO> buscarRankings(Integer mes, Integer anio) {

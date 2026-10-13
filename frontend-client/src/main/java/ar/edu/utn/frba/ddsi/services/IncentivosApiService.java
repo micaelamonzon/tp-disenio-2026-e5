@@ -110,7 +110,7 @@ public class IncentivosApiService {
     public List<RankingMensualDTO> buscarRankings(Integer mes, Integer anio) {
         try {
             UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(incentivosServiceUrl)
-                    .path("/ranking/buscar");
+                    .path("/ranking/historial");
 
             if (mes != null) builder.queryParam("mes", mes);
             if (anio != null) builder.queryParam("anio", anio);

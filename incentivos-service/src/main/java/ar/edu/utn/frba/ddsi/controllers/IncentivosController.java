@@ -95,38 +95,6 @@ public class IncentivosController {
                 incentivosService.obtenerMetricasDeImpacto(id));
     }
 
-
-
-    @GetMapping("/ranking") // top 3
-    public ResponseEntity<RankingMensualDTO> obtenerRankingActual() {
-        RankingMensualDTO dto = incentivosService.obtenerUltimoRankingDTO();
-        if (dto == null) {
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.ok(dto);
-    }
-    @GetMapping("/ranking/posicion/{id}")
-    public ResponseEntity<Integer> obtenerPosicionDonante(@PathVariable Long id,
-                                                          @RequestParam TipoDeDonante tipoDeDonante) {
-        Integer posicion = incentivosService.obtenerPosicion(id, tipoDeDonante);
-        return posicion == null ? ResponseEntity.noContent().build() : ResponseEntity.ok(posicion);
-    }
-
-    @GetMapping("/ranking/historial")
-    public ResponseEntity<List<RankingMensualDTO>> obtenerHistorial(
-            @RequestParam(required = false) Integer mes,
-            @RequestParam(required = false) Integer anio) {
-        List<RankingMensualDTO> historial = incentivosService.buscarRankings(mes, anio);
-        if (historial.isEmpty()) return ResponseEntity.noContent().build();
-        return ResponseEntity.ok(historial);
-    }
-
-    @PostMapping("/ranking/calcular")
-    public ResponseEntity<Void> forzarCalculoRanking() {
-        incentivosService.calcularYGuardarRanking();
-        return ResponseEntity.ok().build();
-    }
-
     @GetMapping("/ranking/ultimo")
     public ResponseEntity<RankingMensualDTO> obtenerUltimoRanking() {
         Optional<RankingMensual> ultimoRankingOpt = rankingMensualRepository.findTopByOrderByFechaDesc();
@@ -141,14 +109,20 @@ public class IncentivosController {
         return ResponseEntity.ok(dto);
     }
 
-    @GetMapping("/ranking/buscar")
+    @GetMapping("/ranking/posicion/{id}")
+    public ResponseEntity<Integer> obtenerPosicionDonante(@PathVariable Long id,
+                                                          @RequestParam TipoDeDonante tipoDeDonante) {
+        Integer posicion = incentivosService.obtenerPosicion(id, tipoDeDonante);
+        return posicion == null ? ResponseEntity.noContent().build() : ResponseEntity.ok(posicion);
+    }
+
+    @GetMapping("/ranking/historial")
     public ResponseEntity<List<RankingMensualDTO>> buscarRankings(
             @RequestParam(required = false) Integer mes,
             @RequestParam(required = false) Integer anio) {
 
         List<RankingMensual> rankings = rankingMensualRepository.findAll();
 
-        // Aplicamos un filtrado opcional en memoria si se reciben los parámetros de mes o año
         List<RankingMensualDTO> dtos = rankings.stream()
                 .filter(r -> {
                     boolean coincideMes = (mes == null || r.getFecha().getMonthValue() == mes);
@@ -158,29 +132,24 @@ public class IncentivosController {
                 .map(this::convertirARankingMensualDTO)
                 .collect(Collectors.toList());
 
+        if (dtos.isEmpty()) return ResponseEntity.noContent().build();
         return ResponseEntity.ok(dtos);
     }
+
+    @PostMapping("/ranking/calcular")
+    public ResponseEntity<Void> forzarCalculoRanking() {
+        incentivosService.calcularYGuardarRanking();
+        return ResponseEntity.ok().build();
+    }
     private RankingMensualDTO convertirARankingMensualDTO(RankingMensual ranking) {
-        String primerPuesto = null;
-        String segundoPuesto = null;
-        String tercerPuesto = null;
-
-        if (ranking.getPosiciones() != null) {
-            for (RankingPosicion p : ranking.getPosiciones()) {
-                if (p.getDonante() != null && p.getDonante().getPerfil() != null) {
-                    String nombre = p.getDonante().getPerfil().getNombreDeUsuario();
-                    if (p.getPosicion() == 1) primerPuesto = nombre;
-                    else if (p.getPosicion() == 2) segundoPuesto = nombre;
-                    else if (p.getPosicion() == 3) tercerPuesto = nombre;
-                }
-            }
-        }
-
         return new RankingMensualDTO(
                 ranking.getFecha(),
-                primerPuesto,
-                segundoPuesto,
-                tercerPuesto
+                ranking.getNombrePrimerPuesto(),
+                ranking.getNombreSegundoPuesto(),
+                ranking.getNombreTercerPuesto(),
+                ranking.getMisionesPrimerPuesto() != null ? ranking.getMisionesPrimerPuesto() : 0,
+                ranking.getMisionesSegundoPuesto() != null ? ranking.getMisionesSegundoPuesto(): 0,
+                ranking.getMisionesTercerPuesto() != null ? ranking.getMisionesTercerPuesto() : 0
         );
     }
 

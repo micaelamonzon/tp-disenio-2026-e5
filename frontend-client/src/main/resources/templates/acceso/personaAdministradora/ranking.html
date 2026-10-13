@@ -48,21 +48,21 @@
                     <td>1</td>
                     <td th:text="${rankingActual.primerPuesto}">-</td>
                     <td>Humana</td>
-                    <td><b>-</b></td>
+                    <td><b th:text="${rankingActual.misionesPrimerPuesto}">0</b></td>
                 </tr>
-                <!-- Segundo Puesto -->
-                <tr th:if="${rankingActual != null and rankingActual.segundoPuesto != null}">
+                <!-- Segundo Puesto (Solo se muestra si tiene más de 0 misiones) -->
+                <tr th:if="${rankingActual != null and rankingActual.segundoPuesto != null and rankingActual.misionesSegundoPuesto > 0}">
                     <td>2</td>
                     <td th:text="${rankingActual.segundoPuesto}">-</td>
                     <td>Humana</td>
-                    <td><b>-</b></td>
+                    <td><b th:text="${rankingActual.misionesSegundoPuesto}">0</b></td>
                 </tr>
-                <!-- Tercer Puesto -->
-                <tr th:if="${rankingActual != null and rankingActual.tercerPuesto != null}">
+                <!-- Tercer Puesto (Solo se muestra si tiene más de 0 misiones) -->
+                <tr th:if="${rankingActual != null and rankingActual.tercerPuesto != null and rankingActual.misionesTercerPuesto > 0}">
                     <td>3</td>
                     <td th:text="${rankingActual.tercerPuesto}">-</td>
                     <td>Humana</td>
-                    <td><b>-</b></td>
+                    <td><b th:text="${rankingActual.misionesTercerPuesto}">0</b></td>
                 </tr>
                 <!-- Mensaje si no hay datos -->
                 <tr th:unless="${rankingActual != null and rankingActual.primerPuesto != null}">
@@ -81,15 +81,26 @@
                 <thead>
                 <tr>
                     <th>Período (Mes/Año)</th>
-                    <th>Donante Destacado #1</th>
-                    <th>Misiones</th>
+                    <th>Puesto #1</th>
+                    <th>Puesto #2</th>
+                    <th>Puesto #3</th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr th:each="hist : ${historialRankings}">
-                    <td th:text="${hist.periodo}">Agosto 2026</td>
-                    <td th:text="${hist.primerPuesto}">Carlos López</td>
-                    <td th:text="${hist.misionesPrimerPuesto}">15</td>
+                    <td th:text="${#temporals.format(hist.fecha, 'MMMM', T(java.util.Locale).of('es', 'AR')) + ' de ' + hist.fecha.year}">-</td>
+
+                    <!-- Puesto 1 -->
+                    <td th:text="${hist.primerPuesto ?: '-'}">-</td>
+
+                    <!-- Puesto 2: Muestra el nombre solo si tiene más de 0 misiones, sino un guion -->
+                    <td th:text="${hist.misionesSegundoPuesto != null and hist.misionesSegundoPuesto > 0 ? hist.segundoPuesto : '-'}">-</td>
+
+                    <!-- Puesto 3: Muestra el nombre solo si tiene más de 0 misiones, sino un guion -->
+                    <td th:text="${hist.misionesTercerPuesto != null and hist.misionesTercerPuesto > 0 ? hist.tercerPuesto : '-'}">-</td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(historialRankings)}">
+                    <td colspan="4" style="text-align: center; color: #64748b; padding: 20px;">Todavía no hay rankings anteriores.</td>
                 </tr>
                 </tbody>
             </table>

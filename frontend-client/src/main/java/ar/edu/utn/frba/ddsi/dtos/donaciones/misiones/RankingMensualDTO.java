@@ -6,6 +6,9 @@ public record RankingMensualDTO(
         LocalDate fecha,
         String primerPuesto,
         String segundoPuesto,
-        String tercerPuesto
+        String tercerPuesto,
+        Long misionesPrimerPuesto,
+        Long misionesSegundoPuesto,
+        Long misionesTercerPuesto
 ) {
 }
