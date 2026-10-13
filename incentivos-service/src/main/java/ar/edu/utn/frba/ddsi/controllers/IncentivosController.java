@@ -76,10 +76,11 @@ public class IncentivosController {
 
         String insigniaObtenida = "DONACIONEXITOSA";
 
-        String resultado = incentivosService.publicarYDifundirInsignia(
+        /*String resultado = incentivosService.publicarYDifundirInsignia(
                 id, insigniaObtenida, tipoDonante);
-
-        return ResponseEntity.ok(resultado);
+            comento lo de n8n para no gastar mas creditos
+        return ResponseEntity.ok(resultado);*/
+        return ResponseEntity.ok("Simulación local: Insignia procesada.");
     }
 
 
