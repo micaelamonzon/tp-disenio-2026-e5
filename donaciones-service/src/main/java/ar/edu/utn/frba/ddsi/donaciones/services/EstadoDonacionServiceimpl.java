@@ -131,19 +131,22 @@ public class EstadoDonacionServiceimpl implements EstadoDonacionService{
     public List<DonacionDTO> findByEstado(String nombreEstado) {
         List<DonacionDTO> donacionesDTO = new ArrayList<>();
         List<DonacionSegmentada> donacionSegmentadas = this.donacionesRepository.findByEstado(EstadoDonacion.valueOf(nombreEstado));
-        donacionSegmentadas.forEach(d -> donacionesDTO.add(
+        donacionSegmentadas.forEach(d -> {
+                var entidad = d.getEntidadBeneficiaria();
+                donacionesDTO.add(
                 new DonacionDTO(
                         d.getId().intValue(),
                         d.getEstadoActual().toString(),
                         d.calcularPeso(),
                         d.calcularVolumen(),
-                        d.getEntidadBeneficiaria().getId(),
+                        entidad != null ? entidad.getId() : null,
                         d.getDonanteHumano()!= null ? d.getDonanteHumano().getId() : d.getDonanteJuridico().getId(),
-                        d.getEntidadBeneficiaria().getDireccion(),
-                        d.getEntidadBeneficiaria().getLatitud(),
-                        d.getEntidadBeneficiaria().getLongitud(),
+                        entidad != null ? entidad.getDireccion() : null,
+                        entidad != null ? entidad.getLatitud() : null,
+                        entidad != null ? entidad.getLongitud() : null,
                         d.getSubcategoria().getNombre()
-                        )));
+                        ));
+        });
         return donacionesDTO;
     }
 

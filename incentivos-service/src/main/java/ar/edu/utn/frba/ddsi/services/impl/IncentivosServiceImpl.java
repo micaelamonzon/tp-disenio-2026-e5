@@ -99,6 +99,7 @@ public class IncentivosServiceImpl implements IncentivosService {
         }
     }
 
+    @Transactional
     @Override
     public List<MisionParticularDTO> obtenerMisionesCompletadas(Long id,TipoDeDonante tipoDeDonante) {
 
@@ -173,7 +174,7 @@ public class IncentivosServiceImpl implements IncentivosService {
             return;
         }
         donante.getPerfil().setCategoria(categoriaSiguiente);
-        this.agregarMisionADonante(donante.getId(),donante.getTipoDeDonante(), categoriaSiguiente.getMisiones().get(0).getId());
+        this.agregarMisionADonante(donante.getIdEnDonaciones(),donante.getTipoDeDonante(), categoriaSiguiente.getMisiones().get(0).getId());
 
     }
 
@@ -187,7 +188,7 @@ public class IncentivosServiceImpl implements IncentivosService {
 
         if (misionEnCurso.getMision().getOrdenSecuencial() < misionesDeCategoriaActual.size()) {
             Mision siguienteMision = misionesDeCategoriaActual.get(misionEnCurso.getMision().getOrdenSecuencial() - 1);
-            this.agregarMisionADonante(donante.getId(),donante.getTipoDeDonante(),siguienteMision.getId());
+            this.agregarMisionADonante(donante.getIdEnDonaciones(),donante.getTipoDeDonante(),siguienteMision.getId());
         } else {
             donante.setMisionEnCurso(null);
         }
@@ -301,6 +302,7 @@ public class IncentivosServiceImpl implements IncentivosService {
                 .toList();
 
         List<Donante> ordenados = donantes.stream()
+                .filter(d -> d.calcularMisionesCumplidasEn(mesActual) > 0)
                 .sorted(Comparator.comparingInt(
                         (Donante d) -> -d.calcularMisionesCumplidasEn(mesActual)))
                 .toList();
@@ -497,14 +499,22 @@ public class IncentivosServiceImpl implements IncentivosService {
         return mapearDto(ranking);
     }
 
-    private RankingMensualDTO mapearDto(RankingMensual ranking) {
+    private RankingMensualDTO mapearDto(RankingMensual r) {
         return new RankingMensualDTO(
-                ranking.getFecha(),
-                ranking.getPrimerPuesto() != null ? ranking.getPrimerPuesto().getNombre() : "N/A",
-                ranking.getSegundoPuesto() != null ? ranking.getSegundoPuesto().getNombre() : "N/A",
-                ranking.getTercerPuesto() != null ? ranking.getTercerPuesto().getNombre() : "N/A"
-        );
+                r.getFecha(),
+                nombreDe(r.getPrimerPuesto()),
+                nombreDe(r.getSegundoPuesto()),
+                nombreDe(r.getTercerPuesto()),
+                r.getMisionesPrimerPuesto(),
+                r.getMisionesSegundoPuesto(),
+                r.getMisionesTercerPuesto() );
     }
+
+    private String nombreDe(Donante d) {
+        if (d == null) return null;
+        return d.getNombre() != null ? d.getNombre() + " " + d.getApellido() : d.getRazonSocial();
+    }
+
     @Transactional
     @Override
     public List<RankingMensualDTO> buscarRankings(Integer mes, Integer anio) {
@@ -636,10 +646,10 @@ public class IncentivosServiceImpl implements IncentivosService {
     }
 
     @Transactional(readOnly = true)
-    public List<MisionFrontDTO> obtenerTodasLasMisionesPorId(Long id) {
-        Donante donante = incentivosRepository.findByIdEnDonaciones(id, TipoDeDonante.HUMANO);
+    public List<MisionFrontDTO> obtenerTodasLasMisionesPorId(Long id, TipoDeDonante tipoDeDonante) {
+        Donante donante = incentivosRepository.findByIdEnDonaciones(id,tipoDeDonante);
         if (donante == null) {
-            throw new RuntimeException("No se encontró el donante con id: " + id);
+            throw new RuntimeException("No se encontró el donante con id : " + id + "TIPO" + tipoDeDonante);
         }
 
         List<MisionFrontDTO> misionesParaFront = donante.getMisiones().stream()

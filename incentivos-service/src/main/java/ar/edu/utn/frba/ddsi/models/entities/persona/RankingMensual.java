@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,15 +27,15 @@ public class RankingMensual {
     @Column(name = "fecha")
     private LocalDate fecha;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_primer_puesto")
     private Donante primerPuesto;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_segundo_puesto")
     private Donante segundoPuesto;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_tercer_puesto")
     private Donante tercerPuesto;
 
@@ -88,5 +89,23 @@ public class RankingMensual {
         return donante.getNombre() != null
                 ? donante.getNombre() + " " + donante.getApellido()
                 : donante.getRazonSocial();
+    }
+
+    public Long getMisionesPrimerPuesto() {
+        if (primerPuesto == null) return 0L;
+        YearMonth mes = YearMonth.from(this.fecha);
+        return (long) primerPuesto.calcularMisionesCumplidasEn(mes);
+    }
+
+    public Long getMisionesSegundoPuesto() {
+        if (segundoPuesto == null) return 0L;
+        YearMonth mes = YearMonth.from(this.fecha);
+        return (long) segundoPuesto.calcularMisionesCumplidasEn(mes);
+    }
+
+    public Long getMisionesTercerPuesto() {
+        if (tercerPuesto == null) return 0L;
+        YearMonth mes = YearMonth.from(this.fecha);
+        return (long) tercerPuesto.calcularMisionesCumplidasEn(mes);
     }
 }

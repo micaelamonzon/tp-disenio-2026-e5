@@ -55,9 +55,8 @@
     <a th:href="@{/donante/entidadesBeneficiarias}" class="tab"
        th:classappend="${tabActiva == 'entidades'} ? 'active'"
        th:aria-current="${tabActiva == 'entidades'} ? 'page'">Entidades Beneficiarias</a>
-    <!-- Incentivos: solo para la persona humana donante  -->
-    <a th:href="@{/donante/incentivos}" class="tab"
-       th:if="${session.usuario != null and session.usuario.esDonanteHumano()}"
+
+    <a th:href="@{/donante/incentivos}" class="tab" th:if="${session.usuario != null}"
        th:classappend="${tabActiva == 'incentivos'} ? 'active'"
        th:aria-current="${tabActiva == 'incentivos'} ? 'page'">Incentivos</a>
     <a th:href="@{/donante/seguimiento}" class="tab"
