@@ -8,8 +8,13 @@ import org.springframework.web.client.RestClient;
 
 @Configuration
 public class WebHookConfig {
+
     @Bean
-    public RestClient incentivosClient(@Value("${incentivos.service.url}") String baseUrl) {
-        return RestClient.builder().baseUrl(baseUrl).build();
+    public RestClient incentivosClient(@Value("${incentivos.service.url}") String baseUrl,
+                                       @Value("${api.token}") String apiToken) {
+        return RestClient.builder()
+                .baseUrl(baseUrl)
+                .defaultHeader("X-Api-Token", apiToken)
+                .build();
     }
 }

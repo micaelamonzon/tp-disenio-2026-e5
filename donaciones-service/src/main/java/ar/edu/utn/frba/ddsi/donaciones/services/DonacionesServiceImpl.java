@@ -254,31 +254,15 @@ public class DonacionesServiceImpl implements DonacionesService {
             }
 
 
-            return donacionesSegmentadas.stream().map(this::aDonacionSegmentadaDTO).toList();
+            return this.convertirDonacionesSegADTO(donacionesSegmentadas);
     }
 
-    // Para el mapa y la galería públicos de la landing (TP: "mostrar las donaciones ya
-    // entregadas a entidades beneficiarias en un mapa"). No incluye datos del donante.
     @Override
     public List<DonacionSegmentadaDTO> obtenerDonacionesEntregadas() {
-        return this.donacionesRepository.findByEstado(EstadoDonacion.ENTREGADA)
-                .stream()
-                .map(this::aDonacionSegmentadaDTO)
-                .toList();
+        return this.convertirDonacionesSegADTO(
+                this.donacionesRepository.findByEstado(EstadoDonacion.ENTREGADA));
     }
 
-    private DonacionSegmentadaDTO aDonacionSegmentadaDTO(DonacionSegmentada d) {
-        return new DonacionSegmentadaDTO(
-                d.getId(),
-                d.getEstadoActual().toString(),
-                null,
-                this.obtenerBienesDTO(d.getBienesDelMismoTipo()),
-                d.getFechaDeIngreso(),
-                d.getDonacionEntregada(),
-                d.getEntidadBeneficiaria() != null ? d.getEntidadBeneficiaria().getId() : null,
-                d.getFotoPath()
-        );
-    }
 
     @Override
     public PersonaHumanaDTO obtenerHumanoPorId(Long id) {
@@ -921,6 +905,7 @@ public class DonacionesServiceImpl implements DonacionesService {
                         null,
                         this.obtenerBienesDTO(d.getBienesDelMismoTipo()),
                         d.getFechaDeIngreso(),
+                        d.getFechaDeAsignacion(),
                         d.getDonacionEntregada(),
                         d.getEntidadBeneficiaria() != null ? d.getEntidadBeneficiaria().getId() : null,
                         d.getFotoPath()

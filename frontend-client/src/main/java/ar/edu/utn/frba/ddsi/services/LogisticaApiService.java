@@ -3,65 +3,58 @@ package ar.edu.utn.frba.ddsi.services;
 import ar.edu.utn.frba.ddsi.dtos.logistica.CamionDTO;
 import ar.edu.utn.frba.ddsi.dtos.logistica.EntregaDTO;
 import ar.edu.utn.frba.ddsi.dtos.logistica.RutaEntregaDTO;
+import ar.edu.utn.frba.ddsi.services.internal.SesionExpiradaException;
+import ar.edu.utn.frba.ddsi.services.internal.WebApiCallerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
 import java.util.Map;
 import java.util.List;
+
 
 @Service
 public class LogisticaApiService {
 
     private static final Logger log = LoggerFactory.getLogger(LogisticaApiService.class);
-    private final WebClient webClient = WebClient.builder().build();
+    private final WebApiCallerService apiCaller;
     private final String logisticaServiceUrl;
 
-    public LogisticaApiService(@Value("${logistica.service.url}") String logisticaServiceUrl) {
+    public LogisticaApiService(@Value("${logistica.service.url}") String logisticaServiceUrl,
+                               WebApiCallerService apiCaller) {
         this.logisticaServiceUrl = logisticaServiceUrl;
+        this.apiCaller = apiCaller;
     }
 
     public List<CamionDTO> obtenerCamiones() {
         try {
-            List<CamionDTO> camiones = webClient.get()
-                    .uri(logisticaServiceUrl + "/logistica-service/camiones")
-                    .retrieve()
-                    .bodyToFlux(CamionDTO.class)
-                    .collectList()
-                    .block();
-            return camiones != null ? camiones : List.of();
+            return apiCaller.getList(logisticaServiceUrl + "/logistica-service/camiones", CamionDTO.class);
+        } catch (SesionExpiradaException e) {
+            throw e;
         } catch (Exception e) {
             log.error("Error llamando a logistica-service", e);
             throw new RuntimeException("No se pudieron obtener los camiones", e);
         }
     }
 
-    // Alta de un camión desde el panel de administración.
-    // SUPUESTO: logistica-service expone POST /logistica-service/camiones. Si la ruta es otra, cambiarla acá.
+    // Alta de un camión desde el panel de administración
     public void crearCamion(CamionDTO camion) {
         try {
-            webClient.post()
-                    .uri(logisticaServiceUrl + "/logistica-service/camiones")
-                    .bodyValue(camion)
-                    .retrieve()
-                    .toBodilessEntity()
-                    .block();
+            apiCaller.post(logisticaServiceUrl + "/logistica-service/camiones", camion, Void.class);
+        } catch (SesionExpiradaException e) {
+            throw e;
         } catch (Exception e) {
             log.error("Error creando el camión {}", camion.getPatente(), e);
             throw new RuntimeException("No se pudo crear el camión", e);
         }
     }
 
-    // Baja de un camión.
-    // SUPUESTO: logistica-service expone DELETE /logistica-service/camiones/{id}.
+    // Baja de un camión
     public void eliminarCamion(String id) {
         try {
-            webClient.delete()
-                    .uri(logisticaServiceUrl + "/logistica-service/camiones/" + id)
-                    .retrieve()
-                    .toBodilessEntity()
-                    .block();
+            apiCaller.delete(logisticaServiceUrl + "/logistica-service/camiones/{id}", id);
+        } catch (SesionExpiradaException e) {
+            throw e;
         } catch (Exception e) {
             log.error("Error eliminando el camión {}", id, e);
             throw new RuntimeException("No se pudo eliminar el camión", e);
@@ -70,13 +63,9 @@ public class LogisticaApiService {
 
     public List<EntregaDTO> obtenerEntregas() {
         try {
-            List<EntregaDTO> entregas = webClient.get()
-                    .uri(logisticaServiceUrl + "/logistica-service/entregas")
-                    .retrieve()
-                    .bodyToFlux(EntregaDTO.class)
-                    .collectList()
-                    .block();
-            return entregas != null ? entregas : List.of();
+            return apiCaller.getList(logisticaServiceUrl + "/logistica-service/entregas", EntregaDTO.class);
+        } catch (SesionExpiradaException e) {
+            throw e;
         } catch (Exception e) {
             log.error("Error llamando a logistica-service", e);
             throw new RuntimeException("No se pudieron obtener las entregas", e);
@@ -85,11 +74,9 @@ public class LogisticaApiService {
 
     public EntregaDTO obtenerEntregaPorId(String id) {
         try {
-            return webClient.get()
-                    .uri(logisticaServiceUrl + "/logistica-service/entrega/" + id)
-                    .retrieve()
-                    .bodyToMono(EntregaDTO.class)
-                    .block();
+            return apiCaller.get(logisticaServiceUrl + "/logistica-service/entrega/{id}", EntregaDTO.class, id);
+        } catch (SesionExpiradaException e) {
+            throw e;
         } catch (Exception e) {
             log.error("Error obteniendo entrega {}", id, e);
             throw new RuntimeException("No se pudo obtener la entrega", e);
@@ -101,13 +88,11 @@ public class LogisticaApiService {
     // pasa la entrega a ENTREGADA y avisa a donaciones para actualizar cada donación.
     public EntregaDTO confirmarRecepcion(String entregaId, List<String> fotosUrl, String responsableId) {
         try {
-            return webClient.patch()
-                    .uri(logisticaServiceUrl + "/logistica-service/entrega/" + entregaId
-                            + "/confirmarRecepcion?responsableId=" + responsableId)
-                    .bodyValue(Map.of("fotosUrl", fotosUrl))
-                    .retrieve()
-                    .bodyToMono(EntregaDTO.class)
-                    .block();
+            return apiCaller.patch(
+                    logisticaServiceUrl + "/logistica-service/entrega/{id}/confirmarRecepcion?responsableId={responsable}",
+                    Map.of("fotosUrl", fotosUrl), EntregaDTO.class, entregaId, responsableId);
+        } catch (SesionExpiradaException e) {
+            throw e;
         } catch (Exception e) {
             log.error("Error confirmando la recepción de la entrega {}", entregaId, e);
             throw new RuntimeException("No se pudo confirmar la recepción", e);
@@ -116,20 +101,13 @@ public class LogisticaApiService {
 
     public List<RutaEntregaDTO> obtenerRutasDeDonante(Long idDonante) {
         try {
-            List<RutaEntregaDTO> rutas = webClient.get()
-                    .uri(logisticaServiceUrl + "/logistica-service/camiones/monitoreo/ruta/donante/"
-                            + idDonante + "/recorrido")
-                    .retrieve()
-                    .bodyToFlux(RutaEntregaDTO.class)
-                    .collectList()
-                    .block();
-
-            // Antes: log.info(rutas.toString()) corría antes del null-check y tiraba NPE si rutas era null.
-            if (rutas == null) {
-                return List.of();
-            }
+            List<RutaEntregaDTO> rutas = apiCaller.getList(
+                    logisticaServiceUrl + "/logistica-service/camiones/monitoreo/ruta/donante/{id}/recorrido",
+                    RutaEntregaDTO.class, idDonante);
             log.debug("Rutas del donante {}: {}", idDonante, rutas);
-            return rutas;
+            return rutas != null ? rutas : List.of();
+        } catch (SesionExpiradaException e) {
+            throw e;
         } catch (Exception e) {
             log.error("Error obteniendo las rutas del donante {}", idDonante, e);
             return List.of();
@@ -140,14 +118,12 @@ public class LogisticaApiService {
     // Rutas de las entregas activas de una entidad, recortadas hasta su parada (req. 14)
     public List<RutaEntregaDTO> obtenerRutasDeEntidad(Long idEntidad) {
         try {
-            List<RutaEntregaDTO> rutas = webClient.get()
-                    .uri(logisticaServiceUrl + "/logistica-service/camiones/monitoreo/ruta/entidad/"
-                            + idEntidad + "/recorrido")
-                    .retrieve()
-                    .bodyToFlux(RutaEntregaDTO.class)
-                    .collectList()
-                    .block();
+            List<RutaEntregaDTO> rutas = apiCaller.getList(
+                    logisticaServiceUrl + "/logistica-service/camiones/monitoreo/ruta/entidad/{id}/recorrido",
+                    RutaEntregaDTO.class, idEntidad);
             return rutas != null ? rutas : List.of();
+        } catch (SesionExpiradaException e) {
+            throw e;
         } catch (Exception e) {
             log.error("Error obteniendo las rutas de la entidad {}", idEntidad, e);
             throw new RuntimeException("No se pudieron obtener las rutas de la entidad", e);

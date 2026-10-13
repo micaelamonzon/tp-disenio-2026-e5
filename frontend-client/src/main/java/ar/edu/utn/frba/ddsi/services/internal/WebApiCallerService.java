@@ -1,13 +1,10 @@
 package ar.edu.utn.frba.ddsi.services.internal;
 
-import ar.edu.utn.frba.ddsi.dtos.AuthResponseDTO;
-import ar.edu.utn.frba.ddsi.dtos.RefreshTokenDTO;
 import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ar.edu.utn.frba.ddsi.dtos.autenticacion.AuthResponseDTO;
 import ar.edu.utn.frba.ddsi.dtos.autenticacion.RefreshTokenDTO;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -78,6 +75,17 @@ public class WebApiCallerService {
         return ejecutar(token -> webClient.patch()
                 .uri(url, uriVariables)
                 .headers(h -> agregarToken(h, token))
+                .retrieve()
+                .bodyToMono(responseType)
+                .block());
+    }
+
+    // PATCH con cuerpo (mismo orden de parámetros que post y put)
+    public <T> T patch(String url, Object body, Class<T> responseType, Object... uriVariables) {
+        return ejecutar(token -> webClient.patch()
+                .uri(url, uriVariables)
+                .headers(h -> agregarToken(h, token))
+                .bodyValue(body)
                 .retrieve()
                 .bodyToMono(responseType)
                 .block());
