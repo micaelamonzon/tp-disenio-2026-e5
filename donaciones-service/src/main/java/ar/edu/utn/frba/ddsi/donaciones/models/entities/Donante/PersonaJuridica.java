@@ -48,7 +48,7 @@ public class PersonaJuridica {
     @JoinColumn(name = "medio_predeterminado_id")
     private MedioDeNotificacion medioDeNotificacionPredeterminado;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "donanteJuridico")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "donanteJuridico",cascade = CascadeType.ALL)
     private List<DonacionSinSegmentar> donaciones = new ArrayList<>();
 
 

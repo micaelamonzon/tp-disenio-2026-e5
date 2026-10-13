@@ -117,7 +117,6 @@ public class ReceptorWebHookService {
         Donante donante = this.incentivosRepository.findByIdEnDonaciones(id, tipo);
 
         if(donante != null){
-
             DonacionSegmentada donacion = new DonacionSegmentada(
                     nuevaDonacionDTO.fechaDeIngreso(),
                     nuevaDonacionDTO.donacionEntregada(),
@@ -132,7 +131,7 @@ public class ReceptorWebHookService {
             try {
                 this.incentivosService.obtenerMisionesCompletadas(id, tipo);
             } catch (Exception e) {
-                logger.error("Error al verificar misiones automáticamente para el donante {}: {}", id, e.getMessage());
+                logger.error("Error al verificar misiones completadas automáticamente en el webhook para el donante {}: {}", id, e.getMessage());
             }
         } else {
             logger.warn("Intento de registrar una donación para un donante inexistente: {}", id);
