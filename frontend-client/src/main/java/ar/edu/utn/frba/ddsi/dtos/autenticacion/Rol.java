@@ -1,5 +1,7 @@
 package ar.edu.utn.frba.ddsi.dtos.autenticacion;
 
+import ar.edu.utn.frba.ddsi.dtos.donaciones.misiones.TipoDeDonante;
+
 // Roles de DonaTrack: los mismos nombres que emite autenticacion-service en el claim "rol"
 public enum Rol {
     DONANTE_HUMANO("Persona Donante"),
@@ -18,7 +20,12 @@ public enum Rol {
         return etiqueta;
     }
 
-    public boolean esDonante() {
-        return this == DONANTE_HUMANO || this == DONANTE_JURIDICO;
+
+    public TipoDeDonante tipoDeDonante() {
+        return switch (this) {
+            case DONANTE_HUMANO -> TipoDeDonante.HUMANO;
+            case DONANTE_JURIDICO -> TipoDeDonante.JURIDICO;
+            default -> throw new IllegalStateException("El rol " + this + " no es un tipo de donante");
+        };
     }
 }

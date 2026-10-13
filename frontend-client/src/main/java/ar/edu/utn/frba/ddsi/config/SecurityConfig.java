@@ -31,8 +31,7 @@ public class SecurityConfig {
                         // Públicas (TP: landing, fotos y mapa sin login, legal, registro e inicio de sesión)
                         .requestMatchers("/", "/acceso/**", "/error").permitAll()
                         .requestMatchers("/css/**", "/js/**", "/img/**", "/favicon.ico").permitAll()
-                        // Incentivos es solo para la persona humana donante (TP)
-                        .requestMatchers("/donante/incentivos").hasRole("DONANTE_HUMANO")
+
                         .requestMatchers("/donante/**").hasAnyRole("DONANTE_HUMANO", "DONANTE_JURIDICO")
                         .requestMatchers("/entidadBeneficiaria/**").hasRole("ENTIDAD_BENEFICIARIA")
 

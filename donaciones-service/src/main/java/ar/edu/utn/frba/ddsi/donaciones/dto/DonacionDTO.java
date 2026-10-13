@@ -9,8 +9,8 @@ public record DonacionDTO(
         Long entidadBeneficiariaId,
         Long donanteId,
         String direccionEntidad,
-        double latitudEntidad,
-        double longitudEntidad,
+        Double latitudEntidad,
+        Double longitudEntidad,
         String subcategoria
 ) {
 }

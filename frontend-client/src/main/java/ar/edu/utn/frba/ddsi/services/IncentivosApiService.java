@@ -3,6 +3,7 @@ package ar.edu.utn.frba.ddsi.services;
 import ar.edu.utn.frba.ddsi.dtos.donaciones.misiones.MisionFrontDTO;
 import ar.edu.utn.frba.ddsi.dtos.donaciones.misiones.PerfilDTO;
 import ar.edu.utn.frba.ddsi.dtos.donaciones.misiones.RankingMensualDTO;
+import ar.edu.utn.frba.ddsi.dtos.donaciones.misiones.TipoDeDonante;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,14 +25,16 @@ public class IncentivosApiService {
     }
 
 
-    public List<MisionFrontDTO> obtenerTodasLasMisiones(Long idDonante) {
+    public List<MisionFrontDTO> obtenerTodasLasMisiones(Long idDonante, TipoDeDonante tipo) {
         try {
             List<MisionFrontDTO> misiones = webClient.get()
-                    .uri(incentivosServiceUrl + "/misiones/todas/{id}", idDonante)
+                    .uri(incentivosServiceUrl + "/misiones/todas/{id}?tipoDeDonante={tipo}",
+                            idDonante, tipo)
                     .retrieve()
                     .bodyToFlux(MisionFrontDTO.class)
                     .collectList()
                     .block();
+            System.out.println("Obtener todas las misiones  con" + idDonante + tipo);
             return misiones != null ? misiones : List.of();
         } catch (Exception e) {
             log.error("Error llamando a incentivos-service", e);
@@ -39,14 +42,14 @@ public class IncentivosApiService {
         }
     }
 
-    public PerfilDTO obtenerPerfil(Long idDonante) {
+    public PerfilDTO obtenerPerfil(Long idDonante, TipoDeDonante tipo) {
         try {
             URI uri = UriComponentsBuilder.fromUriString(incentivosServiceUrl)
                     .path("/perfil/{id}")
-                    .queryParam("tipoDeDonante", "HUMANO")
+                    .queryParam("tipoDeDonante", tipo)
                     .buildAndExpand(idDonante)
                     .toUri();
-
+            System.out.println("Obtener perfil con " + uri);
             PerfilDTO perfil = webClient.get()
                     .uri(uri)
                     .retrieve()
@@ -63,14 +66,14 @@ public class IncentivosApiService {
         }
     }
 
-    public void comenzarMision(Long idDonante, Long misionId) {
+    public void comenzarMision(Long idDonante, Long misionId, TipoDeDonante tipo) {
         try {
             URI uri = UriComponentsBuilder.fromUriString(incentivosServiceUrl)
                     .path("/donante/{id}/mision/{misionId}")
-                    .queryParam("tipoDeDonante", "HUMANO")
+                    .queryParam("tipoDeDonante", tipo)
                     .buildAndExpand(idDonante, misionId)
                     .toUri();
-
+        System.out.println("Comenzar mision con" + uri);
             webClient.post()
                     .uri(uri)
                     .retrieve()
@@ -107,7 +110,7 @@ public class IncentivosApiService {
     public List<RankingMensualDTO> buscarRankings(Integer mes, Integer anio) {
         try {
             UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(incentivosServiceUrl)
-                    .path("/ranking/buscar");
+                    .path("/ranking/historial");
 
             if (mes != null) builder.queryParam("mes", mes);
             if (anio != null) builder.queryParam("anio", anio);
