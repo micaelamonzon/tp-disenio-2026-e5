@@ -88,7 +88,7 @@ public class controllerDeNotificaciones {
         notificacion.enviar();
         notificacionRepository.save(notificacion); // persiste la notificación con su estado final
 
-        return "Notificacion enviada por " + medio;
+        return "Notificacion " + notificacion.getEstado() + " por " + medio;
     }
 
     // Notificaciones de un donante (req. 8). Recurso anidado: las notificaciones
