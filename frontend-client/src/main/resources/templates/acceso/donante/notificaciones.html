@@ -33,7 +33,7 @@
                 <div class="notif-body">
                     <h3 class="notif-title" th:text="${n.mensaje}">Mensaje de la notificación</h3>
                     <p class="notif-desc" th:if="${n.medio}"
-                       th:text="'Enviada por ' + ${#strings.toLowerCase(n.medio)}">Enviada por email</p>
+                       th:text="${n.estado == 'FALLIDA'} ? 'No se pudo enviar por ' + ${#strings.toLowerCase(n.medio)} : 'Enviada por ' + ${#strings.toLowerCase(n.medio)}">Enviada por email</p>
                     <span class="notif-time" th:if="${n.fechaEnvio}"
                           th:text="${#temporals.format(n.fechaEnvio, 'dd/MM/yyyy HH:mm')}">10/10/2026 15:30</span>
                 </div>
