@@ -5,12 +5,15 @@ import com.sendgrid.*;
 import com.sendgrid.helpers.mail.Mail;
 import com.sendgrid.helpers.mail.objects.Content;
 import org.springframework.context.annotation.Profile;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+
+import java.io.IOException;
 
 // Adapter que adapta la interfaz de SendGrid a la interfaz del sistema
 @Component
 @Profile("!test")
+@ConditionalOnProperty(name = "notificaciones.email.proveedor", havingValue = "sendgrid", matchIfMissing = true)
 public class SendGridEmailAdapter implements EmailAdapter {
 
     private final TwilioConfig twilioConfig;
@@ -19,7 +22,7 @@ public class SendGridEmailAdapter implements EmailAdapter {
         this.twilioConfig = twilioConfig;
     }
 
-    @Async
+    @Override
     public void enviar(String destinatario, String mensaje) {
         com.sendgrid.helpers.mail.objects.Email from =
                 new com.sendgrid.helpers.mail.objects.Email(twilioConfig.getSendgridFromEmail());
@@ -30,13 +33,21 @@ public class SendGridEmailAdapter implements EmailAdapter {
 
         SendGrid sg = new SendGrid(twilioConfig.getSendgridApiKey());
         Request request = new Request();
+        Response response;
         try {
             request.setMethod(Method.POST);
             request.setEndpoint("mail/send");
             request.setBody(mail.build());
-            sg.api(request);
-        } catch (Exception e) {
-            throw new RuntimeException("Error al enviar email", e);
+            response = sg.api(request);
+        } catch (IOException e) {
+            throw new RuntimeException("Error de conexión con SendGrid", e);
+        }
+
+        // Si no es 2xx, es una excepción para que la notificación quede FALLIDA
+        int codigo = response.getStatusCode();
+        if (codigo < 200 || codigo >= 300) {
+            throw new RuntimeException("SendGrid rechazó el email (código " + codigo + "): "
+                    + response.getBody());
         }
     }
 }

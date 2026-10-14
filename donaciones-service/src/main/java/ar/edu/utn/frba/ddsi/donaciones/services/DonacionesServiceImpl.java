@@ -443,13 +443,13 @@ public class DonacionesServiceImpl implements DonacionesService {
         }
 
         List<Bien> bienes = this.convertirBienesDTO(body.bienes());
-        DonacionSinSegmentar nuevaDonacion = new DonacionSinSegmentar(body.descripcionGeneral(), LocalDateTime.now());
-        bienes.forEach(nuevaDonacion::agregarBien);
-        nuevaDonacion.setDonanteHumano(personaHumana);
+        DonacionSinSegmentar nuevaDonacionSinSegmentar = new DonacionSinSegmentar(body.descripcionGeneral(), LocalDateTime.now());
+        bienes.forEach(nuevaDonacionSinSegmentar::agregarBien);
+        nuevaDonacionSinSegmentar.setDonanteHumano(personaHumana);
 
 
         //segmentamos
-        List<DonacionSegmentada> donacionesSegmentadas = this.segmentador.segmentar(nuevaDonacion);
+        List<DonacionSegmentada> donacionesSegmentadas = this.segmentador.segmentar(nuevaDonacionSinSegmentar);
         donacionesSegmentadas.forEach(d -> d.setDonanteHumano(personaHumana));
         //guardamos las donaciones segmentadas en su repo
 
@@ -458,7 +458,7 @@ public class DonacionesServiceImpl implements DonacionesService {
 //            this.donacionesRepository.save(d);
 //        });
 
-        personaHumana.agregarDonacion(nuevaDonacion);
+        personaHumana.agregarDonacion(nuevaDonacionSinSegmentar);
         this.donantesHumanosRepository.save(personaHumana);
 
         webhookAIncentivos.notificarNuevasDonaciones(
@@ -515,7 +515,7 @@ public class DonacionesServiceImpl implements DonacionesService {
                 donacionesSegmentadas.stream().map( d ->
                         new DonacionIncentivosDTO(
                                 d.getDonacionEntregada(),
-                                d.getEntidadBeneficiaria().getId(),
+                                d.getEntidadBeneficiaria() != null ? d.getEntidadBeneficiaria().getId(): null,
                                 d.getFechaDeIngreso(),
                                 d.calcularCantidadDeBienes(),
                                 d.getBienesDelMismoTipo().getFirst().getSubcategoria().getCategoria().getNombre()
