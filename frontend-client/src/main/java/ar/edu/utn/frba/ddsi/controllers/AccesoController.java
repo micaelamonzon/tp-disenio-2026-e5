@@ -250,4 +250,45 @@ public class AccesoController {
         }
     }
 
+    @GetMapping("/recuperar-clave")
+    public String mostrarRecuperarClave(Model model) {
+        model.addAttribute("titulo", "Recuperar Contraseña");
+        model.addAttribute("tabActiva", "");
+        return "acceso/landigPage/recuperar-clave";
+    }
+    @PostMapping("/recuperar-clave")
+    public String procesarRecuperarClave(@RequestParam String email, Model model) {
+        try {
+            authApiService.solicitarRecuperacion(email);
+            model.addAttribute("exito", "Si el correo está registrado, te enviamos un enlace de recuperación a tu casilla.");
+        } catch (Exception e) {
+            model.addAttribute("error", "No se pudo procesar la solicitud. Intentá de nuevo más tarde.");
+        }
+        model.addAttribute("titulo", "Recuperar Contraseña");
+        model.addAttribute("tabActiva", "");
+        return "acceso/landigPage/recuperar-clave";
+    }
+
+    @GetMapping("/nueva-password")
+    public String mostrarFormularioNuevaPassword(@RequestParam String token, Model model) {
+        model.addAttribute("token", token);
+        model.addAttribute("titulo", "Restablecer Contraseña");
+        model.addAttribute("tabActiva", "");
+        return "acceso/landigPage/nueva-password";
+    }
+
+    @PostMapping("/nueva-password")
+    public String actualizarPasswordDefinitiva(@RequestParam String token,
+                                               @RequestParam String nuevaPassword,
+                                               Model model) {
+        try {
+            authApiService.cambiarPasswordConToken(token, nuevaPassword);
+            return "redirect:/acceso/login?passwordModificada=true";
+        } catch (Exception e) {
+            model.addAttribute("error", e.getMessage());
+            model.addAttribute("token", token);
+            model.addAttribute("titulo", "Restablecer Contraseña");
+            return "acceso/landigPage/nueva-password";
+        }
+    }
 }

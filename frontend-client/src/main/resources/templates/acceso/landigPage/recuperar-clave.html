@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${titulo} + ' - DonaTrack'">Recuperar Contraseña - DonaTrack</title>
+    <link rel="stylesheet" th:href="@{/css/landingPage/landingPage.css}">
+</head>
+<body>
+
+<header th:replace="~{layoutAcceso/layoutAcceso :: header}"></header>
+<nav th:replace="~{layoutAcceso/layoutAcceso :: navBar}"></nav>
+
+<main class="page">
+    <div style="text-align: center; margin-bottom: 2rem;">
+        <h1 style="font-size: 2.25rem; font-weight: 800; color: #0f172a; margin-bottom: 0.5rem;">Recuperar Contraseña</h1>
+        <!-- Actualizado para reflejar que se envía un enlace -->
+        <p style="color: #64748b; font-size: 1rem; margin: 0;">Ingresá tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña</p>
+    </div>
+
+    <div class="form-container" style="background: #ffffff; padding: 2rem; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.04); max-width: 420px; margin: 0 auto;">
+
+        <form th:action="@{/acceso/recuperar-clave}" method="post">
+
+            <div th:if="${exito != null}" class="toast info" style="margin-bottom: 1.25rem; position: relative; bottom: 0; right: 0; background-color: #d1fae5; color: #065f46; padding: 1rem; border-radius: 8px;">
+                <span th:text="${exito}">Instrucciones enviadas.</span>
+            </div>
+
+            <div th:if="${error != null}" class="toast error" style="margin-bottom: 1.25rem; position: relative; bottom: 0; right: 0; background-color: #fee2e2; color: #b91c1c; padding: 1rem; border-radius: 8px;">
+                <span th:text="${error}">Error al procesar la solicitud.</span>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label for="email" style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #334155;">Correo electrónico</label>
+                <div class="input-icon-wrapper" style="position: relative;">
+                    <input type="email" id="email" name="email" placeholder="correo@ejemplo.com" required autofocus
+                           style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 1rem; outline: none;">
+                </div>
+            </div>
+
+            <!-- Texto del botón acorde a la nueva lógica -->
+            <button type="submit" class="btn btn-primary btn-block" style="width: 100%; padding: 12px; background-color: #2563eb; color: #ffffff; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-bottom: 1rem;">Enviar enlace de recuperación</button>
+        </form>
+
+        <div style="text-align: center; margin-top: 1rem;">
+            <a th:href="@{/acceso/login}" class="auth-switch-link" style="color: #2563eb; text-decoration: none; font-size: 0.875rem;">← Volver al inicio de sesión</a>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{layoutAcceso/layoutAcceso :: footer}"></footer>
+
+</body>
+</html>

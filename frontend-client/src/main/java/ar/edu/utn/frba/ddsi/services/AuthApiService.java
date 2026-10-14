@@ -1,6 +1,8 @@
 package ar.edu.utn.frba.ddsi.services;
 
 import ar.edu.utn.frba.ddsi.dtos.autenticacion.AuthResponseDTO;
+import ar.edu.utn.frba.ddsi.dtos.autenticacion.RecuperarPasswordRequestDTO;
+import ar.edu.utn.frba.ddsi.dtos.autenticacion.TokenRespuestaDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -130,5 +132,33 @@ public class AuthApiService {
             // cuerpo vacío o no JSON: se usa el mensaje genérico
         }
         return "No se pudo crear la cuenta de usuario";
+    }
+    public void solicitarRecuperacion(String email) {
+        try {
+            webClient.post()
+                    .uri(authServiceUrl + "/auth/solicitar-recuperacion")
+                    .bodyValue(new RecuperarPasswordRequestDTO(email))
+                    .retrieve()
+                    .toBodilessEntity()
+                    .block();
+        } catch (Exception e) {
+            log.error("Error al solicitar recuperación: {}", e.getMessage());
+            throw new RuntimeException("No se pudo procesar la solicitud", e);
+        }
+    }
+
+    public void cambiarPasswordConToken(String token, String nuevaPassword) {
+        try {
+            var body = java.util.Map.of("token", token, "nuevaPassword", nuevaPassword);
+            webClient.post()
+                    .uri(authServiceUrl + "/auth/cambiar-con-token")
+                    .bodyValue(body)
+                    .retrieve()
+                    .toBodilessEntity()
+                    .block();
+        } catch (Exception e) {
+            log.error("Error al actualizar contraseña con token: {}", e.getMessage());
+            throw new RuntimeException("El enlace de recuperación es inválido o ha expirado", e);
+        }
     }
 }

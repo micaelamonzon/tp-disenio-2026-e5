@@ -28,7 +28,7 @@ public class SecurityConfig {
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         // Puerta de entrada: login y refresh son públicos
-                        .requestMatchers("/api/auth", "/api/auth/refresh").permitAll()
+                        .requestMatchers("/api/auth", "/api/auth/refresh", "/api/auth/solicitar-recuperacion", "/api/auth/cambiar-con-token").permitAll()
                         // TODO: proteger con rol SERVICIO/ADMIN. Mientras tanto queda abierto
                         // y el alta rechaza el rol ADMIN.
                         .requestMatchers("/api/usuarios", "/api/usuarios/disponible").permitAll()

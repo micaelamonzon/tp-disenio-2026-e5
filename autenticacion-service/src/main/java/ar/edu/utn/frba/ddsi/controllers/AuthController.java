@@ -1,8 +1,6 @@
 package ar.edu.utn.frba.ddsi.controllers;
 
-import ar.edu.utn.frba.ddsi.dtos.LoginRequestDTO;
-import ar.edu.utn.frba.ddsi.dtos.RefreshRequestDTO;
-import ar.edu.utn.frba.ddsi.dtos.TokensDTO;
+import ar.edu.utn.frba.ddsi.dtos.*;
 import ar.edu.utn.frba.ddsi.services.AuthService;
 import ar.edu.utn.frba.ddsi.services.AuthService.CredencialesInvalidasException;
 import org.springframework.http.HttpStatus;
@@ -35,6 +33,19 @@ public class AuthController {
             throw new DatosIncompletosException("Falta el refresh token");
         }
         return authService.refresh(body.refreshToken());
+    }
+
+    @PostMapping("/solicitar-recuperacion")
+    public ResponseEntity<MensajeRespuestaDTO> solicitarRecuperacion(@RequestBody RecuperarPasswordRequestDTO body) {
+        authService.solicitarRecuperacion(body.email());
+        return ResponseEntity.accepted()
+                .body(new MensajeRespuestaDTO("Si el correo está registrado, vas a recibir un enlace de recuperación."));
+    }
+
+    @PostMapping("/cambiar-con-token")
+    public ResponseEntity<MensajeRespuestaDTO> cambiarConToken(@RequestBody CambiarPasswordRequestDTO body) {
+        authService.actualizarPasswordConJwtToken(body.token(), body.nuevaPassword());
+        return ResponseEntity.ok(new MensajeRespuestaDTO("Contraseña actualizada con éxito"));
     }
 
     @ExceptionHandler(CredencialesInvalidasException.class)
