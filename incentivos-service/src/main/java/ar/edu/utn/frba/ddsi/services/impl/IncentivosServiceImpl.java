@@ -111,6 +111,8 @@ public class IncentivosServiceImpl implements IncentivosService {
 
         List<MisionParticular> misionesCompletadas = donante.obtenerMisionesCompletadas();
 
+        System.out.println(misionesCompletadas);
+
         // Evento 4: Notificar al donante que cumplió una misión
         if (misionesCompletadas != null && !misionesCompletadas.isEmpty()) {
             for (MisionParticular mision : misionesCompletadas) {
@@ -132,7 +134,8 @@ public class IncentivosServiceImpl implements IncentivosService {
         }
 
         // Evento 5: Notificar al donante que cambió de categoría
-        if (this.pasaSiguienteCategoria(donante)) {
+        if (this.pasaSiguienteCategoria(donante) && donante.getMisionEnCurso() != null) {
+
                 String nuevaCategoria = donante.getMisionEnCurso().getMision().getCategoria().getCategoriaSiguiente().toString();
                 notificar(
                         donante.getIdEnDonaciones(),
@@ -148,6 +151,11 @@ public class IncentivosServiceImpl implements IncentivosService {
 
     @Override
     public Boolean pasaSiguienteCategoria(Donante donante) {
+
+        MisionParticular enCurso = donante.getMisionEnCurso();
+        if (enCurso == null) {
+            return false;
+        }
 
         CategoriaDeMision categoriaActual = donante.getMisionEnCurso().getMision().getCategoria();
 
@@ -358,7 +366,10 @@ public class IncentivosServiceImpl implements IncentivosService {
     public List<MisionParticularDTO> obtenerMisionParticularDTO(List<MisionParticular> misiones) {
 
         List<MisionParticularDTO> misionesDTO = new ArrayList<>();
-        misiones.forEach(m -> misionesDTO.add(new MisionParticularDTO(m.getMision().getNombre().toString(),m.getEstado())));
+        misiones.forEach(m -> misionesDTO.add(
+                new MisionParticularDTO(
+                        m.getMision() != null ? this.obtenerNombreDeMisionParticular(m.getMision()): null,
+                        m.getEstado())));
         return misionesDTO;
     }
 

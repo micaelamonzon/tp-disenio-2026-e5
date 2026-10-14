@@ -5,7 +5,6 @@ import com.twilio.Twilio;
 import com.twilio.rest.api.v2010.account.Message;
 import com.twilio.type.PhoneNumber;
 import org.springframework.context.annotation.Profile;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 // Adapter que adapta la interfaz de Twilio SMS a la interfaz del sistema
@@ -19,7 +18,7 @@ public class TwilioSMSAdapter implements SmsAdapter {
         this.twilioConfig = twilioConfig;
     }
 
-    @Async
+    @Override
     public void enviar(String destinatario, String mensaje) {
         Twilio.init(twilioConfig.getAccountSid(), twilioConfig.getAuthToken());
         Message.creator(
