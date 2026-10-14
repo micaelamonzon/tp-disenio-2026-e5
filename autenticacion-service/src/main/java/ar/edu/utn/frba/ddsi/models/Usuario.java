@@ -45,6 +45,12 @@ public class Usuario {
     @Column(name = "fecha_alta", nullable = false)
     private LocalDateTime fechaAlta = LocalDateTime.now();
 
+    @Column(name = "token_recuperacion")
+    private String tokenRecuperacion;
+
+    @Column(name = "expiracion_token")
+    private LocalDateTime expiracionToken;
+
     public Usuario(String email, String passwordHash, Rol rol, Long idEnDominio, String nombre) {
         this.email = email;
         this.passwordHash = passwordHash;

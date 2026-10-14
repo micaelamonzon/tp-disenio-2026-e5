@@ -24,9 +24,11 @@ public class JwtService {
     public static final String CLAIM_ID_ENTIDAD = "idEntidad";
     public static final String CLAIM_TYPE = "type";
     public static final String TYPE_REFRESH = "refresh";
+    public static final String TYPE_RECUPERACION = "recuperacion";
 
     private static final long ACCESS_TOKEN_VALIDITY = 15 * 60 * 1000L;            // 15 minutos
     private static final long REFRESH_TOKEN_VALIDITY = 7 * 24 * 60 * 60 * 1000L;  // 7 días
+    private static final long RECUPERACION_TOKEN_VALIDITY = 15 * 60 * 1000L;
 
     private final Key key;
 
@@ -84,5 +86,22 @@ public class JwtService {
             case ENTIDAD_BENEFICIARIA -> CLAIM_ID_ENTIDAD;
             case ADMIN -> null;
         };
+    }
+    public String generarTokenRecuperacion(Usuario usuario) {
+        return Jwts.builder()
+                .setSubject(usuario.getEmail())
+                .claim(CLAIM_TYPE, TYPE_RECUPERACION)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + RECUPERACION_TOKEN_VALIDITY))
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    public String validarTokenRecuperacion(String token) {
+        Claims claims = parsear(token);
+        if (!TYPE_RECUPERACION.equals(claims.get(CLAIM_TYPE))) {
+            throw new JwtException("El token no es de tipo recuperación");
+        }
+        return claims.getSubject();
     }
 }
