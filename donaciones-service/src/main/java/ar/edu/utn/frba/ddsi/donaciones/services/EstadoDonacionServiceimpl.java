@@ -79,6 +79,7 @@ public class EstadoDonacionServiceimpl implements EstadoDonacionService{
         if (fotosUrl != null && !fotosUrl.isEmpty()) {
             d.setFotoPath(fotosUrl.get(0));
         }
+        d.setDonacionEntregada(true); // lo usa incentivos para la misión "Donaciones Exitosas"
         this.donacionesRepository.save(d); // sin esto el cambio de estado no se persistía
         return toDTO(d);
     }
