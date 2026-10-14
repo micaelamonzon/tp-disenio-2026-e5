@@ -113,7 +113,7 @@ public class IncentivosServiceImpl implements IncentivosService {
 
         System.out.println(misionesCompletadas);
 
-        // Evento 4: Notificar al donante que cumplió una misión
+        // Difusión de insignias en n8n
         if (misionesCompletadas != null && !misionesCompletadas.isEmpty()) {
             for (MisionParticular mision : misionesCompletadas) {
                 String nombreMision = mision.getMision().getNombre().toString();
@@ -124,24 +124,8 @@ public class IncentivosServiceImpl implements IncentivosService {
                 } catch (Exception e) {
                     System.out.println("Error al difundir la insignia automáticamente en n8n: " + e.getMessage());
                 }
-                
-                notificar(
-                        donante.getIdEnDonaciones(),
-                        "Felicitaciones!+Completaste+la+mision+" + nombreMision
-                );
 
             }
-        }
-
-        // Evento 5: Notificar al donante que cambió de categoría
-        if (this.pasaSiguienteCategoria(donante) && donante.getMisionEnCurso() != null) {
-
-                String nuevaCategoria = donante.getMisionEnCurso().getMision().getCategoria().getCategoriaSiguiente().toString();
-                notificar(
-                        donante.getIdEnDonaciones(),
-                        "Subiste+de+categoria!+Ahora+sos+donante+" + nuevaCategoria
-                );
-
         }
 
         List <MisionParticularDTO> misionesCompletadasDTO = this.obtenerMisionParticularDTO(misionesCompletadas);
@@ -536,20 +520,6 @@ public class IncentivosServiceImpl implements IncentivosService {
                 .filter(r -> (mes == null || r.getFecha().getMonthValue() == mes))
                 .map(this::mapearDto)
                 .toList();
-    }
-
-    // Método para llamar al servicio de notificaciones
-    // URL resultante: http://localhost:8081/servicioDeNotificaciones/notificar?destinatario=X&mensaje=Y&medio=Z
-    private void notificar(Long destinatarioId, String mensaje) {
-        try {
-            String url = notificacionesProperties.getUrl() +
-                    "/servicioDeNotificaciones/notificar" +
-                    "?destinatario=" + destinatarioId +
-                    "&mensaje=" + mensaje;
-            restTemplate.postForObject(url, null, String.class);
-        } catch (Exception e) {
-            System.out.println("Error al notificar: " + e.getMessage());
-        }
     }
 
     public CategoriaDeMisionDTO crearCategoriaMision(CategoriaDeMisionDTO categoriaDto){
