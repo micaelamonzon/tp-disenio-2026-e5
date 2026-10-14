@@ -600,27 +600,32 @@
 </div>
 
 <!-- ===================== FOOTER ===================== -->
-<footer class="site-footer">
-    <div class="footer-grid">
-        <div>
-            <div class="footer-brand">DonaTrack</div>
-            <p class="footer-desc">Plataforma de gestión y trazabilidad de donaciones de UTN Solidaria.</p>
+<footer th:fragment="footer" class="footer">
+    <div class="footer-content">
+        <div class="footer-column">
+            <h3>DonaTrack</h3>
+            <p>Plataforma de gestión y trazabilidad de donaciones de <a href="https://frba.utn.edu.ar/estudiantes/accion-solidaria/" target="_blank" rel="noopener noreferrer" style="color: inherit; text-decoration: underline;">UTN Solidaria</a>.</p>
         </div>
-        <div>
-            <div class="footer-col-title">Enlaces</div>
-            <a th:href="@{/acceso/galeria}">Galería</a>
-            <a th:href="@{/acceso/mapa}">Mapa de Donaciones</a>
-            <a th:href="@{/acceso/sobre-nosotros}">Sobre Nosotros</a>
-            <a th:href="@{/acceso/contacto}">Contacto</a>
+        <div class="footer-column">
+            <h3>Enlaces</h3>
+            <ul>
+                <li><a href="#">Galería</a></li>
+                <li><a href="#">Mapa de Donaciones</a></li>
+                <li><a href="#">Sobre Nosotros</a></li>
+                <li><a href="#">Contacto</a></li>
+                <li><a href="#">Privacidad y Legal</a></li>
+            </ul>
         </div>
-        <div>
-            <div class="footer-col-title">Contacto</div>
-            <p class="footer-desc">UTN Solidaria - Sede Medrano<br>Buenos Aires, Argentina</p>
+        <div class="footer-column">
+            <h3>Contacto</h3>
+            <p><a href="https://frba.utn.edu.ar/estudiantes/accion-solidaria/" target="_blank" rel="noopener noreferrer" style="color: inherit; text-decoration: underline;">UTN Solidaria</a> - Sede Medrano<br>Buenos Aires, Argentina</p>
         </div>
     </div>
-    <div class="footer-bottom">© 2026 DonaTrack - UTN Solidaria. Todos los derechos reservados.</div>
+    <hr class="footer-divider">
+    <div class="footer-bottom">
+        <p>&copy; 2026 DonaTrack - <a href="https://frba.utn.edu.ar/estudiantes/accion-solidaria/" target="_blank" rel="noopener noreferrer" style="color: inherit; text-decoration: underline;">UTN Solidaria</a>. Todos los derechos reservados.</p>
+    </div>
 </footer>
-
 <script th:src="@{/js/admin.js}"></script>
 </body>
 </html>

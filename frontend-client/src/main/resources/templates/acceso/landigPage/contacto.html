@@ -7,7 +7,7 @@
 
     <!-- CSS Estático -->
     <link rel="stylesheet" th:href="@{/css/landingPage/landingPage.css}">
-    <!-- FontAwesome o Lucide Icons para los iconos (opcional si usas SVG/CSS) -->
+    <!-- FontAwesome para los iconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
@@ -25,120 +25,88 @@
 <!-- CONTENEDOR PRINCIPAL -->
 <main class="container" style="max-width: 1100px; margin: 0 auto; padding: 2.5rem 1rem;">
 
-    <!-- MENSAJE DE ÉXITO -->
-    <div th:if="${mensajeEnviado != null}" class="toast success" style="margin-bottom: 1.5rem; background-color: #d4edda; color: #155724; padding: 1rem; border-radius: 8px;">
-        <span th:text="${mensajeEnviado}">Tu mensaje ha sido enviado con éxito.</span>
-    </div>
+    <!-- TARJETA: INFORMACIÓN DE CONTACTO -->
+    <div class="card info-card" style="background: #ffffff; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 2.5rem;">
+        <h2 style="font-size: 1.35rem; font-weight: 700; margin-bottom: 1.5rem; color: #1e293b;">Información de Contacto</h2>
 
-    <!-- SECCIÓN EN 2 COLUMNAS (INFO + FORMULARIO) -->
-    <div class="contact-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem; margin-bottom: 2.5rem;">
-
-        <!-- TARJETA IZQUIERDA: INFORMACIÓN DE CONTACTO -->
-        <div class="card info-card" style="background: #ffffff; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
-            <h2 style="font-size: 1.35rem; font-weight: 700; margin-bottom: 1.5rem; color: #1e293b;">Información de Contacto</h2>
-
-            <div class="info-list" style="display: flex; flex-direction: column; gap: 1.25rem;">
-                <!-- Dirección -->
-                <div class="info-item" style="display: flex; gap: 1rem; align-items: flex-start;">
-                    <div class="icon-box" style="background: #e0ebff; color: #1a61ff; width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                        <i class="fa-solid fa-location-dot"></i>
-                    </div>
-                    <div>
-                        <strong style="display: block; color: #1e293b;">Dirección</strong>
-                        <p style="margin: 0; color: #64748b; font-size: 0.95rem;">
-                            Av. Medrano 951<br>
-                            Almagro, CABA<br>
-                            Buenos Aires, Argentina (C1179AAQ)
-                        </p>
-                    </div>
+        <div class="info-list" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem;">
+            <!-- Dirección -->
+            <div class="info-item" style="display: flex; gap: 1rem; align-items: flex-start;">
+                <div class="icon-box" style="background: #e0ebff; color: #1a61ff; width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                    <i class="fa-solid fa-location-dot"></i>
                 </div>
-
-                <!-- Teléfono -->
-                <div class="info-item" style="display: flex; gap: 1rem; align-items: flex-start;">
-                    <div class="icon-box" style="background: #e0ebff; color: #1a61ff; width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                        <i class="fa-solid fa-phone"></i>
-                    </div>
-                    <div>
-                        <strong style="display: block; color: #1e293b;">Teléfono</strong>
-                        <p style="margin: 0; color: #64748b; font-size: 0.95rem;">
-                            +54 11 4867-7500<br>
-                            Interno: 7530 (UTN Solidaria)
-                        </p>
-                    </div>
-                </div>
-
-                <!-- Email -->
-                <div class="info-item" style="display: flex; gap: 1rem; align-items: flex-start;">
-                    <div class="icon-box" style="background: #e0ebff; color: #1a61ff; width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                        <i class="fa-solid fa-envelope"></i>
-                    </div>
-                    <div>
-                        <strong style="display: block; color: #1e293b;">Email</strong>
-                        <p style="margin: 0; color: #64748b; font-size: 0.95rem;">
-                            utnsolidaria@frba.utn.edu.ar<br>
-                            donatrack@frba.utn.edu.ar
-                        </p>
-                    </div>
-                </div>
-
-                <!-- Horarios -->
-                <div class="info-item" style="display: flex; gap: 1rem; align-items: flex-start;">
-                    <div class="icon-box" style="background: #e0ebff; color: #1a61ff; width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                        <i class="fa-solid fa-clock"></i>
-                    </div>
-                    <div>
-                        <strong style="display: block; color: #1e293b;">Horarios de Atención</strong>
-                        <p style="margin: 0; color: #64748b; font-size: 0.95rem;">
-                            Lunes a Viernes: 9:00 - 18:00<br>
-                            Sábados: 9:00 - 13:00<br>
-                            Domingos y feriados: Cerrado
-                        </p>
-                    </div>
+                <div>
+                    <strong style="display: block; color: #1e293b;">Dirección</strong>
+                    <p style="margin: 0; color: #64748b; font-size: 0.95rem;">
+                        Av. Medrano 951<br>
+                        Almagro, CABA<br>
+                        Buenos Aires, Argentina (C1179AAQ)
+                    </p>
                 </div>
             </div>
 
-            <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 1.5rem 0;">
+            <!-- Teléfono -->
+            <div class="info-item" style="display: flex; gap: 1rem; align-items: flex-start;">
+                <div class="icon-box" style="background: #e0ebff; color: #1a61ff; width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                    <i class="fa-solid fa-phone"></i>
+                </div>
+                <div>
+                    <strong style="display: block; color: #1e293b;">Teléfono</strong>
+                    <p style="margin: 0; color: #64748b; font-size: 0.95rem;">
+                        +54 11 4867-7500<br>
+                        Interno: 7530 (UTN Solidaria)
+                    </p>
+                </div>
+            </div>
 
-            <!-- Redes Sociales -->
-            <div class="social-section">
-                <strong style="display: block; margin-bottom: 0.75rem; color: #1e293b;">Síguenos en Redes Sociales</strong>
-                <div style="display: flex; gap: 0.5rem;">
-                    <a href="#" style="background: #1a61ff; color: white; width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fa-brands fa-facebook-f"></i></a>
-                    <a href="#" style="background: #e1306c; color: white; width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fa-brands fa-instagram"></i></a>
-                    <a href="#" style="background: #0088cc; color: white; width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fa-brands fa-twitter"></i></a>
-                    <a href="#" style="background: #0a66c2; color: white; width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fa-brands fa-linkedin-in"></i></a>
+            <!-- Email -->
+            <div class="info-item" style="display: flex; gap: 1rem; align-items: flex-start;">
+                <div class="icon-box" style="background: #e0ebff; color: #1a61ff; width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                    <i class="fa-solid fa-envelope"></i>
+                </div>
+                <div>
+                    <strong style="display: block; color: #1e293b;">Email</strong>
+                    <p style="margin: 0; color: #64748b; font-size: 0.95rem;">
+                        utnsolidaria@frba.utn.edu.ar<br>
+                        donatrack@frba.utn.edu.ar
+                    </p>
+                </div>
+            </div>
+
+            <!-- Horarios -->
+            <div class="info-item" style="display: flex; gap: 1rem; align-items: flex-start;">
+                <div class="icon-box" style="background: #e0ebff; color: #1a61ff; width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                    <i class="fa-solid fa-clock"></i>
+                </div>
+                <div>
+                    <strong style="display: block; color: #1e293b;">Horarios de Atención</strong>
+                    <p style="margin: 0; color: #64748b; font-size: 0.95rem;">
+                        Lunes a Viernes: 9:00 - 18:00<br>
+                        Sábados: 9:00 - 13:00<br>
+                        Domingos y feriados: Cerrado
+                    </p>
                 </div>
             </div>
         </div>
 
-        <!-- TARJETA DERECHA: FORMULARIO -->
-        <div class="card form-card" style="background: #ffffff; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
-            <h2 style="font-size: 1.35rem; font-weight: 700; margin-bottom: 1.5rem; color: #1e293b;">Envíanos un Mensaje</h2>
+        <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 1.5rem 0;">
 
-            <form th:action="@{/contacto}" method="post" id="contact-form" style="display: flex; flex-direction: column; gap: 1rem;">
+        <!-- Redes Sociales -->
+        <div class="social-section">
+            <strong style="display: block; margin-bottom: 0.75rem; color: #1e293b;">Síguenos en Redes Sociales</strong>
+            <div style="display: flex; gap: 0.5rem;">
+                <!-- 1. Facebook -->
+                <a href="https://www.facebook.com/saeutnba/?locale=es_LA" target="_blank" rel="noopener noreferrer" style="background: #1a61ff; color: white; width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fa-brands fa-facebook-f"></i></a>
 
-                <div class="form-group">
-                    <label for="nombre" style="display: block; font-size: 0.875rem; font-weight: 600; color: #475569; margin-bottom: 0.35rem;">Nombre Completo</label>
-                    <input type="text" id="nombre" name="nombre" placeholder="Tu nombre" style="width: 100%; padding: 0.65rem 0.85rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.95rem;" required>
-                </div>
+                <!-- 2. Instagram -->
+                <a href="https://www.instagram.com/sae.utn.ba/" target="_blank" rel="noopener noreferrer" style="background: #e1306c; color: white; width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fa-brands fa-instagram"></i></a>
 
-                <div class="form-group">
-                    <label for="email" style="display: block; font-size: 0.875rem; font-weight: 600; color: #475569; margin-bottom: 0.35rem;">Email</label>
-                    <input type="email" id="email" name="email" placeholder="tu@email.com" style="width: 100%; padding: 0.65rem 0.85rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.95rem;" required>
-                </div>
+                <!-- 3. Twitter / X -->
+                <a href="https://x.com/frbautn?lang=es" target="_blank" rel="noopener noreferrer" style="background: #0088cc; color: white; width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fa-brands fa-twitter"></i></a>
 
-                <div class="form-group">
-                    <label for="asunto" style="display: block; font-size: 0.875rem; font-weight: 600; color: #475569; margin-bottom: 0.35rem;">Asunto</label>
-                    <input type="text" id="asunto" name="asunto" placeholder="¿En qué podemos ayudarte?" style="width: 100%; padding: 0.65rem 0.85rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.95rem;" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="mensaje" style="display: block; font-size: 0.875rem; font-weight: 600; color: #475569; margin-bottom: 0.35rem;">Mensaje</label>
-                    <textarea id="mensaje" name="mensaje" rows="4" placeholder="Escribe tu mensaje aquí..." style="width: 100%; padding: 0.65rem 0.85rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.95rem; resize: vertical;" required></textarea>
-                </div>
-
-                <button type="submit" class="btn btn-primary" style="background-color: #1a61ff; color: #ffffff; border: none; padding: 0.75rem; border-radius: 6px; font-weight: 600; font-size: 1rem; cursor: pointer; margin-top: 0.5rem; transition: background 0.2s;">Enviar Mensaje</button>
-            </form>
+                <!-- 4. LinkedIn -->
+                <a href="https://www.linkedin.com/company/utn--regional-ba/home/" target="_blank" rel="noopener noreferrer" style="background: #0a66c2; color: white; width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fa-brands fa-linkedin-in"></i></a>
+            </div>
         </div>
     </div>
 
