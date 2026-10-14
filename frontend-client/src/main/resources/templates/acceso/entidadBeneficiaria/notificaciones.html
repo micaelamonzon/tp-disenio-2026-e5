@@ -27,7 +27,7 @@
                     <div>
                         <div class="notification-title" th:text="${n.mensaje}">Mensaje de la notificación</div>
                         <div class="notification-desc" th:if="${n.medio}"
-                             th:text="'Enviada por ' + ${#strings.toLowerCase(n.medio)}">Enviada por email</div>
+                             th:text="${n.estado == 'FALLIDA'} ? 'No se pudo enviar por ' + ${#strings.toLowerCase(n.medio)} : 'Enviada por ' + ${#strings.toLowerCase(n.medio)}">Enviada por email</div>
                         <div class="notification-time" th:if="${n.fechaEnvio}"
                              th:text="${#temporals.format(n.fechaEnvio, 'dd/MM/yyyy HH:mm')}">10/10/2026 15:30</div>
                     </div>
