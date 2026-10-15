@@ -8,6 +8,7 @@
 }
 
 .profile-card {
+
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
@@ -32,11 +33,13 @@
     gap: 18px;
     flex-wrap: wrap;
 }
+
 .profile-avatar {
-    width: 72px;
-    height: 72px;
-    font-size: 24px;
+    width: 76px;
+    height: 76px;
+    font-size: 26px;
     flex-shrink: 0;
+    box-shadow: 0 0 0 4px var(--card), 0 0 0 6px var(--blue);
 }
 .profile-header-info { flex: 1; min-width: 160px; }
 .profile-username { font-size: 22px; font-weight: 700; }
