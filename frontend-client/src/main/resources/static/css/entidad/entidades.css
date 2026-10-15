@@ -5,8 +5,10 @@
     --border: #e2e8f0;
     --border-soft: #edf2f7;
     --blue:#3d5afe;
+    --blue-text:#413DFF ;
     --blue-soft:#eff6ff;
-    --orange:#f9670c;
+    --orange: #ff9f66;
+    --orange-text: #f65b00;
     --orange-bg:#ffdfb8;
     --green:#0fa968;
     --text: #0f172a;
@@ -15,10 +17,17 @@
     --green-hover: #16a34a;
     --green-bg: #ccf7e0;
     --green-text: #15803d;
-    --amber: #f59e0b;
+    --amber: #efc454;
     --amber-bg: #fffbeb;
     --amber-text: #b45309;
+    --marron-text: #804000;
+    --marron: #f2cfa7;
+    --lila:#eecbf5;
+    --violeta:#7F00FF;
+    --verde-agua:#9cffff;
+    --verde-agua-text: #00b887;
     --red: #dc2626;
+    --red-light:#ffa0a0;
     --red-bg: #fef2f2;
     --red-text: #b91c1c;
     --radius-md: 10px;
@@ -236,8 +245,7 @@ a{
     height: 100%;
 }
 
-.status-icon-pendiente { color: #ef4444; }
-.status-icon-entregado { color: #22c55e; }
+
 /* ===================== CARDS & FORM ===================== */
 .card {
     background: var(--card);
@@ -472,9 +480,22 @@ a{
     display: inline-block;
     align-self: flex-start;
 }
-.status-pendiente  { background: var(--red-bg); color: var(--red-text); }
-.status-en-proceso { background: var(--red-bg); color: var(--red-text); }
-.status-entregado  { background: var(--green-bg); color: var(--green-text); }
+.status-icon-en-deposito  { color: var(--amber-text) }
+.status-icon-asignacion-realizada {color: var(--violeta) }
+.status-icon-lista-para-entregar{color: var(--marron-text)}
+.status-icon-entregado{color: var(--green-text)}
+.status-icon-en-traslado{ color: var(--blue-text)}
+.status-icon-entrega-fallida{color: var(--red-text)}
+.status-icon-vencida{color:var(--orange-text)}
+
+.status-en-deposito{background: var(--amber); color: var(--amber-text)}
+.status-asignacion-realizada{background: var(--lila); color: var(--violeta)}
+.status-lista-para-entregar{background: var(--marron); color: var(--marron-text)}
+.status-en-traslado{background: var(--blue); color: var(--blue-text)}
+.status-entregado {background: var(--green-bg); color: var(--green-text)}
+.status-entrega-fallida{background: var(--red-light); color: var(--red-text)}
+.status-vencida{background: var(--orange); color: var(--orange-text)}
+
 
 .empty-state {
     text-align: center;
