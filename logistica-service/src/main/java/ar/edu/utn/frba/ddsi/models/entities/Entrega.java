@@ -30,11 +30,13 @@ public class Entrega {
     private String longitud; // de la entidad
     private String direccion; // de la entidad
 
+
     public Entrega(List<Long> donacionesIds, Long entidadBeneficiariaId) {
         this.donacionesIds = donacionesIds;
         this.entidadBeneficiariaId = entidadBeneficiariaId;
         this.estadoActual = EstadoEntrega.PENDIENTE;
         this.fechaEntrega = LocalDateTime.now();
+
 
     }
 

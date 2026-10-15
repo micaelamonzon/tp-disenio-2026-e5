@@ -1,4 +1,4 @@
-package ar.edu.utn.frba.ddsi.repository;
+package ar.edu.utn.frba.ddsi.repository.impl;
 
 import ar.edu.utn.frba.ddsi.models.entities.Camion;
 import org.springframework.data.mongodb.repository.MongoRepository;

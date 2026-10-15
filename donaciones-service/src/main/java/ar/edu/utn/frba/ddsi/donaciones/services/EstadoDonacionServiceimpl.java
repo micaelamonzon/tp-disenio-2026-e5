@@ -5,6 +5,7 @@ import ar.edu.utn.frba.ddsi.donaciones.dto.CategoriaDTO;
 import ar.edu.utn.frba.ddsi.donaciones.dto.DonacionDTO;
 import ar.edu.utn.frba.ddsi.donaciones.dto.DonacionSegmentadaDTO;
 import ar.edu.utn.frba.ddsi.donaciones.dto.SubcategoriaDTO;
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante.TipoDonante;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.Bien;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.algoritmos.Estado;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.DonacionSegmentada;
@@ -110,6 +111,7 @@ public class EstadoDonacionServiceimpl implements EstadoDonacionService{
                 donacionesDTO.add(
                 new DonacionDTO(
                         d.getId().intValue(),
+                        d.getDonanteHumano() != null ? TipoDonante.HUMANO : TipoDonante.JURIDICO,
                         d.getEstadoActual().toString(),
                         d.calcularPeso(),
                         d.calcularVolumen(),
@@ -121,6 +123,8 @@ public class EstadoDonacionServiceimpl implements EstadoDonacionService{
                         d.getSubcategoria().getNombre()
                         ));
         });
+
+        System.out.println("LAS DONACIONES QUE SE ENVIAN A LOGISTICA SON" + donacionesDTO);
         return donacionesDTO;
     }
 
