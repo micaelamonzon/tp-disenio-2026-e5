@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${titulo} + ' - DonaTrack'">Acceso denegado - DonaTrack</title>
+    <link rel="stylesheet" th:href="@{/css/landingPage/landingPage.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body style="background-color: #f8fafc; color: #334155; font-family: system-ui, -apple-system, sans-serif; display: flex; flex-direction: column; min-height: 100vh; margin: 0;">
+
+<!-- HEADER -->
+<header th:replace="~{layoutAcceso/layoutAcceso :: header}"></header>
+<nav th:replace="~{layoutAcceso/layoutAcceso :: navBar}"></nav>
+
+<main class="container" style="flex: 1; max-width: 900px; margin: 0 auto; padding: 3rem 1rem; text-align: center;">
+
+    <div style="background: #ffffff; padding: 3rem 2rem; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.04); border: 1px solid #f1f5f9;">
+
+        <!-- Ícono de Candado/Alerta -->
+        <div style="color: #dc2626; margin-bottom: 1.5rem;">
+            <i class="fas fa-shield-alt fa-3x"></i>
+        </div>
+
+        <h1 style="font-size: 2.25rem; font-weight: 800; color: #0f172a; margin-bottom: 0.75rem;">
+            <span th:text="${titulo}">Acceso denegado</span>
+        </h1>
+
+        <!-- Mensaje dinámico recibido del controller -->
+        <div style="background: #fef2f2; border: 1px solid #fca5a5; color: #991b1b; padding: 0.75rem 1rem; border-radius: 8px; font-size: 0.95rem; max-width: 500px; margin: 0 auto 1.5rem auto;" th:if="${mensaje}">
+            <i class="fas fa-info-circle" style="margin-right: 0.5rem;"></i>
+            <span th:text="${mensaje}">No tiene permiso para acceder a este recurso.</span>
+        </div>
+
+        <p style="color: #64748b; font-size: 1.05rem; max-width: 600px; margin: 0 auto 2rem auto; line-height: 1.5;">
+            Lo sentimos, usted no posee los permisos necesarios para ingresar a esta sección de la plataforma.
+        </p>
+
+        <!-- Botones de Acción -->
+        <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 3rem;">
+            <a th:href="@{/acceso/landing}" style="background-color: #2563eb; color: #ffffff; padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; transition: background 0.2s;">
+                <i class="fas fa-home"></i> Ir al Inicio
+            </a>
+            <button onclick="history.back()" style="background-color: transparent; color: #2563eb; border: 1px solid #2563eb; padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem; transition: all 0.2s;">
+                <i class="fas fa-arrow-left"></i> Volver Atrás
+            </button>
+        </div>
+
+    </div>
+</main>
+
+<!-- FOOTER -->
+<footer th:replace="~{layoutAcceso/layoutAcceso :: footer}"></footer>
+
+</body>
+</html>
