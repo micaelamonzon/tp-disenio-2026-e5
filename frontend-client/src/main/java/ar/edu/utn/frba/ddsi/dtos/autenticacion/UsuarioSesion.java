@@ -17,15 +17,21 @@ public record UsuarioSesion(String email, String nombre, Rol codigoRol, Long idE
 
     // Para el avatar (session.usuario.iniciales)
     public String getIniciales() {
+        if (nombre == null || nombre.isBlank()) {
+            return "";
+        }
+        java.util.Set<String> ignoradas = java.util.Set.of("de", "del", "la", "las", "los", "el", "y");
         StringBuilder sb = new StringBuilder();
-        String texto = (nombre == null || nombre.isBlank()) ? email : nombre;
-        for (String parte : texto.trim().split("\\s+")) {
-            if (!parte.isEmpty() && sb.length() < 2) {
-                sb.append(Character.toUpperCase(parte.charAt(0)));
+        for (String p : nombre.trim().split("\\s+")) {
+            if (!ignoradas.contains(p.toLowerCase())) {
+                sb.append(Character.toUpperCase(p.charAt(0)));
+                if (sb.length() == 2) break;
             }
         }
         return sb.toString();
     }
+
+
 
     public boolean esDonanteHumano() {
         return codigoRol == Rol.DONANTE_HUMANO;

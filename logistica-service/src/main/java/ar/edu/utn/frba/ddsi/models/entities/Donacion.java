@@ -17,9 +17,11 @@ public class Donacion {
     private String destino;
     private String subcategoria;
     private String estado;
+    private TipoDeDonante tipoDeDonante;
 
-    public Donacion(Long idEnDonaciones,Long entidadBeneficiariaId,Double latitud,Double longitud, Long donanteId, String destino, String subcategoria, String estado) {
+    public Donacion(Long idEnDonaciones,TipoDeDonante tipoDeDonante,Long entidadBeneficiariaId,Double latitud,Double longitud, Long donanteId, String destino, String subcategoria, String estado) {
         this.idEnDonaciones = idEnDonaciones;
+        this.tipoDeDonante = tipoDeDonante;
         this.entidadBeneficiariaId = entidadBeneficiariaId;
         this.latitud = latitud;
         this.longitud = longitud;

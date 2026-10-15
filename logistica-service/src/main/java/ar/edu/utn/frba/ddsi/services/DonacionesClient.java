@@ -1,4 +1,4 @@
-package ar.edu.utn.frba.ddsi.models.entities;
+package ar.edu.utn.frba.ddsi.services;
 
 import ar.edu.utn.frba.ddsi.dto.DonacionDTO;
 
@@ -18,7 +18,6 @@ public class DonacionesClient {
 
     private final RestTemplate restTemplate;
     private final String donacionesUrl;
-    private final String BASE_URL = "http://localhost:8080/servicioDeDonaciones";
 
     public DonacionesClient(RestTemplate restTemplate,
                             @Value("${donaciones.service.url}") String donacionesUrl){
@@ -26,9 +25,9 @@ public class DonacionesClient {
         this.donacionesUrl = donacionesUrl;
     }
 
-    public void iniciarTraslado(Long donacionId, String responsableId) {
+    public void iniciarTraslado(Long donacionId, String responsable) {
         String url = donacionesUrl + "/donacion/"
-                + donacionId + "/iniciarTraslado?responsableId=" + responsableId;
+                + donacionId + "/iniciarTraslado?responsableId=" + responsable;
         restTemplate.patchForObject(url, null, String.class);
     }
 
@@ -42,11 +41,6 @@ public class DonacionesClient {
         restTemplate.patchForObject(url, body, String.class);
     }
 
-   /* public void marcarEntregaFallida(Long donacionId, String motivo, String responsableId) {
-        String url = donacionesUrl + "/servicioDeDonaciones/donacion/"
-                + donacionId + "/fallarEntrega?responsableId=" + responsableId;
-        restTemplate.patchForObject(url, null, String.class);
-    } */
 
     public void marcarEntregaFallida(Long donacionId, String motivo, String responsableId) {
         String url = donacionesUrl + "/servicioDeDonaciones/donacion/"
@@ -70,13 +64,13 @@ public class DonacionesClient {
     }
 
     public List<DonacionDTO> obtenerDonacionesAsignadas() {
-        String url = BASE_URL + "/donaciones?estado=ASIGNACION_REALIZADA";
+        String url = donacionesUrl + "/donaciones?estado=ASIGNACION_REALIZADA";
         DonacionDTO[] response = restTemplate.getForObject(url, DonacionDTO[].class);
         return response != null ? Arrays.asList(response) : List.of();
     }
 
     public void marcarComoListaParaEntregar(Long donacionId) {
-        String url = BASE_URL + "/donacion/" + donacionId + "/listaParaEntregar?responsableId=SISTEMA_LOGISTICA";
+        String url = donacionesUrl + "/donacion/" + donacionId + "/listaParaEntregar?responsableId=SISTEMA_LOGISTICA";
         restTemplate.exchange(url, HttpMethod.PATCH, HttpEntity.EMPTY, Void.class);
     }
 }

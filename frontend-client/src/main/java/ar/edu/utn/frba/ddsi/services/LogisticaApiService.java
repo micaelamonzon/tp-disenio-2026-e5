@@ -1,5 +1,6 @@
 package ar.edu.utn.frba.ddsi.services;
 
+import ar.edu.utn.frba.ddsi.dtos.donaciones.misiones.TipoDeDonante;
 import ar.edu.utn.frba.ddsi.dtos.logistica.CamionDTO;
 import ar.edu.utn.frba.ddsi.dtos.logistica.EntregaDTO;
 import ar.edu.utn.frba.ddsi.dtos.logistica.RutaEntregaDTO;
@@ -114,17 +115,16 @@ public class LogisticaApiService {
         }
     }
 
-    public List<RutaEntregaDTO> obtenerRutasDeDonante(Long idDonante) {
+    public List<RutaEntregaDTO> obtenerRutasDeDonante(Long idDonante, TipoDeDonante tipoDeDonante) {
         try {
             List<RutaEntregaDTO> rutas = webClient.get()
                     .uri(logisticaServiceUrl + "/logistica-service/camiones/monitoreo/ruta/donante/"
-                            + idDonante + "/recorrido")
+                            + idDonante + "/recorrido" + "?tipoDonante="+tipoDeDonante)
                     .retrieve()
                     .bodyToFlux(RutaEntregaDTO.class)
                     .collectList()
                     .block();
 
-            // Antes: log.info(rutas.toString()) corría antes del null-check y tiraba NPE si rutas era null.
             if (rutas == null) {
                 return List.of();
             }

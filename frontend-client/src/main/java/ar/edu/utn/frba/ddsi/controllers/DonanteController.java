@@ -184,7 +184,7 @@ public class DonanteController {
     public String seguimiento(Model model) {
         model.addAttribute("titulo", "Seguimiento de entregas");
         model.addAttribute("tabActiva", "seguimiento");
-        List<RutaEntregaDTO> entregas = logisticaApiService.obtenerRutasDeDonante(idDonanteActual());
+        List<RutaEntregaDTO> entregas = logisticaApiService.obtenerRutasDeDonante(idDonanteActual(), tipoDonanteActual());
         model.addAttribute("entregas", entregas);
         model.addAttribute("entregasJson", objectMapper.writeValueAsString(entregas));
         return  "acceso/donante/seguimiento";
@@ -192,7 +192,7 @@ public class DonanteController {
     @GetMapping("/seguimiento/datos")
     @ResponseBody
     public List<RutaEntregaDTO> seguimientoDatos() {
-        return logisticaApiService.obtenerRutasDeDonante(idDonanteActual());
+        return logisticaApiService.obtenerRutasDeDonante(idDonanteActual(),tipoDonanteActual());
     }
 
     @GetMapping("/notificaciones")

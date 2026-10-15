@@ -12,10 +12,9 @@
 
             <div class="profile-card profile-header">
                 <div class="avatar profile-avatar" aria-hidden="true"
-                     th:text="${#strings.toUpperCase(#strings.substring(perfil.nombreDeUsuario, 0, perfil.nombreDeUsuario.length() > 1 ? 2 : 1))}">PD</div>
+                     th:text="${perfil.iniciales()}">PD</div>
                 <div class="profile-header-info">
                     <h2 class="profile-username" th:text="${perfil.nombreDeUsuario}">persona_donante</h2>
-                    <span class="profile-role">Persona Donante</span>
                 </div>
                 <div class="profile-header-stats">
                     <div class="profile-stat">
