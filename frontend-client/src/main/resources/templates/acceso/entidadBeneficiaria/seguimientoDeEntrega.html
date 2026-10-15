@@ -76,6 +76,7 @@
     <script th:inline="javascript">
         window.ENTREGAS_ACTIVAS = JSON.parse(/*[[${entregasJson}]]*/ "[]");
         window.SEGUIMIENTO_URL = /*[[@{/entidadBeneficiaria/seguimientoDeEntrega/datos}]]*/ "/entidadBeneficiaria/seguimientoDeEntrega/datos";
+        window.ESTADO_AL_LLEGAR = "LLEGO";
     </script>
     <script th:src="@{/js/donante/seguimiento.js}"></script>
 </div>

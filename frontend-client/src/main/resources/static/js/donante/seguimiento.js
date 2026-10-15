@@ -7,6 +7,7 @@
   const ESTADOS = {
     PENDIENTE:   { texto: "Pendiente",   clase: "status-orange" },
     EN_TRASLADO:   { texto: "En traslado", clase: "status-blue" },
+    LLEGO:       { texto: "Llegó, falta confirmar", clase: "status-blue" },
     ENTREGADA:   { texto: "Entregada",   clase: "status-green" }
   };
   const estadoInfo = (e) => ESTADOS[e] || { texto: e, clase: "status-orange" };
@@ -147,7 +148,9 @@
   function actualizarParada(p) {
     const c = p.camion;
     p.llego = c.indice >= p.indiceParada;
-    if (p.llego) p.estado = "ENTREGADA";
+    //if (p.llego) p.estado = "ENTREGADA";
+    //cada pantalla puede indicar que mostrar al llegar (la entidad todavia tiene que confirmar)
+    if (p.llego) p.estado = window.ESTADO_AL_LLEGAR || "ENTREGADA";
     p.fraccion = p.llego ? 1 : Math.min(c.indice / Math.max(p.indiceParada, 1), 1);
 
     if (!p.card) return;
