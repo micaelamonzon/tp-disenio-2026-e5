@@ -230,12 +230,6 @@ public class EntidadController {
         return "acceso/entidadBeneficiaria/notificaciones";
     }
 
-//    @GetMapping("/perfil")
-//    public String pefil(Model model) {
-//        model.addAttribute("titulo", "Mi perfil");
-//        model.addAttribute("tabActiva", " ");
-//        return "acceso/entidadBeneficiaria/perfil";
-//    }
 
     private List<EntregaDTO> filtrarPorEstado(List<EntregaDTO> entregas, String estado) {
         return entregas.stream()
