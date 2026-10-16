@@ -201,17 +201,11 @@ public class DonanteController {
         model.addAttribute("tabActiva", "notificaciones");
         model.addAttribute("notificaciones", List.of());
         try {
-            // notificaciones-service solo conoce donantes humanos: humanos y jurídicos
-            // tienen ids independientes en donaciones, así que un jurídico podría ver
-            // notificaciones de un humano con el mismo id. Por eso solo consultamos
-            // si el donante es humano.
-            if (usuarioActual.obtener().esDonanteHumano()) {
-                model.addAttribute("notificaciones",
-                        notificacionesApiService.obtenerNotificacionesDeDonante(idDonanteActual()));
-            } else {
-                model.addAttribute("avisoNotificaciones",
-                        "Las notificaciones para personas jurídicas todavía no están disponibles en esta sección.");
-            }
+            // Humanos y jurídicos tienen ids independientes en donaciones,
+            // por eso notificaciones-service expone un endpoint para cada uno
+            model.addAttribute("notificaciones", usuarioActual.obtener().esDonanteHumano()
+                    ? notificacionesApiService.obtenerNotificacionesDeDonante(idDonanteActual())
+                    : notificacionesApiService.obtenerNotificacionesDeDonanteJuridico(idDonanteActual()));
         } catch (RuntimeException e) {
             model.addAttribute("error",
                     "El servicio de notificaciones no está disponible. Intentá de nuevo en unos minutos.");

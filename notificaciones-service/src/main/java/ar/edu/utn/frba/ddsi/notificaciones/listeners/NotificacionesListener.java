@@ -1,5 +1,6 @@
 package ar.edu.utn.frba.ddsi.notificaciones.listeners;
 
+import ar.edu.utn.frba.ddsi.notificaciones.dto.DonanteJuridicoDTO;
 import ar.edu.utn.frba.ddsi.notificaciones.dto.NotificacionMensajeDTO;
 import ar.edu.utn.frba.ddsi.notificaciones.models.entities.ServicioDeNotificaciones.Donante;
 import ar.edu.utn.frba.ddsi.notificaciones.models.entities.ServicioDeNotificaciones.Email;
@@ -64,25 +65,28 @@ public class NotificacionesListener {
             }
         }
 
-        // Si el mensaje trae donanteId, el contacto todavía no está resuelto:
-        // lo buscamos acá, consultando a donaciones-service, y de paso
-        // actualizamos (upsert) la copia local del donante con el dato fresco.
-        // Si trae destinatario (entidad o admin), ya viene resuelto desde
-        // logistica-service como siempre.
+        // si el mensaje trae donanteId, el contacto se resuelve contra donaciones-service
+        // tipoDonante dice en qué tabla buscarlo, pero si no esta es HUMANO
+        // si trae destinatario (entidad o admin) ya viene resuelto
+        boolean esJuridico = "JURIDICO".equalsIgnoreCase(dto.tipoDonante());
         String destinatarioFinal;
+        String medioDelDonante = null;
         Donante donante = null;
+        Long donanteJuridicoId = null;
         try {
-            if (dto.donanteId() != null) {
+            if (dto.donanteId() != null && esJuridico) {
+                DonanteJuridicoDTO.Medio contacto = donanteService.resolverContactoJuridico(dto.donanteId());
+                destinatarioFinal = contacto.datoDeContacto();
+                medioDelDonante = contacto.tipoDeNotificacion();
+                donanteJuridicoId = dto.donanteId();
+            } else if (dto.donanteId() != null) {
                 donante = donanteService.resolverYActualizarDonante(dto.donanteId());
                 destinatarioFinal = donante.getContacto();
+                medioDelDonante = donante.getTipoDeNotificacion();
             } else {
                 destinatarioFinal = dto.destinatario();
             }
         } catch (RestClientException | IllegalStateException e) {
-            // No relanzamos la excepción a propósito: si RabbitMQ recibe una
-            // excepción sin capturar acá, reintenta el mensaje indefinidamente
-            // (loop infinito). Preferimos descartar este mensaje puntual y
-            // dejarlo logueado, aceptando que esa notificación se pierde.
             System.err.println("No se pudo resolver el contacto para el evento "
                     + dto.idEvento() + ": " + e.getMessage());
             return;
@@ -93,14 +97,13 @@ public class NotificacionesListener {
 
         Notificacion notificacion = new Notificacion();
         notificacion.setDestinatario(destinatarioFinal);
-        notificacion.setDonante(donante); // null si la notificación es para entidad/admin
+        notificacion.setDonante(donante); // null si no es para un donante humano
+        notificacion.setDonanteJuridicoId(donanteJuridicoId); // null si no es para un donante jurídico
         notificacion.setEntidadBeneficiariaId(dto.entidadId()); // null si no es para una entidad
         notificacion.setMensaje(dto.mensaje());
 
-        // Si el mensaje no trae medio (por ejemplo, los avisos de incentivos),
-        // usamos el medio preferido del donante, que viene de donaciones-service
-        String medio = dto.medio() != null ? dto.medio()
-                : (donante != null ? donante.getTipoDeNotificacion() : null);
+        // Si el mensaje no trae medio usamos el medio preferido del donante, que viene de donaciones-service
+        String medio = dto.medio() != null ? dto.medio() : medioDelDonante;
 
         MedioDeNotificacion medioDeNotificacion = switch (medio == null ? "" : medio.toUpperCase()) {
             case "EMAIL" -> email;
@@ -109,8 +112,6 @@ public class NotificacionesListener {
             default -> null;
         };
 
-        // Sin un medio válido no se puede enviar. No lanzamos excepción a propósito:
-        // RabbitMQ reintentaría el mensaje indefinidamente (loop infinito).
         if (medioDeNotificacion == null) {
             System.err.println("Medio no soportado o ausente para el evento "
                     + dto.idEvento() + ": " + medio);
@@ -123,8 +124,8 @@ public class NotificacionesListener {
         registrarCambioDeEstado(notificacion); // deja constancia del estado resultante en el historial
     }
 
-    // Deja una fila en el historial con el estado en que quedó la
-    // notificación después de intentar enviarla (ENVIADA o FALLIDA).
+    // deja una fila en el historial con el estado en que quedó la
+    // notificación después de intentar enviarla (ENVIADA o FALLIDA)
     private void registrarCambioDeEstado(Notificacion notificacion) {
         NotificacionEstadoHistorial registro = new NotificacionEstadoHistorial();
         registro.setNotificacion(notificacion);

@@ -32,6 +32,9 @@ public class Notificacion {
     @Column(name = "entidad_beneficiaria_id")
     private Long entidadBeneficiariaId;
 
+    @Column(name = "donante_juridico_id")
+    private Long donanteJuridicoId;
+
     @Column(columnDefinition = "TEXT")
     private String mensaje;
 

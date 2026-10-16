@@ -28,7 +28,7 @@ public class NotificacionesPublisher {
         try {
             String idEvento = UUID.randomUUID().toString();
             NotificacionMensajeDTO notificacion =
-                    new NotificacionMensajeDTO(idEvento, destinatario, null, null, mensaje, medio);
+                    new NotificacionMensajeDTO(idEvento, destinatario, null, null, mensaje, medio, null);
             rabbitTemplate.convertAndSend(queueName, notificacion);
         } catch (Exception e) {
             System.out.println("Error al publicar notificación en la cola: " + e.getMessage());
@@ -41,7 +41,7 @@ public class NotificacionesPublisher {
         try {
             String idEvento = UUID.randomUUID().toString();
             NotificacionMensajeDTO notificacion =
-                    new NotificacionMensajeDTO(idEvento, null, donanteId, null, mensaje, medio);
+                    new NotificacionMensajeDTO(idEvento, null, donanteId, null, mensaje, medio, null);
             rabbitTemplate.convertAndSend(queueName, notificacion);
         } catch (Exception e) {
             System.out.println("Error al publicar notificación en la cola: " + e.getMessage());
@@ -55,7 +55,19 @@ public class NotificacionesPublisher {
         try {
             String idEvento = UUID.randomUUID().toString();
             NotificacionMensajeDTO notificacion =
-                    new NotificacionMensajeDTO(idEvento, destinatario, null, entidadId, mensaje, medio);
+                    new NotificacionMensajeDTO(idEvento, destinatario, null, entidadId, mensaje, medio, null);
+            rabbitTemplate.convertAndSend(queueName, notificacion);
+        } catch (Exception e) {
+            System.out.println("Error al publicar notificación en la cola: " + e.getMessage());
+        }
+    }
+
+    // se indica si el donante es HUMANO o JURIDICo para que notificaciones-service busque el contacto en la tabla correcta
+    public void publicarParaDonante(Long donanteId, String mensaje, String medio, String tipoDonante) {
+        try {
+            String idEvento = UUID.randomUUID().toString();
+            NotificacionMensajeDTO notificacion =
+                    new NotificacionMensajeDTO(idEvento, null, donanteId, null, mensaje, medio, tipoDonante);
             rabbitTemplate.convertAndSend(queueName, notificacion);
         } catch (Exception e) {
             System.out.println("Error al publicar notificación en la cola: " + e.getMessage());
