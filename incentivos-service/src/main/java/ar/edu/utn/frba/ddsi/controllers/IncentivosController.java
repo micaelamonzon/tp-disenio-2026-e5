@@ -68,21 +68,13 @@ public class IncentivosController {
         }
     }
 
-    @GetMapping("/verificarMision/{idPersona}")
-    public ResponseEntity<String> verificarMision(
-            @PathVariable("idPersona") Long id,
-            @RequestParam(name = "tipoDonante", defaultValue = "HUMANO")
-            String tipoDonante) {
-
-        String insigniaObtenida = "DONACIONEXITOSA";
-
-        /*String resultado = incentivosService.publicarYDifundirInsignia(
-                id, insigniaObtenida, tipoDonante);
-            comento lo de n8n para no gastar mas creditos
-        return ResponseEntity.ok(resultado);*/
-        return ResponseEntity.ok("Simulación local: Insignia procesada.");
+    @PostMapping("/donante/{id}/insignias/{insignia}/difundir")
+    public ResponseEntity<String> difundirInsignia(@PathVariable Long id,
+                                                   @PathVariable String insignia,
+                                                   @RequestParam TipoDeDonante tipoDeDonante) {
+        String resultado = incentivosService.publicarYDifundirInsignia(id, insignia, tipoDeDonante.name());
+        return ResponseEntity.accepted().body(resultado);
     }
-
 
     @GetMapping("/admin/metricas-sistema")
     public ResponseEntity<MetricasSistemaDTO> obtenerMetricasSistema() {

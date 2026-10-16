@@ -50,27 +50,33 @@ public class MisionShedulerService {
                 if (misionParticular == null)
                     return;
 
+                EstadoDeMision estadoAntes = misionParticular.getEstado();
+                misionParticular.avanzarMision();
 
-                if (misionParticular != null) {
-                    misionParticular.avanzarMision();
-                    loggerMisionesEnCurso.info("Misión en curso chequeada, ID donante {} con misión actual {}", donante.getId(), misionParticular.getMision().getNombre());
-
-                    if(misionParticular.getEstado() == EstadoDeMision.COMPLETADA){
-
-                        donante.getPerfil().agregarInsignia(misionParticular.getMision().getInsigniaGanadora());
-
-                        Estado nuevoEstadoMision = new Estado(EstadoDeMision.COMPLETADA,donante,misionParticular);
-
-                        misionParticular.agregarEstado(nuevoEstadoMision);
-
-                        this.estadoMisionRepository.save(nuevoEstadoMision);
+                // solo entra si la misión PASÓ a completada en esta ee ronda? (no si ya lo estaba)
+                boolean recienCompletada = estadoAntes != EstadoDeMision.COMPLETADA
+                        && misionParticular.getEstado() == EstadoDeMision.COMPLETADA;
 
 
-                        loggerMisionesEnCurso.info("Misión completada para donante {}, misión {}", donante.getId(), misionParticular.getMision().getNombre());
+                if (recienCompletada) {
 
-                        // Evento: el donante cumplió una misión
-                        notificarDonante(donante, "¡Felicitaciones! Completaste la misión " + misionParticular.getMision().getNombre());
+                    // la guardo en una variable porque más abajo la misión en curso del donante cambia
+                    String insignia = misionParticular.getMision().getInsigniaGanadora();
+                    donante.getPerfil().agregarInsignia(insignia);
 
+                    Estado nuevoEstadoMision = new Estado(EstadoDeMision.COMPLETADA, donante, misionParticular);
+
+                    misionParticular.agregarEstado(nuevoEstadoMision);
+
+                    this.estadoMisionRepository.save(nuevoEstadoMision);
+
+                    loggerMisionesEnCurso.info("Misión completada para donante {}, misión {}", donante.getId(), misionParticular.getMision().getNombre());
+
+                    // Evento: el donante cumplió una misión
+                    notificarDonante(donante, "¡Felicitaciones! Completaste la misión " + misionParticular.getMision().getNombre());
+
+                    // Difusión de la insignia en n8n: una sola vez, al completarse la misión
+                    difundirInsignia(donante, insignia);
                         if(incentivosService.pasaSiguienteCategoria(donante)){
 
                             loggerMisionesEnCurso.info("Donante {} pasa de la categoria {} a la siguiente categoría {}", donante.getId(), donante.getMisionEnCurso().getMision().getCategoria().getNombre(), donante.getMisionEnCurso().getMision().getCategoria().getCategoriaSiguiente());
@@ -92,12 +98,24 @@ public class MisionShedulerService {
                             loggerMisionesEnCurso.info("Donante {} no pasa a la siguiente categoría, pero avanza a la mision {} de la misma categoría {}", donante.getId(), donante.getMisionEnCurso() ,donante.getMisionEnCurso().getMision().getCategoria().getNombre());
                         }
                     }
-                }
             } catch (Exception e) {
 
                 loggerMisionesEnCurso.error("Error chequeando misión del donante {}", donante.getId(), e);
             }
         });
+    }
+
+    // Difunde la insignia en n8n. Tiene su propio try/catch para que, si n8n no responde,
+    // no se corte el resto del procesamiento del donante (cambio de misión o de categoría).
+    private void difundirInsignia(Donante donante, String insignia) {
+        try {
+            incentivosService.publicarYDifundirInsignia(
+                    donante.getIdEnDonaciones(),
+                    insignia,
+                    donante.getTipoDeDonante().name());
+        } catch (Exception e) {
+            loggerMisionesEnCurso.error("No se pudo difundir la insignia {} del donante {}", insignia, donante.getId(), e);
+        }
     }
 
 

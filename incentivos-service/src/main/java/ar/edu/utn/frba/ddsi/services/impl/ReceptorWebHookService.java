@@ -132,14 +132,8 @@ public class ReceptorWebHookService {
             donante.agregarDonacion(donacion);
 
             this.incentivosRepository.save(donante);
-            try {
-                this.incentivosService.obtenerMisionesCompletadas(id, tipo);
-            } catch (Exception e) {
-                logger.error("Error al verificar misiones completadas automáticamente en el webhook para el donante {}: {}", id, e.getMessage());
-            }
         } else {
             logger.warn("Intento de registrar una donación para un donante inexistente: {}", id);
-
         }
     }
     @Transactional
