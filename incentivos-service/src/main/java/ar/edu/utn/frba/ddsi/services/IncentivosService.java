@@ -28,7 +28,7 @@ public interface IncentivosService {
     RankingMensual obtenerUltimoRanking();
     void calcularYGuardarRanking();
     public Integer obtenerPosicion(Long idEnDonaciones, TipoDeDonante tipo);
-    MetricasImpactoDTO obtenerMetricasDeImpacto(Long idDonante);
+    MetricasImpactoDTO obtenerMetricasDeImpacto(Long idEnDonaciones, TipoDeDonante tipoDeDonante);
 
     public String procesarLogro(Long id, String insignia, TipoDeDonante tipoDeDonante);
 

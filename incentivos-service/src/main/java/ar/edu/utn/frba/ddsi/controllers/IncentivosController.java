@@ -81,11 +81,13 @@ public class IncentivosController {
         return ResponseEntity.ok(incentivosService.obtenerMetricasDelSistema());
     }
 
+    // Métricas de impacto para el perfil del donante.
     @GetMapping("/{id}/metricas")
     public ResponseEntity<MetricasImpactoDTO> obtenerMetricas(
-            @PathVariable Long id) {
+            @PathVariable Long id,
+            @RequestParam TipoDeDonante tipoDeDonante) {
         return ResponseEntity.ok(
-                incentivosService.obtenerMetricasDeImpacto(id));
+                incentivosService.obtenerMetricasDeImpacto(id, tipoDeDonante));
     }
 
     @GetMapping("/ranking/ultimo")

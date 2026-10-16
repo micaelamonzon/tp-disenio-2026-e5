@@ -215,9 +215,6 @@ public class IncentivosServiceImpl implements IncentivosService {
         MisionParticularDTO misionActualDTO = new MisionParticularDTO(donante.getMisionEnCurso().getMision().getNombre().toString(), donante.getMisionEnCurso().getEstado());
         return misionActualDTO;
     }
-
-    //TODO: Hacer que tome el query param de tipoDeDonante para que tambien pubique y difunda  insignias para los donantes juridicos
-
     @Override
     public String publicarYDifundirInsignia(Long id, String insignia,
                                             String tipoDeDonante) {
@@ -376,13 +373,16 @@ public class IncentivosServiceImpl implements IncentivosService {
 
 
 
-    //TODO: Hacer que tome el query param de tipoDeDonante para que tambien obtenga las metricas de juridico
-    @Override
-    public MetricasImpactoDTO obtenerMetricasDeImpacto(Long idDonante) {
 
-        Donante donante = incentivosRepository.findById(idDonante).orElseThrow(
-                () -> new RuntimeException("Donante no encontrado: " + idDonante)
-        );
+    @Override
+    @Transactional
+    public MetricasImpactoDTO obtenerMetricasDeImpacto(Long idEnDonaciones, TipoDeDonante tipoDeDonante) {
+
+        Donante donante = incentivosRepository.findByIdEnDonaciones(idEnDonaciones, tipoDeDonante);
+        if (donante == null) {
+            throw new RuntimeException("Donante no encontrado: " + idEnDonaciones + " (" + tipoDeDonante + ")");
+        }
+        Long idDonante = idEnDonaciones;
 
         String nombre = donante.getNombre() != null
                 ? donante.getNombre() + " " + donante.getApellido()
@@ -402,6 +402,7 @@ public class IncentivosServiceImpl implements IncentivosService {
                 idDonante,
                 nombre,
                 donante.totalDonaciones(),
+                donante.totalDonacionesEntregadas(),
                 mesPico,
                 mesPico != null ? donante.cantidadDonacionesEnMes(mesPico) : 0,
                 donante.calcularEvolucionMensual(),

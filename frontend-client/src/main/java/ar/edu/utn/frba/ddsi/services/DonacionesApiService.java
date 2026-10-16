@@ -1,5 +1,6 @@
 package ar.edu.utn.frba.ddsi.services;
 
+import ar.edu.utn.frba.ddsi.dtos.donaciones.DatosPersonalesDTO;
 import ar.edu.utn.frba.ddsi.dtos.donaciones.DonacionDTO;
 import ar.edu.utn.frba.ddsi.dtos.donaciones.RegistroEntidadBeneficiariaDTO;
 import ar.edu.utn.frba.ddsi.dtos.donaciones.RegistroPersonaHumanaDTO;
@@ -91,7 +92,58 @@ public class DonacionesApiService {
     }
 
 
-    // GET /servicioDeDonaciones/donaciones/entregadas (público: mapa y galería de la landing)
+    // GET /servicioDeDonaciones/donaciones/entregadas
+    // Datos personales para el perfil del donante
+    // GET /donante/humano/{id} o /donante/juridico/{id}
+    public DatosPersonalesDTO obtenerDatosPersonales(Long idDonante, boolean esHumano) {
+        try {
+            String ruta = esHumano ? "/donante/humano/{id}" : "/donante/juridico/{id}";
+            Map<?, ?> d = apiCaller.get(donacionesServiceUrl + ruta, Map.class, idDonante);
+            if (d == null) {
+                return null;
+            }
+            List<String> contactos = new java.util.ArrayList<>();
+            if (d.get("mediosDeNotificacion") instanceof List<?> medios) {
+                for (Object m : medios) {
+                    if (m instanceof Map<?, ?> medio && medio.get("datoDeContacto") != null) {
+                        contactos.add(tipoDeContactoLegible(medio.get("tipoDeNotificacion")) + ": " + medio.get("datoDeContacto"));
+                    }
+                }
+            }
+            if (esHumano) {
+                String nombre = (texto(d.get("nombre")) + " " + texto(d.get("apellido"))).trim();
+                return new DatosPersonalesDTO(nombre, "DNI", texto(d.get("DNI")), texto(d.get("direccion")),
+                        null, null, contactos);
+            }
+            return new DatosPersonalesDTO(texto(d.get("razonSocial")), "CUIT", texto(d.get("cuit")), null,
+                    texto(d.get("rubro")), tipoOrganizacionLegible(d.get("tipo")), contactos);
+        } catch (SesionExpiradaException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Error obteniendo los datos personales del donante {}", idDonante, e);
+            throw new RuntimeException("No se pudieron obtener los datos personales", e);
+        }
+    }
+
+    private String texto(Object valor) {
+        return valor != null ? String.valueOf(valor) : "";
+    }
+
+    private String tipoDeContactoLegible(Object tipo) {
+        String t = texto(tipo);
+        return switch (t) {
+            case "EMAIL" -> "Email";
+            case "WHATSAPP" -> "WhatsApp";
+            default -> t;
+        };
+    }
+
+    private String tipoOrganizacionLegible(Object tipo) {
+        String t = texto(tipo);
+        if (t.isBlank()) return null;
+        return Character.toUpperCase(t.charAt(0)) + t.substring(1).toLowerCase();
+    }
+
     public List<DonacionDTO> obtenerDonacionesEntregadas() {
         try {
             return apiCaller.getList(donacionesServiceUrl + "/donaciones/entregadas", DonacionDTO.class);

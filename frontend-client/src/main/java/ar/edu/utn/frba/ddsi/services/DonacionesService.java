@@ -1,5 +1,6 @@
 package ar.edu.utn.frba.ddsi.services;
 
+import ar.edu.utn.frba.ddsi.dtos.donaciones.DatosPersonalesDTO;
 import ar.edu.utn.frba.ddsi.dtos.donaciones.DonacionDTO;
 import ar.edu.utn.frba.ddsi.dtos.entidades.EntidadBeneficiariaDTO;
 import ar.edu.utn.frba.ddsi.dtos.entidades.NecesidadDTO;
@@ -76,6 +77,10 @@ public class DonacionesService {
 
     public EntidadBeneficiariaDTO obtenerEntidad(Long idEntidad) {
         return donacionesApiService.obtenerEntidad(idEntidad);
+    }
+
+    public DatosPersonalesDTO obtenerDatosPersonales(Long idDonante, boolean esHumano) {
+        return donacionesApiService.obtenerDatosPersonales(idDonante, esHumano);
     }
 
     /** Primero las pendientes, despues las satisfechas*/

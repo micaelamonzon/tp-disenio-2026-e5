@@ -1,5 +1,6 @@
 package ar.edu.utn.frba.ddsi.services;
 
+import ar.edu.utn.frba.ddsi.dtos.donaciones.misiones.MetricasImpactoDTO;
 import ar.edu.utn.frba.ddsi.dtos.donaciones.misiones.MisionFrontDTO;
 import ar.edu.utn.frba.ddsi.dtos.donaciones.misiones.PerfilDTO;
 import ar.edu.utn.frba.ddsi.dtos.donaciones.misiones.RankingMensualDTO;
@@ -57,6 +58,19 @@ public class IncentivosApiService {
         } catch (Exception e) {
             log.error("Error llamando a incentivos-service", e);
             throw new RuntimeException("No se pudo obtener el perfil", e);
+        }
+    }
+
+    // Métricas de impacto del perfil: totales, evolución mensual, comparación, organizaciones, ranking
+    public MetricasImpactoDTO obtenerMetricas(Long idDonante, TipoDeDonante tipo) {
+        try {
+            return apiCaller.get(incentivosServiceUrl + "/{id}/metricas?tipoDeDonante={tipo}",
+                    MetricasImpactoDTO.class, idDonante, tipo);
+        } catch (SesionExpiradaException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Error obteniendo las métricas del donante {}", idDonante, e);
+            throw new RuntimeException("No se pudieron obtener las métricas", e);
         }
     }
 
