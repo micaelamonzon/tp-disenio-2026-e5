@@ -40,4 +40,19 @@ public class NotificacionesPublisher {
             return false;
         }
     }
+
+    // para la entidad beneficiaria se manda el contacto y el medio del representante
+    // y el entidadId para que la notificación aparezca en la pantalla de la entidad
+    public boolean publicarParaEntidad(Long entidadId, String contacto, String mensaje, String medio) {
+        try {
+            String idEvento = UUID.randomUUID().toString();
+            NotificacionMensajeDTO notificacion =
+                    new NotificacionMensajeDTO(idEvento, contacto, null, entidadId, mensaje, medio);
+            rabbitTemplate.convertAndSend(queueName, notificacion);
+            return true;
+        } catch (Exception e) {
+            log.error("Error al publicar notificación para entidad {}", entidadId, e);
+            return false;
+        }
+    }
 }
