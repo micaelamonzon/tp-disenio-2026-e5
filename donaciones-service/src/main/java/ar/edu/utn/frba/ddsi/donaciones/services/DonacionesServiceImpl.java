@@ -20,6 +20,9 @@ import ar.edu.utn.frba.ddsi.donaciones.repositories.DonacionesSinSegmentarReposi
 import ar.edu.utn.frba.ddsi.donaciones.repositories.DonantesHumanosRepository;
 import ar.edu.utn.frba.ddsi.donaciones.repositories.DonantesJuridicosRepository;
 import com.opencsv.exceptions.CsvValidationException;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
@@ -44,6 +47,10 @@ public class DonacionesServiceImpl implements DonacionesService {
 
     // Cliente HTTP para llamar al servicio de notificaciones
     private final RestTemplate restTemplate;
+
+    // API token con el que donaciones se identifica ante notificaciones
+    @Value("${api.token}")
+    private String apiToken;
     private final NotificacionesProperties notificacionesProperties;
 
 
@@ -950,7 +957,9 @@ public class DonacionesServiceImpl implements DonacionesService {
 
             System.out.println("URL enviada: " + url);
 
-            String respuesta = restTemplate.postForObject(url, null, String.class);
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("X-Api-Token", apiToken);
+            String respuesta = restTemplate.postForObject(url, new HttpEntity<>(headers), String.class);
 
             System.out.println("Respuesta: " + respuesta);
 

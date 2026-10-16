@@ -20,6 +20,7 @@ public final class ReglaDeDuenio {
 
     private static final Logger log = LoggerFactory.getLogger(ReglaDeDuenio.class);
     private static final String ADMIN = "ADMIN";
+    private static final String SERVICIO = ApiTokenFilter.ROL_SERVICIO;
 
     private ReglaDeDuenio() {
     }
@@ -27,6 +28,20 @@ public final class ReglaDeDuenio {
     // {idDonante} de la URL tiene que coincidir con el claim idDonante (y el rol con el tipo de donante)
     public static AuthorizationManager<RequestAuthorizationContext> donante(String rol) {
         return duenioOAdmin(Set.of(rol), "idDonante", UsuarioAutenticado::idDonante);
+    }
+
+    // Igual que donante(rol), pero también deja pasar a otro servicio (API token, ROLE_SERVICIO).
+    // Ej: notificaciones y logística consultan el contacto de cualquier donante para avisarle.
+    public static AuthorizationManager<RequestAuthorizationContext> donanteOServicio(String rol) {
+        AuthorizationManager<RequestAuthorizationContext> duenio = donante(rol);
+        return (authentication, context) -> {
+            Authentication auth = authentication.get();
+            if (auth != null && auth.getPrincipal() instanceof UsuarioAutenticado usuario
+                    && SERVICIO.equals(usuario.rol())) {
+                return new AuthorizationDecision(true);
+            }
+            return duenio.authorize(authentication, context);
+        };
     }
 
     // Para servicios que guardan el idDonante sin saber si es humano o jurídico (ej: logística).

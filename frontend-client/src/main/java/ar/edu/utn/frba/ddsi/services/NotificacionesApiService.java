@@ -1,52 +1,53 @@
 package ar.edu.utn.frba.ddsi.services;
 
 import ar.edu.utn.frba.ddsi.dtos.notificaciones.NotificacionDTO;
+import ar.edu.utn.frba.ddsi.services.internal.SesionExpiradaException;
+import ar.edu.utn.frba.ddsi.services.internal.WebApiCallerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.List;
 
 // Cliente del front hacia notificaciones-service.
-// Por ahora sin token, igual que el resto de los ApiService: cuando esté
-// el servicio de autenticación, se pasa a usar WebApiCallerService.
+// Las llamadas pasan por WebApiCallerService: manda el token del usuario logueado
+// (notificaciones lo exige y solo deja ver las propias) y lo renueva si venció
 @Service
 public class NotificacionesApiService {
 
     private static final Logger log = LoggerFactory.getLogger(NotificacionesApiService.class);
-    private final WebClient webClient = WebClient.builder().build();
+    private final WebApiCallerService apiCaller;
     private final String notificacionesServiceUrl;
 
-    public NotificacionesApiService(@Value("${notificaciones.service.url}") String notificacionesServiceUrl) {
+    public NotificacionesApiService(@Value("${notificaciones.service.url}") String notificacionesServiceUrl,
+                                    WebApiCallerService apiCaller) {
         this.notificacionesServiceUrl = notificacionesServiceUrl;
+        this.apiCaller = apiCaller;
     }
 
     public List<NotificacionDTO> obtenerNotificacionesDeEntidad(Long entidadId) {
-        return obtenerLista("/entidades/" + entidadId + "/notificaciones");
+        return obtenerLista("/entidades/{id}/notificaciones", entidadId);
     }
 
     public List<NotificacionDTO> obtenerNotificacionesDeDonante(Long donanteId) {
-        return obtenerLista("/donantes/" + donanteId + "/notificaciones");
+        return obtenerLista("/donantes/{id}/notificaciones", donanteId);
     }
 
     // Los jurídicos tienen su propio endpoint: sus ids son de otra tabla y podrían
     // coincidir con los de las personas humanas
     public List<NotificacionDTO> obtenerNotificacionesDeDonanteJuridico(Long donanteJuridicoId) {
-        return obtenerLista("/juridicos/" + donanteJuridicoId + "/notificaciones");
+        return obtenerLista("/juridicos/{id}/notificaciones", donanteJuridicoId);
     }
 
-    // Las dos llamadas son iguales salvo la ruta, así que comparten este método
-    private List<NotificacionDTO> obtenerLista(String ruta) {
+    // Las llamadas son iguales salvo la ruta, así que comparten este método
+    private List<NotificacionDTO> obtenerLista(String ruta, Long id) {
         try {
-            List<NotificacionDTO> notificaciones = webClient.get()
-                    .uri(notificacionesServiceUrl + ruta)
-                    .retrieve()
-                    .bodyToFlux(NotificacionDTO.class)
-                    .collectList()
-                    .block();
+            List<NotificacionDTO> notificaciones = apiCaller.getList(
+                    notificacionesServiceUrl + ruta, NotificacionDTO.class, id);
             return notificaciones != null ? notificaciones : List.of();
+        } catch (SesionExpiradaException e) {
+            throw e;
         } catch (Exception e) {
             log.error("Error llamando a notificaciones-service en {}", ruta, e);
             throw new RuntimeException("No se pudieron obtener las notificaciones", e);
