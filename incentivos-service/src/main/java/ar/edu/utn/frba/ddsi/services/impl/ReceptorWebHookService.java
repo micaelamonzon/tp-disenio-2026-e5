@@ -168,11 +168,12 @@ public class ReceptorWebHookService {
                 });
     }
 
-    public void  registrarDonacionEntregada(Long idDonacionEnDonaciones){
+    public void  registrarDonacionEntregada(Long idDonacionEnDonaciones, Long idEntidadBeneficiaria){
         DonacionSegmentada donacion = this.donacionRepository.findByIdEnDonaciones(idDonacionEnDonaciones);
 
         if(donacion != null){
             donacion.setDonacionEntregada(true);
+            donacion.setEntidadBeneficiariaId(idEntidadBeneficiaria);
             donacionRepository.save(donacion);
             return;
         }

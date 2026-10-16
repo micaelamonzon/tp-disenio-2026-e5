@@ -490,6 +490,8 @@ a{
     border-radius: 12px;
     display: inline-block;
     align-self: flex-start;
+    background: var(--red-light);
+    color: var(--red-text);
 }
 .status-icon-en-deposito  { color: var(--amber-text) }
 .status-icon-asignacion-realizada {color: var(--violeta) }
