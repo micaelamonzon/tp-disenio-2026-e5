@@ -92,8 +92,8 @@ public class EntregaServiceImpl {
         for (Long donacionId : entrega.getDonacionesIds()) {
             donacionesClient.confirmarEntrega(donacionId, responsableId, body.getFotosUrl());
         }
-        String comprobante = "Entrega+realizada+con+exito.+Fecha:+" + entrega.getFechaEntrega()
-                + ".+Entrega+nro+" + entrega.getId();
+        String comprobante = "Entrega realizada con éxito. Fecha: " + entrega.getFechaEntrega()
+                + ". Entrega nro " + entrega.getId();
         notificarInteresados(entrega, comprobante);
         return toDTO(entrega);
     }
@@ -122,8 +122,8 @@ public class EntregaServiceImpl {
         for (Long donacionId : entrega.getDonacionesIds()) {
             donacionesClient.marcarEntregaFallida(donacionId, body.getMotivo(), responsableId);
         }
-        String aviso = "Entrega+nro+" + entrega.getId() + "+no+pudo+concretarse.+Motivo:+"
-                + body.getMotivo().replace(" ", "+");
+        String aviso = "Entrega nro " + entrega.getId() + " no pudo concretarse. Motivo: "
+                + body.getMotivo();
         notificarInteresados(entrega, aviso);
         notificacionesPublisher.publicar(adminContacto, aviso, "SMS");
         return toDTO(entrega);

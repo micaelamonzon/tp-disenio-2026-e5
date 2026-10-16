@@ -43,7 +43,7 @@ public class DonacionesClient {
 
 
     public void marcarEntregaFallida(Long donacionId, String motivo, String responsableId) {
-        String url = donacionesUrl + "/servicioDeDonaciones/donacion/"
+        String url = donacionesUrl + "/donacion/"
                 + donacionId + "/fallarEntrega?responsableId=" + responsableId;
         String motivoSeguro = motivo != null ? motivo : "Sin motivo especificado";
         java.util.Map<String, String> body = java.util.Map.of("justificacion", motivoSeguro);
@@ -53,13 +53,13 @@ public class DonacionesClient {
     // Obtiene la entidad beneficiaria con sus representantes y medios de
     // notificación, para poder notificarle los eventos de la entrega
     public EntidadContactoDTO obtenerEntidad(Long entidadId) {
-        String url = donacionesUrl + "/servicioDeDonaciones/obtenerEntidad/" + entidadId;
+        String url = donacionesUrl + "/entidad/" + entidadId;
         return restTemplate.getForObject(url, EntidadContactoDTO.class);
     }
 
     // Obtiene el donante humano con su medio de notificación predeterminado
     public PersonaContactoDTO obtenerDonanteHumano(Long donanteId) {
-        String url = donacionesUrl + "/servicioDeDonaciones/humano/" + donanteId;
+        String url = donacionesUrl + "/donante/humano/" + donanteId;
         return restTemplate.getForObject(url, PersonaContactoDTO.class);
     }
 
