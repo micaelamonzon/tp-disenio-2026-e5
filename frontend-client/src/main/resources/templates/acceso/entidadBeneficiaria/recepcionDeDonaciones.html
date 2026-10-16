@@ -4,12 +4,11 @@
         <div class="page-head">
             <h1>Recepción de Donación</h1>
             <p class="page-sub">Confirme la recepción de cada donación asignada, adjuntando las fotos correspondientes</p>
+
+            <p th:if="${mensajeRecepcion}" class="page-sub" role="status" th:text="${mensajeRecepcion}">¡Recepción confirmada!</p>
+            <p th:if="${errorRecepcion}" class="page-sub" role="alert" th:text="${errorRecepcion}">No pudimos confirmar la recepción.</p>
+            <p th:if="${errorCarga}" class="page-sub" role="alert" th:text="${errorCarga}">No pudimos obtener tus entregas.</p>
         </div>
-
-
-        <p th:if="${mensajeRecepcion}" class="page-sub" role="status" th:text="${mensajeRecepcion}">¡Recepción confirmada!</p>
-        <p th:if="${errorRecepcion}" class="page-sub" role="alert" th:text="${errorRecepcion}">No pudimos confirmar la recepción.</p>
-        <p th:if="${errorCarga}" class="page-sub" role="alert" th:text="${errorCarga}">No pudimos obtener tus entregas.</p>
 
         <div class="recepcion-container">
             <h2 class="section-subtitle">Donaciones pendientes de confirmar</h2>
