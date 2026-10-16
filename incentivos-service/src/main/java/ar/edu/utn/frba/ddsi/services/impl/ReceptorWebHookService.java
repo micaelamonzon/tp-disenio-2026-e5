@@ -10,6 +10,7 @@ import ar.edu.utn.frba.ddsi.models.entities.persona.Perfil;
 import ar.edu.utn.frba.ddsi.models.entities.persona.TipoDeDonante;
 import ar.edu.utn.frba.ddsi.repositories.CategoriaDeBien;
 import ar.edu.utn.frba.ddsi.repositories.CategoriaDeMisionRepository;
+import ar.edu.utn.frba.ddsi.repositories.DonacionRepository;
 import ar.edu.utn.frba.ddsi.repositories.IncentivosRepository;
 import ar.edu.utn.frba.ddsi.services.IncentivosService;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,12 +30,14 @@ public class ReceptorWebHookService {
     private final CategoriaDeMisionRepository categoriaDeMisionRepository;
     private static final Logger logger = LoggerFactory.getLogger(ReceptorWebHookService.class);
     private final IncentivosService incentivosService;
+    private final DonacionRepository donacionRepository;
 
-    public ReceptorWebHookService(IncentivosRepository incentivosRepository, CategoriaDeBien categoriaRepository, CategoriaDeMisionRepository categoriaDeMisionRepository, IncentivosService incentivosService) {
+    public ReceptorWebHookService(IncentivosRepository incentivosRepository, CategoriaDeBien categoriaRepository, CategoriaDeMisionRepository categoriaDeMisionRepository, IncentivosService incentivosService, DonacionRepository donacionRepository) {
         this.incentivosRepository = incentivosRepository;
         this.categoriaRepository = categoriaRepository;
         this.categoriaDeMisionRepository = categoriaDeMisionRepository;
         this.incentivosService = incentivosService;
+        this.donacionRepository = donacionRepository;
     }
 
 
@@ -118,6 +121,7 @@ public class ReceptorWebHookService {
 
         if(donante != null){
             DonacionSegmentada donacion = new DonacionSegmentada(
+                    nuevaDonacionDTO.idEnDonaciones(),
                     nuevaDonacionDTO.fechaDeIngreso(),
                     nuevaDonacionDTO.donacionEntregada(),
                     nuevaDonacionDTO.entidadBeneficiariaId(),
@@ -152,6 +156,7 @@ public class ReceptorWebHookService {
         if (donacionesDTO == null) return new ArrayList<>();
         return donacionesDTO.stream()
                 .map(d -> new DonacionSegmentada(
+                        d.idEnDonaciones(),
                         d.fechaDeIngreso(),
                         d.donacionEntregada(),
                         d.entidadBeneficiariaId(),
@@ -167,5 +172,15 @@ public class ReceptorWebHookService {
                     nueva.setNombreDeUsuario("ADMIN");
                     return categoriaRepository.save(nueva);
                 });
+    }
+
+    public void  registrarDonacionEntregada(Long idDonacionEnDonaciones){
+        DonacionSegmentada donacion = this.donacionRepository.findByIdEnDonaciones(idDonacionEnDonaciones);
+
+        if(donacion != null){
+            donacion.setDonacionEntregada(true);
+            donacionRepository.save(donacion);
+            return;
+        }
     }
 }

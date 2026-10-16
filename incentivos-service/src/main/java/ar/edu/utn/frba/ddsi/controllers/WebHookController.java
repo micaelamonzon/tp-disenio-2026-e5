@@ -51,4 +51,11 @@ public class WebHookController {
         webHookReceptorService.registrarDonacion(donacion, tipoDonante, id);
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/donacion/{idDonacionEnDonaciones}/fueEntregada")
+    public ResponseEntity<Void> donacionEntregada(@PathVariable Long idDonacionEnDonaciones) {
+        webHookReceptorService.registrarDonacionEntregada(idDonacionEnDonaciones);
+        return ResponseEntity.ok().build();
+    }
+
 }

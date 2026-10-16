@@ -21,9 +21,9 @@ public class Racha extends Mision{
     @Column
     private Integer meses; //minimo 2 meses y maximo 12 meses
     @Column
-    private Integer mesInicial; // ej: marzo -> 3
+    private Integer mesInicial; // ej: marzo= 3
     @Column
-    private Integer mesFinal; // ej: abril -> 4
+    private Integer mesFinal; // ej: abril= 4
 
 
     public Racha(NombreDeMision nombre,Integer mesInicial, Integer mesFinal){
