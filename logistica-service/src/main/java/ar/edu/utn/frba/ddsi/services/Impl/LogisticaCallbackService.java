@@ -1,16 +1,14 @@
 package ar.edu.utn.frba.ddsi.services.Impl;
 
 import ar.edu.utn.frba.ddsi.dto.CallbackPlanificadorDTO;
-import ar.edu.utn.frba.ddsi.dto.EntregaDTO;
 import ar.edu.utn.frba.ddsi.dto.PlanningResultDTO;
 import ar.edu.utn.frba.ddsi.models.entities.Camion;
 import ar.edu.utn.frba.ddsi.models.entities.Donacion;
-import ar.edu.utn.frba.ddsi.models.entities.DonacionesClient;
+import ar.edu.utn.frba.ddsi.services.DonacionesClient;
 import ar.edu.utn.frba.ddsi.models.entities.Entrega;
-import ar.edu.utn.frba.ddsi.models.entities.EstadoEntrega;
 import ar.edu.utn.frba.ddsi.models.entities.PuntosDeEntrega;
 import ar.edu.utn.frba.ddsi.models.entities.Ruta;
-import ar.edu.utn.frba.ddsi.repository.RepositoryCamiones;
+import ar.edu.utn.frba.ddsi.repository.impl.RepositoryCamiones;
 import ar.edu.utn.frba.ddsi.repository.impl.RepositoryDonacion;
 import ar.edu.utn.frba.ddsi.repository.impl.RepositoryEntregas;
 import ar.edu.utn.frba.ddsi.repository.impl.RepositoryRutas;
@@ -23,7 +21,6 @@ import tools.jackson.databind.ObjectMapper;
 import java.util.LinkedHashMap;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -171,9 +168,12 @@ public class LogisticaCallbackService implements ILogisticaCallbackService {
 
             Camion camion = repositoryCamiones.findById(route.truckId()).orElse(null);
 
+
             if (camion == null) {
                 System.err.println("No se encontró camión con truckId=" + route.truckId());
             }
+
+            camion.setDisponible(false);
 
             Ruta ruta = new Ruta();
             ruta.setCamionId(camion != null ? camion.getId() : null);

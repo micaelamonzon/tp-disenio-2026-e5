@@ -18,7 +18,7 @@ public class EstadoDonacionController {
 
     private static final Logger estadosDonacionController = LoggerFactory.getLogger(EstadoDonacionController.class);
 
-    private final EstadoDonacionServiceimpl estadoDonacionService; // ← cambia acá
+    private final EstadoDonacionServiceimpl estadoDonacionService;
 
     public EstadoDonacionController(EstadoDonacionServiceimpl estadoDonacionService) { // ← y acá
         this.estadoDonacionService = estadoDonacionService;
@@ -114,7 +114,7 @@ public class EstadoDonacionController {
     //Para que logística pueda consultar donaciones según estado
     @GetMapping("/donaciones")
     public ResponseEntity<List<DonacionDTO>> buscarPorEstado(@RequestParam String estado) {
-        estadosDonacionController.info("ENTRE AL ENDPOINT DE DONACIONES BUSCAR POR ESTADO");
+        estadosDonacionController.info("SOLICITANDO TODAS LAS DONACIONES PARA ENVIARSELAS AL SERVICIO DE LOGISTICA");
         List<DonacionDTO> encontradas = estadoDonacionService.findByEstado(estado);
         return ResponseEntity.ok(encontradas);
     }

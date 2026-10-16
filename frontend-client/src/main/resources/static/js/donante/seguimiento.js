@@ -3,12 +3,11 @@
   const PIN_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>`;
 
 
-  const SIMULAR_AVANCE = false;
-  const DURACION_SIMULADA_MS = 120000;
 
   const ESTADOS = {
     PENDIENTE:   { texto: "Pendiente",   clase: "status-orange" },
     EN_TRASLADO:   { texto: "En traslado", clase: "status-blue" },
+    LLEGO:       { texto: "Llegó, falta confirmar", clase: "status-blue" },
     ENTREGADA:   { texto: "Entregada",   clase: "status-green" }
   };
   const estadoInfo = (e) => ESTADOS[e] || { texto: e, clase: "status-orange" };
@@ -116,22 +115,15 @@
     return [...porCamion.values()];
   }
 
-
   function calcularPosicion(c) {
     const n = c.ruta.length - 1;
-    if (SIMULAR_AVANCE) {
-      const f = Math.min((Date.now() - inicio) / DURACION_SIMULADA_MS, 1);
-      const pos = f * n;
-      const i = Math.min(Math.floor(pos), n - 1);
-      const t = pos - i, a = c.ruta[i], b = c.ruta[i + 1];
-      return { indice: i, punto: [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t], fraccion: f };
-    }
     if (c.real) {
       const i = c.indiceReal != null ? Math.min(c.indiceReal, n) : indiceMasCercano(c.ruta, c.real);
       return { indice: i, punto: c.real, fraccion: i / n };
     }
     return { indice: 0, punto: c.ruta[0], fraccion: 0 };
   }
+
 
   function popupHtml(p) {
     const est = estadoInfo(p.estado);
@@ -156,7 +148,9 @@
   function actualizarParada(p) {
     const c = p.camion;
     p.llego = c.indice >= p.indiceParada;
-    if (p.llego) p.estado = "ENTREGADA";
+    //if (p.llego) p.estado = "ENTREGADA";
+    //cada pantalla puede indicar que mostrar al llegar (la entidad todavia tiene que confirmar)
+    if (p.llego) p.estado = window.ESTADO_AL_LLEGAR || "ENTREGADA";
     p.fraccion = p.llego ? 1 : Math.min(c.indice / Math.max(p.indiceParada, 1), 1);
 
     if (!p.card) return;
@@ -276,7 +270,7 @@
   const timerRefresco = setInterval(refrescar, 5000);
   if (recorridoTerminado()) clearInterval(timerRefresco);
   setInterval(actualizarTiempos, 1000);
-  if (SIMULAR_AVANCE) setInterval(() => camiones.forEach(actualizar), 250);
+
 
   window.actualizarSeguimiento = render;
 })();

@@ -140,7 +140,14 @@
     margin-bottom: 10px;
 }
 
-.delivery-id { font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 4px; }
+.delivery-id {
+    font-size: 13px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin:10px;
+}
 .delivery-meta-right { text-align: right; }
 .truck-code { font-size: 11px; color: var(--text-muted); display: block; font-weight: 600; }
 .eta-text { font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 3px; margin-top: 2px; }

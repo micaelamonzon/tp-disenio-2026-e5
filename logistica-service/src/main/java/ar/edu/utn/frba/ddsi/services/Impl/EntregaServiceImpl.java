@@ -1,11 +1,12 @@
 package ar.edu.utn.frba.ddsi.services.Impl;
 
-import ar.edu.utn.frba.ddsi.models.entities.DonacionesClient;
+import ar.edu.utn.frba.ddsi.models.entities.EstadoEntrega;
+import ar.edu.utn.frba.ddsi.repository.impl.RepositoryCamiones;
+import ar.edu.utn.frba.ddsi.services.DonacionesClient;
 import ar.edu.utn.frba.ddsi.dto.ConfirmarRecepcionDTO;
 import ar.edu.utn.frba.ddsi.dto.EntregaDTO;
 import ar.edu.utn.frba.ddsi.dto.EntidadContactoDTO;
 import ar.edu.utn.frba.ddsi.dto.MedioDeNotificacionDTO;
-import ar.edu.utn.frba.ddsi.dto.PersonaContactoDTO;
 import ar.edu.utn.frba.ddsi.models.entities.Entrega;
 import ar.edu.utn.frba.ddsi.repository.impl.RepositoryEntregas;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,16 +23,19 @@ public class EntregaServiceImpl {
     private final RepositoryEntregas repositoryEntregas;
     private final DonacionesClient donacionesClient;
     private final NotificacionesPublisher notificacionesPublisher;
+    private final RepositoryCamiones repositoryCamiones;
     private final String adminContacto;
 
     public EntregaServiceImpl(RepositoryEntregas repositoryEntregas,
                               DonacionesClient donacionesClient,
                               NotificacionesPublisher notificacionesPublisher,
+                              RepositoryCamiones repositoryCamiones,
                               @Value("${notificaciones.admin.contacto}") String adminContacto) {
         this.repositoryEntregas = repositoryEntregas;
         this.donacionesClient = donacionesClient;
         this.notificacionesPublisher = notificacionesPublisher;
         this.adminContacto = adminContacto;
+        this.repositoryCamiones = repositoryCamiones;
     }
 
     public Entrega crearEntrega(List<Long> donacionesIds, Long entidadId,List<Long> donantesIds) {
@@ -49,21 +53,21 @@ public class EntregaServiceImpl {
         return this.toDTO(entrega);
     }
 
-    public List<EntregaDTO> iniciarTraslado(Long idDonante, String responsableId) {
+    public List<EntregaDTO> iniciarTraslado(Long idDonante, String responsable) {
         List<Entrega> entregas = buscarEntregas(idDonante);
 
         entregas.forEach(entrega -> {
             entrega.iniciarTraslado();
             repositoryEntregas.save(entrega);
-            this.persistirCambiosEnDonaciones(entrega,responsableId);
+            this.persistirCambiosEnDonaciones(entrega,responsable);
         });
 
         return entregas.stream().map(entrega -> this.toDTO(entrega)).collect(Collectors.toList());
     }
 
-    public void persistirCambiosEnDonaciones(Entrega entrega,String responsableId) {
+    public void persistirCambiosEnDonaciones(Entrega entrega,String responsable) {
         for (Long donacionId : entrega.getDonacionesIds()) {
-            donacionesClient.iniciarTraslado(donacionId, responsableId);
+            donacionesClient.iniciarTraslado(donacionId, responsable);
         }
     }
 //    public List<EntregaDTO> iniciarRuta(List<String> entregaIds, String choferId) {
@@ -84,6 +88,7 @@ public class EntregaServiceImpl {
         Entrega entrega = buscar(entregaId);
         entrega.confirmarRecepcion(body.getFotosUrl());
         repositoryEntregas.save(entrega);
+        this.liberarCamionSiTermino(entrega);
         for (Long donacionId : entrega.getDonacionesIds()) {
             donacionesClient.confirmarEntrega(donacionId, responsableId, body.getFotosUrl());
         }
@@ -91,6 +96,22 @@ public class EntregaServiceImpl {
                 + ".+Entrega+nro+" + entrega.getId();
         notificarInteresados(entrega, comprobante);
         return toDTO(entrega);
+    }
+
+    private void liberarCamionSiTermino(Entrega entrega) {
+        String camionId = entrega.getCamionId();
+        if (camionId == null) return;
+
+        boolean quedanActivas = repositoryEntregas.findByCamionId(camionId).stream()
+                .anyMatch(e -> e.getEstadoActual() == EstadoEntrega.PENDIENTE
+                        || e.getEstadoActual() == EstadoEntrega.EN_TRASLADO);
+        if (quedanActivas) return;
+
+        repositoryCamiones.findById(camionId).ifPresent(camion -> {
+            camion.getPosiciones().clear();
+            camion.setDisponible(true);
+            repositoryCamiones.save(camion);
+        });
     }
 
     public EntregaDTO marcarNoRecibida(String entregaId, ConfirmarRecepcionDTO body,

@@ -18,7 +18,7 @@ public class DonacionAsignadaDTO {
     private String descripcion;
     private Boolean donacionEntregada;
 
-    public String getHace() {
+    public String Hace() {
         LocalDateTime base = fechaDeAsignacion != null ? fechaDeAsignacion : null;
         if (base == null) return "";
         long dias = ChronoUnit.DAYS.between(base, LocalDateTime.now());

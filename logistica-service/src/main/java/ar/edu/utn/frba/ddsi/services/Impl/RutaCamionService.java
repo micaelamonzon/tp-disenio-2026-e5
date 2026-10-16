@@ -2,6 +2,7 @@ package ar.edu.utn.frba.ddsi.services.Impl;
 
 import ar.edu.utn.frba.ddsi.dto.PosicionDTO;
 import ar.edu.utn.frba.ddsi.models.entities.Entrega;
+import ar.edu.utn.frba.ddsi.models.entities.EstadoEntrega;
 import ar.edu.utn.frba.ddsi.repository.impl.RepositoryEntregas;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -34,7 +35,10 @@ public class RutaCamionService {
     public RutaCamion armarRutaPara(Entrega entrega) {
         List<Entrega> entregas = entrega.getCamionId() == null
                 ? List.of(entrega)
-                : repositoryEntregas.findByCamionId(entrega.getCamionId());
+                : repositoryEntregas.findByCamionId(entrega.getCamionId()).stream()
+                .filter(e -> e.getEstadoActual() == EstadoEntrega.PENDIENTE
+                        || e.getEstadoActual() == EstadoEntrega.EN_TRASLADO)
+                .toList();
         return armarRuta(entregas);
     }
 

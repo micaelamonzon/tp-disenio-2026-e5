@@ -11,14 +11,14 @@
         <div class="profile-layout" th:if="${entidad != null}">
 
             <div class="profile-card profile-header">
-                <div class="avatar profile-avatar" th:text="${iniciales}">CG</div>
+                <div class="avatar profile-avatar" th:text="${entidad.iniciales()}"></div>
                 <div class="profile-header-info">
-                    <h2 class="profile-username" th:text="${entidad.razonSocial}">Razón social</h2>
-                    <span class="profile-role">Entidad Beneficiaria</span>
+                    <h2 class="profile-username" th:text="${entidad.razonSocial}"></h2>
+                    <span class="profile-role"></span>
                 </div>
                 <div class="profile-header-stats">
                     <div class="profile-stat">
-                        <b th:text="${#lists.size(entidad.representantes)}">2</b>
+                        <b th:text="${#lists.size(entidad.representantes)}"></b>
                         <span>Representantes</span>
                     </div>
                 </div>
@@ -46,10 +46,10 @@
                 <h3 class="profile-section-title">Representantes de la Entidad</h3>
                 <div class="rep-list">
                     <article class="rep-item" th:each="r : ${entidad.representantes}">
-                        <div class="rep-avatar" th:text="${r.iniciales()}">ME</div>
+                        <div class="rep-avatar" th:text="${r.iniciales()}"></div>
                         <div class="rep-info">
-                            <h4 class="rep-name" th:text="${r.nombreCompleto()}">Nombre</h4>
-                            <a class="rep-mail" th:href="'mailto:' + ${r.obtenerMail()}" th:text="${r.obtenerMail()}">mail</a>
+                            <h4 class="rep-name" th:text="${r.nombreCompleto()}"></h4>
+                            <a class="rep-mail" th:href="'mailto:' + ${r.obtenerMail()}" th:text="${r.obtenerMail()}"></a>
                         </div>
                     </article>
                 </div>

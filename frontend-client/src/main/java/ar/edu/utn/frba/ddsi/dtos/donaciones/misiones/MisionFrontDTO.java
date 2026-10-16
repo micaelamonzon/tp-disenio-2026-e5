@@ -7,6 +7,8 @@ public record MisionFrontDTO(
         Integer ordenSecuencial,
         String insigniaGanadora,
         Integer meses,
+        String mesInicial,
+        String mesFinal,
         Integer objetivoDeCategoriasDistintas,
         Integer cantidadDeDonaciones,
         Integer cantidadDeBienes,

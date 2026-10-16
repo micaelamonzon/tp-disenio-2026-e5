@@ -160,7 +160,7 @@ public class IncentivosServiceImpl implements IncentivosService {
     public void setearSiguienteCategoria(Donante donante) {
         CategoriaDeMision categoriaActual = donante.getMisionEnCurso().getMision().getCategoria();
         CategoriaDeMision categoriaSiguiente = this.categoriaDeMisionRepository.findByNombre(categoriaActual.getCategoriaSiguiente());
-        if(categoriaSiguiente == null || categoriaSiguiente == categoriaActual){
+        if(categoriaSiguiente == null || categoriaSiguiente.getNombre() == categoriaActual.getNombre()){
             donante.getPerfil().setCategoria(categoriaActual);
             donante.setMisionEnCurso(null);
             return;
@@ -178,9 +178,16 @@ public class IncentivosServiceImpl implements IncentivosService {
 
         MisionParticular misionEnCurso = donante.getMisionEnCurso();
 
-        if (misionEnCurso.getMision().getOrdenSecuencial() < misionesDeCategoriaActual.size()) {
-            Mision siguienteMision = misionesDeCategoriaActual.get(misionEnCurso.getMision().getOrdenSecuencial() - 1);
-            this.agregarMisionADonante(donante.getIdEnDonaciones(),donante.getTipoDeDonante(),siguienteMision.getId());
+        if ((misionEnCurso.getMision().getOrdenSecuencial() - 1 )< misionesDeCategoriaActual.size()) {
+            int ordenActual = misionEnCurso.getMision().getOrdenSecuencial();
+            Optional<Mision> siguienteMision = misionesDeCategoriaActual.stream()
+                    .filter(m -> m.getOrdenSecuencial() > ordenActual)
+                    .min(Comparator.comparingInt(Mision::getOrdenSecuencial));
+
+            if (siguienteMision.isPresent()) {
+                this.agregarMisionADonante(donante.getIdEnDonaciones(), donante.getTipoDeDonante(), siguienteMision.get().getId());
+            }
+
         } else {
             donante.setMisionEnCurso(null);
         }
@@ -335,6 +342,7 @@ public class IncentivosServiceImpl implements IncentivosService {
                 donacion -> {
 
                     return new DonacionSegmentada(
+                            donacion.idEnDonaciones(),
                             donacion.fechaDeIngreso(),
                             donacion.donacionEntregada(),
                             donacion.entidadBeneficiariaId(),
@@ -657,6 +665,8 @@ public class IncentivosServiceImpl implements IncentivosService {
                 mision.getOrdenSecuencial(),
                 mision.getInsigniaGanadora(),
                 mision instanceof Racha r ? r.getMeses() : null,
+                mision instanceof Racha r ? this.obtenerNombreDeMes(r.getMesInicial()) : null,
+                mision instanceof Racha r ? this.obtenerNombreDeMes(r.getMesFinal()) : null,
                 mision instanceof Completitud c ? c.getObjetivoDeCategoriasDistintas() : null,
                 mision instanceof DonacionesExitosas d ? d.getCantidadDeDonacioneExitosas() : null,
                 mision instanceof HabilDonador h ? h.getCantidadDeBienes() : null,
@@ -664,6 +674,40 @@ public class IncentivosServiceImpl implements IncentivosService {
                 mp != null ? mp.getProgreso(): null,
                 mp != null ? mp.getDistanciaDelObjetivo() : null
                 );
+    }
+
+    public String obtenerNombreDeMes(Integer numMes) {
+        if(numMes == null){
+            return null;
+        }
+        if(numMes == 1){
+            return "Enero";
+        } else if (numMes == 2) {
+            return "Febrero";
+        }
+        else if (numMes == 3) {
+            return "Marzo";
+        }else if (numMes == 4) {
+            return "Abril";
+        }else if (numMes == 5) {
+            return "Mayo";
+        }else if (numMes == 6) {
+            return "Junio";
+        }else if (numMes == 7) {
+            return "Julio";
+        }else if (numMes == 8) {
+            return "Agosto";
+        }else if (numMes == 9) {
+            return "Septiembre";
+        }else if (numMes == 10) {
+            return "Octubre";
+        }else if (numMes == 11) {
+            return "Noviembre";
+        } else if (numMes == 12) {
+            return "Diciembre";
+        }else{
+            return null;
+        }
     }
 
     public String obtenerNombreDeMisionParticular(Mision m) {

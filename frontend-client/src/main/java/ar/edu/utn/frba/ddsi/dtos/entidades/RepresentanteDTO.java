@@ -22,7 +22,15 @@ public class RepresentanteDTO {
         return (n + a).toUpperCase();
     }
 
-    public String obtenerMail(){
-        return mediosDeNotificacion.stream().filter( m -> m.getTipoDeNotificacion().equals("EMAIL")).findFirst().get().getDatoDeContacto();
+    public String obtenerMail() {
+        if (mediosDeNotificacion == null) {
+            return null;
+        }
+        return mediosDeNotificacion.stream()
+                .filter(m -> "EMAIL".equals(m.getTipoDeNotificacion()))
+                .map(MedioDeNotificacionDTO::getDatoDeContacto)
+                .filter(d -> d != null && !d.isBlank())
+                .findFirst()
+                .orElse(null);
     }
 }

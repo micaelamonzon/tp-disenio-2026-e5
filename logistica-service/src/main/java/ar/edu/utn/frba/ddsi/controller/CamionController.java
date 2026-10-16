@@ -2,7 +2,6 @@ package ar.edu.utn.frba.ddsi.controller;
 
 import ar.edu.utn.frba.ddsi.dto.CamionDTO;
 import ar.edu.utn.frba.ddsi.dto.CamionResponseDTO;
-import ar.edu.utn.frba.ddsi.repository.RepositoryCamiones;
 import ar.edu.utn.frba.ddsi.repository.impl.RepositoryRutas;
 import ar.edu.utn.frba.ddsi.services.Impl.CamionServiceImpl;
 import org.springframework.http.HttpStatus;

@@ -2,9 +2,8 @@ package ar.edu.utn.frba.ddsi.services.Impl;
 
 import ar.edu.utn.frba.ddsi.dto.CamionDTO;
 import ar.edu.utn.frba.ddsi.dto.DonacionDTO;
-import ar.edu.utn.frba.ddsi.models.entities.Camion;
 import ar.edu.utn.frba.ddsi.models.entities.Donacion;
-import ar.edu.utn.frba.ddsi.models.entities.DonacionesClient;
+import ar.edu.utn.frba.ddsi.services.DonacionesClient;
 import ar.edu.utn.frba.ddsi.repository.impl.RepositoryDonacion;
 import ar.edu.utn.frba.ddsi.services.CamionService;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -27,6 +26,7 @@ public class LogisticaScheduler {
     }
 
     @Scheduled(cron = "0 0 2 * * *")
+//    @Scheduled(fixedRate = 120000)
     public void planificadorRutasDelDiaSiguiente(){
         List<DonacionDTO> donaciones = donacionesClient.obtenerDonacionesAsignadas();
 
@@ -35,6 +35,7 @@ public class LogisticaScheduler {
            this.repositoryDonacion.save(
                new Donacion(
                        d.codigo().longValue(),
+                       d.tipoDonante(),
                        d.entidadBeneficiariaId(),
                        d.latitudEntidad(),
                        d.longitudEntidad(),

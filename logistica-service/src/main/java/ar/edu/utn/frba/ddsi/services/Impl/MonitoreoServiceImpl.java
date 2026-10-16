@@ -8,24 +8,17 @@ import ar.edu.utn.frba.ddsi.models.entities.Donacion;
 import ar.edu.utn.frba.ddsi.models.entities.Entrega;
 import ar.edu.utn.frba.ddsi.models.entities.EstadoEntrega;
 import ar.edu.utn.frba.ddsi.models.entities.Posicion;
-import ar.edu.utn.frba.ddsi.repository.RepositoryCamiones;
+import ar.edu.utn.frba.ddsi.models.entities.TipoDeDonante;
+import ar.edu.utn.frba.ddsi.repository.impl.RepositoryCamiones;
 import ar.edu.utn.frba.ddsi.repository.impl.RepositoryDonacion;
 import ar.edu.utn.frba.ddsi.repository.impl.RepositoryEntregas;
-import ar.edu.utn.frba.ddsi.repository.impl.RepositoryRutas;
 import ar.edu.utn.frba.ddsi.services.MonitoreoService;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import tools.jackson.databind.ObjectMapper;
 
-import java.net.http.HttpClient;
-import java.time.Instant;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Service
@@ -56,7 +49,7 @@ public class MonitoreoServiceImpl implements MonitoreoService {
 
         Posicion nuevaPosicion = new Posicion(posicionDTO.latitud(), posicionDTO.longitud());
         camion.agregarPosicion(nuevaPosicion);
-        repositoryCamiones.save(camion); // ← persiste la nueva posición en MySQL
+        repositoryCamiones.save(camion);
 
         return posicionDTO;
     }
@@ -76,22 +69,33 @@ public class MonitoreoServiceImpl implements MonitoreoService {
     }
 
     @Override
-    public List<RutaEntregaDTO> obtenerRecorridoDeDonacionesDeDonante(Long idDonante){
+    public List<RutaEntregaDTO> obtenerRecorridoDeDonacionesDeDonante(Long idDonante, TipoDeDonante tipoDeDonante){
 
-        List<Donacion> donaciones = this.repositoryDonacion.findByDonanteId(idDonante);
+        List<Donacion> donaciones = this.repositoryDonacion.findByDonanteIdAndTipoDeDonante(idDonante,tipoDeDonante);
         if(donaciones.isEmpty()){
-             throw new RuntimeException("Este id " + idDonante + " no fue encontrado en ninguna donación");
+            return List.of();
         }
 
         List<Long> idsDeDonacionesEnDonaciones = donaciones.stream().map(Donacion::getIdEnDonaciones).toList();
 
-        List<Entrega> entregas = this.repositoryEntregas.findByDonacionesIdsIn(idsDeDonacionesEnDonaciones);
+        List<Entrega> entregas = this.repositoryEntregas.findByDonacionesIdsIn(idsDeDonacionesEnDonaciones).stream().filter(e -> e.getEstadoActual().equals(EstadoEntrega.EN_TRASLADO) ||  e.getEstadoActual().equals(EstadoEntrega.PENDIENTE)).toList();
+
+        if (entregas.isEmpty()) return List.of();
 
         this.iniciarTrasladoSiCorresponde(entregas);
 
-         return entregas.stream()
-                 .map( e -> this.armarRutaDeEntrega(e,donaciones))
-                 .toList();
+        List<RutaEntregaDTO> rutas = entregas.stream()
+                .map(e -> this.armarRutaDeEntrega(e, donaciones))
+                .toList();
+
+        // Por camión: la parada más lejana entre las entregas de ESTE donante
+        Map<String, Integer> limitePorCamion = rutas.stream()
+                .filter(r -> r.camionId() != null && r.indiceParada() != null)
+                .collect(Collectors.toMap(RutaEntregaDTO::camionId, RutaEntregaDTO::indiceParada, Math::max));
+
+        return rutas.stream()
+                .map(r -> recortarHasta(r, limitePorCamion.getOrDefault(r.camionId(), r.indiceParada())))
+                .toList();
     }
 
 
@@ -118,16 +122,24 @@ public class MonitoreoServiceImpl implements MonitoreoService {
                 .filter(d -> idsDonaciones.contains(d.getIdEnDonaciones()))
                 .toList();
 
-        List<RutaEntregaDTO> rutas = new ArrayList<>();
+        List<RutaEntregaDTO> rutasCompletas = new ArrayList<>();
+
         for (Entrega entrega : entregas) {
             try {
-                rutas.add(recortarHastaLaParada(armarRutaDeEntrega(entrega, donaciones)));
+                rutasCompletas.add(armarRutaDeEntrega(entrega, donaciones));
             } catch (RuntimeException e) {
-                // Si una entrega tiene datos incompletos, no rompemos el mapa de las demás
                 System.out.println("No se pudo armar la ruta de la entrega " + entrega.getId() + ": " + e.getMessage());
             }
         }
-        return rutas;
+
+        // Por camión: la parada más lejana entre las entregas de ESTA entidad
+        Map<String, Integer> limitePorCamion = rutasCompletas.stream()
+                .filter(r -> r.camionId() != null && r.indiceParada() != null)
+                .collect(Collectors.toMap(RutaEntregaDTO::camionId, RutaEntregaDTO::indiceParada, Math::max));
+
+        return rutasCompletas.stream()
+                .map(r -> recortarHasta(r, limitePorCamion.getOrDefault(r.camionId(), r.indiceParada())))
+                .toList();
     }
 
     // Deja la ruta del camión solo hasta la parada de esta entrega
@@ -166,15 +178,7 @@ public class MonitoreoServiceImpl implements MonitoreoService {
         );
     }
 
-    public String convertirEstado(EstadoEntrega estadoEntrega) {
-        if(EstadoEntrega.EN_TRASLADO.equals(estadoEntrega)){
-            return "EN TRASLADO";
-        } else if (EstadoEntrega.ENTREGADA.equals(estadoEntrega)) {
-            return "ENTREGADA";
-        }else {
-            return " ";
-        }
-    }
+
     private UltimoAvanceDTO obtenerUltimoAvance(Entrega entrega) {
         if (entrega.getCamionId() == null) return null;
 
@@ -193,5 +197,22 @@ public class MonitoreoServiceImpl implements MonitoreoService {
         entregas.stream()
                 .filter(e -> e.getEstadoActual() == EstadoEntrega.PENDIENTE)
                 .forEach(e -> entregaService.iniciarTrasladoDeEntrega(e.getId(), "SISTEMA_LOGISTICA"));
+    }
+
+    private RutaEntregaDTO recortarHasta(RutaEntregaDTO r, Integer limite) {
+        if (r.rutaCompleta() == null || limite == null || limite < 0) return r;
+
+        int fin = Math.min(limite + 1, r.rutaCompleta().size());
+        List<PosicionDTO> corta = new ArrayList<>(r.rutaCompleta().subList(0, fin));
+
+        // Si el camión ya pasó el límite, lo dejamos clavado en el último punto de la ruta recortada
+        UltimoAvanceDTO avance = r.ultimoAvance();
+        if (avance != null && avance.indiceRuta() != null && avance.indiceRuta() > limite) {
+            avance = new UltimoAvanceDTO(corta.get(fin - 1), avance.fecha(), limite);
+        }
+
+        return new RutaEntregaDTO(
+                r.entregaId(), r.camionId(), r.estadoActual(), r.direccion(), r.destino(),
+                corta, r.indiceParada(), r.subcategorias(), avance);
     }
 }

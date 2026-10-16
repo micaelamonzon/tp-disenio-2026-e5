@@ -27,14 +27,7 @@
     border-bottom: 1px solid var(--border-soft, var(--border));
 }
 
-.profile-section-title::before {
-    content: "";
-    width: 4px;
-    height: 20px;
-    border-radius: 2px;
-    background: var(--blue);
-    flex-shrink: 0;
-}
+
 .profile-section-title svg { width: 18px; height: 18px; color: var(--blue); }
 
 
@@ -48,13 +41,7 @@
     padding-top: 34px;
 }
 
-.profile-header::before {
-    content: "";
-    position: absolute;
-    inset: 0 0 auto 0;
-    height: 8px;
-    background: linear-gradient(90deg, var(--blue), #818cf8);
-}
+
 
 .profile-avatar {
     width: 76px;

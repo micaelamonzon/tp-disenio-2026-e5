@@ -37,11 +37,11 @@ public class DonacionSinSegmentar extends Persistente {
   @Column(name = "fecha_de_ingreso")
   private LocalDateTime fechaDeIngreso;
 
-  @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name="donanteHumano_id", referencedColumnName = "id")
   private PersonaHumana donanteHumano;
 
-  @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name="donanteJuridico_id", referencedColumnName = "id")
   private PersonaJuridica donanteJuridico;
 
