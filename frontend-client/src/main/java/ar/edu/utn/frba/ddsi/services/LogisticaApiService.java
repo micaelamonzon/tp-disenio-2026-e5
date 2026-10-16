@@ -1,5 +1,6 @@
 package ar.edu.utn.frba.ddsi.services;
 
+import ar.edu.utn.frba.ddsi.dtos.donaciones.misiones.TipoDeDonante;
 import ar.edu.utn.frba.ddsi.dtos.logistica.CamionDTO;
 import ar.edu.utn.frba.ddsi.dtos.logistica.EntregaDTO;
 import ar.edu.utn.frba.ddsi.dtos.logistica.RutaEntregaDTO;
@@ -99,11 +100,11 @@ public class LogisticaApiService {
         }
     }
 
-    public List<RutaEntregaDTO> obtenerRutasDeDonante(Long idDonante) {
+    public List<RutaEntregaDTO> obtenerRutasDeDonante(Long idDonante,TipoDeDonante tipoDeDonante) {
         try {
             List<RutaEntregaDTO> rutas = apiCaller.getList(
-                    logisticaServiceUrl + "/logistica-service/camiones/monitoreo/ruta/donante/{id}/recorrido",
-                    RutaEntregaDTO.class, idDonante);
+                    logisticaServiceUrl + "/logistica-service/camiones/monitoreo/ruta/donante/{idDonante}/recorrido?tipoDonante={tipoDeDonante}",
+                    RutaEntregaDTO.class, idDonante, tipoDeDonante);
             log.debug("Rutas del donante {}: {}", idDonante, rutas);
             return rutas != null ? rutas : List.of();
         } catch (SesionExpiradaException e) {

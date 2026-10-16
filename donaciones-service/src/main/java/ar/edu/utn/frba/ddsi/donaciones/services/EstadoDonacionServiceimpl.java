@@ -1,5 +1,6 @@
 package ar.edu.utn.frba.ddsi.donaciones.services;
 import ar.edu.utn.frba.ddsi.donaciones.dto.*;
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante.TipoDonante;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.Necesidad.Necesidad;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.Bien;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.algoritmos.Estado;
@@ -137,6 +138,7 @@ public class EstadoDonacionServiceimpl implements EstadoDonacionService{
                 donacionesDTO.add(
                 new DonacionDTO(
                         d.getId().intValue(),
+                        d.getDonanteHumano()!= null ? TipoDonante.HUMANO : TipoDonante.JURIDICO,
                         d.getEstadoActual().toString(),
                         d.calcularPeso(),
                         d.calcularVolumen(),
