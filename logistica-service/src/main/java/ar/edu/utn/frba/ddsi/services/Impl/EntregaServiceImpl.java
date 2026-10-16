@@ -1,7 +1,9 @@
 package ar.edu.utn.frba.ddsi.services.Impl;
 
+import ar.edu.utn.frba.ddsi.models.entities.Donacion;
 import ar.edu.utn.frba.ddsi.models.entities.EstadoEntrega;
 import ar.edu.utn.frba.ddsi.repository.impl.RepositoryCamiones;
+import ar.edu.utn.frba.ddsi.repository.impl.RepositoryDonacion;
 import ar.edu.utn.frba.ddsi.services.DonacionesClient;
 import ar.edu.utn.frba.ddsi.dto.ConfirmarRecepcionDTO;
 import ar.edu.utn.frba.ddsi.dto.EntregaDTO;
@@ -14,7 +16,9 @@ import org.springframework.stereotype.Service;
 import ar.edu.utn.frba.ddsi.services.NotificacionesPublisher;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,17 +29,20 @@ public class EntregaServiceImpl {
     private final NotificacionesPublisher notificacionesPublisher;
     private final RepositoryCamiones repositoryCamiones;
     private final String adminContacto;
+    private final RepositoryDonacion repositoryDonacion;
 
     public EntregaServiceImpl(RepositoryEntregas repositoryEntregas,
                               DonacionesClient donacionesClient,
                               NotificacionesPublisher notificacionesPublisher,
                               RepositoryCamiones repositoryCamiones,
+                              RepositoryDonacion repositoryDonacion,
                               @Value("${notificaciones.admin.contacto}") String adminContacto) {
         this.repositoryEntregas = repositoryEntregas;
         this.donacionesClient = donacionesClient;
         this.notificacionesPublisher = notificacionesPublisher;
         this.adminContacto = adminContacto;
         this.repositoryCamiones = repositoryCamiones;
+        this.repositoryDonacion = repositoryDonacion;
     }
 
     public Entrega crearEntrega(List<Long> donacionesIds, Long entidadId,List<Long> donantesIds) {
@@ -150,11 +157,18 @@ public class EntregaServiceImpl {
             System.out.println("No se pudo notificar a la entidad: " + e.getMessage());
         }
 
-        // Un aviso por cada donante de la entrega. Solo se manda el id:
+        // Un aviso por cada donante de la entrega (sin repetir si donó varias cosas)
+        // Solo se manda el id y el tipo (HUMANO/JURIDICO), que sale de la donación guardada en logística
         // notificaciones-service resuelve el contacto y su medio preferido
-        if (entrega.getDonantesId() != null) {
-            for (Long donanteId : entrega.getDonantesId()) {
-                notificacionesPublisher.publicarParaDonante(donanteId, mensaje, null);
+        Set<String> yaAvisados = new HashSet<>();
+        for (Long donacionId : entrega.getDonacionesIds()) {
+            Donacion donacion = repositoryDonacion.findByIdEnDonaciones(donacionId);
+            if (donacion == null || donacion.getDonanteId() == null) continue;
+
+            String tipo = donacion.getTipoDeDonante() != null
+                    ? donacion.getTipoDeDonante().name() : "HUMANO";
+            if (yaAvisados.add(tipo + "-" + donacion.getDonanteId())) {
+                notificacionesPublisher.publicarParaDonante(donacion.getDonanteId(), mensaje, null, tipo);
             }
         }
     }

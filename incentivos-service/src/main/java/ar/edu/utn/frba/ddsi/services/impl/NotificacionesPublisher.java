@@ -26,12 +26,12 @@ public class NotificacionesPublisher {
         this.queueName = queueName;
     }
 
-    public void publicarParaDonante(Long donanteId, String mensaje) {
+    public void publicarParaDonante(Long donanteId, String mensaje, String tipoDonante) {
         try {
             // idEvento único: permite que el listener descarte mensajes duplicados (idempotencia)
             String idEvento = UUID.randomUUID().toString();
             NotificacionMensajeDTO notificacion =
-                    new NotificacionMensajeDTO(idEvento, null, donanteId, null, mensaje, null);
+                    new NotificacionMensajeDTO(idEvento, null, donanteId, null, mensaje, null, tipoDonante);
             rabbitTemplate.convertAndSend(queueName, notificacion);
         } catch (Exception e) {
             // Si falla la publicación no cortamos el scheduler: el progreso de la

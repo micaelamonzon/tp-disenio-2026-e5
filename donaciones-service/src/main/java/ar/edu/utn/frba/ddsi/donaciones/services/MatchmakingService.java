@@ -105,15 +105,16 @@ public class MatchmakingService {
             );
         }
 
-        // Evento 3: Notificar al donante que su donación fue asignada
-        // (solo humanos: notificaciones-service resuelve el contacto por id de PersonaHumana)
+        // Evento 3: Notificar al donante (humano o jurídico) que su donación fue asignada
         DonacionSegmentada donacion = propuesta.getDonacion();
-        if (donacion != null && donacion.getDonanteHumano() != null) {
-            notificacionesPublisher.publicarParaDonante(
-                    donacion.getDonanteHumano().getId(),
-                    "Tu donación de " + donacion.getSubcategoria().getNombre()
-                            + " fue asignada a una entidad beneficiaria"
-            );
+        if (donacion != null) {
+            String aviso = "Tu donación de " + donacion.getSubcategoria().getNombre()
+                    + " fue asignada a una entidad beneficiaria";
+            if (donacion.getDonanteHumano() != null) {
+                notificacionesPublisher.publicarParaDonante(donacion.getDonanteHumano().getId(), aviso);
+            } else if (donacion.getDonanteJuridico() != null) {
+                notificacionesPublisher.publicarParaDonanteJuridico(donacion.getDonanteJuridico().getId(), aviso);
+            }
         }
 
         return matchRepository.save(propuesta);
