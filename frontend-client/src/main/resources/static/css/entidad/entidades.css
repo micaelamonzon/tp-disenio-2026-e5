@@ -45,7 +45,18 @@ html, body {
     color: var(--text);
     font-family: var(--font);
     -webkit-font-smoothing: antialiased;
+}
 
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.page {
+    flex: 1 0 auto;
+    width: 100%;
+    min-height: calc(100vh - 120px);
 }
 
 
@@ -1019,3 +1030,4 @@ a{
 .field[hidden] {
     display: none;
 }
+

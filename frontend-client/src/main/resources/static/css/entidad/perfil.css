@@ -48,7 +48,7 @@
     height: 76px;
     font-size: 26px;
     flex-shrink: 0;
-    box-shadow: 0 0 0 4px var(--card), 0 0 0 6px var(--blue);
+    box-shadow: 0 0 0 4px var(--card), 0 0 0 6px #3D5AFEFF;
 }
 .profile-header-info { flex: 1; min-width: 200px; }
 .profile-username {
@@ -78,7 +78,7 @@
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
 }
-.profile-stat b { font-size: 22px; line-height: 1.2; color: var(--blue); }
+.profile-stat b { font-size: 22px; line-height: 1.2; color:#3D5AFEFF; }
 .profile-stat span { font-size: 12px; color: var(--text-soft); text-align: center; }
 
 
@@ -132,8 +132,8 @@
     border-radius: 50%;
     font-size: 15px;
     font-weight: 700;
-    color: var(--blue);
-    background: color-mix(in srgb, var(--blue) 14%, transparent);
+    color: white;
+    background: color-mix(in srgb, #413dff 14%, #413dff);
 }
 .rep-info { min-width: 0; }
 .rep-name { font-size: 15.5px; font-weight: 700; margin: 0 0 2px; }

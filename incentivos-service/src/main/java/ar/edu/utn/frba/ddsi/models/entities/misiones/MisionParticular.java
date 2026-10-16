@@ -62,6 +62,8 @@ public class MisionParticular extends Persistente {
         this.mision = mision;
         this.donante = donante;
         this.estado = EstadoDeMision.ACTUAL;
+        this.progreso= 0;
+        this.distanciaDelObjetivo = 100;
     }
 
     public void avanzarMision() {
