@@ -75,7 +75,7 @@ public class MisionShedulerService {
                     notificarDonante(donante, "¡Felicitaciones! Completaste la misión " + misionParticular.getMision().getNombre());
 
                     // Difusión de la insignia en n8n: una sola vez, al completarse la misión
-                    difundirInsignia(donante, insignia);
+                    // difundirInsignia(donante, insignia); la escribo xq m estoy quedando sin ejecuciones
                         if(incentivosService.pasaSiguienteCategoria(donante)){
 
                             loggerMisionesEnCurso.info("Donante {} pasa de la categoria {} a la siguiente categoría {}", donante.getId(), donante.getMisionEnCurso().getMision().getCategoria().getNombre(), donante.getMisionEnCurso().getMision().getCategoria().getCategoriaSiguiente());
