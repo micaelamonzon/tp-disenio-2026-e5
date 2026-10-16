@@ -15,4 +15,7 @@ public interface NotificacionRepository extends JpaRepository<Notificacion, Long
 
     // Notificaciones de una entidad beneficiaria, de la más nueva a la más vieja
     List<Notificacion> findByEntidadBeneficiariaIdOrderByFechaEnvioDesc(Long entidadBeneficiariaId);
+
+    // Notificaciones de un donante jurídico, de la más nueva a la más vieja
+    List<Notificacion> findByDonanteJuridicoIdOrderByFechaEnvioDesc(Long donanteJuridicoId);
 }

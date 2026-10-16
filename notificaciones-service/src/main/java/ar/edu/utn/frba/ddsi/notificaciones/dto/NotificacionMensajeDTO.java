@@ -8,5 +8,6 @@ public record NotificacionMensajeDTO(
         Long donanteId,          // se resuelve al consumir (donante)
         Long entidadId,          // identifica a la entidad beneficiaria destinataria
         String mensaje,
-        String medio
+        String medio,
+        String tipoDonante       // HUMANO o JURIDICO; si viene null se toma HUMANO
 ) {}

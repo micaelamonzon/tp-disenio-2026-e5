@@ -8,5 +8,6 @@ public record NotificacionMensajeDTO(
         Long donanteId,        // id del donante en donaciones-service
         Long entidadId,        // no se usa desde incentivos
         String mensaje,
-        String medio           // null: se usa el medio preferido del donante
+        String medio,           // null: se usa el medio preferido del donante
+        String tipoDonante     // HUMANO o JURIDICO, para que notificaciones busque en la tabla correcta
 ) {}

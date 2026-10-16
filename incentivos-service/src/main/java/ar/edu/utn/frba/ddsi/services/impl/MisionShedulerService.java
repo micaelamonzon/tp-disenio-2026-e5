@@ -9,7 +9,6 @@ import ar.edu.utn.frba.ddsi.repositories.IncentivosRepository;
 import ar.edu.utn.frba.ddsi.services.IncentivosService;
 import ar.edu.utn.frba.ddsi.services.impl.NotificacionesPublisher;
 import ar.edu.utn.frba.ddsi.models.entities.persona.Donante;
-import ar.edu.utn.frba.ddsi.models.entities.persona.TipoDeDonante;
 import java.util.Objects;
 import lombok.Setter;
 import org.slf4j.Logger;
@@ -119,14 +118,12 @@ public class MisionShedulerService {
     }
 
 
-    // Publica el aviso en la cola. notificaciones-service solo resuelve donantes
-    // humanos (su id en donaciones), así que para jurídicos no se publica.
+    // Publica el aviso en la cola con el tipo de donante (HUMANO o JURIDICO):
+    // notificaciones-service busca el contacto en la tabla que corresponde,
+    // porque los ids de humanos y jurídicos en donaciones pueden coincidir
     private void notificarDonante(Donante donante, String mensaje) {
-        if (donante.getTipoDeDonante() != TipoDeDonante.HUMANO) {
-            loggerMisionesEnCurso.info("Donante {} es jurídico: no se publica la notificación", donante.getId());
-            return;
-        }
-        notificacionesPublisher.publicarParaDonante(donante.getIdEnDonaciones(), mensaje);
+        notificacionesPublisher.publicarParaDonante(
+                donante.getIdEnDonaciones(), mensaje, donante.getTipoDeDonante().name());
     }
 }
 

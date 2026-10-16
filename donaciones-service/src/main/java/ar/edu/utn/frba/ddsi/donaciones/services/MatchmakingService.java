@@ -16,11 +16,6 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.ArrayList;
 import java.util.List;
 
-import ar.edu.utn.frba.ddsi.donaciones.config.NotificacionesProperties;
-import org.springframework.web.client.RestTemplate;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-
 @Service
 @RequiredArgsConstructor
 public class MatchmakingService {
@@ -31,8 +26,7 @@ public class MatchmakingService {
     private final EstadoDonacionServiceimpl estadoDonacionService;
     private final List<Strategy_AlgoritmosMatchmaking> estrategiasActivas;
 
-    private final RestTemplate restTemplate;
-    private final NotificacionesProperties notificacionesProperties;
+    private final NotificacionesPublisher notificacionesPublisher;
 
     public PropuestaMatch obtenerPropuestaPorId(Long matcheoId ) {
         return matchRepository.findById(matcheoId).orElseThrow();
@@ -103,15 +97,25 @@ public class MatchmakingService {
             MedioDeNotificacion medio = necesidad.getEntidadBeneficiaria()
                     .getRepresentantes().get(0)
                     .getMediosDeNotificacion().get(0);
-            notificar(
+            notificacionesPublisher.publicarParaEntidad(
+                    necesidad.getEntidadBeneficiaria().getId(),
                     medio.getContacto(),
-                    "Se+le+asigno+una+nueva+donacion+a+su+entidad+beneficiaria",
+                    "Se le asignó una nueva donación a su entidad beneficiaria",
                     medio.getTipoDeNotificacion().name()
             );
         }
 
-        // Evento 3: Notificar al donante que su donación fue asignada
-        // (se implementa desde el servicio de donaciones cuando se integre el donante con la donación segmentada)
+        // Evento 3: Notificar al donante (humano o jurídico) que su donación fue asignada
+        DonacionSegmentada donacion = propuesta.getDonacion();
+        if (donacion != null) {
+            String aviso = "Tu donación de " + donacion.getSubcategoria().getNombre()
+                    + " fue asignada a una entidad beneficiaria";
+            if (donacion.getDonanteHumano() != null) {
+                notificacionesPublisher.publicarParaDonante(donacion.getDonanteHumano().getId(), aviso);
+            } else if (donacion.getDonanteJuridico() != null) {
+                notificacionesPublisher.publicarParaDonanteJuridico(donacion.getDonanteJuridico().getId(), aviso);
+            }
+        }
 
         return matchRepository.save(propuesta);
     }
@@ -127,20 +131,5 @@ public class MatchmakingService {
         return necesidades.stream()
                 .map(Necesidad::getId)
                 .anyMatch(necesidadId::equals);
-    }
-
-    // Método para llamar al servicio de notificaciones
-    // URL resultante: http://localhost:8081/servicioDeNotificaciones/notificar?destinatario=X&mensaje=Y&medio=Z
-    private void notificar(String destinatario, String mensaje, String medio) {
-        try {
-            String url = notificacionesProperties.getUrl() +
-                    "/servicioDeNotificaciones/notificar" +
-                    "?destinatario=" + URLEncoder.encode(destinatario, StandardCharsets.UTF_8) +
-                    "&mensaje=" + mensaje +
-                    "&medio=" + medio;
-            restTemplate.postForObject(url, null, String.class);
-        } catch (Exception e) {
-            System.out.println("Error al notificar: " + e.getMessage());
-        }
     }
 }
