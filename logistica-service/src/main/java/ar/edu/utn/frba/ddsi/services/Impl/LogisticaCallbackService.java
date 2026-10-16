@@ -168,9 +168,12 @@ public class LogisticaCallbackService implements ILogisticaCallbackService {
 
             Camion camion = repositoryCamiones.findById(route.truckId()).orElse(null);
 
+
             if (camion == null) {
                 System.err.println("No se encontró camión con truckId=" + route.truckId());
             }
+
+            camion.setDisponible(false);
 
             Ruta ruta = new Ruta();
             ruta.setCamionId(camion != null ? camion.getId() : null);

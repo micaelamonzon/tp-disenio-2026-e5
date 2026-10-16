@@ -35,7 +35,7 @@
                         <p class="mission-desc" th:text="'Categoría: ' + ${m.categoria}">Categoría: COLABORADOR</p>
 
                         <p class="mission-desc" th:if="${m.meses != null}"
-                           th:text="'Doná durante ' + ${m.meses} + ' meses consecutivos.'"></p>
+                           th:text="'Doná durante ' + ${m.meses} + ' meses consecutivos. Desde ' + ${m.mesInicial} + ' hasta ' + ${m.mesFinal}+'.'"></p>
                         <p class="mission-desc" th:if="${m.objetivoDeCategoriasDistintas != null}"
                            th:text="'Realizá donaciones de ' + ${m.objetivoDeCategoriasDistintas} + ' categorías distintas.'"></p>
                         <p class="mission-desc" th:if="${m.cantidadDeDonaciones != null}"
@@ -55,6 +55,9 @@
                 </div>
 
                 <div class="mission-progress" th:unless="${bloqueada or comenzable}">
+                    <p class="mission-distance" th:unless="${completada}"
+                       th:text="'Te falta ' + ${dist} + '% para el objetivo'"></p>
+
                     <div class="mission-progress-labels">
                         <span>Progreso</span>
                         <span th:text="${completada ? objetivo : prog} + ' / ' + ${objetivo}">0 / 10</span>

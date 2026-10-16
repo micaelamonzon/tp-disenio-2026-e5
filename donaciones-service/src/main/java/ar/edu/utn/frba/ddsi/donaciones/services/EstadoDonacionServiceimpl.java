@@ -23,9 +23,11 @@ import java.util.concurrent.atomic.AtomicLong;
 public class EstadoDonacionServiceimpl implements EstadoDonacionService{
 
     private final DonacionesRepository donacionesRepository;
+    private final ServiceWebHook webhookAIncentivos;
 
-    public EstadoDonacionServiceimpl(DonacionesRepository donacionesRepository) {
+    public EstadoDonacionServiceimpl(DonacionesRepository donacionesRepository, ServiceWebHook webhookAIncentivos) {
         this.donacionesRepository = donacionesRepository;
+        this.webhookAIncentivos = webhookAIncentivos;
     }
 
     @Override
@@ -82,6 +84,7 @@ public class EstadoDonacionServiceimpl implements EstadoDonacionService{
         }
         d.setDonacionEntregada(true); // lo usa incentivos para la misión "Donaciones Exitosas"
         this.donacionesRepository.save(d); // sin esto el cambio de estado no se persistía
+        this.webhookAIncentivos.notificarDonacionEntregada(d);
         return toDTO(d);
     }
 
