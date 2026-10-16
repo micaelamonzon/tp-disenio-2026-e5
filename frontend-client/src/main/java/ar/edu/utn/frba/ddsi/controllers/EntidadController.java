@@ -173,7 +173,6 @@ public class EntidadController {
         try {
             EntidadBeneficiariaDTO entidad = entidadesApiService.obtenerPerfil(idEntidadActual());
             model.addAttribute("entidad", entidad);
-            model.addAttribute("iniciales", iniciales(entidad.getRazonSocial()));
         } catch (RuntimeException e) {
             model.addAttribute("errorPerfil",
                     "No pudimos cargar los datos de tu entidad. Intentá de nuevo en unos minutos.");
@@ -181,11 +180,6 @@ public class EntidadController {
         return "acceso/entidadBeneficiaria/perfil";
     }
 
-    private String iniciales(String nombre) {
-        if (nombre == null || nombre.isBlank()) return "?";
-        String n = nombre.trim();
-        return n.substring(0, Math.min(2, n.length())).toUpperCase();
-    }
 
 
     // Req. 14: mapa con los camiones que traen donaciones a la entidad
@@ -236,12 +230,6 @@ public class EntidadController {
         return "acceso/entidadBeneficiaria/notificaciones";
     }
 
-//    @GetMapping("/perfil")
-//    public String pefil(Model model) {
-//        model.addAttribute("titulo", "Mi perfil");
-//        model.addAttribute("tabActiva", " ");
-//        return "acceso/entidadBeneficiaria/perfil";
-//    }
 
     private List<EntregaDTO> filtrarPorEstado(List<EntregaDTO> entregas, String estado) {
         return entregas.stream()

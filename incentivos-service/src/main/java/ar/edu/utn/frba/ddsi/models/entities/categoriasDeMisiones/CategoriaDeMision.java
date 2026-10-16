@@ -6,6 +6,7 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -22,7 +23,8 @@ public class CategoriaDeMision extends Persistente {
     private TipoCategoria nombre; //tipo o nombre de categoria
 
     @OneToMany(mappedBy = "categoria", fetch = FetchType.LAZY)
-    private List<Mision> misiones; //lista de misiones consecutivas a cumplir -> se llena en el servis de incentivos
+    @OrderBy("ordenSecuencial ASC")
+    private List<Mision> misiones;
 
     @Enumerated(EnumType.STRING)
     private TipoCategoria categoriaSiguiente;

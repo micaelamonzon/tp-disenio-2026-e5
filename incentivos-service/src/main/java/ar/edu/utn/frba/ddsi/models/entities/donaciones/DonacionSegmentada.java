@@ -26,6 +26,9 @@ public class DonacionSegmentada extends Persistente {
     private Donante donante;
 
     @Column
+    private Long idEnDonaciones;
+
+   @Column
     private LocalDateTime fechaDeIngreso;
 
     @Column
@@ -41,7 +44,8 @@ public class DonacionSegmentada extends Persistente {
     @JoinColumn(name = "categoria_id", referencedColumnName = "id")
     private Categoria categoria;
 
-    public DonacionSegmentada(LocalDateTime fechaDeIngreso, Boolean donacionEntregada, Long entidadBeneficiariaId, Integer cantidadDeBienes, Categoria categoria) {
+    public DonacionSegmentada(Long idEnDonaciones,LocalDateTime fechaDeIngreso, Boolean donacionEntregada, Long entidadBeneficiariaId, Integer cantidadDeBienes, Categoria categoria) {
+        this.idEnDonaciones = idEnDonaciones;
         this.fechaDeIngreso = fechaDeIngreso;
         this.donacionEntregada = donacionEntregada;
         this.entidadBeneficiariaId = entidadBeneficiariaId;

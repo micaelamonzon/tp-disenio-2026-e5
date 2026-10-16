@@ -5,7 +5,7 @@ import ar.edu.utn.frba.ddsi.models.entities.Camion;
 import ar.edu.utn.frba.ddsi.models.entities.Entrega;
 import ar.edu.utn.frba.ddsi.models.entities.EstadoEntrega;
 import ar.edu.utn.frba.ddsi.models.entities.Posicion;
-import ar.edu.utn.frba.ddsi.repository.RepositoryCamiones;
+import ar.edu.utn.frba.ddsi.repository.impl.RepositoryCamiones;
 import ar.edu.utn.frba.ddsi.repository.impl.RepositoryEntregas;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -51,6 +51,7 @@ public class SimuladorGpsService {
     }
 
     private void avanzar(String camionId, List<Entrega> entregas) {
+
         boolean hayActivas = entregas.stream().anyMatch(e ->
                 e.getEstadoActual() == EstadoEntrega.EN_TRASLADO);
         if (!hayActivas) return;
@@ -79,25 +80,8 @@ public class SimuladorGpsService {
         camion.agregarPosicion(nueva);
         repositoryCamiones.save(camion);
 
-        this.marcarEntregasCompletadas(entregas, rutaCamion, siguiente);
     }
 
-    //solo las marca completadas en el servicio de logistica, para que se seteen como entregdas en Donaciones, la entidad debe confirmar la entrega
-    private void marcarEntregasCompletadas(List<Entrega> entregas,
-                                           RutaCamionService.RutaCamion rutaCamion,
-                                           int indiceRuta) {
-        entregas.stream()
-                .filter(e -> e.getEstadoActual() == EstadoEntrega.EN_TRASLADO
-                        || e.getEstadoActual() == EstadoEntrega.PENDIENTE)
-                .filter(e -> {
-                    Integer indiceParada = rutaCamion.indiceDe(e.getId());
-                    return indiceParada != null && indiceRuta >= indiceParada;
-                })
-                .forEach(e -> {
-                    e.setEstadoActual(EstadoEntrega.ENTREGADA);
-                    repositoryEntregas.save(e);
-                });
-    }
 
 
 }

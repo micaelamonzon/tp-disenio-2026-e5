@@ -16,6 +16,7 @@ import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.DonacionSinSe
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.EstadoDonacion;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.Segmentador;
 import ar.edu.utn.frba.ddsi.donaciones.repositories.DonacionesRepository;
+import ar.edu.utn.frba.ddsi.donaciones.repositories.DonacionesSinSegmentarRepository;
 import ar.edu.utn.frba.ddsi.donaciones.repositories.DonantesHumanosRepository;
 import ar.edu.utn.frba.ddsi.donaciones.repositories.DonantesJuridicosRepository;
 import com.opencsv.exceptions.CsvValidationException;
@@ -39,6 +40,7 @@ public class DonacionesServiceImpl implements DonacionesService {
     private final DonantesHumanosRepository donantesHumanosRepository;
     private final DonacionesRepository donacionesRepository;
     private final DonantesJuridicosRepository donantesJuridicosRepository;
+    private final DonacionesSinSegmentarRepository donacionesSinSegmentarRepository;
 
     // Cliente HTTP para llamar al servicio de notificaciones
     private final RestTemplate restTemplate;
@@ -52,6 +54,7 @@ public class DonacionesServiceImpl implements DonacionesService {
 
     public DonacionesServiceImpl(DonantesHumanosRepository donantesRepository,
                                  DonantesJuridicosRepository donantesJuridicosRepository,
+                                 DonacionesSinSegmentarRepository donacionesSinSegmentarRepository,
                                  RestTemplate restTemplate,
                                  NotificacionesProperties notificacionesProperties,
                                  DonacionesRepository donacionesRepository,
@@ -66,6 +69,7 @@ public class DonacionesServiceImpl implements DonacionesService {
         this.donantesJuridicosRepository = donantesJuridicosRepository;
         this.catalogoSubcategorias = catalogoSubcategorias;
         this.webhookAIncentivos = webhookAIncentivos;
+        this.donacionesSinSegmentarRepository=donacionesSinSegmentarRepository;
     }
 
 
@@ -156,6 +160,7 @@ public class DonacionesServiceImpl implements DonacionesService {
                 .flatMap(donacionSinSegmentar -> donacionSinSegmentar.getDonacionesSegmentadas().stream())
                 .map(donacionSegmentada ->
                         new DonacionIncentivosDTO(
+                                donacionSegmentada.getId(),
                                 donacionSegmentada.getDonacionEntregada(),
                                 donacionSegmentada.getEntidadBeneficiaria().getId(),
                                 donacionSegmentada.getFechaDeIngreso(),
@@ -434,6 +439,7 @@ public class DonacionesServiceImpl implements DonacionesService {
 
 
     @Override
+    @Transactional
     public List<DonacionSegmentadaDTO> crearDonacionDeHumano(DonacionSinSegmentarDTO body, Long id) {
 
         PersonaHumana personaHumana = this.donantesHumanosRepository.findById(id).orElse(null);
@@ -446,24 +452,24 @@ public class DonacionesServiceImpl implements DonacionesService {
         DonacionSinSegmentar nuevaDonacionSinSegmentar = new DonacionSinSegmentar(body.descripcionGeneral(), LocalDateTime.now());
         bienes.forEach(nuevaDonacionSinSegmentar::agregarBien);
         nuevaDonacionSinSegmentar.setDonanteHumano(personaHumana);
+        personaHumana.agregarDonacion(nuevaDonacionSinSegmentar);
 
 
         //segmentamos
         List<DonacionSegmentada> donacionesSegmentadas = this.segmentador.segmentar(nuevaDonacionSinSegmentar);
+
         donacionesSegmentadas.forEach(d -> d.setDonanteHumano(personaHumana));
-        //guardamos las donaciones segmentadas en su repo
 
-//        donacionesSegmentadas.forEach(d -> {
-//            d.setDonanteHumano(personaHumana);
-//            this.donacionesRepository.save(d);
-//        });
-
-        personaHumana.agregarDonacion(nuevaDonacionSinSegmentar);
         this.donantesHumanosRepository.save(personaHumana);
+
+        this.donacionesRepository.saveAll(donacionesSegmentadas);
+
+        this.donacionesSinSegmentarRepository.save(nuevaDonacionSinSegmentar);
 
         webhookAIncentivos.notificarNuevasDonaciones(
             donacionesSegmentadas.stream().map( d ->
                  new DonacionIncentivosDTO(
+                      d.getId(),
                       d.getDonacionEntregada(),
                       d.getEntidadBeneficiaria() != null ? d.getEntidadBeneficiaria().getId() : null,
                       d.getFechaDeIngreso(),
@@ -486,7 +492,7 @@ public class DonacionesServiceImpl implements DonacionesService {
 
     @Override
     @Transactional
-    public List<DonacionSegmentadaDTO> crearDonacionDeJuridico(DonacionSinSegmentarDTO body, Long id){
+    public List<DonacionSegmentadaDTO> crearDonacionDeJuridico(DonacionSinSegmentarDTO body, Long id) {
 
         PersonaJuridica personaJuridica = this.donantesJuridicosRepository.findById(id).orElse(null);
 
@@ -498,22 +504,22 @@ public class DonacionesServiceImpl implements DonacionesService {
         DonacionSinSegmentar nuevaDonacion = new DonacionSinSegmentar(body.descripcionGeneral(), LocalDateTime.now());
         bienes.forEach(nuevaDonacion::agregarBien);
         nuevaDonacion.setDonanteJuridico(personaJuridica);
+        personaJuridica.agregarDonacion(nuevaDonacion);
 
         //segmentamos
         List<DonacionSegmentada> donacionesSegmentadas = this.segmentador.segmentar(nuevaDonacion);
+        donacionesSegmentadas.forEach(d -> {d.setDonanteJuridico(personaJuridica);} );
 
-        //guardamos las donaciones segmentadas en su repo
 
-        donacionesSegmentadas.forEach(d -> {
-            d.setDonanteJuridico(personaJuridica);
-        } );
-
-        personaJuridica.agregarDonacion(nuevaDonacion);
         this.donantesJuridicosRepository.save(personaJuridica);
+        this.donacionesRepository.saveAll(donacionesSegmentadas);
+        this.donacionesSinSegmentarRepository.save(nuevaDonacion);
+
 
         webhookAIncentivos.notificarNuevasDonaciones(
                 donacionesSegmentadas.stream().map( d ->
                         new DonacionIncentivosDTO(
+                                d.getId(),
                                 d.getDonacionEntregada(),
                                 d.getEntidadBeneficiaria() != null ? d.getEntidadBeneficiaria().getId(): null,
                                 d.getFechaDeIngreso(),

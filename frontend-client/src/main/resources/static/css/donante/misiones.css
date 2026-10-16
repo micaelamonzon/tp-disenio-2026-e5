@@ -76,6 +76,10 @@
 
 .mission-start{ margin-top: 14px; }
 .mission-start .btn{ min-height: 48px; justify-content: center; width: 100%; }
-
+.mission-distance {
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin: 0 0 6px;
+}
 
 

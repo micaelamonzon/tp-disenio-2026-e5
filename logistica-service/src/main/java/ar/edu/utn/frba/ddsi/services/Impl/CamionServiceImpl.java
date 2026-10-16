@@ -2,24 +2,16 @@ package ar.edu.utn.frba.ddsi.services.Impl;
 
 import ar.edu.utn.frba.ddsi.dto.CamionDTO;
 import ar.edu.utn.frba.ddsi.dto.CamionResponseDTO;
-import ar.edu.utn.frba.ddsi.dto.EntregaDTO;
-import ar.edu.utn.frba.ddsi.dto.PlanningResultDTO;
 import ar.edu.utn.frba.ddsi.models.entities.Camion;
-import ar.edu.utn.frba.ddsi.models.entities.PuntosDeEntrega;
-import ar.edu.utn.frba.ddsi.models.entities.Ruta;
-import ar.edu.utn.frba.ddsi.repository.impl.RepositoryRutas;
 import ar.edu.utn.frba.ddsi.services.CamionService;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
 
-import ar.edu.utn.frba.ddsi.repository.RepositoryCamiones;
+import ar.edu.utn.frba.ddsi.repository.impl.RepositoryCamiones;
 
 
 
