@@ -1,7 +1,6 @@
-package ar.edu.utn.frba.ddsi.models.entities;
+package ar.edu.utn.frba.ddsi.services;
 
 import ar.edu.utn.frba.ddsi.dto.DonacionDTO;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
