@@ -43,7 +43,7 @@ public class ServiceWebHook {
 
     public void notificarDonacionEntregada(DonacionSegmentada donacion) {
         if (donacion == null) return;
-        enviarDonacionEntregada(donacion.getId());
+        enviarDonacionEntregada(donacion.getId(), donacion.getEntidadBeneficiaria().getId());
     }
 
     private void enviar(String path, Object body) {
@@ -74,10 +74,10 @@ public class ServiceWebHook {
         }
     }
 
-    private void enviarDonacionEntregada(Long idDonacionEntregada) {
+    private void enviarDonacionEntregada(Long idDonacionEntregada, Long idEntidadBeneficiaria) {
         try {
             client.post()
-                    .uri("incentivos/webhooks/donacion/{idDonacionEnDonaciones}/fueEntregada", idDonacionEntregada)
+                    .uri("incentivos/webhooks/donacion/{idDonacionEnDonaciones}/fueEntregada/{idEntidadBeneficiaria}", idDonacionEntregada, idEntidadBeneficiaria)
                     .retrieve()
                     .toBodilessEntity();
 
