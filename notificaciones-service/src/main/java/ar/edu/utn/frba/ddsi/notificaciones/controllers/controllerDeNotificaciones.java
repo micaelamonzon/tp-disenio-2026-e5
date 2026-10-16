@@ -103,6 +103,15 @@ public class controllerDeNotificaciones {
                 .toList();
     }
 
+    // Notificaciones de un donante jurídico
+    @GetMapping("/juridicos/{donanteJuridicoId}/notificaciones")
+    public List<NotificacionResponseDTO> notificacionesDeDonanteJuridico(@PathVariable Long donanteJuridicoId) {
+        return notificacionRepository.findByDonanteJuridicoIdOrderByFechaEnvioDesc(donanteJuridicoId)
+                .stream()
+                .map(this::aDTO)
+                .toList();
+    }
+
     // Notificaciones de una entidad beneficiaria (req. 13). Mismo criterio que la de donante.
     @GetMapping("/entidades/{entidadId}/notificaciones")
     public List<NotificacionResponseDTO> notificacionesDeEntidad(@PathVariable Long entidadId) {

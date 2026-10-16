@@ -31,6 +31,12 @@ public class NotificacionesApiService {
         return obtenerLista("/donantes/" + donanteId + "/notificaciones");
     }
 
+    // Los jurídicos tienen su propio endpoint: sus ids son de otra tabla y podrían
+    // coincidir con los de las personas humanas
+    public List<NotificacionDTO> obtenerNotificacionesDeDonanteJuridico(Long donanteJuridicoId) {
+        return obtenerLista("/juridicos/" + donanteJuridicoId + "/notificaciones");
+    }
+
     // Las dos llamadas son iguales salvo la ruta, así que comparten este método
     private List<NotificacionDTO> obtenerLista(String ruta) {
         try {

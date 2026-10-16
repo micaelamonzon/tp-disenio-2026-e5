@@ -4,6 +4,14 @@
 
     <link rel="stylesheet" th:href="@{/css/donante/seguimiento.css}">
 
+    <!-- entidades.css define --blue como gris pero el mapa usa los colores del donante -->
+    <style>
+        #view-seguimiento {
+            --blue: #3d5afe;
+            --blue-soft: #eff6ff;
+        }
+    </style>
+
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
           integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"

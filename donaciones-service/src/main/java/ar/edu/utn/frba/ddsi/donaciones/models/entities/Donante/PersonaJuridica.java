@@ -36,6 +36,11 @@ public class PersonaJuridica {
     @Column(name = "fecha_de_registro")
     private LocalDateTime fechaDeRegistro;
 
+    // Última vez que se le avisó por inactividad. Evita repetir el aviso todos los días:
+    // solo se vuelve a avisar si hubo actividad (una donación) después de este aviso
+    @Column(name = "fecha_ultimo_aviso_inactividad")
+    private LocalDateTime fechaUltimoAvisoInactividad;
+
     @OneToMany (cascade = CascadeType.ALL)
     @JoinColumn(name = "persona_juridica_id", referencedColumnName = "id")
     private List<Representante> personasRepresentantes = new ArrayList<>();
