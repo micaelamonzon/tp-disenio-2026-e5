@@ -1,5 +1,6 @@
 package ar.edu.utn.frba.ddsi.services;
 
+import ar.edu.utn.frba.ddsi.dtos.donaciones.misiones.MetricasImpactoDTO;
 import ar.edu.utn.frba.ddsi.dtos.donaciones.misiones.MisionFrontDTO;
 import ar.edu.utn.frba.ddsi.dtos.donaciones.misiones.PerfilDTO;
 import ar.edu.utn.frba.ddsi.dtos.donaciones.misiones.RankingMensualDTO;
@@ -23,6 +24,10 @@ public class IncentivosService {
     public PerfilDTO obtenerPerfil(Long idDonante, TipoDeDonante tipo) {
         return incentivosApiService.obtenerPerfil(idDonante, tipo);
     }
+    public MetricasImpactoDTO obtenerMetricas(Long idDonante, TipoDeDonante tipo) {
+        return incentivosApiService.obtenerMetricas(idDonante, tipo);
+    }
+
     public void comenzarMision(Long idDonante, Long misionId,TipoDeDonante tipo) {
         incentivosApiService.comenzarMision(idDonante, misionId,  tipo);
     }

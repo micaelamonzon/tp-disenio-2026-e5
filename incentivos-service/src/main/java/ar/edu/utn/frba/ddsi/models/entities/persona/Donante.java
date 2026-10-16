@@ -124,14 +124,33 @@ public class Donante extends Persistente {
                 .map(entry -> new MetricaMensual(
                         entry.getKey(),
                         entry.getValue().size(),
-                        0  // organizaciones: se completa cuando tengamos entidad en donación
+                        // organizaciones distintas que RECIBIERON las donaciones de ese mes
+                        (int) entry.getValue().stream()
+                                .filter(Donante::fueEntregada)
+                                .map(DonacionSegmentada::getEntidadBeneficiariaId)
+                                .filter(java.util.Objects::nonNull)
+                                .distinct()
+                                .count()
                 ))
                 .toList();
     }
 
-    // Total historico
+    // Total historico: todas las donaciones realizadas, en cualquier estado
     public int totalDonaciones() {
         return donaciones.size();
+    }
+
+    // Las que ya llegaron a una entidad beneficiaria
+    public int totalDonacionesEntregadas() {
+        if (this.donaciones == null) {
+            return 0;
+        }
+        return (int) this.donaciones.stream().filter(Donante::fueEntregada).count();
+    }
+
+    // donacionEntregada puede venir null si la donación todavía no fue entregada
+    private static boolean fueEntregada(DonacionSegmentada donacion) {
+        return Boolean.TRUE.equals(donacion.getDonacionEntregada());
     }
 
     public int compararConMesAnterior() {
@@ -152,6 +171,7 @@ public class Donante extends Persistente {
         }
 
         return (int) this.donaciones.stream()
+                .filter(Donante::fueEntregada)
                 .map(DonacionSegmentada::getEntidadBeneficiariaId)
                 .filter(java.util.Objects::nonNull)
                 .distinct()

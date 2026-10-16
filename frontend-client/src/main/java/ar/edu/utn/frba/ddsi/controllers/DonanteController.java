@@ -226,11 +226,32 @@ public class DonanteController {
     public String perfil(Model model) {
         model.addAttribute("titulo", "Mi Perfil");
         model.addAttribute("tabActiva", "");
+        // Misiones, insignias, categoría y ranking
         try {
             model.addAttribute("perfil", incentivosService.obtenerPerfil(idDonanteActual(), tipoDonanteActual()));
+        } catch (SesionExpiradaException e) {
+            throw e;
         } catch (RuntimeException e) {
             model.addAttribute("error", "El servicio de incentivos no está disponible. Intentá de nuevo en unos minutos.");
         }
+        // Métricas del donante: totales, evolución mensual, comparación, organizaciones
+        try {
+            model.addAttribute("metricas", incentivosService.obtenerMetricas(idDonanteActual(), tipoDonanteActual()));
+        } catch (SesionExpiradaException e) {
+            throw e;
+        } catch (RuntimeException e) {
+            model.addAttribute("errorMetricas", "No pudimos cargar tus estadísticas en este momento.");
+        }
+        // Datos personales
+        try {
+            model.addAttribute("datos", donacionesService.obtenerDatosPersonales(
+                    idDonanteActual(), usuarioActual.obtener().esDonanteHumano()));
+        } catch (SesionExpiradaException e) {
+            throw e;
+        } catch (RuntimeException e) {
+            model.addAttribute("errorDatos", "No pudimos cargar tus datos personales en este momento.");
+        }
+        model.addAttribute("email", usuarioActual.obtener().email());
         return "acceso/donante/perfil";
     }
 

@@ -162,12 +162,26 @@ public class DonacionesServiceImpl implements DonacionesService {
                         new DonacionIncentivosDTO(
                                 donacionSegmentada.getId(),
                                 donacionSegmentada.getDonacionEntregada(),
-                                donacionSegmentada.getEntidadBeneficiaria().getId(),
+                                // Una donación recién cargada todavía no tiene entidad (la asigna el matchmaking)
+                                donacionSegmentada.getEntidadBeneficiaria() != null
+                                        ? donacionSegmentada.getEntidadBeneficiaria().getId() : null,
                                 donacionSegmentada.getFechaDeIngreso(),
                                 donacionSegmentada.getBienesDelMismoTipo().size(),
-                                donacionSegmentada.getBienesDelMismoTipo().get(0).getSubcategoria().getCategoria().getNombre()
+                                this.categoriaDe(donacionSegmentada)
                         ))
                 .collect(Collectors.toList());
+    }
+
+    // Categoría de la donación, null si no se puede saber
+    private String categoriaDe(DonacionSegmentada donacion) {
+        if (donacion.getBienesDelMismoTipo() == null || donacion.getBienesDelMismoTipo().isEmpty()) {
+            return null;
+        }
+        var subcategoria = donacion.getBienesDelMismoTipo().get(0).getSubcategoria();
+        if (subcategoria == null || subcategoria.getCategoria() == null) {
+            return null;
+        }
+        return subcategoria.getCategoria().getNombre();
     }
 
     @Override

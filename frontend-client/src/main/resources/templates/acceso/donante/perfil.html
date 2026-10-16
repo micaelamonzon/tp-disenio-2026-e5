@@ -3,14 +3,15 @@
     <section id="view-perfil">
         <div class="page-head">
             <h1>Mi Perfil</h1>
-            <p class="page-sub">Tu actividad, insignias y progreso como persona donante</p>
+            <p class="page-sub">Tus datos, tu impacto, insignias y progreso como persona donante</p>
         </div>
 
         <p th:if="${error}" th:text="${error}" class="profile-empty" role="alert"></p>
 
-        <div class="profile-layout" th:if="${perfil}">
+        <!-- Cada parte se muestra si se pudo cargar: perfil (incentivos), métricas (incentivos), datos (donaciones) -->
+        <div class="profile-layout">
 
-            <div class="profile-card profile-header">
+            <div class="profile-card profile-header" th:if="${perfil}">
                 <div class="avatar profile-avatar" aria-hidden="true"
                      th:text="${perfil.iniciales()}">PD</div>
                 <div class="profile-header-info">
@@ -28,8 +29,62 @@
                 </div>
             </div>
 
-
+            <!-- Datos personales (vienen de donaciones) -->
             <div class="profile-card">
+                <h3 class="profile-section-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    Datos personales
+                </h3>
+                <p class="profile-empty" th:if="${errorDatos}" th:text="${errorDatos}" role="alert"></p>
+                <dl class="profile-data" th:if="${datos}">
+                    <div><dt>Nombre</dt><dd th:text="${datos.nombre()}">Soledad Romero</dd></div>
+                    <div><dt th:text="${datos.tipoDocumento()}">DNI</dt><dd th:text="${datos.documento()}">30111222</dd></div>
+                    <div><dt>Email de la cuenta</dt><dd th:text="${email}">soledad@mail.com</dd></div>
+                    <div th:if="${not #strings.isEmpty(datos.direccion())}"><dt>Dirección</dt><dd th:text="${datos.direccion()}"></dd></div>
+                    <div th:if="${datos.tipoOrganizacion() != null}"><dt>Tipo de organización</dt><dd th:text="${datos.tipoOrganizacion()}"></dd></div>
+                    <div th:if="${not #strings.isEmpty(datos.rubro())}"><dt>Rubro</dt><dd th:text="${datos.rubro()}"></dd></div>
+                    <div th:if="${not #lists.isEmpty(datos.contactos())}">
+                        <dt>Medios de contacto</dt>
+                        <dd><span th:each="c, i : ${datos.contactos()}" th:text="${c} + ${i.last ? '' : ' · '}"></span></dd>
+                    </div>
+                </dl>
+            </div>
+
+            <!-- Impacto acumulado (TP: totales históricos, comparación mensual, organizaciones ayudadas) -->
+            <div class="profile-card">
+                <h3 class="profile-section-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 5-6"/></svg>
+                    Tu impacto
+                </h3>
+                <p class="profile-empty" th:if="${errorMetricas}" th:text="${errorMetricas}" role="alert"></p>
+                <div class="impact-grid" th:if="${metricas}">
+                    <!-- Cada tarjeta: título arriba, valor abajo (y un detalle opcional) -->
+                    <div class="impact-item">
+                        <span class="impact-title">Donaciones realizadas</span>
+                        <b th:text="${metricas.totalDonacionesHistoricas() ?: 0}">12</b>
+                    </div>
+                    <div class="impact-item">
+                        <span class="impact-title">Entregadas a una entidad</span>
+                        <b th:text="${metricas.totalDonacionesEntregadas() ?: 0}">8</b>
+                    </div>
+                    <div class="impact-item">
+                        <span class="impact-title">Organizaciones ayudadas</span>
+                        <b th:text="${metricas.totalOrganizacionesAyudadas() ?: 0}">3</b>
+                    </div>
+                    <div class="impact-item">
+                        <span class="impact-title">Este mes vs. el anterior</span>
+                        <b th:classappend="${metricas.diferenciaMensual() > 0} ? 'impact-up' : (${metricas.diferenciaMensual() < 0} ? 'impact-down' : '')"
+                           th:text="${metricas.diferenciaMensual() > 0 ? '▲ ' + metricas.diferenciaMensual()
+                                    : (metricas.diferenciaMensual() < 0 ? '▼ ' + (-metricas.diferenciaMensual()) : '= 0')}">▲ 2</b>
+                    </div>
+                    <div class="impact-item">
+                        <span class="impact-title">Tu mejor mes</span>
+                        <b th:text="${metricas.mesPicoNombre() != null ? metricas.mesPicoNombre() : '-'}">Octubre</b>
+                    </div>
+                </div>
+            </div>
+
+            <div class="profile-card" th:if="${perfil}">
                 <h3 class="profile-section-title">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="6"/><path d="M15.5 13.5 17 22l-5-3-5 3 1.5-8.5"/></svg>
                     Insignias ganadas
@@ -47,7 +102,7 @@
                 </p>
             </div>
 
-            <div class="profile-card">
+            <div class="profile-card" th:if="${perfil}">
                 <h3 class="profile-section-title">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
                     Categoría Actual
@@ -58,49 +113,32 @@
                 </div>
             </div>
 
-
+            <!-- Evolución mensual con datos reales: la altura de cada barra es proporcional al mes con más donaciones -->
             <div class="profile-card">
                 <h3 class="profile-section-title">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
                     Evolución mensual
                 </h3>
 
-                <div class="evolution-chart" id="evolutionChart" role="img" aria-label="Evolución mensual de donaciones">
+                <p class="profile-empty" th:if="${metricas == null}">El gráfico no está disponible en este momento.</p>
+                <p class="profile-empty" th:if="${metricas != null and #lists.isEmpty(metricas.evolucion())}">
+                    Todavía no tenés donaciones para mostrar en el gráfico.
+                </p>
 
-                    <div class="evolution-col" data-valor="4">
-                        <span class="evolution-value">4</span>
-                        <div class="evolution-bar"></div>
-                        <span class="evolution-label">Abr</span>
-                    </div>
-                    <div class="evolution-col" data-valor="7">
-                        <span class="evolution-value">7</span>
-                        <div class="evolution-bar"></div>
-                        <span class="evolution-label">May</span>
-                    </div>
-                    <div class="evolution-col" data-valor="5">
-                        <span class="evolution-value">5</span>
-                        <div class="evolution-bar"></div>
-                        <span class="evolution-label">Jun</span>
-                    </div>
-                    <div class="evolution-col" data-valor="9">
-                        <span class="evolution-value">9</span>
-                        <div class="evolution-bar"></div>
-                        <span class="evolution-label">Jul</span>
-                    </div>
-                    <div class="evolution-col" data-valor="12">
-                        <span class="evolution-value">12</span>
-                        <div class="evolution-bar"></div>
-                        <span class="evolution-label">Ago</span>
-                    </div>
-                    <div class="evolution-col" data-valor="10">
-                        <span class="evolution-value">10</span>
-                        <div class="evolution-bar"></div>
-                        <span class="evolution-label">Sep</span>
+                <div class="evolution-chart" id="evolutionChart" role="img"
+                     th:if="${metricas != null and not #lists.isEmpty(metricas.evolucion())}"
+                     aria-label="Evolución mensual de donaciones">
+                    <div class="evolution-col" th:each="m : ${metricas.evolucion()}"
+                         th:title="${m.cantidad() + ' donaciones, ' + (m.organizacionesAyudadas() ?: 0) + ' organizaciones ayudadas'}">
+                        <span class="evolution-value" th:text="${m.cantidad()}">4</span>
+                        <div class="evolution-bar"
+                             th:style="'height:' + ${metricas.maximoMensual() > 0 ? m.cantidad() * 80 / metricas.maximoMensual() : 0} + '%'"></div>
+                        <span class="evolution-label" th:text="${m.etiqueta()}">Abr 26</span>
                     </div>
                 </div>
             </div>
 
-            <div class="profile-card">
+            <div class="profile-card" th:if="${perfil}">
                 <h3 class="profile-section-title">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
                     Puesto en el Ranking Mensual

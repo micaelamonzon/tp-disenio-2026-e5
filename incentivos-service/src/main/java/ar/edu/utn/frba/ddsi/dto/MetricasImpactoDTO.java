@@ -7,6 +7,7 @@ public record MetricasImpactoDTO(
         Long idDonante,
         String nombreDonante,
         int totalDonacionesHistoricas,
+        int totalDonacionesEntregadas,
         YearMonth mesConMasDonaciones,
         long cantidadDonacionesEnMesPico,
 
