@@ -4,6 +4,10 @@ import ar.edu.utn.frba.ddsi.notificaciones.dto.DonanteJuridicoDTO;
 import ar.edu.utn.frba.ddsi.notificaciones.dto.PersonaHumanaDTO;
 import ar.edu.utn.frba.ddsi.notificaciones.models.entities.ServicioDeNotificaciones.Donante;
 import ar.edu.utn.frba.ddsi.notificaciones.models.repositories.DonanteRepository;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -21,13 +25,24 @@ public class DonanteService {
 
     private final DonanteRepository donanteRepository;
     private final RestTemplate restTemplate;
+    private final String apiToken;
 
     private static final String DONANTE_JURIDICO_URL =
             "http://localhost:8080/servicioDeDonaciones/donante/juridico/";
 
-    public DonanteService(DonanteRepository donanteRepository, RestTemplate restTemplate) {
+    // Donaciones solo deja leer el contacto de un donante al propio donante, al admin
+    // o a un servicio: notificaciones se identifica con su API token
+    public DonanteService(DonanteRepository donanteRepository, RestTemplate restTemplate,
+                          @Value("${api.token}") String apiToken) {
         this.donanteRepository = donanteRepository;
         this.restTemplate = restTemplate;
+        this.apiToken = apiToken;
+    }
+
+    private <T> T getDeDonaciones(String url, Class<T> tipo) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("X-Api-Token", apiToken);
+        return restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(headers), tipo).getBody();
     }
 
     // Llama a donaciones-service para obtener los datos actuales del donante,
@@ -35,10 +50,7 @@ public class DonanteService {
     // el GET: asi el envio siempre usa el contacto mas reciente, sin
     // necesitar un proceso de validacion periodico aparte.
     public Donante resolverYActualizarDonante(Long donanteId) {
-        PersonaHumanaDTO persona = restTemplate.getForObject(
-                DONACIONES_SERVICE_URL + donanteId,
-                PersonaHumanaDTO.class
-        );
+        PersonaHumanaDTO persona = getDeDonaciones(DONACIONES_SERVICE_URL + donanteId, PersonaHumanaDTO.class);
 
         if (persona == null || persona.medioDeNotificacionPredeterminado() == null) {
             throw new IllegalStateException(
@@ -59,10 +71,7 @@ public class DonanteService {
     // los jurídicos no se guardan en la caché Donante (su id es de otra tabla
     // y chocaría con el de las personas humanas), solo se resuelve el contacto
     public DonanteJuridicoDTO.Medio resolverContactoJuridico(Long donanteJuridicoId) {
-        DonanteJuridicoDTO juridico = restTemplate.getForObject(
-                DONANTE_JURIDICO_URL + donanteJuridicoId,
-                DonanteJuridicoDTO.class
-        );
+        DonanteJuridicoDTO juridico = getDeDonaciones(DONANTE_JURIDICO_URL + donanteJuridicoId, DonanteJuridicoDTO.class);
 
         if (juridico == null || juridico.mediosDeNotificacion() == null
                 || juridico.mediosDeNotificacion().isEmpty()) {

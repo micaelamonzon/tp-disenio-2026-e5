@@ -7,10 +7,13 @@ import org.springframework.web.client.RestClient;
 
 @Configuration
 public class NotificacionesClientConfig {
+
     @Bean
-    public RestClient notificacionesRestClient() {
+    public RestClient notificacionesRestClient(@Value("${service.notificaciones.url}") String notificacionesUrl,
+                                               @Value("${api.token}") String apiToken) {
         return RestClient.builder()
-                .baseUrl("http://localhost:8081")
+                .baseUrl(notificacionesUrl)
+                .defaultHeader("X-Api-Token", apiToken)
                 .build();
     }
 }

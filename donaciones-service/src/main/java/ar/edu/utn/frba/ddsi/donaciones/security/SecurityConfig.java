@@ -50,10 +50,6 @@ public class SecurityConfig {
                         // Mapa y galería de la landing: donaciones entregadas, sin datos del donante
                         .requestMatchers(HttpMethod.GET, P + "/donaciones/entregadas").permitAll()
 
-                        // ---------- TEMPORAL hasta que notificaciones mande su API token ----------
-                        // notificaciones consulta el contacto del donante
-                        .requestMatchers(HttpMethod.GET, P + "/donante/humano/*").permitAll()
-
                         // ---------- TEMPORAL hasta que admin.js pase por el front ----------
                         // admin.js llama desde el navegador y no tiene el token (está en la sesión del front).
                         // GET /donaciones también lo usa logística, que ya manda su API token.
@@ -82,6 +78,10 @@ public class SecurityConfig {
                         // ---------- Donantes y sus donaciones: solo el propio donante o ADMIN ----------
                         .requestMatchers(HttpMethod.GET, P + "/donaciones/humano/{idDonante}").access(ReglaDeDuenio.donante(HUMANO))
                         .requestMatchers(HttpMethod.GET, P + "/donaciones/juridico/{idDonante}").access(ReglaDeDuenio.donante(JURIDICO))
+                        // Datos y contacto del donante: el propio donante, ADMIN, o un servicio
+                        // (notificaciones y logística lo consultan con su API token para avisarle)
+                        .requestMatchers(HttpMethod.GET, P + "/donante/humano/{idDonante}").access(ReglaDeDuenio.donanteOServicio(HUMANO))
+                        .requestMatchers(HttpMethod.GET, P + "/donante/juridico/{idDonante}").access(ReglaDeDuenio.donanteOServicio(JURIDICO))
                         .requestMatchers(P + "/donante/humano/{idDonante}", P + "/humano/donacion/{idDonante}/**").access(ReglaDeDuenio.donante(HUMANO))
                         .requestMatchers(P + "/donante/juridico/{idDonante}", P + "/juridico/donacion/{idDonante}/**").access(ReglaDeDuenio.donante(JURIDICO))
                         .requestMatchers(HttpMethod.GET, P + "/donacion/*/historial").authenticated()

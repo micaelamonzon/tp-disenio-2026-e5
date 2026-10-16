@@ -33,6 +33,11 @@
             <artifactId>common-lib</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
+        <!-- Validación de tokens: las clases están en common-lib; cada servicio agrega Spring Security -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
