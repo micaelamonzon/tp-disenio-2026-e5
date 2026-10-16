@@ -30,7 +30,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Públicas (TP: landing, fotos y mapa sin login, legal, registro e inicio de sesión)
                         .requestMatchers("/", "/acceso/**", "/error").permitAll()
-                        .requestMatchers("/css/**", "/js/**", "/img/**", "/favicon.ico").permitAll()
+                        .requestMatchers("/css/**", "/js/**", "/img/**", "/uploads/**", "/favicon.ico").permitAll()
 
                         .requestMatchers("/donante/**").hasAnyRole("DONANTE_HUMANO", "DONANTE_JURIDICO")
                         .requestMatchers("/entidadBeneficiaria/**").hasRole("ENTIDAD_BENEFICIARIA")
