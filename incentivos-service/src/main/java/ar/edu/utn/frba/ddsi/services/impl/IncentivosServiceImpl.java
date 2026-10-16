@@ -333,23 +333,7 @@ public class IncentivosServiceImpl implements IncentivosService {
         return ranking.getPosicion(donante);
     }
 
-    public List<DonacionSegmentada> convertirDonacionesDTO(List<DonacionIncentivosDTO> donacionesDTO) {
 
-        List<DonacionSegmentada> donaciones = donacionesDTO.stream().map(
-                donacion -> {
-
-                    return new DonacionSegmentada(
-                            donacion.idEnDonaciones(),
-                            donacion.fechaDeIngreso(),
-                            donacion.donacionEntregada(),
-                            donacion.entidadBeneficiariaId(),
-                            donacion.cantidadDeBienes(),
-                            new Categoria(donacion.categoria())
-                    );
-                }).toList();
-
-        return donaciones;
-    }
 
 
     public List<MisionParticularDTO> obtenerMisionParticularDTO(List<MisionParticular> misiones) {
