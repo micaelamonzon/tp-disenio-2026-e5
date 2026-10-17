@@ -61,13 +61,13 @@ public class LogisticaController {
     public String entregas(Model model) {
         List<EntregaDTO> entregas = logisticaApiService.obtenerEntregas();
         model.addAttribute("entregas", entregas);
-        return "acceso/personaAdministradora/logistica/entregas"; // ← cambiado
+        return "acceso/personaAdministradora/logistica/entregas";
     }
 
     @GetMapping("/entregas/{id}")
     public String detalleEntrega(@PathVariable String id, Model model) {
         EntregaDTO entrega = logisticaApiService.obtenerEntregaPorId(id);
         model.addAttribute("entrega", entrega);
-        return "acceso/personaAdministradora/logistica/detalle-entrega"; // ← cambiado
+        return "acceso/personaAdministradora/logistica/detalle-entrega";
     }
 }

@@ -1,6 +1,7 @@
 package ar.edu.utn.frba.ddsi.services.Impl;
 
 import ar.edu.utn.frba.ddsi.dto.PosicionDTO;
+import ar.edu.utn.frba.ddsi.dto.RutaCamionDTO;
 import ar.edu.utn.frba.ddsi.dto.RutaEntregaDTO;
 import ar.edu.utn.frba.ddsi.dto.UltimoAvanceDTO;
 import ar.edu.utn.frba.ddsi.models.entities.Camion;
@@ -162,7 +163,7 @@ public class MonitoreoServiceImpl implements MonitoreoService {
                 .distinct()
                 .toList();
 
-        RutaCamionService.RutaCamion rutaCamion = rutaCamionService.armarRutaPara(entrega);
+        RutaCamionDTO rutaCamion = rutaCamionService.armarRutaPara(entrega);
 
 
         return new RutaEntregaDTO(

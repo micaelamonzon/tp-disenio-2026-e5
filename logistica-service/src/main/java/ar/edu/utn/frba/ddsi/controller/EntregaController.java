@@ -95,6 +95,12 @@ public class EntregaController {
         return ResponseEntity.ok(entregaService.listarEntregas());
     }
 
+    @GetMapping("entregasDeEntidad/{idEntidadBeneficiaria}")
+    public ResponseEntity<List<EntregaDTO>> listarEntregas(@PathVariable Long idEntidadBeneficiaria) {
+        return ResponseEntity.ok(entregaService.listarEntregasDeEntidadBeneficiaria(idEntidadBeneficiaria));
+    }
+
+
     @GetMapping("/entrega/{id}")
     public ResponseEntity<EntregaDTO> obtenerEntrega(@PathVariable String id) {
         try {

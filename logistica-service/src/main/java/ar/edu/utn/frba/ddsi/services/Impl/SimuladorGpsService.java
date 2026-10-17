@@ -1,6 +1,7 @@
 package ar.edu.utn.frba.ddsi.services.Impl;
 
 import ar.edu.utn.frba.ddsi.dto.PosicionDTO;
+import ar.edu.utn.frba.ddsi.dto.RutaCamionDTO;
 import ar.edu.utn.frba.ddsi.models.entities.Camion;
 import ar.edu.utn.frba.ddsi.models.entities.Entrega;
 import ar.edu.utn.frba.ddsi.models.entities.EstadoEntrega;
@@ -59,7 +60,7 @@ public class SimuladorGpsService {
         Camion camion = repositoryCamiones.findById(camionId).orElse(null);
         if (camion == null) return;
 
-        RutaCamionService.RutaCamion rutaCamion = rutaCamionService.armarRuta(entregas);
+        RutaCamionDTO rutaCamion = rutaCamionService.armarRuta(entregas);
         List<PosicionDTO> ruta = rutaCamion.ruta();
         int ultimo = ruta.size() - 1;
 

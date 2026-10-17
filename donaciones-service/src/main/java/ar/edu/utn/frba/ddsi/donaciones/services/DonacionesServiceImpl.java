@@ -123,8 +123,8 @@ public class DonacionesServiceImpl implements DonacionesService {
         List<PersonaHumana> humanas = donantesHumanosRepository.findAll();
         List<PersonaJuridica> juridicas = donantesJuridicosRepository.findAll();
 
-        System.out.println("Cantidad humanos aca: " + humanas.size());
-        System.out.println("Cantidad juridicas aca: " + juridicas.size());
+//        System.out.println("Cantidad humanos aca: " + humanas.size());
+//        System.out.println("Cantidad juridicas aca: " + juridicas.size());
 
         List<PersonaDonanteDTO> donantes= new ArrayList<>();
 
@@ -141,7 +141,7 @@ public class DonacionesServiceImpl implements DonacionesService {
                         )
         );
 
-        System.out.println("Cantidad donantes: " + donantes.size());
+
 
 
         juridicas.forEach(j -> donantes.add(
@@ -157,7 +157,7 @@ public class DonacionesServiceImpl implements DonacionesService {
                         )
         );
 
-        System.out.println("Cantidad donantes: " + donantes.size());
+
         return donantes;
     }
 
