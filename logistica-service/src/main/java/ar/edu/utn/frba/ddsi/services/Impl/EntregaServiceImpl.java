@@ -214,6 +214,11 @@ public class EntregaServiceImpl {
                 .toList();
     }
 
+    public List<EntregaDTO> listarEntregasDeEntidadBeneficiaria(Long idEntidadBeneficiaria){
+        return repositoryEntregas.findByEntidadBeneficiariaId(idEntidadBeneficiaria).stream().map(this::toDTO)
+                .toList();
+    }
+
     public EntregaDTO obtenerEntrega(String id) {
         return toDTO(buscar(id));
     }

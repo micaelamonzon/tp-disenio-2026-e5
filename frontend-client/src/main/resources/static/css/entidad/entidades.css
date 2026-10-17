@@ -19,7 +19,7 @@
     --green-text: #15803d;
     --amber: #efc454;
     --amber-bg: #fffbeb;
-    --amber-text: #b45309;
+    --amber-text: #6e681f;
     --marron-text: #804000;
     --marron: #f2cfa7;
     --lila:#eecbf5;
@@ -493,8 +493,8 @@ a{
     background: var(--red-light);
     color: var(--red-text);
 }
-.status-icon-en-deposito  { color: var(--amber-text) }
-.status-icon-pendiente { color: var(--amber-text) }
+
+.status-icon-pendiente { color: var(--red) }
 .status-icon-asignacion-realizada {color: var(--violeta) }
 .status-icon-lista-para-entregar{color: var(--marron-text)}
 .status-icon-entregado{color: var(--green-text)}
@@ -502,8 +502,8 @@ a{
 .status-icon-entrega-fallida{color: var(--red-text)}
 .status-icon-vencida{color:var(--orange-text)}
 
-.status-en-deposito{background: var(--amber); color: var(--amber-text)}
-.status-pendiente{background: var(--amber); color: var(--amber-text)}
+
+.status-pendiente{background: var(--red-light); color: var(--red-text)}
 .status-asignacion-realizada{background: var(--lila); color: var(--violeta)}
 .status-lista-para-entregar{background: var(--marron); color: var(--marron-text)}
 .status-en-traslado{background: var(--blue); color: var(--blue-text)}

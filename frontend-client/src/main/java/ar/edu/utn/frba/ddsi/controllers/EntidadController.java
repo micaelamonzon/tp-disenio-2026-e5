@@ -84,10 +84,8 @@ public class EntidadController {
         model.addAttribute("titulo", "Recepcion de donaciones");
         model.addAttribute("tabActiva", "recepcion");
         try {
-            // TODO: si logística agrega un filtro por entidad, usarlo en vez de filtrar acá
-            List<EntregaDTO> entregasDeLaEntidad = logisticaApiService.obtenerEntregas().stream()
-                    .filter(e -> idEntidadActual().equals(e.getEntidadBeneficiariaId()))
-                    .toList();
+
+            List<EntregaDTO> entregasDeLaEntidad = logisticaApiService.obtenerEntregasDeEntidad(this.idEntidadActual());
             model.addAttribute("pendientes", filtrarPorEstado(entregasDeLaEntidad, "EN_TRASLADO"));
             model.addAttribute("confirmadas", filtrarPorEstado(entregasDeLaEntidad, "ENTREGADA"));
         } catch (RuntimeException e) {

@@ -12,4 +12,5 @@ public interface RepositoryEntregas extends MongoRepository<Entrega, String> {
     List<Entrega> findByDonacionesIdsIn(Collection<Long> donacionesIds);
     List<Entrega> findByDonantesId(List<Long> donantesId);
     List<Entrega> findByCamionId(String camionId);
+    List<Entrega> findByEntidadBeneficiariaId(Long id);
 }

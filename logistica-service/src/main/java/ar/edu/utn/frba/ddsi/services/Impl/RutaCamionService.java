@@ -1,6 +1,7 @@
 package ar.edu.utn.frba.ddsi.services.Impl;
 
 import ar.edu.utn.frba.ddsi.dto.PosicionDTO;
+import ar.edu.utn.frba.ddsi.dto.RutaCamionDTO;
 import ar.edu.utn.frba.ddsi.models.entities.Entrega;
 import ar.edu.utn.frba.ddsi.models.entities.EstadoEntrega;
 import ar.edu.utn.frba.ddsi.repository.impl.RepositoryEntregas;
@@ -12,9 +13,7 @@ import java.util.*;
 @Service
 public class RutaCamionService {
 
-    public record RutaCamion(List<PosicionDTO> ruta, Map<String, Integer> indicePorEntrega) {
-        public Integer indiceDe(String entregaId) { return indicePorEntrega.get(entregaId); }
-    }
+
 
     private final RepositoryEntregas repositoryEntregas;
     private final OsrmRutaService osrmRutaService;
@@ -32,7 +31,7 @@ public class RutaCamionService {
     }
 
     // Ruta del camión de esta entrega (o solo de la entrega si todavía no tiene camión)
-    public RutaCamion armarRutaPara(Entrega entrega) {
+    public RutaCamionDTO armarRutaPara(Entrega entrega) {
         List<Entrega> entregas = entrega.getCamionId() == null
                 ? List.of(entrega)
                 : repositoryEntregas.findByCamionId(entrega.getCamionId()).stream()
@@ -42,7 +41,7 @@ public class RutaCamionService {
         return armarRuta(entregas);
     }
 
-    public RutaCamion armarRuta(List<Entrega> entregas) {
+    public RutaCamionDTO armarRuta(List<Entrega> entregas) {
         List<Entrega> ordenadas = ordenarPorCercania(entregas);
         List<PosicionDTO> paradas = ordenadas.stream()
                 .map(e -> new PosicionDTO(Double.parseDouble(e.getLatitud()), Double.parseDouble(e.getLongitud())))
@@ -54,7 +53,7 @@ public class RutaCamionService {
         for (int i = 0; i < ordenadas.size(); i++) {
             indices.put(ordenadas.get(i).getId(), r.indicesParadas().get(i));
         }
-        return new RutaCamion(r.ruta(), indices);
+        return new RutaCamionDTO(r.ruta(), indices);
     }
 
     // Vecino más cercano: desde el depósito, siempre a la parada más próxima a la última

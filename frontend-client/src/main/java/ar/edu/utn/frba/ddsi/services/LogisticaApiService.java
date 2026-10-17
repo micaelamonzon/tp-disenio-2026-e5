@@ -73,6 +73,17 @@ public class LogisticaApiService {
         }
     }
 
+    public  List<EntregaDTO> obtenerEntregasDeEntidad(Long idEntidadBeneficiaria) {
+        try {
+            return apiCaller.getList(logisticaServiceUrl + "/logistica-service/entregasDeEntidad/" + idEntidadBeneficiaria,EntregaDTO.class);
+        } catch (SesionExpiradaException e) {
+            throw e;
+        } catch (RuntimeException  e) {
+            log.error("Error llamando a logistica-service para obtener las entregas de la entidad con ID {} ", idEntidadBeneficiaria);
+            throw new RuntimeException("No se pudieron obtener las entregas de la entidad beneficiaria ", e);
+        }
+    }
+
     public EntregaDTO obtenerEntregaPorId(String id) {
         try {
             return apiCaller.get(logisticaServiceUrl + "/logistica-service/entrega/{id}", EntregaDTO.class, id);
