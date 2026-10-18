@@ -16,7 +16,6 @@ public record PersonaHumanaDTO(
         Integer edad,
         Integer DNI,
         String genero,
-        String direccion,
         LocalDate fechaDeNacimiento,
         List<DonacionSinSegmentarDTO> donaciones,
         List<MedioDeNotificacionDTO> mediosDeNotificacion,

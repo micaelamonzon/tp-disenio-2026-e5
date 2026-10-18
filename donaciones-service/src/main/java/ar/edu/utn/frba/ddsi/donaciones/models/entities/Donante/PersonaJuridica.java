@@ -64,6 +64,7 @@ public class PersonaJuridica {
         this.razonSocial = razonSocial;
         this.tipo = tipo;
         this.rubro= rubro;
+        this.fechaDeRegistro=LocalDateTime.now();
     }
 
     public void agregarMedioDeNotificacion(MedioDeNotificacion unMedio) {

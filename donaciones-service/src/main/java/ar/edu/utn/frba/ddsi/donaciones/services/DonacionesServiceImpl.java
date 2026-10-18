@@ -211,7 +211,6 @@ public class DonacionesServiceImpl implements DonacionesService {
                     persona.getEdad(),
                     persona.getDNI(),
                     persona.getGenero(),
-                    persona.getDireccion(),
                     persona.getFechaDeNaciemiento(),
                     donacionesDTO,
                     mediosDTO,
@@ -311,7 +310,6 @@ public class DonacionesServiceImpl implements DonacionesService {
                 personaHumana.getEdad(),
                 personaHumana.getDNI(),
                 personaHumana.getGenero(),
-                personaHumana.getDireccion(),
                 null,
                 donacionesDTO,
                 mediosDTO,
@@ -351,7 +349,6 @@ public class DonacionesServiceImpl implements DonacionesService {
                 body.apellido(),
                 body.DNI(),
                 body.genero(),
-                body.direccion(),
                 body.fechaDeNacimiento()
                 );
 
@@ -405,7 +402,6 @@ public class DonacionesServiceImpl implements DonacionesService {
                 humano.getEdad(),
                 humano.getDNI(),
                 humano.getGenero(),
-                humano.getDireccion(),
                 humano.getFechaDeNaciemiento(),
                 donacionesDTO,
                 mediosDTO,
@@ -665,7 +661,6 @@ public class DonacionesServiceImpl implements DonacionesService {
         if (request.edad() != null) personaHumana.setEdad(request.edad());
         if (request.DNI() != null) personaHumana.setDNI(request.DNI());
         if (request.genero() != null) personaHumana.setGenero(request.genero());
-        if (request.direccion() != null) personaHumana.setDireccion(request.direccion());
         if(request.mediosDeNotificacion() != null && !request.mediosDeNotificacion().isEmpty()){
             this.cambiarMediosDeNotificacion(request.mediosDeNotificacion(),personaHumana.getMediosDeNotificacion());
         }
@@ -689,7 +684,6 @@ public class DonacionesServiceImpl implements DonacionesService {
                 personaHumana.getEdad(),
                 personaHumana.getDNI(),
                 personaHumana.getGenero(),
-                personaHumana.getDireccion(),
                 personaHumana.getFechaDeNaciemiento(),
                 donacionesDTO,
                 mediosDTO,

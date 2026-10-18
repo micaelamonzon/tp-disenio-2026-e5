@@ -48,9 +48,6 @@ public class PersonaHumana {
     @Column(name = "genero")
     private String genero;
 
-    @Column(name = "direccion")
-    private String direccion;
-
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "persona_humana_id", referencedColumnName = "id")
     private List<MedioDeNotificacion> mediosDeNotificacion = new ArrayList<>();
@@ -63,14 +60,14 @@ public class PersonaHumana {
     private List<DonacionSinSegmentar> donaciones = new ArrayList<>(); //al acceder a esta donacion sabremos que donaciones segmentadas salieron
 
 
-    public PersonaHumana(String nombre,String apellido,Integer numeroDeDocumento,String genero,String direccion, LocalDate fechaDeNacimiento) {
+    public PersonaHumana(String nombre,String apellido,Integer numeroDeDocumento,String genero, LocalDate fechaDeNacimiento) {
         this.nombre = nombre;
         this.apellido = apellido;
         this.DNI = numeroDeDocumento;
-        this.genero = genero;
-        this.direccion = direccion;
+        this.genero = genero;;
         this.fechaDeNaciemiento = fechaDeNacimiento;
         this.fechaDeRegistro = LocalDateTime.now();
+        this.fechaUltimoAvisoInactividad = LocalDateTime.now();
 
     }
 
