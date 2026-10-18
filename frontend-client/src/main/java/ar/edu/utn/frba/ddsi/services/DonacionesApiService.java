@@ -211,7 +211,7 @@ public class DonacionesApiService {
             Map<String, Object> body = new HashMap<>();
             body.put("nombre", dto.getNombre());
             body.put("apellido", dto.getApellido());
-            body.put("edad", dto.getEdad());
+            body.put("edad", dto.getFechaDeNacimiento());
             body.put("DNI", dto.getDNI());
             body.put("genero", dto.getGenero());
 
