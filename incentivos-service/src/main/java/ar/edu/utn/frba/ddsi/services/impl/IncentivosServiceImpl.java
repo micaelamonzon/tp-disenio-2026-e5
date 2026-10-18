@@ -271,46 +271,27 @@ public class IncentivosServiceImpl implements IncentivosService {
     @Transactional
     @Override
     public void calcularYGuardarRanking() {
-        URI uri = UriComponentsBuilder
-                .fromUriString(propiedades.getUrl())
-                .path("/donantes")
-                .build()
-                .toUri();
+        // el scheduler corre el día 1, así que el mes que se cierra es el anterior.
+        // !! para probar con las misiones de este mes, cambiar esta línea por: YearMonth.now()
+        YearMonth periodo = YearMonth.now().minusMonths(1);
 
-        ResponseEntity<PersonaDonanteDTO[]> response =
-                restTemplate.getForEntity(uri, PersonaDonanteDTO[].class);
-        PersonaDonanteDTO[] array = response.getBody();
-        if (array == null || array.length == 0) return;
-
-        //YearMonth mesPasado = YearMonth.now().minusMonths(1);
-        YearMonth mesActual = YearMonth.now();
-
-        List<Donante> donantes = Arrays.stream(array)
-                .map(dto -> {
-                    if (dto.idHumano() != null) {
-                        return incentivosRepository.findByIdEnDonaciones(dto.idHumano(), TipoDeDonante.HUMANO);
-                    } else if (dto.idJuridico() != null) {
-                        return incentivosRepository.findByIdEnDonaciones(dto.idJuridico(), TipoDeDonante.JURIDICO);
-                    }
-                    return null;
-                })
-                .filter(d -> d != null)
-                .toList();
-
-        List<Donante> ordenados = donantes.stream()
-                .filter(d -> d.calcularMisionesCumplidasEn(mesActual) > 0)
+        List<Donante> ordenados = incentivosRepository.findAll().stream()
+                .filter(d -> d.calcularMisionesCumplidasEn(periodo) > 0)
                 .sorted(Comparator.comparingInt(
-                        (Donante d) -> -d.calcularMisionesCumplidasEn(mesActual)))
-                .toList();
-        if (ordenados.isEmpty()) return;
+                        (Donante d) -> -d.calcularMisionesCumplidasEn(periodo)))
+                .toList(); // saco los donates de incentivos 
 
-        // recalcular reemplaza el ranking de ese mes en vez de duplicarlo
+        if (ordenados.isEmpty()) {
+            System.out.println("Ranking " + periodo + ": nadie completó misiones, no se guarda");
+            return;
+        }
+
         rankingMensualRepository.findAll().stream()
-                .filter(r -> YearMonth.from(r.getFecha()).equals(mesActual))
+                .filter(r -> YearMonth.from(r.getFecha()).equals(periodo))
                 .forEach(rankingMensualRepository::delete);
 
         RankingMensual nuevo = new RankingMensual(
-                mesActual.atDay(1),
+                periodo.atDay(1),
                 ordenados.get(0),
                 ordenados.size() > 1 ? ordenados.get(1) : null,
                 ordenados.size() > 2 ? ordenados.get(2) : null,
@@ -726,16 +707,7 @@ public class IncentivosServiceImpl implements IncentivosService {
         Integer cantInsignias = perfil.getInsignias().size();
         List<InsigniaDTO> insigniasDTO = this.obtenerInsigniasDTO(donante);
         RankingMensual rankingActual = obtenerUltimoRanking();
-        if (rankingActual == null) {
-            calcularYGuardarRanking();
-            rankingActual = obtenerUltimoRanking();
-        }
-        
-        Integer puestoRanking = null;
-        if (rankingActual != null) {
-            puestoRanking = rankingActual.getPosicion(donante);
-        }
-
+        Integer puestoRanking = (rankingActual != null) ? rankingActual.getPosicion(donante) : null;
         return new PerfilDTO(
                 cantMisionesCumplidas,
                 cantInsignias,
