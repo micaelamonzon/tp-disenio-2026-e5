@@ -30,19 +30,22 @@ public class EntregaServiceImpl {
     private final RepositoryCamiones repositoryCamiones;
     private final String adminContacto;
     private final RepositoryDonacion repositoryDonacion;
+    private final String frontendUrl;
 
     public EntregaServiceImpl(RepositoryEntregas repositoryEntregas,
                               DonacionesClient donacionesClient,
                               NotificacionesPublisher notificacionesPublisher,
                               RepositoryCamiones repositoryCamiones,
                               RepositoryDonacion repositoryDonacion,
-                              @Value("${notificaciones.admin.contacto}") String adminContacto) {
+                              @Value("${notificaciones.admin.contacto}") String adminContacto,
+                              @Value("${frontend.url:http://localhost:8084}") String frontendUrl) {
         this.repositoryEntregas = repositoryEntregas;
         this.donacionesClient = donacionesClient;
         this.notificacionesPublisher = notificacionesPublisher;
         this.adminContacto = adminContacto;
         this.repositoryCamiones = repositoryCamiones;
         this.repositoryDonacion = repositoryDonacion;
+        this.frontendUrl = frontendUrl;
     }
 
     public Entrega crearEntrega(List<Long> donacionesIds, Long entidadId,List<Long> donantesIds) {
@@ -67,6 +70,7 @@ public class EntregaServiceImpl {
             entrega.iniciarTraslado();
             repositoryEntregas.save(entrega);
             this.persistirCambiosEnDonaciones(entrega,responsable);
+            avisarInicioDeTraslado(entrega);
         });
 
         return entregas.stream().map(entrega -> this.toDTO(entrega)).collect(Collectors.toList());
@@ -144,6 +148,12 @@ public class EntregaServiceImpl {
     }
 
     private void notificarInteresados(Entrega entrega, String mensaje) {
+        notificarInteresados(entrega, mensaje, mensaje);
+    }
+
+    // permite mandar un mensaje distinto a la entidad y a los donantes
+    // (por ej cada uno con el enlace a su propio mapa de seguimiento)
+    private void notificarInteresados(Entrega entrega, String mensajeEntidad, String mensajeDonante) {
         try {
             EntidadContactoDTO entidad = donacionesClient.obtenerEntidad(entrega.getEntidadBeneficiariaId());
             if (entidad != null && entidad.representantes() != null
@@ -151,7 +161,7 @@ public class EntregaServiceImpl {
                     && !entidad.representantes().get(0).mediosDeNotificacion().isEmpty()) {
                 MedioDeNotificacionDTO medio = entidad.representantes().get(0).mediosDeNotificacion().get(0);
                 notificacionesPublisher.publicarParaEntidad(entrega.getEntidadBeneficiariaId(),
-                        medio.datoDeContacto(), mensaje, medio.tipoDeNotificacion());
+                        medio.datoDeContacto(), mensajeEntidad, medio.tipoDeNotificacion());
             }
         } catch (Exception e) {
             System.out.println("No se pudo notificar a la entidad: " + e.getMessage());
@@ -168,7 +178,7 @@ public class EntregaServiceImpl {
             String tipo = donacion.getTipoDeDonante() != null
                     ? donacion.getTipoDeDonante().name() : "HUMANO";
             if (yaAvisados.add(tipo + "-" + donacion.getDonanteId())) {
-                notificacionesPublisher.publicarParaDonante(donacion.getDonanteId(), mensaje, null, tipo);
+                notificacionesPublisher.publicarParaDonante(donacion.getDonanteId(), mensajeDonante, null, tipo);
             }
         }
     }
@@ -183,6 +193,7 @@ public class EntregaServiceImpl {
         Entrega entrega = buscar(entregaId);
         entrega.iniciarTraslado();
         repositoryEntregas.save(entrega);
+        avisarInicioDeTraslado(entrega);
         try {
             persistirCambiosEnDonaciones(entrega, responsableId);
         } catch (Exception e) {
@@ -221,5 +232,21 @@ public class EntregaServiceImpl {
 
     public EntregaDTO obtenerEntrega(String id) {
         return toDTO(buscar(id));
+    }
+
+
+    // Evento "inicio de ruta": avisa a la entidad y a los donantes, con el enlace
+    // al mapa de seguimiento de cada uno. Si falla, no se corta el traslado
+    private void avisarInicioDeTraslado(Entrega entrega) {
+        String aviso = "La entrega nro " + entrega.getId()
+                + " está en camino. Seguí el recorrido del camión en el mapa: ";
+        try {
+            notificarInteresados(entrega,
+                    aviso + frontendUrl + "/entidadBeneficiaria/seguimientoDeEntrega",
+                    aviso + frontendUrl + "/donante/seguimiento");
+        } catch (Exception e) {
+            System.out.println("No se pudo notificar el inicio de traslado de la entrega "
+                    + entrega.getId() + ": " + e.getMessage());
+        }
     }
 }
