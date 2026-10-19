@@ -4,11 +4,14 @@ import ar.edu.utn.frba.ddsi.dtos.donaciones.DonacionDTO;
 import ar.edu.utn.frba.ddsi.dtos.donaciones.RegistroEntidadBeneficiariaDTO;
 import ar.edu.utn.frba.ddsi.dtos.donaciones.RegistroPersonaHumanaDTO;
 import ar.edu.utn.frba.ddsi.dtos.donaciones.RegistroPersonaJuridicaDTO;
+import ar.edu.utn.frba.ddsi.dtos.entidades.EntidadBeneficiariaDTO;
 import ar.edu.utn.frba.ddsi.services.AuthApiService;
 import ar.edu.utn.frba.ddsi.services.DonacionesApiService;
 import ar.edu.utn.frba.ddsi.services.DonacionesService;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,19 +21,24 @@ import tools.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
+@Slf4j
 @Controller
 @RequestMapping("/acceso")
 public class AccesoController {
     private final DonacionesService donacionesService;
     private final DonacionesApiService donacionesApiService;
     private final AuthApiService authApiService;
+    private final ObjectMapper objectMapper;
 
     public AccesoController(DonacionesService donacionesService,
-                            DonacionesApiService donacionesApiService, AuthApiService authApiService) {
+                            DonacionesApiService donacionesApiService, AuthApiService authApiService, ObjectMapper objectMapper) {
         this.donacionesService = donacionesService;
         this.donacionesApiService = donacionesApiService;
         this.authApiService = authApiService;
+        this.objectMapper = objectMapper;
     }
 
     private List<DonacionDTO> obtenerTodasLasDonacionesPublicas() {
@@ -95,13 +103,26 @@ public class AccesoController {
                             || "ENTREGADA".equalsIgnoreCase(d.getEstadoActual()))
                     .toList();
 
-            ObjectMapper mapper = new ObjectMapper();
-            mapper.registeredModules();
+            // Se completa cada donación con la ubicación real de su entidad.
+            try {
+                Map<Long, EntidadBeneficiariaDTO> entidades = donacionesApiService.obtenerEntidadesPublicas().stream()
+                        .collect(Collectors.toMap(EntidadBeneficiariaDTO::getId, e -> e, (a, b) -> a));
 
-            String donacionesJson = mapper.writeValueAsString(donacionesEntregadas);
+                donacionesEntregadas.forEach(d -> {
+                    EntidadBeneficiariaDTO e = entidades.get(d.getOrganizacionId());
+                    if (e != null) {
+                        d.setLatitud(e.getLatitud());
+                        d.setLongitud(e.getLongitud());
+                        d.setNombreEntidad(e.getRazonSocial());
+                        d.setDireccionEntidad(e.getDireccion());
+                    }
+                });
+            } catch (Exception e) {
+                log.error("No se pudieron obtener las entidades para el mapa", e);
+            }
 
-            model.addAttribute("donacionesMapaJson", donacionesJson);
-            model.addAttribute("donacionesMapa", donacionesEntregadas); // Para las tarjetas HTML
+            model.addAttribute("donacionesMapaJson", objectMapper.writeValueAsString(donacionesEntregadas));
+            model.addAttribute("donacionesMapa", donacionesEntregadas);
         } catch (Exception e) {
             model.addAttribute("error", "El servicio de donaciones no está disponible.");
             model.addAttribute("donacionesMapaJson", "[]");
