@@ -30,29 +30,6 @@
 
 
         <div id="real-map" style="width: 100%; height: 480px; min-height: 480px; display: block; z-index: 1;"></div>
-
-
-        <div style="position: absolute; top: 20px; left: 20px; z-index: 1000; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(4px); padding: 1rem 1.25rem; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; font-size: 0.88rem;">
-            <div style="display: flex; align-items: center; gap: 0.5rem; font-weight: 700; color: #1e293b; margin-bottom: 0.6rem;">
-                <i class="fa-regular fa-compass" style="color: #2563eb;"></i>
-                <span>Leyenda</span>
-            </div>
-            <div style="display: flex; flex-direction: column; gap: 0.4rem; color: #475569;">
-                <div style="display: flex; align-items: center; gap: 0.5rem;">
-                    <span style="width: 10px; height: 10px; border-radius: 50%; background-color: #2563eb; display: inline-block;"></span> CABA / Centro
-                </div>
-                <div style="display: flex; align-items: center; gap: 0.5rem;">
-                    <span style="width: 10px; height: 10px; border-radius: 50%; background-color: #3b82f6; display: inline-block;"></span> Zona Sur
-                </div>
-                <div style="display: flex; align-items: center; gap: 0.5rem;">
-                    <span style="width: 10px; height: 10px; border-radius: 50%; background-color: #a855f7; display: inline-block;"></span> Zona Oeste
-                </div>
-            </div>
-        </div>
-
-        <div style="position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); z-index: 1000; background: #ffffff; padding: 0.4rem 1rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600; color: #475569; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-            Buenos Aires, Argentina
-        </div>
     </div>
 
     <!-- TARJETAS DE PUNTOS DE ENTREGA -->
@@ -74,7 +51,7 @@
                     </span>
                     <span style="display: flex; align-items: center; gap: 0.5rem;">
                         <i class="fa-solid fa-location-dot" style="width: 16px; color: #2563eb;"></i>
-                        <span>UTN Solidaria (Sede Central)</span>
+                        <span th:text="${donacion.nombreEntidad != null ? donacion.nombreEntidad : 'Entidad beneficiaria'}">Entidad</span>
                     </span>
                     <span style="display: flex; align-items: center; gap: 0.5rem;" th:if="${donacion.fechaDeIngreso != null}">
                         <i class="fa-regular fa-calendar" style="width: 16px; color: #2563eb;"></i>
@@ -98,7 +75,6 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-
 <script th:inline="javascript">
     document.addEventListener("DOMContentLoaded", function() {
 
@@ -111,7 +87,6 @@
             console.error("Error al parsear el JSON de donaciones:", e);
         }
 
-        // 2. Renderizar mapa con Leaflet normalmente...
         const mapContainer = document.getElementById('real-map') || document.getElementById('map');
         if (!mapContainer || typeof L === 'undefined') return;
 
@@ -122,36 +97,60 @@
             attribution: '&copy; OpenStreetMap contributors'
         }).addTo(map);
 
-        const coordenadasDefecto = [
-            { lat: -34.6037, lng: -58.4116, lugar: "Sede Medrano - Almagro" },
-            { lat: -34.6180, lng: -58.4350, lugar: "Hogar San José - Caballito" },
-            { lat: -34.7600, lng: -58.3970, lugar: "Hospital Gandulfo - Lomas de Zamora" },
-            { lat: -34.6800, lng: -58.4600, lugar: "Centro La Esperanza - Lugano" },
-            { lat: -34.6300, lng: -58.4620, lugar: "Escuela N°42 - Flores" }
-        ];
+        // Los textos vienen de datos cargados por usuarios (razón social, dirección):
+        // se escapan antes de meterlos en el HTML del popup.
+        const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        }[c]));
 
-        if (donacionesServidor && donacionesServidor.length > 0) {
-            donacionesServidor.forEach((d, index) => {
-                const pos = coordenadasDefecto[index % coordenadasDefecto.length];
-                const titulo = d.subcategoria ? d.subcategoria : (d.categoria ? d.categoria : "Donación entregada");
-                const cantidad = d.cantidadTotalItems ? d.cantidadTotalItems : 1;
+        // Solo se dibujan las donaciones cuya entidad tiene coordenadas reales
+        const conUbicacion = (donacionesServidor || [])
+            .filter(d => d.latitud != null && d.longitud != null);
 
-                const circle = L.circleMarker([pos.lat, pos.lng], {
-                    color: '#ffffff',
-                    weight: 2,
-                    fillColor: '#2563eb',
-                    fillOpacity: 1,
-                    radius: 10
-                }).addTo(map);
+        // Agrupa las donaciones por entidad: misma ubicación = un solo marcador
+        const porEntidad = new Map();
+        conUbicacion.forEach(d => {
+            const clave = d.organizacionId ?? `${d.latitud},${d.longitud}`;
+            if (!porEntidad.has(clave)) porEntidad.set(clave, []);
+            porEntidad.get(clave).push(d);
+        });
 
-                circle.bindPopup(`
-                    <div style="font-family: system-ui, sans-serif; padding: 4px;">
-                        <strong style="color: #0f172a; font-size: 0.95rem;">${titulo}</strong><br>
-                        <span style="color: #2563eb; font-weight: 600; font-size: 0.85rem;">📦 ${cantidad} unidades</span><br>
-                        <span style="color: #64748b; font-size: 0.8rem;">📍 ${pos.lugar}</span>
+        const puntos = [];
+
+        porEntidad.forEach(donaciones => {
+            const e = donaciones[0]; // los datos de la entidad son iguales para todas
+
+            const items = donaciones.map(d => {
+                const titulo = d.subcategoria || d.categoria || "Donación entregada";
+                const cantidad = d.cantidadTotalItems || 1;
+                return `<li style="margin: 2px 0;">${esc(titulo)} — <b>${esc(cantidad)}</b> unidades</li>`;
+            }).join('');
+
+            const circle = L.circleMarker([e.latitud, e.longitud], {
+                color: '#ffffff',
+                weight: 2,
+                fillColor: '#2563eb',
+                fillOpacity: 1,
+                radius: 10 + Math.min(donaciones.length, 5)
+            }).addTo(map);
+
+            circle.bindPopup(`
+                <div style="font-family: system-ui, sans-serif; padding: 4px; min-width: 200px;">
+                    <strong style="color: #0f172a;">🏠 ${esc(e.nombreEntidad)}</strong><br>
+                    <span style="color: #64748b; font-size: 0.8rem;">📍 ${esc(e.direccionEntidad)}</span>
+                    <div style="margin-top: 6px; font-size: 0.85rem;">
+                        <b>${donaciones.length}</b> donación(es) entregada(s):
+                        <ul style="margin: 4px 0 0 16px; padding: 0;">${items}</ul>
                     </div>
-                `);
-            });
+                </div>
+            `);
+
+            puntos.push([e.latitud, e.longitud]);
+        });
+
+        // Ajusta el zoom para que se vean todos los marcadores
+        if (puntos.length > 0) {
+            map.fitBounds(puntos, { padding: [40, 40], maxZoom: 15 });
         }
 
         setTimeout(() => {

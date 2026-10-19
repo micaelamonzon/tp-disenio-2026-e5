@@ -33,6 +33,10 @@ public class DonacionDTO {
     private Long idDelDonante;
     private String nombreDonante;
     private Boolean puedeVencerse;
+    private Double latitud;
+    private Double longitud;
+    private String nombreEntidad;
+    private String direccionEntidad;
 
     public String getEstadoLegible() {
         if (estadoActual == null) return "";

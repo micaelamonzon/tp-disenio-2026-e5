@@ -46,7 +46,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // preflight CORS
                         // Registro: el usuario todavía no existe, no puede tener token
                         .requestMatchers(HttpMethod.POST, P + "/donante/humano", P + "/donante/juridico", P + "/entidad").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/geocodificar", P + "/saludar").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/geocodificar", P + "/saludar", P + "/entidades/publicas").permitAll()
                         // Mapa y galería de la landing: donaciones entregadas, sin datos del donante
                         .requestMatchers(HttpMethod.GET, P + "/donaciones/entregadas").permitAll()
 
