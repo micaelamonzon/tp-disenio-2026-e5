@@ -35,6 +35,10 @@ public class DonacionesService {
         return donacionesApiService.obtenerDonacionesPorEstado(estado);
     }
 
+    public java.util.Map<String, List<String>> obtenerSubcategoriasPorCategoria() {
+        return donacionesApiService.obtenerSubcategoriasPorCategoria();
+    }
+
     public void vencerDonacion(Long id, String responsableId) {
         donacionesApiService.vencerDonacion(id, responsableId);
     }

@@ -65,6 +65,23 @@ public class DonacionesApiService {
         }
     }
 
+    // GET /servicioDeDonaciones/subcategorias/porCategoria (con el token del admin)
+    // Catálogo real para el formulario de carga: { "Alimentos": ["Arroz", ...], ... }
+    // Si falla, devuelve vacío y el formulario usa la lista fija de admin.js
+    @SuppressWarnings("unchecked")
+    public Map<String, List<String>> obtenerSubcategoriasPorCategoria() {
+        try {
+            Map<String, List<String>> catalogo =
+                    apiCaller.get(donacionesServiceUrl + "/subcategorias/porCategoria", Map.class);
+            return catalogo != null ? catalogo : Map.of();
+        } catch (SesionExpiradaException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Error obteniendo el catálogo de subcategorías", e);
+            return Map.of();
+        }
+    }
+
     // GET /servicioDeDonaciones/admin/donaciones?estado=...
     public List<DonacionDTO> obtenerDonacionesPorEstado(String estado) {
         try {
@@ -211,7 +228,8 @@ public class DonacionesApiService {
             Map<String, Object> body = new HashMap<>();
             body.put("nombre", dto.getNombre());
             body.put("apellido", dto.getApellido());
-            body.put("edad", dto.getFechaDeNacimiento());
+            body.put("fechaDeNacimiento",
+                    dto.getFechaDeNacimiento() != null ? dto.getFechaDeNacimiento().toString() : null);
             body.put("DNI", dto.getDNI());
             body.put("genero", dto.getGenero());
 

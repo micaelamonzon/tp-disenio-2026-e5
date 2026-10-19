@@ -99,6 +99,15 @@ public class AdminController {
             model.addAttribute("inventario", List.<DonacionDTO>of());
             model.addAttribute("errorInventario", "No se pudo conectar con el servicio de donaciones.");
         }
+
+      try {
+            model.addAttribute("catalogoSubcategorias", donacionesService.obtenerSubcategoriasPorCategoria());
+        } catch (SesionExpiradaException e) {
+            throw e;
+        } catch (Exception e) {
+            log.warn("No se pudo obtener el catálogo de subcategorías", e);
+            model.addAttribute("catalogoSubcategorias", java.util.Map.of());
+        }
         return "acceso/personaAdministradora/home";
     }
 

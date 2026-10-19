@@ -309,7 +309,7 @@ let bienIdCounter = 0;
 
 const CATEGORIAS = {
     "Alimentos": ["Fideos secos", "Arroz", "Legumbres secas", "Aceite vegetal", "Leche en polvo", "Galletitas"],
-    "Vestimenta": ["Camperas de abrigo", "Remeras", "Pantalones", "Ropa infantil"],
+    "Vestimenta": ["Ropa de abrigo", "Remeras", "Pantalones", "Ropa infantil"],
     "Mobiliario": ["Sillas", "Mesas", "Estantes"],
     "Abrigo": ["Frazadas", "Colchones"],
 };
@@ -324,12 +324,21 @@ const UNIDADES = [
     { value: "METROS", label: "metros" },
 ];
 
+const CATALOGO_BD = window.CATALOGO_SUBCATEGORIAS || {};
+
+function nombresDeCategorias() {
+    return [...new Set([...Object.keys(CATEGORIAS), ...Object.keys(CATALOGO_BD)])];
+}
+function subcategoriasDe(categoria) {
+    return [...new Set([...(CATEGORIAS[categoria] || []), ...(CATALOGO_BD[categoria] || [])])];
+}
+
 function categoriaOptionsHTML(selected) {
     return `<option value="">Seleccionar categoría</option>` +
-        Object.keys(CATEGORIAS).map(cat => `<option value="${cat}" ${cat === selected ? "selected" : ""}>${cat}</option>`).join("");
+        nombresDeCategorias().map(cat => `<option value="${cat}" ${cat === selected ? "selected" : ""}>${cat}</option>`).join("");
 }
 function subcategoriaOptionsHTML(categoria) {
-    const subs = CATEGORIAS[categoria] || [];
+    const subs = subcategoriasDe(categoria);
     if (!subs.length) return `<option value="">Elegí primero una categoría</option>`;
     return `<option value="">Seleccionar subcategoría</option>` + subs.map(s => `<option value="${s}">${s}</option>`).join("");
 }
