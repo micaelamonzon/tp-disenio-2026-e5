@@ -143,16 +143,6 @@ public class MonitoreoServiceImpl implements MonitoreoService {
                 .toList();
     }
 
-    // Deja la ruta del camión solo hasta la parada de esta entrega
-    private RutaEntregaDTO recortarHastaLaParada(RutaEntregaDTO r) {
-        if (r.rutaCompleta() == null || r.indiceParada() == null || r.indiceParada() < 0) return r;
-        int fin = Math.min(r.indiceParada() + 1, r.rutaCompleta().size());
-        return new RutaEntregaDTO(
-                r.entregaId(), r.camionId(), r.estadoActual(), r.direccion(), r.destino(),
-                new ArrayList<>(r.rutaCompleta().subList(0, fin)),
-                r.indiceParada(), r.subcategorias(), r.ultimoAvance());
-    }
-
     private RutaEntregaDTO armarRutaDeEntrega(Entrega entrega, List<Donacion> donacionesDelDonante) {
         double lat = Double.parseDouble(entrega.getLatitud());
         double lon = Double.parseDouble(entrega.getLongitud());

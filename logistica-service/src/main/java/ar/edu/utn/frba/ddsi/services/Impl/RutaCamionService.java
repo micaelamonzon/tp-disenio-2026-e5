@@ -30,7 +30,7 @@ public class RutaCamionService {
         this.depositoLon = depositoLon;
     }
 
-    // Ruta del camión de esta entrega (o solo de la entrega si todavía no tiene camión)
+    // Ruta del camión de esta entrega
     public RutaCamionDTO armarRutaPara(Entrega entrega) {
         List<Entrega> entregas = entrega.getCamionId() == null
                 ? List.of(entrega)
