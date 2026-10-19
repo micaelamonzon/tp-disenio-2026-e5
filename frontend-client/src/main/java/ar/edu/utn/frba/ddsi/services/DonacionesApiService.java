@@ -7,6 +7,7 @@ import ar.edu.utn.frba.ddsi.dtos.donaciones.RegistroPersonaHumanaDTO;
 import ar.edu.utn.frba.ddsi.dtos.donaciones.RegistroPersonaJuridicaDTO;
 import ar.edu.utn.frba.ddsi.dtos.entidades.EntidadBeneficiariaDTO;
 import ar.edu.utn.frba.ddsi.dtos.entidades.NecesidadDTO;
+import ar.edu.utn.frba.ddsi.services.internal.GeocodingService;
 import ar.edu.utn.frba.ddsi.services.internal.SesionExpiradaException;
 import ar.edu.utn.frba.ddsi.services.internal.WebApiCallerService;
 import org.slf4j.Logger;
@@ -190,6 +191,22 @@ public class DonacionesApiService {
         }
     }
 
+    // GET /servicioDeDonaciones/entidades/publicas  (público, sin token)
+    public List<EntidadBeneficiariaDTO> obtenerEntidadesPublicas() {
+        try {
+            List<EntidadBeneficiariaDTO> lista = webClient.get()
+                    .uri(donacionesServiceUrl + "/entidades/publicas")
+                    .retrieve()
+                    .bodyToFlux(EntidadBeneficiariaDTO.class)
+                    .collectList()
+                    .block();
+            return lista != null ? lista : List.of();
+        } catch (Exception e) {
+            log.error("Error obteniendo entidades públicas", e);
+            return List.of();   // el mapa se muestra igual, sin marcadores
+        }
+    }
+
 
     public EntidadBeneficiariaDTO obtenerEntidad(Long idEntidad) {
         try {
@@ -295,6 +312,11 @@ public class DonacionesApiService {
             body.put("direccion", dto.getDireccion());
             body.put("telefono", dto.getTelefono());
             body.put("representantes", List.of(representante));
+            double[] coords = GeocodingService.geocodificar(dto.getDireccion());
+            if (coords != null) {
+                body.put("latitud", coords[0]);
+                body.put("longitud", coords[1]);
+            }
 
             Map response = webClient.post()
                     .uri(donacionesServiceUrl + "/entidad")

@@ -1,6 +1,7 @@
 package ar.edu.utn.frba.ddsi.donaciones.controllers;
 
 import ar.edu.utn.frba.ddsi.donaciones.dto.EntidadBeneficiariaDTO;
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.Necesidad.EntidadPublicaDTO;
 import ar.edu.utn.frba.ddsi.donaciones.services.EntidadBeneficiariaService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -55,5 +56,13 @@ public class EntidadBeneficiariaController {
             System.out.println(e.getMessage());
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @GetMapping("/entidades/publicas")
+    public List<EntidadPublicaDTO> entidadesPublicas() {
+        return entidadBeneficiariaService.obtenerTodas().stream()
+                .map(e -> new EntidadPublicaDTO(e.id(), e.razonSocial(), e.direccion(),
+                        e.latitud(), e.longitud()))
+                .toList();
     }
 }

@@ -14,6 +14,8 @@ public class EntidadBeneficiariaDTO {
     private String direccion;
     private String telefono;
     private List<RepresentanteDTO> representantes;
+    private Double latitud;     
+    private Double longitud;
 
 
     public String iniciales() {
