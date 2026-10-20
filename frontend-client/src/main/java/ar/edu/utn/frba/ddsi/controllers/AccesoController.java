@@ -74,18 +74,32 @@ public class AccesoController {
         try {
             List<DonacionDTO> todas = obtenerTodasLasDonacionesPublicas();
 
-            // Filtrar las 6 donaciones HISTÓRICAS con más bienes
             List<DonacionDTO> donacionesGaleria = todas.stream()
                     .filter(d -> d.getFotoPath() != null && !d.getFotoPath().isBlank())
                     .filter(d -> Boolean.TRUE.equals(d.getDonacionEntregada())
                             || "ENTREGADA".equalsIgnoreCase(d.getEstadoActual()))
                     .sorted(Comparator.comparingInt(DonacionDTO::getCantidadTotalItems).reversed())
-                    .limit(6) // Máximo 6 históricas
+                    .limit(6)
                     .toList();
+
+            try {
+                Map<Long, EntidadBeneficiariaDTO> entidades = donacionesApiService.obtenerEntidadesPublicas().stream()
+                        .collect(Collectors.toMap(EntidadBeneficiariaDTO::getId, e -> e, (a, b) -> a));
+
+                donacionesGaleria.forEach(d -> {
+                    EntidadBeneficiariaDTO e = entidades.get(d.getOrganizacionId());
+                    if (e != null) {
+                        d.setNombreEntidad(e.getRazonSocial());
+                        d.setDireccionEntidad(e.getDireccion());
+                    }
+                });
+            } catch (Exception e) {
+                log.error("No se pudieron obtener las entidades para la galeria", e);
+            }
 
             model.addAttribute("donaciones", donacionesGaleria);
         } catch (RuntimeException e) {
-            model.addAttribute("error", "El servicio de donaciones no está disponible. Intentá de nuevo en unos minutos.");
+            model.addAttribute("error", "El servicio de donaciones no está disponible.");
             model.addAttribute("donaciones", List.of());
         }
         return "acceso/landigPage/galeria";
