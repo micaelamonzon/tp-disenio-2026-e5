@@ -52,12 +52,27 @@ public class AccesoController {
         try {
             List<DonacionDTO> todas = obtenerTodasLasDonacionesPublicas();
             java.time.LocalDateTime haceUnMes = java.time.LocalDateTime.now().minusMonths(1);
-            // 3 donaciones con mas bienes del ultimo mes
+
+            // 3 donaciones con más bienes del último mes
             List<DonacionDTO> destacadas = todas.stream()
                     .filter(d -> d.getFechaDeIngreso() != null && d.getFechaDeIngreso().isAfter(haceUnMes))
                     .sorted(Comparator.comparingInt(DonacionDTO::getCantidadTotalItems).reversed())
-                    .limit(3) // Máximo 3 para las destacar en el mes
+                    .limit(3)
                     .toList();
+
+            try {
+                Map<Long, EntidadBeneficiariaDTO> entidades = donacionesApiService.obtenerEntidadesPublicas().stream()
+                        .collect(Collectors.toMap(EntidadBeneficiariaDTO::getId, e -> e, (a, b) -> a));
+
+                destacadas.forEach(d -> {
+                    EntidadBeneficiariaDTO e = entidades.get(d.getOrganizacionId());
+                    if (e != null) {
+                        d.setNombreEntidad(e.getRazonSocial());
+                    }
+                });
+            } catch (Exception e) {
+                log.error("No se pudieron obtener las entidades para la landing", e);
+            }
 
             model.addAttribute("donacionesDestacadas", destacadas);
         } catch (RuntimeException e) {
@@ -66,7 +81,6 @@ public class AccesoController {
         }
         return "acceso/landigPage/landing";
     }
-
     @GetMapping("/galeria")
     public String galeria(Model model) {
         model.addAttribute("titulo", "Galería de Donaciones");
