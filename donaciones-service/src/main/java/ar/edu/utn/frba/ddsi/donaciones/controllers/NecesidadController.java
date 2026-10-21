@@ -1,9 +1,7 @@
 package ar.edu.utn.frba.ddsi.donaciones.controllers;
 
-import ar.edu.utn.frba.ddsi.donaciones.dto.CambioEstadoRequestDTO;
 import ar.edu.utn.frba.ddsi.donaciones.dto.NecesidadDTO;
 import ar.edu.utn.frba.ddsi.donaciones.services.NecesidadService;
-import ar.edu.utn.frba.ddsi.donaciones.dto.DonacionSegmentadaDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

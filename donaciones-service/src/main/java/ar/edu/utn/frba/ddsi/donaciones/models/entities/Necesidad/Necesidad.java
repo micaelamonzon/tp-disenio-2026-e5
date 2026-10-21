@@ -56,6 +56,10 @@ public abstract class Necesidad{
     }
 
     public abstract void satisfacer(int cantidadRecibida);
+    public abstract String tipo();
+    public abstract int cantidadSolicitada();
+    public abstract int cantidadRecibida();
+
 
     protected void marcarComoSatisfecha() {
         this.estaSatisfecha = true;
