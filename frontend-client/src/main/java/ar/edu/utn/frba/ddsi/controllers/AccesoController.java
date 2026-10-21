@@ -4,11 +4,14 @@ import ar.edu.utn.frba.ddsi.dtos.donaciones.DonacionDTO;
 import ar.edu.utn.frba.ddsi.dtos.donaciones.RegistroEntidadBeneficiariaDTO;
 import ar.edu.utn.frba.ddsi.dtos.donaciones.RegistroPersonaHumanaDTO;
 import ar.edu.utn.frba.ddsi.dtos.donaciones.RegistroPersonaJuridicaDTO;
+import ar.edu.utn.frba.ddsi.dtos.entidades.EntidadBeneficiariaDTO;
 import ar.edu.utn.frba.ddsi.services.AuthApiService;
 import ar.edu.utn.frba.ddsi.services.DonacionesApiService;
 import ar.edu.utn.frba.ddsi.services.DonacionesService;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,19 +21,24 @@ import tools.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
+@Slf4j
 @Controller
 @RequestMapping("/acceso")
 public class AccesoController {
     private final DonacionesService donacionesService;
     private final DonacionesApiService donacionesApiService;
     private final AuthApiService authApiService;
+    private final ObjectMapper objectMapper;
 
     public AccesoController(DonacionesService donacionesService,
-                            DonacionesApiService donacionesApiService, AuthApiService authApiService) {
+                            DonacionesApiService donacionesApiService, AuthApiService authApiService, ObjectMapper objectMapper) {
         this.donacionesService = donacionesService;
         this.donacionesApiService = donacionesApiService;
         this.authApiService = authApiService;
+        this.objectMapper = objectMapper;
     }
 
     private List<DonacionDTO> obtenerTodasLasDonacionesPublicas() {
@@ -44,12 +52,27 @@ public class AccesoController {
         try {
             List<DonacionDTO> todas = obtenerTodasLasDonacionesPublicas();
             java.time.LocalDateTime haceUnMes = java.time.LocalDateTime.now().minusMonths(1);
-            // 3 donaciones con mas bienes del ultimo mes
+
+            // 3 donaciones con más bienes del último mes
             List<DonacionDTO> destacadas = todas.stream()
                     .filter(d -> d.getFechaDeIngreso() != null && d.getFechaDeIngreso().isAfter(haceUnMes))
                     .sorted(Comparator.comparingInt(DonacionDTO::getCantidadTotalItems).reversed())
-                    .limit(3) // Máximo 3 para las destacar en el mes
+                    .limit(3)
                     .toList();
+
+            try {
+                Map<Long, EntidadBeneficiariaDTO> entidades = donacionesApiService.obtenerEntidadesPublicas().stream()
+                        .collect(Collectors.toMap(EntidadBeneficiariaDTO::getId, e -> e, (a, b) -> a));
+
+                destacadas.forEach(d -> {
+                    EntidadBeneficiariaDTO e = entidades.get(d.getOrganizacionId());
+                    if (e != null) {
+                        d.setNombreEntidad(e.getRazonSocial());
+                    }
+                });
+            } catch (Exception e) {
+                log.error("No se pudieron obtener las entidades para la landing", e);
+            }
 
             model.addAttribute("donacionesDestacadas", destacadas);
         } catch (RuntimeException e) {
@@ -58,7 +81,6 @@ public class AccesoController {
         }
         return "acceso/landigPage/landing";
     }
-
     @GetMapping("/galeria")
     public String galeria(Model model) {
         model.addAttribute("titulo", "Galería de Donaciones");
@@ -66,18 +88,32 @@ public class AccesoController {
         try {
             List<DonacionDTO> todas = obtenerTodasLasDonacionesPublicas();
 
-            // Filtrar las 6 donaciones HISTÓRICAS con más bienes
             List<DonacionDTO> donacionesGaleria = todas.stream()
                     .filter(d -> d.getFotoPath() != null && !d.getFotoPath().isBlank())
                     .filter(d -> Boolean.TRUE.equals(d.getDonacionEntregada())
                             || "ENTREGADA".equalsIgnoreCase(d.getEstadoActual()))
                     .sorted(Comparator.comparingInt(DonacionDTO::getCantidadTotalItems).reversed())
-                    .limit(6) // Máximo 6 históricas
+                    .limit(6)
                     .toList();
+
+            try {
+                Map<Long, EntidadBeneficiariaDTO> entidades = donacionesApiService.obtenerEntidadesPublicas().stream()
+                        .collect(Collectors.toMap(EntidadBeneficiariaDTO::getId, e -> e, (a, b) -> a));
+
+                donacionesGaleria.forEach(d -> {
+                    EntidadBeneficiariaDTO e = entidades.get(d.getOrganizacionId());
+                    if (e != null) {
+                        d.setNombreEntidad(e.getRazonSocial());
+                        d.setDireccionEntidad(e.getDireccion());
+                    }
+                });
+            } catch (Exception e) {
+                log.error("No se pudieron obtener las entidades para la galeria", e);
+            }
 
             model.addAttribute("donaciones", donacionesGaleria);
         } catch (RuntimeException e) {
-            model.addAttribute("error", "El servicio de donaciones no está disponible. Intentá de nuevo en unos minutos.");
+            model.addAttribute("error", "El servicio de donaciones no está disponible.");
             model.addAttribute("donaciones", List.of());
         }
         return "acceso/landigPage/galeria";
@@ -95,13 +131,26 @@ public class AccesoController {
                             || "ENTREGADA".equalsIgnoreCase(d.getEstadoActual()))
                     .toList();
 
-            ObjectMapper mapper = new ObjectMapper();
-            mapper.registeredModules();
+            // Se completa cada donación con la ubicación real de su entidad.
+            try {
+                Map<Long, EntidadBeneficiariaDTO> entidades = donacionesApiService.obtenerEntidadesPublicas().stream()
+                        .collect(Collectors.toMap(EntidadBeneficiariaDTO::getId, e -> e, (a, b) -> a));
 
-            String donacionesJson = mapper.writeValueAsString(donacionesEntregadas);
+                donacionesEntregadas.forEach(d -> {
+                    EntidadBeneficiariaDTO e = entidades.get(d.getOrganizacionId());
+                    if (e != null) {
+                        d.setLatitud(e.getLatitud());
+                        d.setLongitud(e.getLongitud());
+                        d.setNombreEntidad(e.getRazonSocial());
+                        d.setDireccionEntidad(e.getDireccion());
+                    }
+                });
+            } catch (Exception e) {
+                log.error("No se pudieron obtener las entidades para el mapa", e);
+            }
 
-            model.addAttribute("donacionesMapaJson", donacionesJson);
-            model.addAttribute("donacionesMapa", donacionesEntregadas); // Para las tarjetas HTML
+            model.addAttribute("donacionesMapaJson", objectMapper.writeValueAsString(donacionesEntregadas));
+            model.addAttribute("donacionesMapa", donacionesEntregadas);
         } catch (Exception e) {
             model.addAttribute("error", "El servicio de donaciones no está disponible.");
             model.addAttribute("donacionesMapaJson", "[]");

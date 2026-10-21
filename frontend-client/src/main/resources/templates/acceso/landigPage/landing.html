@@ -89,13 +89,13 @@
                     <h3 th:text="${donacion.subcategoria != null ? donacion.subcategoria : (donacion.categoria != null ? donacion.categoria : 'Donación')}">Título de Donación</h3>
 
                     <div class="donation-meta">
-
+                        <!-- Cantidad de ítems -->
                         <span th:text="${donacion.cantidadTotalItems + ' ítems'}">100 ítems</span>
 
+                        <!-- Nombre de la Entidad -->
+                        <span th:text="${donacion.nombreEntidad != null ? donacion.nombreEntidad : 'UTN Solidaria'}">Entidad Beneficiaria</span>
 
-                        <span th:text="${donacion.estadoLegible}">Entregada</span>
-
-
+                        <!-- Fecha de ingreso -->
                         <span th:if="${donacion.fechaDeIngreso != null}"
                               th:text="${#temporals.format(donacion.fechaDeIngreso, 'dd/MM/yyyy')}">01/01/2026</span>
                     </div>

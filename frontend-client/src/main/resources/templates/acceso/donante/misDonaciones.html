@@ -57,7 +57,8 @@
             <div class="donations-grid">
                 <article class="donation-card" th:each="d : ${donaciones}">
                     <div class="donation-card-top">
-                        <span class="donation-qty" th:text="'Donación #' + ${d.id}">Donación #1</span>
+                        <!-- Sin número: el id es de la base (compartido entre todos los donantes) y confundía -->
+                        <span class="donation-qty">Donación</span>
                         <span class="pill" th:classappend="${d.estadoCss}" th:text="${d.estadoLegible}">En depósito</span>
                     </div>
                     <th:block th:each="b : ${d.bienes}">

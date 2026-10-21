@@ -35,12 +35,11 @@
                      style="background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); transition: transform 0.2s; cursor: pointer;"
                      onclick="openModalFromCard(this)"
                      th:attr="data-titulo=${donacion.subcategoria != null ? donacion.subcategoria : (donacion.categoria != null ? donacion.categoria : 'Donación Solidaria')},
-                         data-imagen=${donacion.imagenUrlEfectiva != null ? donacion.imagenUrlEfectiva : '/img/default.jpg'},
-                         data-entidad='UTN Solidaria',
-                         data-ubicacion='Sede UTN',
-                         data-fecha=${donacion.fechaDeIngreso != null ? #temporals.format(donacion.fechaDeIngreso, 'dd/MM/yyyy') : 'Entregado'},
-                         data-desc=${'Donación correspondiente a la categoría ' + (donacion.categoria != null ? donacion.categoria : 'General') + ' con un total de ' + donacion.cantidadTotalItems + ' ítems recibidos.'}">
-
+                     data-imagen=${donacion.imagenUrlEfectiva != null ? donacion.imagenUrlEfectiva : '/img/default.jpg'},
+                     data-entidad=${donacion.nombreEntidad != null ? donacion.nombreEntidad : 'Entidad Beneficiaria'},
+                     data-ubicacion=${donacion.direccionEntidad != null ? donacion.direccionEntidad : 'Dirección no especificada'},
+                     data-fecha=${donacion.fechaDeIngreso != null ? #temporals.format(donacion.fechaDeIngreso, 'dd/MM/yyyy') : 'Entregado'},
+                     data-desc=${'Donación correspondiente a la categoría ' + (donacion.categoria != null ? donacion.categoria : 'General') + ' con un total de ' + donacion.cantidadTotalItems + ' ítems recibidos.'}">
                 <div style="height: 200px; width: 100%; overflow: hidden;">
 
                     <img th:src="${donacion.imagenUrlEfectiva != null ? donacion.imagenUrlEfectiva : '/img/default.jpg'}"

@@ -903,3 +903,19 @@ svg{ width: 18px; height: 18px; flex-shrink:0; }
     cursor: pointer;
 }
 .confirm-danger:hover { background: #b91c1c; }
+/* ---------- Footer compartido (mismas clases que layoutDonante / layoutEntidad) ----------*/
+.footer { background-color: #1a2332; color: #cbd2dc; width: 100%; }
+.footer-content {
+    display: flex; flex-wrap: wrap; justify-content: space-between; gap: 30px;
+    max-width: 1200px; margin: 0 auto; padding: 40px 30px 20px;
+}
+.footer-column { flex: 1; min-width: 220px; }
+.footer-column h3 { color: #ffffff; font-size: 1.3rem; margin-bottom: 15px; }
+.footer-column p { line-height: 1.6; font-size: 0.95rem; color: #b5bdc9; margin: 0; }
+.footer-column ul { list-style: none; padding: 0; margin: 0; }
+.footer-column ul li { margin-bottom: 12px; }
+.footer-column ul li a { color: #b5bdc9; text-decoration: none; font-size: 0.95rem; transition: color 0.2s ease; }
+.footer-column ul li a:hover { color: #ffffff; }
+.footer-divider { border: none; border-top: 1px solid #33404f; max-width: 1200px; margin: 10px auto 0; }
+.footer .footer-bottom { max-width: none; margin: 0; border-top: none; padding: 20px 15px; text-align: center; }
+.footer .footer-bottom p { margin: 0; font-size: 0.85rem; color: #8892a0; }
