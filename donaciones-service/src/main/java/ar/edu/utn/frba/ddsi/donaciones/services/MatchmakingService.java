@@ -91,6 +91,12 @@ public class MatchmakingService {
         return toPropuestaDTO(obtenerPropuestaDeDonacion(donacionId));
     }
 
+    @Transactional(readOnly = true)
+    public List<PropuestaMatchDTO> obtenerPropuestasDePendientes() {
+        return matchRepository.findByDonacionEstadoActual(EstadoDonacion.EN_DEPOSITO)
+                .stream().map(this::toPropuestaDTO).toList();
+    }
+
     private PropuestaMatchDTO toPropuestaDTO(PropuestaMatch p) {
         return new PropuestaMatchDTO(
                 p.getId(),

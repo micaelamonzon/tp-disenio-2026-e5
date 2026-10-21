@@ -83,7 +83,6 @@ const sidebarOverlay = document.getElementById("sidebarOverlay");
 // Camiones no necesita cargador: Thymeleaf ya renderizó la tabla en el servidor.
 const cargadoresDeVista = {
     dashboard: cargarDashboard,
-    asignacion: cargarAsignacion,
 };
 
 function activarVista(view) {
@@ -155,21 +154,6 @@ function mapDonacion(raw, cacheDonantes) {
         donante: nombreDonante,
         fechaIngreso: (raw.fechaDeIngreso || "").toString().slice(0, 10) || "-",
         vencimiento: (primerBien.fechaDeVencimiento || "").toString().slice(0, 10) || "N/A",
-    };
-}
-
-function mapNecesidad(raw) {
-    const entidad = raw.entidadBeneficiaria || {};
-    const esExtraordinaria = raw.cantidadRequerida !== undefined;
-    const esRecurrente = raw.cantidadObjetivoPorPeriodo !== undefined || raw.periodo !== undefined;
-    let tipo = raw.tipo; // por si en algún momento se homogeneiza con NecesidadDTO
-    if (!tipo) tipo = esExtraordinaria ? "Extraordinaria" : (esRecurrente ? "Recurrente" : "Necesidad");
-
-    return {
-        id: raw.id,
-        entidad: entidad.razonSocial || entidad.nombre || "Entidad",
-        descripcion: raw.descripcion || "-",
-        tipo,
     };
 }
 
@@ -651,27 +635,8 @@ inventoryFilterEstado.addEventListener("change", filtrarInventario);
 filtrarInventario();
 
 /* ============================================================
-   ASIGNACIÓN DE DONACIONES — Matchmaking (motor real del backend)
+   RANKING DE DONANTES — alternar pestañas
    ============================================================ */
-const matchCardsContainer = document.getElementById("matchCardsContainer");
-
-// donacionId -> { donacion, propuesta (o null si no se ejecutó todavía) }
-let donacionesPendientesMap = new Map();
-
-async function cargarAsignacion() {
-    matchCardsContainer.innerHTML = `<div class="loading-inline"><span class="spinner"></span> Cargando donaciones pendientes de asignación...</div>`;
-    try {
-        const enDeposito = await apiGet(`/donaciones?estado=${ESTADOS.EN_DEPOSITO}`);
-        const cacheDonantes = await getDonantesCache();
-        donacionesPendientesMap = new Map(
-            (enDeposito || []).map(d => mapDonacion(d, cacheDonantes)).map(d => [d.id, { donacion: d, propuesta: null, cargandoPropuesta: false }])
-        );
-        renderMatchCards();
-    } catch (err) {
-        console.error(err);
-        matchCardsContainer.innerHTML = `<p class="empty-state">No se pudieron cargar las donaciones pendientes. ¿Está corriendo el backend?</p>`;
-    }
-}
 
 // funcion para manejar la alternacnia de pestañas dentro de la secicon del ranking
 function switchRankingView(tipo) {
@@ -693,176 +658,14 @@ function switchRankingView(tipo) {
     }
 }
 
-
-
-// El backend ejecuta el matchmaking para TODAS las donaciones "En Depósito" de una sola vez
-// (MotorDeMatchmaking / MatchmakingScheduler),no hay un endpoint para ejecutarlo donación por donación.
-// Por eso el botón de cada card dispara el mismo proceso batch y después busca el resultado puntual de esa donación.
-
-async function ejecutarYObtenerPropuesta(donacionId) {
-    await apiPost("/matcheos/ejecutar");
-    return apiGet(`/matcheos/${donacionId}`);
-}
-
-function matchOptionHTML(donacionId, necesidad, rank, variant) {
-    const inputName = `seleccion-${donacionId}`;
-    const inputId = `sel-${donacionId}-${variant}-${necesidad.id}`;
-    if (variant === "coincidencia") {
-        return `
-      <label class="match-option" for="${inputId}">
-        <input type="radio" name="${inputName}" id="${inputId}" value="${necesidad.id}">
-        <span class="match-rank-badge">${rank}</span>
-        <span class="match-option-body">
-          <span class="match-option-name">${necesidad.entidad}</span>
-          <span class="match-option-desc">${necesidad.descripcion}</span>
-        </span>
-      </label>
-    `;
-    }
-    return `
-    <label class="algo-item" for="${inputId}">
-      <input type="radio" name="${inputName}" id="${inputId}" value="${necesidad.id}">
-      <span class="algo-item-rank">${rank}.</span>
-      <span class="algo-item-body">
-        <span class="algo-item-name">${necesidad.entidad}</span>
-        <span class="algo-item-desc">${necesidad.descripcion}</span>
-      </span>
-    </label>
-  `;
-}
-
-function matchCardHTML(id, entry) {
-    const { donacion, propuesta, cargandoPropuesta } = entry;
-
-    if (propuesta?.necesidadSeleccionada) {
-        const seleccionada = mapNecesidad(propuesta.necesidadSeleccionada);
-        return `
-      <article class="match-card">
-        <div class="match-head">
-          <div>
-            <div class="match-title">${donacion.articulo}</div>
-            <div class="match-meta">${donacion.cantidad} ${donacion.unidad} · ${donacion.categoria} · Donante: ${donacion.donante}</div>
-          </div>
-        </div>
-        <span class="match-assigned-pill">${ICONS.check} Asignada a ${seleccionada.entidad}</span>
-      </article>
-    `;
-    }
-
-    const botonEjecutar = `<button class="btn btn-primary" data-ejecutar="${id}" ${cargandoPropuesta ? "disabled" : ""}>
-    ${cargandoPropuesta ? "Ejecutando..." : "Ejecutar Matchmaking"}
-  </button>`;
-
-    if (!propuesta) {
-        return `
-      <article class="match-card">
-        <div class="match-head">
-          <div>
-            <div class="match-title">${donacion.articulo}</div>
-            <div class="match-meta">${donacion.cantidad} ${donacion.unidad} · ${donacion.categoria} · Donante: ${donacion.donante}</div>
-          </div>
-          ${botonEjecutar}
-        </div>
-      </article>
-    `;
-    }
-
-    const coincidencias = (propuesta.rankingConjunto || []).map(mapNecesidad);
-    const rankingsIndividuales = propuesta.rankingsIndividuales || [];
-
-    return `
-    <article class="match-card">
-      <div class="match-head">
-        <div>
-          <div class="match-title">${donacion.articulo}</div>
-          <div class="match-meta">${donacion.cantidad} ${donacion.unidad} · ${donacion.categoria} · Donante: ${donacion.donante}</div>
-        </div>
-        ${botonEjecutar}
-      </div>
-
-      ${coincidencias.length ? `
-        <div class="coincidencia-box">
-          <div class="coincidencia-title">${ICONS.check} Coincidencias en Ambos Algoritmos (${coincidencias.length})</div>
-          <div class="coincidencia-sub">Las siguientes entidades fueron recomendadas por ambos algoritmos. Seleccione una:</div>
-          ${coincidencias.map((n, i) => matchOptionHTML(id, n, i + 1, "coincidencia")).join("")}
-        </div>
-      ` : `<p class="algo-item-desc" style="margin-top:14px;">No hubo coincidencias entre ambos algoritmos. Elija una necesidad de los rankings de abajo.</p>`}
-
-      <div class="algo-columns">
-        ${rankingsIndividuales.map(r => {
-        const necesidades = (r.necesidades || []).map(mapNecesidad);
-        return `
-            <div class="algo-column">
-              <div class="algo-column-title"><span class="algo-dot semantica"></span> ${r.nombreAlgoritmo || "Algoritmo"}</div>
-              ${necesidades.map((n, i) => matchOptionHTML(id, n, i + 1, r.nombreAlgoritmo || "algo")).join("") || `<p class="algo-item-desc">Sin necesidades compatibles.</p>`}
-            </div>
-          `;
-    }).join("")}
-      </div>
-
-      <div class="match-actions">
-        <button class="btn btn-primary" data-confirmar="${id}" disabled>Confirmar Asignación a Entidad</button>
-      </div>
-    </article>
-  `;
-}
-
-function renderMatchCards() {
-    if (!donacionesPendientesMap.size) {
-        matchCardsContainer.innerHTML = `<p class="empty-state">No hay donaciones "En depósito" pendientes de asignación.</p>`;
-        return;
-    }
-
-    matchCardsContainer.innerHTML = Array.from(donacionesPendientesMap.entries())
-        .map(([id, entry]) => matchCardHTML(id, entry))
-        .join("");
-
-    matchCardsContainer.querySelectorAll("[data-ejecutar]").forEach(btn => {
-        btn.addEventListener("click", async () => {
-            const id = btn.dataset.ejecutar;
-            const entry = donacionesPendientesMap.get(Number(id)) || donacionesPendientesMap.get(id);
-            entry.cargandoPropuesta = true;
-            renderMatchCards();
-            try {
-                entry.propuesta = await ejecutarYObtenerPropuesta(id);
-            } catch (err) {
-                console.error(err);
-                alert("No se pudo ejecutar el matchmaking para esta donación. Revisá la consola para más detalle.");
-            } finally {
-                entry.cargandoPropuesta = false;
-                renderMatchCards();
-            }
-        });
+// Muestra "Procesando..." en los formularios que pueden tardar (ej. ejecutar matchmaking)
+document.querySelectorAll("form[data-loading]").forEach(form => {
+    form.addEventListener("submit", () => {
+        const boton = form.querySelector("button[type=submit]");
+        boton.disabled = true;
+        boton.textContent = "Procesando...";
     });
-
-    matchCardsContainer.querySelectorAll('input[type="radio"]').forEach(radio => {
-        radio.addEventListener("change", () => {
-            const card = radio.closest(".match-card");
-            card.querySelector("[data-confirmar]").disabled = false;
-        });
-    });
-
-    matchCardsContainer.querySelectorAll("[data-confirmar]").forEach(btn => {
-        btn.addEventListener("click", async () => {
-            const id = btn.dataset.confirmar;
-            const entry = donacionesPendientesMap.get(Number(id)) || donacionesPendientesMap.get(id);
-            const seleccionado = matchCardsContainer.querySelector(`input[name="seleccion-${id}"]:checked`);
-            if (!seleccionado) return;
-
-            btn.disabled = true;
-            btn.textContent = "Confirmando...";
-            try {
-                entry.propuesta = await apiPost(`/matcheos/${id}/seleccion`, { necesidadId: Number(seleccionado.value) });
-                renderMatchCards();
-            } catch (err) {
-                console.error(err);
-                alert("No se pudo confirmar la asignación.");
-                btn.disabled = false;
-                btn.textContent = "Confirmar Asignación a Entidad";
-            }
-        });
-    });
-}
+});
 
 /* ============================================================
    GESTIÓN DE CAMIONES

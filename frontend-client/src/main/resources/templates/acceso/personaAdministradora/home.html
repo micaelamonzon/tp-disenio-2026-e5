@@ -399,7 +399,78 @@
             </div>
 
             <h2 class="section-title-plain">Donaciones en Depósito - Pendientes de Asignación</h2>
-            <div id="matchCardsContainer" class="match-cards"></div>
+            <p class="form-error" th:if="${errorAsignacion}" th:text="${errorAsignacion}"></p>
+            <p class="alert-info" th:if="${mensajeAsignacion}" th:text="${mensajeAsignacion}"></p>
+
+            <form method="post" data-loading th:action="@{/personaAdministradora/asignacion/ejecutar}" style="margin: 16px 0;">
+                <button type="submit" class="btn btn-primary">Ejecutar Matchmaking</button>
+            </form>
+
+            <div id="matchCardsContainer" class="match-cards">
+                <p class="empty-state" th:if="${#lists.isEmpty(pendientesAsignacion)}">
+                    No hay donaciones "En depósito" pendientes de asignación.
+                </p>
+
+                <article class="match-card" th:each="d : ${pendientesAsignacion}" th:with="p=${propuestas.get(d.id)}">
+                    <div class="match-head">
+                        <div>
+                            <div class="match-title" th:text="${d.articulos}"></div>
+                            <div class="match-meta"
+                                 th:text="${d.cantidadTotalItems + ' ' + d.unidad + ' · ' + d.categoria + ' · Donante: ' + d.nombreDonante}"></div>
+                        </div>
+                    </div>
+
+                    <p class="algo-item-desc" th:if="${p == null}">
+                        Todavía no hay propuesta para esta donación. Ejecutá el matchmaking.
+                    </p>
+
+                    <form th:if="${p != null}" method="post" data-loading
+                          th:action="@{/personaAdministradora/asignacion/{id}/seleccionar(id=${p.id})}">
+
+                        <div class="coincidencia-box" th:if="${!#lists.isEmpty(p.rankingConjunto)}">
+                            <div class="coincidencia-title"
+                                 th:text="'Coincidencias en Ambos Algoritmos (' + ${#lists.size(p.rankingConjunto)} + ')'"></div>
+                            <div class="coincidencia-sub">Estas entidades fueron recomendadas por ambos algoritmos. Seleccione una:</div>
+                            <label class="match-option" th:each="n, st : ${p.rankingConjunto}"
+                                   th:for="${'sel-' + d.id + '-c-' + n.id}">
+                                <input type="radio" name="necesidadId" required
+                                       th:id="${'sel-' + d.id + '-c-' + n.id}" th:value="${n.id}">
+                                <span class="match-rank-badge" th:text="${st.count}"></span>
+                                <span class="match-option-body">
+                        <span class="match-option-name" th:text="${n.entidadRazonSocial}"></span>
+                        <span class="match-option-desc" th:text="${n.descripcion}"></span>
+                    </span>
+                            </label>
+                        </div>
+                        <p class="algo-item-desc" style="margin-top:14px;" th:if="${#lists.isEmpty(p.rankingConjunto)}">
+                            No hubo coincidencias entre ambos algoritmos. Elija una necesidad de los rankings de abajo.
+                        </p>
+
+                        <div class="algo-columns">
+                            <div class="algo-column" th:each="r, rs : ${p.rankingsIndividuales}">
+                                <div class="algo-column-title">
+                                    <span class="algo-dot semantica"></span> <span th:text="${r.algoritmo}"></span>
+                                </div>
+                                <label class="algo-item" th:each="n, st : ${r.necesidades}"
+                                       th:for="${'sel-' + d.id + '-r' + rs.index + '-' + n.id}">
+                                    <input type="radio" name="necesidadId" required
+                                           th:id="${'sel-' + d.id + '-r' + rs.index + '-' + n.id}" th:value="${n.id}">
+                                    <span class="algo-item-rank" th:text="${st.count + '.'}"></span>
+                                    <span class="algo-item-body">
+                            <span class="algo-item-name" th:text="${n.entidadRazonSocial}"></span>
+                            <span class="algo-item-desc" th:text="${n.descripcion}"></span>
+                        </span>
+                                </label>
+                                <p class="algo-item-desc" th:if="${#lists.isEmpty(r.necesidades)}">Sin necesidades compatibles.</p>
+                            </div>
+                        </div>
+
+                        <div class="match-actions">
+                            <button type="submit" class="btn btn-primary">Confirmar Asignación a Entidad</button>
+                        </div>
+                    </form>
+                </article>
+            </div>
         </section>
 
         <!-- ===== GESTIÓN DE CAMIONES (datos renderizados por Thymeleaf) ===== -->
