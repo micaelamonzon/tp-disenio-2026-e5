@@ -39,5 +39,4 @@ public class MatchmakingController {
         matchmakingService.seleccionarNecesidad(propuestaId, necesidadId, responsableId);
         return ResponseEntity.noContent().build();
     }
-    }
 }
