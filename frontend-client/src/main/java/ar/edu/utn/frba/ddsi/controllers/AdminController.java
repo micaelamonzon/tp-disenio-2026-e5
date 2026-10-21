@@ -1,6 +1,7 @@
 package ar.edu.utn.frba.ddsi.controllers;
 
 import ar.edu.utn.frba.ddsi.dtos.donaciones.DonacionDTO;
+import ar.edu.utn.frba.ddsi.dtos.donaciones.PropuestaMatchDTO;
 import ar.edu.utn.frba.ddsi.dtos.donaciones.misiones.RankingMensualDTO;
 import ar.edu.utn.frba.ddsi.dtos.logistica.CamionDTO;
 import ar.edu.utn.frba.ddsi.services.DonacionesService;
@@ -16,7 +17,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/personaAdministradora")
@@ -88,17 +91,33 @@ public class AdminController {
         }
 
         try {
-            List<DonacionDTO> inventario = new ArrayList<>();
-            inventario.addAll(donacionesService.obtenerDonacionesPorEstado("EN_DEPOSITO"));
+            List<DonacionDTO> enDeposito = donacionesService.obtenerDonacionesPorEstado("EN_DEPOSITO");
+            List<DonacionDTO> inventario = new ArrayList<>(enDeposito);
             inventario.addAll(donacionesService.obtenerDonacionesPorEstado("VENCIDA"));
             model.addAttribute("inventario", inventario);
+            model.addAttribute("pendientesAsignacion", enDeposito);
         } catch (SesionExpiradaException e) {
             throw e;
         } catch (Exception e) {
             log.warn("No se pudo obtener el inventario", e);
             model.addAttribute("inventario", List.<DonacionDTO>of());
+            model.addAttribute("pendientesAsignacion", List.<DonacionDTO>of());
             model.addAttribute("errorInventario", "No se pudo conectar con el servicio de donaciones.");
         }
+
+        Map<Long, PropuestaMatchDTO> propuestas = new HashMap<>();
+        try {
+            for (PropuestaMatchDTO p : donacionesService.obtenerPropuestasPendientes()) {
+                // Si hubiera más de una por donación, nos quedamos con la más reciente
+                propuestas.merge(p.getDonacionId(), p, (a, b) -> a.getId() > b.getId() ? a : b);
+            }
+        } catch (SesionExpiradaException e) {
+            throw e;
+        } catch (Exception e) {
+            log.warn("No se pudieron obtener las propuestas de matchmaking", e);
+            model.addAttribute("errorAsignacion", "No se pudieron obtener las propuestas de matchmaking.");
+        }
+        model.addAttribute("propuestas", propuestas);
 
       try {
             model.addAttribute("catalogoSubcategorias", donacionesService.obtenerSubcategoriasPorCategoria());
@@ -123,5 +142,35 @@ public class AdminController {
             redirect.addFlashAttribute("errorInventario", "No se pudo marcar la donación como vencida.");
         }
         return "redirect:/personaAdministradora/home#inventario";
+    }
+
+    @PostMapping("/asignacion/ejecutar")
+    public String ejecutarMatchmaking(RedirectAttributes redirect) {
+        try {
+            donacionesService.ejecutarMatchmaking();
+            redirect.addFlashAttribute("mensajeAsignacion", "Matchmaking ejecutado. Ya podés revisar las propuestas.");
+        } catch (SesionExpiradaException e) {
+            throw e;
+        } catch (Exception e) {
+            log.warn("No se pudo ejecutar el matchmaking", e);
+            redirect.addFlashAttribute("errorAsignacion", "No se pudo ejecutar el matchmaking.");
+        }
+        return "redirect:/personaAdministradora/home#asignacion";
+    }
+
+    @PostMapping("/asignacion/{propuestaId}/seleccionar")
+    public String seleccionar(@PathVariable Long propuestaId,
+                              @RequestParam Long necesidadId,
+                              RedirectAttributes redirect) {
+        try {
+            donacionesService.seleccionarNecesidad(propuestaId, necesidadId, usuarioActual.obtener().email());
+            redirect.addFlashAttribute("mensajeAsignacion", "Asignación confirmada: la donación quedó asignada a la entidad elegida.");
+        } catch (SesionExpiradaException e) {
+            throw e;
+        } catch (Exception e) {
+            log.warn("No se pudo confirmar la asignación de la propuesta {}", propuestaId, e);
+            redirect.addFlashAttribute("errorAsignacion", "No se pudo confirmar la asignación.");
+        }
+        return "redirect:/personaAdministradora/home#asignacion";
     }
 }

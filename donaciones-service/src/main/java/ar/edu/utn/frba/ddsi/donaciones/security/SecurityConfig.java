@@ -54,9 +54,8 @@ public class SecurityConfig {
                         // admin.js llama desde el navegador y no tiene el token (está en la sesión del front).
                         // GET /donaciones también lo usa logística, que ya manda su API token.
                         .requestMatchers(HttpMethod.GET, P + "/donaciones").permitAll()
-                        .requestMatchers(HttpMethod.GET, P + "/donantes", P + "/matcheos/*").permitAll()
-                        .requestMatchers(HttpMethod.POST, P + "/humano/donacion/*", P + "/juridico/donacion/*",
-                                P + "/matcheos/ejecutar", P + "/matcheos/*/seleccion").permitAll()
+                        .requestMatchers(HttpMethod.GET, P + "/donantes").permitAll()
+                        .requestMatchers(HttpMethod.POST, P + "/humano/donacion/*", P + "/juridico/donacion/*").permitAll()
 
                         // ---------- Entre servicios (API token, ROLE_SERVICIO) ----------
                         // logística: cambios de estado de la donación durante la entrega

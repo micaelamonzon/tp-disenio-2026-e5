@@ -4,6 +4,8 @@ import ar.edu.utn.frba.ddsi.donaciones.services.MatchmakingService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/servicioDeDonaciones/matchmaking")
 public class MatchmakingController {
@@ -23,6 +25,11 @@ public class MatchmakingController {
     @GetMapping("/donacion/{donacionId}")
     public PropuestaMatchDTO obtenerPorDonacion(@PathVariable Long donacionId) {
         return matchmakingService.obtenerPropuestaDTODeDonacion(donacionId);
+    }
+
+    @GetMapping("/pendientes")
+    public List<PropuestaMatchDTO> obtenerPendientes() {
+        return matchmakingService.obtenerPropuestasDePendientes();
     }
 
     @PostMapping("/{propuestaId}/seleccionar")

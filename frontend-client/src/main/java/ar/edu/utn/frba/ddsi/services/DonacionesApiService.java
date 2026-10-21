@@ -1,10 +1,6 @@
 package ar.edu.utn.frba.ddsi.services;
 
-import ar.edu.utn.frba.ddsi.dtos.donaciones.DatosPersonalesDTO;
-import ar.edu.utn.frba.ddsi.dtos.donaciones.DonacionDTO;
-import ar.edu.utn.frba.ddsi.dtos.donaciones.RegistroEntidadBeneficiariaDTO;
-import ar.edu.utn.frba.ddsi.dtos.donaciones.RegistroPersonaHumanaDTO;
-import ar.edu.utn.frba.ddsi.dtos.donaciones.RegistroPersonaJuridicaDTO;
+import ar.edu.utn.frba.ddsi.dtos.donaciones.*;
 import ar.edu.utn.frba.ddsi.dtos.entidades.EntidadBeneficiariaDTO;
 import ar.edu.utn.frba.ddsi.dtos.entidades.NecesidadDTO;
 import ar.edu.utn.frba.ddsi.services.internal.GeocodingService;
@@ -106,6 +102,41 @@ public class DonacionesApiService {
         } catch (Exception e) {
             log.error("Error marcando donación como vencida", e);
             throw new RuntimeException("No se pudo marcar la donación como vencida", e);
+        }
+    }
+
+    public void ejecutarMatchmaking() {
+        try {
+            apiCaller.post(donacionesServiceUrl + "/matchmaking/ejecutar", Map.of(), Void.class);
+        } catch (SesionExpiradaException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Error ejecutando el matchmaking", e);
+            throw new RuntimeException("No se pudo ejecutar el matchmaking", e);
+        }
+    }
+
+    public List<PropuestaMatchDTO> obtenerPropuestasPendientes() {
+        try {
+            return apiCaller.getList(donacionesServiceUrl + "/matchmaking/pendientes", PropuestaMatchDTO.class);
+        } catch (SesionExpiradaException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Error obteniendo propuestas pendientes", e);
+            throw new RuntimeException("No se pudieron obtener las propuestas", e);
+        }
+    }
+
+    public void seleccionarNecesidad(Long propuestaId, Long necesidadId, String responsableId) {
+        try {
+            apiCaller.post(donacionesServiceUrl
+                            + "/matchmaking/{propuestaId}/seleccionar?necesidadId={necesidadId}&responsableId={responsableId}",
+                    Map.of(), Void.class, propuestaId, necesidadId, responsableId);
+        } catch (SesionExpiradaException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Error seleccionando la necesidad", e);
+            throw new RuntimeException("No se pudo confirmar la asignación", e);
         }
     }
 

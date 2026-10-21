@@ -2,6 +2,7 @@ package ar.edu.utn.frba.ddsi.services;
 
 import ar.edu.utn.frba.ddsi.dtos.donaciones.DatosPersonalesDTO;
 import ar.edu.utn.frba.ddsi.dtos.donaciones.DonacionDTO;
+import ar.edu.utn.frba.ddsi.dtos.donaciones.PropuestaMatchDTO;
 import ar.edu.utn.frba.ddsi.dtos.entidades.EntidadBeneficiariaDTO;
 import ar.edu.utn.frba.ddsi.dtos.entidades.NecesidadDTO;
 import org.springframework.stereotype.Service;
@@ -41,6 +42,16 @@ public class DonacionesService {
 
     public void vencerDonacion(Long id, String responsableId) {
         donacionesApiService.vencerDonacion(id, responsableId);
+    }
+
+    public void ejecutarMatchmaking() { donacionesApiService.ejecutarMatchmaking(); }
+
+    public List<PropuestaMatchDTO> obtenerPropuestasPendientes() {
+        return donacionesApiService.obtenerPropuestasPendientes();
+    }
+
+    public void seleccionarNecesidad(Long propuestaId, Long necesidadId, String responsableId) {
+        donacionesApiService.seleccionarNecesidad(propuestaId, necesidadId, responsableId);
     }
 
     public List<DonacionDTO> filtrar(List<DonacionDTO> donaciones,
