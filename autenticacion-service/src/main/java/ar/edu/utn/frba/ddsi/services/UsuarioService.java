@@ -8,6 +8,8 @@ import ar.edu.utn.frba.ddsi.repositories.UsuarioRepository;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import ar.edu.utn.frba.ddsi.models.NotificacionesClient;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.security.SecureRandom;
 
@@ -22,10 +24,13 @@ public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
+    private final String frontendUrl;
 
-    public UsuarioService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder) {
+    public UsuarioService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder,
+                          @Value("${frontend.url:http://localhost:8084}") String frontendUrl) {
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
+        this.frontendUrl = frontendUrl;
     }
 
     public UsuarioDTO crear(CrearUsuarioDTO body) {
@@ -61,12 +66,36 @@ public class UsuarioService {
             throw new EmailEnUsoException(email);
         }
 
+        enviarBienvenida(usuario, passwordTemporal);
+
         return new UsuarioDTO(usuario.getId(), usuario.getEmail(), usuario.getRol().name(),
                 usuario.getIdEnDominio(), usuario.getNombre(), passwordTemporal);
     }
 
     public boolean emailDisponible(String email) {
         return usuarioRepository.findByEmail(normalizarEmail(email)).isEmpty();
+    }
+
+    // mail de bienvenida al terminar el alta (si falla el registro sigue igual)
+    private void enviarBienvenida(Usuario usuario, String passwordTemporal) {
+        String link = frontendUrl + "/acceso/login";
+        String mensaje = "¡Hola " + usuario.getNombre() + ", te damos la bienvenida a DonaTrack! "
+                + "Tu cuenta ya está creada. ";
+        if (passwordTemporal != null) {
+            mensaje += "Para ingresar por primera vez usá tu email " + usuario.getEmail()
+                    + " y esta contraseña temporal: " + passwordTemporal
+                    + ". Podés cambiarla desde \"¿Olvidaste tu contraseña?\". ";
+        } else {
+            mensaje += "Ya podés ingresar con tu email " + usuario.getEmail() + ". ";
+        }
+        mensaje += "Ingresá en: " + link;
+
+        try {
+            NotificacionesClient.enviarEmail(usuario.getEmail(), mensaje);
+        } catch (Exception e) {
+            System.out.println("No se pudo enviar el mail de bienvenida a "
+                    + usuario.getEmail() + ": " + e.getMessage());
+        }
     }
 
     private String normalizarEmail(String email) {
