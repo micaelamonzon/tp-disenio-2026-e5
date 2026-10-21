@@ -33,4 +33,8 @@ public class NecesidadExtraordinaria extends Necesidad {
             marcarComoSatisfecha();
         }
     }
+
+    @Override public String tipo() { return "EXTRAORDINARIA"; }
+    @Override public int cantidadSolicitada() { return cantidadRequerida; }
+    @Override public int cantidadRecibida() { return cantidadRecibida; }
 }

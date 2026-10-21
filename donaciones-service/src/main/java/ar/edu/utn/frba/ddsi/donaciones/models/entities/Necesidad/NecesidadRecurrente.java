@@ -39,6 +39,10 @@ public class NecesidadRecurrente extends Necesidad {
         }
     }
 
+    @Override public String tipo() { return "RECURRENTE"; }
+    @Override public int cantidadSolicitada() { return cantidadObjetivoPorPeriodo; }
+    @Override public int cantidadRecibida() { return cantidadRecibidaEnPeriodo; }
+
     // Se llama al inicio de cada nuevo período (puede usarlo un @Scheduled)
     public void reiniciarPeriodo() {
         this.cantidadRecibidaEnPeriodo = 0;

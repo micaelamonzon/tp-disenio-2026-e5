@@ -15,16 +15,25 @@ import java.util.List;
 @Entity
 @Table(name = "PropuestaMatch")
 public class PropuestaMatch extends Persistente {
-    @Transient
-    private DonacionSegmentada donacion; // donación a la que corresponden los rankings
-    @Transient
-    private List<Necesidad> rankingConjunto = new ArrayList<>(); //Cuando hay coincidencias
-    @Transient
+    @ManyToOne
+    @JoinColumn(name = "donacion_id")
+    private DonacionSegmentada donacion;
+
+    // Cuando hay coincidencias entre algoritmos. El orden importa (primero el mejor)
+    @ManyToMany
+    @JoinTable(name = "propuesta_ranking_conjunto",
+            joinColumns = @JoinColumn(name = "propuesta_id"),
+            inverseJoinColumns = @JoinColumn(name = "necesidad_id"))
+    @OrderColumn(name = "posicion")
+    private List<Necesidad> rankingConjunto = new ArrayList<>();
+
+    @ManyToOne
+    @JoinColumn(name = "necesidad_seleccionada_id")
     private Necesidad necesidadSeleccionada;
 
-    // Guarda los rankings separados si no hubo coincidencias globales
-
-    @Transient
+    // Rankings separados si no hubo coincidencias globales
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "propuesta_id")
     private List<RankingPorAlgoritmo> rankingsIndividuales = new ArrayList<>();
 
 }

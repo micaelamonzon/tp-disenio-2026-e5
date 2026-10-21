@@ -14,12 +14,10 @@ import java.util.List;
 public class DonacionesController {
 
     private final DonacionesService donacionesService;
-    private final MatchmakingService matchmakingService;
 
     public DonacionesController(DonacionesService donacionesService,
                                 MatchmakingService matchmakingService) {
         this.donacionesService = donacionesService;
-        this.matchmakingService = matchmakingService;
     }
 
     //Generales
@@ -39,28 +37,6 @@ public class DonacionesController {
     @ResponseStatus(HttpStatus.ACCEPTED)
     public void importadorCSV(@RequestParam("file") String file) {
         donacionesService.arrancarImportacionDeCSV(file);
-    }
-    // Matching
-
-    @GetMapping("/matcheos/{matcheoId}")
-    public PropuestaMatch obtenerRankingGenerado(
-            @PathVariable Long matcheoId) {
-        return matchmakingService.obtenerPropuestaPorId(matcheoId);
-    }
-
-    @PostMapping("/matcheos/ejecutar")
-    @ResponseStatus(HttpStatus.OK)
-    public String ejecutarAlgoritmosADemanda() {
-        matchmakingService.ejecutarProcesoMatchmaking();
-        return "Proceso de asignación ejecutado a demanda exitosamente.";
-    }
-
-    @PostMapping("/matcheos/{matcheoId}/seleccion")
-    public PropuestaMatch seleccionarNecesidad(
-            @PathVariable Long matcheoId,
-            @RequestBody SeleccionNecesidadRequestDTO request) {
-        return matchmakingService.seleccionarNecesidad(
-                matcheoId, request.necesidadId());
     }
 
     // Donantes
