@@ -1,46 +1,28 @@
-/* ============================================================
-   CONFIGURACIÓN DE LA API
-   ============================================================
-*/
-const API_BASE = "http://localhost:8080/servicioDeDonaciones";
-
-// Nombres de estado usados para filtrar GET /donaciones?estado=...
-const ESTADOS = {
-    EN_DEPOSITO: "EN_DEPOSITO",
-    ASIGNADA: "ASIGNACION_REALIZADA",
-    VENCIDA: "VENCIDA",
-};
 
 /* ---------- Helpers genéricos de fetch ---------- */
-async function apiGet(path) {
-    const res = await fetch(`${API_BASE}${path}`);
-    if (!res.ok) throw new Error(`GET ${path} -> ${res.status}`);
-    return res.status === 204 ? null : res.json();
+
+// Llamadas JSON al propio front (con el token CSRF de los <meta>)
+async function frontJson(path, { method = "GET", body } = {}) {
+    const headers = { "Accept": "application/json" };
+    if (body !== undefined) headers["Content-Type"] = "application/json";
+    const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
+    const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
+    if (csrfToken && csrfHeader) headers[csrfHeader] = csrfToken;
+
+    const res = await fetch(path, { method, headers, body: body !== undefined ? JSON.stringify(body) : undefined });
+    if (res.status === 401 || (res.redirected && res.url.includes("/acceso/login"))) {
+        window.location.href = "/acceso/login?expirada";
+        throw new Error("Tu sesión expiró.");
+    }
+    const data = await res.json().catch(() => null);
+    if (!res.ok) {
+        const err = new Error(data?.error || `Error ${res.status}`);
+        err.data = data;
+        throw err;
+    }
+    return data;
 }
 
-async function apiPost(path, body) {
-    const res = await fetch(`${API_BASE}${path}`, {
-        method: "POST",
-        headers: body ? { "Content-Type": "application/json" } : undefined,
-        body: body ? JSON.stringify(body) : undefined,
-    });
-    if (!res.ok) throw new Error(`POST ${path} -> ${res.status}`);
-    return res.status === 204 ? null : res.json().catch(() => null);
-}
-
-async function apiPatch(path, body) {
-    const res = await fetch(`${API_BASE}${path}`, {
-        method: "PATCH",
-        headers: body ? { "Content-Type": "application/json" } : undefined,
-        body: body ? JSON.stringify(body) : undefined,
-    });
-    if (!res.ok) throw new Error(`PATCH ${path} -> ${res.status}`);
-    return res.status === 204 ? null : res.json().catch(() => null);
-}
-
-// Responsable de la acción (persona administradora logueada).
-// REVISAR cuando exista login real / servicio de autenticación (Entrega 5).
-const RESPONSABLE_ACTUAL_ID = "admin-demo";
 
 /* ============================================================
    ICONOS
@@ -78,12 +60,8 @@ const adminShell = document.getElementById("adminShell");
 const sidebarToggle = document.getElementById("sidebarToggle");
 const sidebarOverlay = document.getElementById("sidebarOverlay");
 
-// Cada vista se carga (fetch) cuando se abre, para que siempre muestre
-// datos frescos del backend y no algo que haya quedado obsoleto.
-// Camiones no necesita cargador: Thymeleaf ya renderizó la tabla en el servidor.
-const cargadoresDeVista = {
-    dashboard: cargarDashboard,
-};
+// Ninguna vista necesita cargador: Thymeleaf ya renderiza todo en el servidor.
+const cargadoresDeVista = {};
 
 function activarVista(view) {
     if (!document.getElementById(`view-${view}`)) view = "dashboard";
@@ -101,107 +79,6 @@ sidebarLinks.forEach(link => {
 
 sidebarToggle.addEventListener("click", () => adminShell.classList.toggle("sidebar-open"));
 sidebarOverlay.addEventListener("click", () => adminShell.classList.remove("sidebar-open"));
-
-/* ============================================================
-   ADAPTADORES DE DATOS
-   ============================================================
-*/
-
-let donantesCache = null;
-
-async function getDonantesCache() {
-    if (donantesCache) return donantesCache;
-    donantesCache = new Map();
-    try {
-        const todos = await apiGet("/donantes");
-        (todos || []).forEach(d => {
-            const esJuridica = d.idJuridico != null;
-            const id = esJuridica ? d.idJuridico : d.idHumano;
-            if (id == null) return; // registro sin id de ningún tipo, no se puede resolver
-            const tipoKey = esJuridica ? "JURIDICO" : "HUMANO";
-            const nombreMostrado = esJuridica
-                ? (d.razonSocial || `Donante jurídico #${id}`)
-                : (`${d.nombre || ""} ${d.apellido || ""}`.trim() || `Donante #${id}`);
-            donantesCache.set(`${tipoKey}-${id}`, nombreMostrado);
-        });
-    } catch (err) {
-        console.error("No se pudo precargar la lista de donantes:", err);
-    }
-    return donantesCache;
-}
-
-function mapDonacion(raw, cacheDonantes) {
-    const sub = raw.subcategoria || {};
-    const bienes = raw.bienesDelMismoTipo || [];
-    const primerBien = bienes[0] || {};
-    const cantidadTotal = bienes.reduce((acc, b) => acc + (b.cantidad || 0), 0);
-
-    // RESUELTO: TipoDonante.java define HUMANO / JURIDICO (sin la "A" final).
-    const tipoDonanteKey = (raw.tipoDonante || "").toUpperCase() === "JURIDICO" ? "JURIDICO" : "HUMANO";
-    const donanteKey = `${tipoDonanteKey}-${raw.idDelDonante}`;
-    const nombreDonante = cacheDonantes?.get(donanteKey)
-        || (raw.idDelDonante ? `Donante #${raw.idDelDonante}` : "Donante");
-
-    return {
-        id: raw.id,
-        articulo: sub.nombre || primerBien.nombre || "Artículo sin nombre",
-        categoria: sub.categoria?.nombre || "-",
-        subcategoria: sub.nombre || "-",
-        cantidad: cantidadTotal || primerBien.cantidad || 0,
-        // Unidad.tipoUnidad es el enum KILOGRAMOS/LITROS/CENTIMETROS/METROS (Unidad.java).
-        unidad: (primerBien.tipoUnidad || "").toString().toLowerCase(),
-        estado: raw.estadoActual || "-",
-        donante: nombreDonante,
-        fechaIngreso: (raw.fechaDeIngreso || "").toString().slice(0, 10) || "-",
-        vencimiento: (primerBien.fechaDeVencimiento || "").toString().slice(0, 10) || "N/A",
-    };
-}
-
-/* ============================================================
-   PANEL / DASHBOARD
-   ============================================================ */
-async function cargarDashboard() {
-    const errorBox = document.getElementById("dashboardError");
-    const lista = document.getElementById("dashboardRecientesList");
-    errorBox.hidden = true;
-    lista.innerHTML = `<div class="loading-inline"><span class="spinner"></span> Cargando donaciones recientes...</div>`;
-
-    try {
-        const [enDeposito, vencidas, asignadas] = await Promise.all([
-            apiGet(`/donaciones?estado=${ESTADOS.EN_DEPOSITO}`),
-            apiGet(`/donaciones?estado=${ESTADOS.VENCIDA}`).catch(() => []),
-            apiGet(`/donaciones?estado=${ESTADOS.ASIGNADA}`).catch(() => []),
-        ]);
-
-        document.getElementById("statDisponibles").textContent = (enDeposito || []).length;
-        document.getElementById("statVencidas").textContent = (vencidas || []).length;
-        document.getElementById("statAsignadas").textContent = (asignadas || []).length;
-
-        const cacheDonantes = await getDonantesCache();
-        const recientes = [...(enDeposito || []), ...(asignadas || [])]
-            .map(d => mapDonacion(d, cacheDonantes))
-            .slice(0, 6);
-
-        lista.innerHTML = recientes.length
-            ? recientes.map(d => `
-          <div class="reciente-item">
-            <div>
-              <div class="reciente-item-name">${d.articulo}</div>
-              <div class="reciente-item-meta">Donante: ${d.donante}</div>
-            </div>
-            <div class="reciente-item-right">
-              <div class="reciente-item-cant">${d.cantidad} ${d.unidad}</div>
-              <span class="pill pill-${d.estado === ESTADOS.EN_DEPOSITO ? "Disponible" : "Asignada"}">${d.estado === ESTADOS.EN_DEPOSITO ? "Disponible" : "Asignada"}</span>
-            </div>
-          </div>`).join("")
-            : `<p class="empty-state">No hay donaciones registradas todavía.</p>`;
-    } catch (err) {
-        console.error(err);
-        errorBox.hidden = false;
-        errorBox.textContent = "No se pudo conectar con el Servicio de Donaciones. Verificá que el backend esté corriendo en " + API_BASE + ".";
-        lista.innerHTML = "";
-    }
-}
 
 /* ============================================================
    REGISTRAR DONACIONES
@@ -243,26 +120,17 @@ donorSearchBtn.addEventListener("click", async () => {
     donorSearchResult.className = "donor-search-result";
     donorSearchResult.innerHTML = `<span class="loading-inline"><span class="spinner"></span> Buscando...</span>`;
     try {
-        const todos = await apiGet("/donantes");
-        const coincidencias = (todos || []).filter(d => {
-            const nombreCompleto = `${d.nombre || ""} ${d.apellido || ""}`.toLowerCase();
-            const razonSocial = (d.razonSocial || "").toLowerCase();
-            return nombreCompleto.includes(query) || razonSocial.includes(query);
-        });
+        const coincidencias = await frontJson(`/personaAdministradora/donantes?q=${encodeURIComponent(query)}`);
         const encontrado = coincidencias[0];
 
         if (encontrado) {
-            const esJuridica = encontrado.idJuridico != null;
-            const id = esJuridica ? encontrado.idJuridico : encontrado.idHumano;
-            const nombreMostrado = esJuridica
-                ? encontrado.razonSocial
-                : `${encontrado.nombre || ""} ${encontrado.apellido || ""}`.trim();
+            const esJuridica = encontrado.tipo === "juridica";
             donorSearchResult.innerHTML = `
-        <b>${nombreMostrado}</b> · ${esJuridica ? "Persona jurídica" : "Persona humana"}
+        <b>${escapeHTML(encontrado.nombre)}</b> · ${esJuridica ? "Persona jurídica" : "Persona humana"}
         ${coincidencias.length > 1 ? `<br><span class="reciente-item-meta">Hay ${coincidencias.length} coincidencias, se tomó la primera. Afiná la búsqueda si no es la persona correcta.</span>` : ""}
       `;
-            donorSearchResult.dataset.foundId = id;
-            donorSearchResult.dataset.foundTipo = esJuridica ? "juridica" : "humana";
+            donorSearchResult.dataset.foundId = encontrado.id;
+            donorSearchResult.dataset.foundTipo = encontrado.tipo;
         } else {
             donorSearchResult.className = "donor-search-result not-found";
             donorSearchResult.innerHTML = "No se encontró ningún donante con ese nombre. Podés registrarlo como donante nuevo.";
@@ -496,15 +364,24 @@ registrarForm.addEventListener("submit", async (e) => {
     submitBtn.textContent = "Registrando...";
 
     try {
-        let donanteId;
-        let tipoDelDonante;
+        const donacion = {
+            descripcionGeneral: document.getElementById("descripcionGeneral").value.trim() || null,
+            bienes,
+            fechaDeIngreso: fechaInputALocalDateTime(new Date().toISOString().slice(0, 10)),
+        };
+        let payload;
 
         if (modoExistente) {
             if (!donorSearchResult.dataset.foundId) {
                 throw new Error("Buscá y confirmá un donante existente antes de registrar la donación.");
             }
-            donanteId = donorSearchResult.dataset.foundId;
-            tipoDelDonante = donorSearchResult.dataset.foundTipo;
+            payload = {
+                donanteExistente: {
+                    id: Number(donorSearchResult.dataset.foundId),
+                    tipo: donorSearchResult.dataset.foundTipo,
+                },
+                donacion,
+            };
         } else {
             const email = document.getElementById("donEmail").value.trim();
             if (!email) throw new Error("El email del donante es obligatorio.");
@@ -512,13 +389,13 @@ registrarForm.addEventListener("submit", async (e) => {
             const whatsapp = document.getElementById("donWhatsapp").value.trim();
             const mediosDeNotificacion = construirMediosDeNotificacion({ email, telefono, whatsapp });
 
-            let nuevoDonante;
+            let datos;
+            let nombreUsuario;
             if (esJuridica) {
                 const razonSocial = document.getElementById("jurRazonSocial").value.trim();
                 const cuit = document.getElementById("jurCuit").value.trim();
                 if (!razonSocial) throw new Error("La razón social es obligatoria.");
                 if (!cuit) throw new Error("El CUIT es obligatorio.");
-                // "direccion" sigue sin existir en el DTO, así que ese campo del form todavía no se envía.
                 const repNombre = document.getElementById("jurRepresentanteNombre").value.trim();
                 const repApellido = document.getElementById("jurRepresentanteApellido").value.trim();
                 const repDni = document.getElementById("jurRepresentanteDni").value.trim();
@@ -530,27 +407,26 @@ registrarForm.addEventListener("submit", async (e) => {
                         mediosDeNotificacion: [],
                     }]
                     : [];
-
-                nuevoDonante = await apiPost("/donante/juridico", {
+                datos = {
                     cuit,
                     razonSocial,
                     rubro: document.getElementById("jurRubro").value.trim() || null,
                     tipo: mapTipoPersonaJuridica(document.getElementById("jurTipo").value),
                     representantes,
                     mediosDeNotificacion,
-                });
+                };
+                nombreUsuario = razonSocial;
             } else {
                 const nombre = document.getElementById("donNombre").value.trim();
                 const apellido = document.getElementById("donApellido").value.trim();
                 const documento = document.getElementById("donDocumento").value.trim();
                 if (!nombre || !apellido || !documento) throw new Error("Nombre, apellido y documento son obligatorios.");
-                const medioPredeterminadoKey = document.getElementById("donMedioPredeterminado").value; // "email"|"telefono"|"whatsapp"
+                const medioPredeterminadoKey = document.getElementById("donMedioPredeterminado").value;
                 const medioPredeterminado = mediosDeNotificacion.find(
                     m => m.tipoDeNotificacion === TIPO_NOTIFICACION[medioPredeterminadoKey]
                 ) || mediosDeNotificacion[0] || null;
                 const edad = document.getElementById("donEdad").value.trim();
-
-                nuevoDonante = await apiPost("/donante/humano", {
+                datos = {
                     nombre,
                     apellido,
                     DNI: Number(documento) || null,
@@ -559,25 +435,19 @@ registrarForm.addEventListener("submit", async (e) => {
                     direccion: document.getElementById("donDireccion").value.trim() || null,
                     mediosDeNotificacion,
                     medioDeNotificacionPredeterminado: medioPredeterminado,
-                });
+                };
+                nombreUsuario = `${nombre} ${apellido}`;
             }
-            donanteId = nuevoDonante?.id;
-            tipoDelDonante = esJuridica ? "juridica" : "humana";
-            if (!donanteId) throw new Error("El donante se creó pero el backend no devolvió un id. Revisá la respuesta en la pestaña Network.");
-            donantesCache = null; // fuerza a refrescar la caché de nombres en la próxima vista que la use
+            payload = {
+                donanteNuevo: { tipo: esJuridica ? "juridica" : "humana", email, nombre: nombreUsuario, datos },
+                donacion,
+            };
         }
 
-        const path = tipoDelDonante === "juridica"
-            ? `/juridico/donacion/${donanteId}`
-            : `/humano/donacion/${donanteId}`;
+        const resultado = await frontJson("/personaAdministradora/registrar", { method: "POST", body: payload });
+        const lista = resultado?.donaciones || [];
+        const avisos = resultado?.avisos || [];
 
-        const donacionesSegmentadas = await apiPost(path, {
-            descripcionGeneral: document.getElementById("descripcionGeneral").value.trim() || null,
-            bienes,
-            fechaDeIngreso: fechaInputALocalDateTime(new Date().toISOString().slice(0, 10)),
-        });
-
-        const lista = donacionesSegmentadas || [];
         segmentacionResumen.hidden = false;
         segmentacionResumen.innerHTML = `
       <h3>${ICONS.check} Donación registrada — el backend generó ${lista.length} donación${lista.length === 1 ? "" : "es"} segmentada${lista.length === 1 ? "" : "s"}</h3>
@@ -590,7 +460,8 @@ registrarForm.addEventListener("submit", async (e) => {
             const unidadMostrada = (primerBien.tipoUnidad || "").toString().toLowerCase();
             return `<li><b>${nombreMostrado}</b> — ${cantidadTotal || "-"} ${unidadMostrada}</li>`;
         }).join("") || "<li>El backend no devolvió el detalle segmentado.</li>"}
-      </ul>
+      </ul> 
+        ${avisos.map(a => `<p class="reciente-item-meta">${escapeHTML(a)}</p>`).join("")}
     `;
         segmentacionResumen.scrollIntoView({ behavior: "smooth", block: "nearest" });
 
@@ -603,6 +474,14 @@ registrarForm.addEventListener("submit", async (e) => {
         donorSearchResult.hidden = true;
     } catch (err) {
         console.error(err);
+        if (err.data?.donanteId) {
+            document.querySelector('input[name="donorMode"][value="existente"]').click();
+            donorSearchResult.hidden = false;
+            donorSearchResult.className = "donor-search-result";
+            donorSearchResult.innerHTML = `<b>Donante #${err.data.donanteId}</b> · registrado. Corregí los bienes y volvé a registrar.`;
+            donorSearchResult.dataset.foundId = err.data.donanteId;
+            donorSearchResult.dataset.foundTipo = err.data.tipo;
+        }
         mostrarErrorFormulario(err.message || "No se pudo registrar la donación. Verificá que el backend esté corriendo.");
     } finally {
         submitBtn.disabled = false;

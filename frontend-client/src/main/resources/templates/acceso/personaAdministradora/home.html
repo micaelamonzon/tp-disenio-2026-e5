@@ -95,7 +95,7 @@
                 <p class="page-sub">Bienvenido, Administrador. Aquí tienes un resumen de las donaciones.</p>
             </div>
 
-            <div id="dashboardError" class="form-error" hidden></div>
+            <div id="dashboardError" class="form-error" th:if="${errorDashboard}" th:text="${errorDashboard}"></div>
 
             <div class="dashboard-stats" id="dashboardStats">
                 <div class="stat-card">
@@ -105,7 +105,7 @@
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                         </span>
                     </div>
-                    <div class="stat-value" id="statDisponibles">–</div>
+                    <div class="stat-value" id="statDisponibles" th:text="${cantDisponibles ?: '–'}">–</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-card-head">
@@ -114,7 +114,7 @@
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
                         </span>
                     </div>
-                    <div class="stat-value" id="statVencidas">–</div>
+                    <div class="stat-value" id="statVencidas" th:text="${cantVencidas ?: '–'}">–</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-card-head">
@@ -123,14 +123,27 @@
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
                         </span>
                     </div>
-                    <div class="stat-value" id="statAsignadas">–</div>
+                    <div class="stat-value" id="statAsignadas" th:text="${cantAsignadas ?: '–'}">–</div>
                 </div>
             </div>
 
             <div class="table-card">
                 <div class="table-title">Donaciones Recientes</div>
                 <div id="dashboardRecientesList" class="recientes-list">
-                    <p class="empty-state">Cargando donaciones recientes...</p>
+                    <div class="reciente-item" th:each="d : ${recientes}">
+                        <div>
+                            <div class="reciente-item-name" th:text="${d.articulos}"></div>
+                            <div class="reciente-item-meta"
+                                 th:text="'Donante: ' + ${d.nombreDonante ?: ('Donante #' + d.idDelDonante)}"></div>
+                        </div>
+                        <div class="reciente-item-right">
+                            <div class="reciente-item-cant" th:text="${d.cantidadTotalItems + ' ' + d.unidad}"></div>
+                            <span class="pill"
+                                  th:classappend="${d.estadoActual == 'EN_DEPOSITO'} ? 'pill-Disponible' : 'pill-Asignada'"
+                                  th:text="${d.estadoActual == 'EN_DEPOSITO'} ? 'Disponible' : 'Asignada'"></span>
+                        </div>
+                    </div>
+                    <p class="empty-state" th:if="${#lists.isEmpty(recientes)}">No hay donaciones registradas todavía.</p>
                 </div>
             </div>
         </section>

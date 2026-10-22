@@ -396,6 +396,59 @@ public class DonacionesApiService {
         return Map.of("tipoDeNotificacion", "EMAIL", "datoDeContacto", email.trim());
     }
 
+    // POST /donante/humano o /donante/juridico -> id del donante creado
+    public Long crearDonante(boolean esJuridica, Map<String, Object> body) {
+        String path = esJuridica ? "/donante/juridico" : "/donante/humano";
+        try {
+            Map<?, ?> respuesta = apiCaller.post(donacionesServiceUrl + path, body, Map.class);
+            return extraerId(respuesta);
+        } catch (SesionExpiradaException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Error creando el donante", e);
+            throw new RuntimeException("No se pudo registrar el donante", e);
+        }
+    }
+
+    // POST /humano/donacion/{id} o /juridico/donacion/{id} -> donaciones segmentadas
+    @SuppressWarnings("rawtypes")
+    public List<Map> crearDonacion(boolean esJuridica, Long donanteId, Map<String, Object> body) {
+        String path = esJuridica ? "/juridico/donacion/{id}" : "/humano/donacion/{id}";
+        try {
+            return apiCaller.postList(donacionesServiceUrl + path, body, Map.class, donanteId);
+        } catch (SesionExpiradaException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Error registrando la donación", e);
+            throw new RuntimeException("No se pudo registrar la donación", e);
+        }
+    }
+
+    // Rollback del alta si falla la creación del usuario (no se relanza el error)
+    public void eliminarDonanteConToken(boolean esJuridica, Long id) {
+        String path = esJuridica ? "/donante/juridico/{id}" : "/donante/humano/{id}";
+        try {
+            apiCaller.delete(donacionesServiceUrl + path, id);
+        } catch (SesionExpiradaException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("No se pudo deshacer el alta del donante {}", id, e);
+        }
+    }
+
+    // GET /donantes (humanos y jurídicos juntos)
+    @SuppressWarnings("rawtypes")
+    public List<Map> obtenerTodosLosDonantes() {
+        try {
+            return apiCaller.getList(donacionesServiceUrl + "/donantes", Map.class);
+        } catch (SesionExpiradaException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Error obteniendo los donantes", e);
+            throw new RuntimeException("No se pudieron obtener los donantes", e);
+        }
+    }
+
     // Sin id no se puede vincular el usuario con su donante/entidad: se corta el registro
     private Long extraerId(Map response) {
         if (response == null || !(response.get("id") instanceof Number id)) {

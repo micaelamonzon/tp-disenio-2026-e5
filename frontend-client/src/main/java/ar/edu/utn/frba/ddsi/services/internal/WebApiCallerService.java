@@ -51,6 +51,17 @@ public class WebApiCallerService {
                 .block());
     }
 
+    public <T> List<T> postList(String url, Object body, Class<T> responseType, Object... uriVariables) {
+        return ejecutar(token -> webClient.post()
+                .uri(url, uriVariables)
+                .headers(h -> agregarToken(h, token))
+                .bodyValue(body)
+                .retrieve()
+                .bodyToFlux(responseType)
+                .collectList()
+                .block());
+    }
+
     public <T> T post(String url, Object body, Class<T> responseType, Object... uriVariables) {
         return ejecutar(token -> webClient.post()
                 .uri(url, uriVariables)
