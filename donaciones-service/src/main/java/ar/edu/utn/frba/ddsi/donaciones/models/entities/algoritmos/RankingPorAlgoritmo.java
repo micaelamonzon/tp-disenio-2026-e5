@@ -12,6 +12,7 @@ import java.util.List;
 
 @Getter
 @Setter
+@Entity
 public class RankingPorAlgoritmo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
