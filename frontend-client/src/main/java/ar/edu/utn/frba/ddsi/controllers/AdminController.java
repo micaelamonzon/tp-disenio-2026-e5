@@ -16,10 +16,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Controller
 @RequestMapping("/personaAdministradora")
@@ -92,17 +89,32 @@ public class AdminController {
 
         try {
             List<DonacionDTO> enDeposito = donacionesService.obtenerDonacionesPorEstado("EN_DEPOSITO");
+            List<DonacionDTO> vencidas = donacionesService.obtenerDonacionesPorEstado("VENCIDA");
+            List<DonacionDTO> asignadas = donacionesService.obtenerDonacionesPorEstado("ASIGNACION_REALIZADA");
+
             List<DonacionDTO> inventario = new ArrayList<>(enDeposito);
-            inventario.addAll(donacionesService.obtenerDonacionesPorEstado("VENCIDA"));
+            inventario.addAll(vencidas);
             model.addAttribute("inventario", inventario);
             model.addAttribute("pendientesAsignacion", enDeposito);
+
+            // Dashboard: contadores y las 6 más recientes (disponibles + asignadas)
+            model.addAttribute("cantDisponibles", enDeposito.size());
+            model.addAttribute("cantVencidas", vencidas.size());
+            model.addAttribute("cantAsignadas", asignadas.size());
+            List<DonacionDTO> recientes = new ArrayList<>(enDeposito);
+            recientes.addAll(asignadas);
+            recientes.sort(Comparator.comparing(DonacionDTO::getFechaDeIngreso,
+                    Comparator.nullsLast(Comparator.reverseOrder())));
+            model.addAttribute("recientes", recientes.stream().limit(6).toList());
         } catch (SesionExpiradaException e) {
             throw e;
         } catch (Exception e) {
             log.warn("No se pudo obtener el inventario", e);
             model.addAttribute("inventario", List.<DonacionDTO>of());
             model.addAttribute("pendientesAsignacion", List.<DonacionDTO>of());
+            model.addAttribute("recientes", List.<DonacionDTO>of());
             model.addAttribute("errorInventario", "No se pudo conectar con el servicio de donaciones.");
+            model.addAttribute("errorDashboard", "No se pudo conectar con el servicio de donaciones.");
         }
 
         Map<Long, PropuestaMatchDTO> propuestas = new HashMap<>();

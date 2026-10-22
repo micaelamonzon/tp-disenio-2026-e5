@@ -50,13 +50,6 @@ public class SecurityConfig {
                         // Mapa y galería de la landing: donaciones entregadas, sin datos del donante
                         .requestMatchers(HttpMethod.GET, P + "/donaciones/entregadas").permitAll()
 
-                        // ---------- TEMPORAL hasta que admin.js pase por el front ----------
-                        // admin.js llama desde el navegador y no tiene el token (está en la sesión del front).
-                        // GET /donaciones también lo usa logística, que ya manda su API token.
-                        .requestMatchers(HttpMethod.GET, P + "/donaciones").permitAll()
-                        .requestMatchers(HttpMethod.GET, P + "/donantes").permitAll()
-                        .requestMatchers(HttpMethod.POST, P + "/humano/donacion/*", P + "/juridico/donacion/*").permitAll()
-
                         // ---------- Entre servicios (API token, ROLE_SERVICIO) ----------
                         // logística: cambios de estado de la donación durante la entrega
                         .requestMatchers(HttpMethod.PATCH, P + "/donacion/**").hasAnyRole(SERVICIO, ADMIN)
@@ -88,6 +81,8 @@ public class SecurityConfig {
                         // ---------- Solo administración ----------
                         .requestMatchers(HttpMethod.GET, P + "/donantes/humanos", P + "/donantes/juridicos").hasRole(ADMIN)
                         .requestMatchers(HttpMethod.POST, P + "/importadorCSV", P + "/donacion/registrar").hasRole(ADMIN)
+                        .requestMatchers(HttpMethod.GET, P + "/donaciones").hasAnyRole(SERVICIO, ADMIN)
+                        .requestMatchers(HttpMethod.GET, P + "/donantes").hasRole(ADMIN)
                         .requestMatchers(P + "/matchmaking/**").hasRole(ADMIN)
                         .requestMatchers(HttpMethod.GET, P + "/admin/**").hasRole(ADMIN)
 
