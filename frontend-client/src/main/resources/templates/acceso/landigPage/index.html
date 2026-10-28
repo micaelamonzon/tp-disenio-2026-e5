@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DonaTrack - UTN Solidaria</title>
+
+    <link rel="stylesheet" th:href="@{/css/landingPage/landingPage.css}">
+</head>
+<body>
+
+
+<header th:replace="~{layoutAcceso/layoutAcceso :: header}"></header>
+<nav th:replace="~{layoutAcceso/layoutAcceso :: navBar}"></nav>
+
+
+<section class="blue-header-banner" style="text-align: center; padding: 4rem 1rem;">
+    <div class="container">
+        <h1 style="font-size: 2.5rem; margin-bottom: 1rem;">Gestión y Trazabilidad de Donaciones</h1>
+        <p style="font-size: 1.15rem; max-width: 700px; margin: 0 auto 2rem auto;">
+            Conectamos a la comunidad universitaria con comedores, merenderos e instituciones sociales de forma transparente.
+        </p>
+        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+            <a th:href="@{/acceso/galeria}" class="btn btn-primary" style="padding: 0.85rem 1.75rem; font-size: 1rem;">Explorar Donaciones</a>
+            <a th:href="@{/acceso/mapa}" class="btn btn-outline" style="padding: 0.85rem 1.75rem; font-size: 1rem; border-color: white; color: white;">Ver Mapa de Impacto</a>
+        </div>
+    </div>
+</section>
+
+
+<main class="container" style="padding-top: 3rem; padding-bottom: 4rem;">
+    <section class="grid-3" style="margin-bottom: 3rem;">
+        <article class="form-container-card" style="text-align: center; padding: 2rem;">
+            <h2 style="font-size: 2.5rem; color: var(--blue); margin-bottom: 0.5rem;">+1,500</h2>
+            <p style="color: var(--text-soft); font-weight: 500;">Donaciones Entregadas</p>
+        </article>
+        <article class="form-container-card" style="text-align: center; padding: 2rem;">
+            <h2 style="font-size: 2.5rem; color: var(--green); margin-bottom: 0.5rem;">45</h2>
+            <p style="color: var(--text-soft); font-weight: 500;">Entidades Beneficiadas</p>
+        </article>
+        <article class="form-container-card" style="text-align: center; padding: 2rem;">
+            <h2 style="font-size: 2.5rem; color: var(--purple); margin-bottom: 0.5rem;">100%</h2>
+            <p style="color: var(--text-soft); font-weight: 500;">Trazabilidad Verificada</p>
+        </article>
+    </section>
+
+
+    <section class="legal-card" style="margin-bottom: 2rem;">
+        <h2>¿Cómo funciona DonaTrack?</h2>
+        <div class="grid-3" style="margin-top: 1.5rem; gap: 1.5rem;">
+            <div>
+                <h3>1. Publicación</h3>
+                <p>Donantes particulares o empresas registran los artículos disponibles para entrega.</p>
+            </div>
+            <div>
+                <h3>2. Solicitud</h3>
+                <p>Las organizaciones sociales verificadas solicitan las donaciones que necesitan.</p>
+            </div>
+            <div>
+                <h3>3. Trazabilidad</h3>
+                <p>Se confirma la recepción física y se visualiza la ubicación del impacto en el mapa.</p>
+            </div>
+        </div>
+    </section>
+</main>
+
+
+<footer th:replace="~{layoutAcceso/layoutAcceso :: footer}"></footer>
+
+</body>
+</html>
+

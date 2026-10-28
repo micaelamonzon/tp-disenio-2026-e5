@@ -1,39 +1,83 @@
 package ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante;
 
-import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.Bien;
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.Persistente;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.mediosDeNotificacion.MedioDeNotificacion;
-import ar.edu.utn.frba.ddsi.donaciones.models.entities.mision.Mision;
-import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.DonacionSegmentada;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.DonacionSinSegmentar;
+import jakarta.persistence.*;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Persistent;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Data
-public class PersonaHumana{
+@NoArgsConstructor
+@Entity
+@Table(name = "persona_humana")
+public class PersonaHumana {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String nombre;
-    private String apellido;
-    private Integer edad;
-    private Integer numeroDeDocumento;
-    private String genero;
-    private String direccion;
-    private List<MedioDeNotificacion> mediosDeNotificacion = new ArrayList<>();
-    private MedioDeNotificacion medioDeNotificacionPredeterminado;
-    private List<DonacionSinSegmentar> donaciones = new ArrayList<>(); //al acceder a esta donacion sabremoscuales salieron
-    private List<Mision> misiones = new ArrayList<>();
-    private CategoriaDeDonante categoria;
 
-    public PersonaHumana(String nombre,String apellido,Integer edad,Integer numeroDeDocumento,String genero,String direccion) {
+    @Column(name = "nombre")
+    private String nombre;
+
+    @Column(name = "apellido")
+    private String apellido;
+
+    @Column(name = "edad")
+    private Integer edad;
+
+    @Column(name = "fecha_de_nacimiento")
+    private LocalDate fechaDeNaciemiento;
+
+    @Column(name = "fecha_de_registro")
+    private LocalDateTime fechaDeRegistro;
+
+    // Última vez que se le avisó por inactividad. Evita repetir el aviso todos los días:
+    // solo se vuelve a avisar si hubo actividad (una donación) después de este aviso
+    @Column(name = "fecha_ultimo_aviso_inactividad")
+    private LocalDateTime fechaUltimoAvisoInactividad;
+
+    @Column(name = "dni")
+    private Integer DNI;
+
+    @Column(name = "genero")
+    private String genero;
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "persona_humana_id", referencedColumnName = "id")
+    private List<MedioDeNotificacion> mediosDeNotificacion = new ArrayList<>();
+
+    @ManyToOne
+    @JoinColumn(name = "medio_predeterminado_id")
+    private MedioDeNotificacion medioDeNotificacionPredeterminado;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "donanteHumano", cascade = CascadeType.ALL)
+    private List<DonacionSinSegmentar> donaciones = new ArrayList<>(); //al acceder a esta donacion sabremos que donaciones segmentadas salieron
+
+
+    public PersonaHumana(String nombre,String apellido,Integer numeroDeDocumento,String genero, LocalDate fechaDeNacimiento) {
         this.nombre = nombre;
         this.apellido = apellido;
-        this.edad = edad;
-        this.numeroDeDocumento = numeroDeDocumento;
-        this.genero = genero;
-        this.direccion = direccion;
+        this.DNI = numeroDeDocumento;
+        this.genero = genero;;
+        this.fechaDeNaciemiento = fechaDeNacimiento;
+        this.fechaDeRegistro = LocalDateTime.now();
+        this.fechaUltimoAvisoInactividad = LocalDateTime.now();
+
+    }
+
+    public void calcularEdad() {
+        if(this.fechaDeNaciemiento == null){
+            this.edad = null;
+            return ;
+        }
+        LocalDateTime fechaActual = LocalDateTime.now();
+        this.edad = fechaActual.getYear() - this.fechaDeNaciemiento.getYear();
 
     }
 
@@ -42,9 +86,6 @@ public class PersonaHumana{
         this.mediosDeNotificacion.add(unMedio);
     }
 
-    public void agregarMision(Mision mision){
-        this.misiones.add(mision);
-    }
 
     public void agregarDonacion(DonacionSinSegmentar donacion){
         this.donaciones.add(donacion);

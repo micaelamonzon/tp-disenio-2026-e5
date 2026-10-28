@@ -1,0 +1,85 @@
+.missions-grid{
+    display:grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+}
+
+.mission-card{
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 18px 20px;
+    box-shadow: var(--shadow-card);
+    position:relative;
+}
+
+.mission-top{ display:flex; justify-content:space-between; gap: 12px; }
+.mission-name{ font-size: 15.5px; font-weight: 700; }
+.mission-desc{ font-size: 13.5px; color: var(--text-soft); margin-top: 4px; }
+
+.mission-check{
+    width: 26px; height:26px;
+    border-radius: 50%;
+    background: var(--green);
+    color:#fff;
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0;
+}
+.mission-check svg{ width:14px; height:14px; }
+
+.mission-progress{ margin-top: 14px; }
+.mission-progress-labels{
+    display:flex; justify-content:space-between;
+    font-size: 12.5px; color: var(--text-soft); margin-bottom: 6px;
+}
+.mission-progress .progress-track{ background: var(--border-soft); }
+.mission-progress .progress-fill{ background: var(--blue); }
+.mission-progress .progress-fill.done{ background: var(--green); }
+
+.mission-reward{
+    display:flex; justify-content:space-between; align-items:center;
+    margin-top: 12px; font-size: 13px; color: var(--text-soft);
+}
+.mission-reward b{ color: var(--blue); font-weight: 700; }
+
+.mission-card.locked{ background:#e3ebf1; opacity:.65; box-shadow:none; }
+.mission-card.locked .mission-name{ color: var(--text-soft); }
+
+
+.mission-card.current{
+    border-color: var(--blue);
+    box-shadow: 0 0 0 2px var(--blue-soft-bg), var(--shadow-card);
+}
+
+
+.mission-lock{
+    width:26px; height:26px;
+    border-radius:50%;
+    background:#cbd5e1;
+    color: var(--text-soft);
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0;
+}
+.mission-lock svg{ width:14px; height:14px; }
+
+.mission-locked-msg{ font-style:italic; margin-top:12px; }
+
+
+.mission-state{
+    display:inline-block;
+    margin-top:8px;
+    font-size:11px; font-weight:600;
+    padding:2px 8px; border-radius:10px;
+    background: var(--blue-soft-bg); color: var(--blue-dark);
+}
+.mission-state.done{ background: var(--green-bg); color:#0a6b43; }
+
+.mission-start{ margin-top: 14px; }
+.mission-start .btn{ min-height: 48px; justify-content: center; width: 100%; }
+.mission-distance {
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin: 0 0 6px;
+}
+
+

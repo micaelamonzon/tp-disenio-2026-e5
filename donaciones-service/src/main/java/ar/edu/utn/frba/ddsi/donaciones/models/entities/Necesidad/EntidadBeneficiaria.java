@@ -1,19 +1,47 @@
 package ar.edu.utn.frba.ddsi.donaciones.models.entities.Necesidad;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante.Representante;
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.Persistente;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.Subcategoria;
+import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.ArrayList;
 
-@Data
+@Getter
+@Setter
+@Entity
+@Table(name = "entidad_beneficiaria")
 public class EntidadBeneficiaria {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "razon_social")
     private String razonSocial;
+
+    @Column(name = "direccion")
     private String direccion;
-    private Integer telefono;
+
+    @Column(name = "telefono")
+    private String telefono;
+
+    @Column(name = "latitud")
+    private Double latitud;
+
+    @Column(name = "longitud")
+    private Double longitud;
+
+    // Los representantes pertenecen a la entidad (composición), asi quee se guardan y se borran con ella
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "entidad_beneficiaria_id", referencedColumnName = "id")
     private List<Representante> representantes;
+
+    @OneToMany(mappedBy = "entidadBeneficiaria", cascade = CascadeType.ALL)
     private List<Necesidad> necesidades;
 
 
@@ -48,7 +76,7 @@ public class EntidadBeneficiaria {
     }
 
     public int obtenerCantidadDonacionesUltimoTrimestre() {
-        LocalDate haceTresMeses = LocalDate.now().minusMonths(3);
+        LocalDateTime haceTresMeses = LocalDateTime.now().minusMonths(3);
 
         return this.necesidades.stream()
                 .mapToInt(n -> n.contarDonacionesDesde(haceTresMeses))

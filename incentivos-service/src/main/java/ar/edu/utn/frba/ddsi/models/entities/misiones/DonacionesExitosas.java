@@ -1,49 +1,41 @@
 package ar.edu.utn.frba.ddsi.models.entities.misiones;
 
-import ar.edu.utn.frba.ddsi.models.entities.donaciones.DonacionSinSegmentar;
-import ar.edu.utn.frba.ddsi.models.entities.persona.Insignia;
+import ar.edu.utn.frba.ddsi.models.entities.donaciones.DonacionSegmentada;
+import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
-@Data
-public class DonacionesExitosas extends Mision{
-    private Integer cantidadDeDonaciones;
 
-    public DonacionesExitosas(String nombre,Integer cantidadDeDonaciones){
+@Data
+@NoArgsConstructor
+@Entity
+@DiscriminatorValue("DonacionesExitosas")
+public class DonacionesExitosas extends Mision{
+    @Column
+    private Integer cantidadDeDonacioneExitosas;
+
+    public DonacionesExitosas(NombreDeMision nombre,Integer cantidadDeDonaciones){
         this.setNombre(nombre);
-        this.cantidadDeDonaciones = cantidadDeDonaciones;
-        setInsigniaGanadora(Insignia.DONACIONEXITOSA);
+        this.cantidadDeDonacioneExitosas = cantidadDeDonaciones;
+
     }
+
     //lograr X donaciones que sean recibidas exitosamente por una entidad beneficiaria.
     @Override
-    public Boolean seCompletoLaMision(List<DonacionSinSegmentar> donaciones) {
-        this.setProgreso(0);
+    public AvanceDeMision seCompletoLaMision(List<DonacionSegmentada> donaciones) {
+
         int cantInicial = 0;
 
         for(int i = 0; i< donaciones.size(); i++){
             if(donaciones.get(i).getDonacionEntregada()){
                 cantInicial ++;
-                subirProgreso(donaciones.size());
-                int distanciaRestante = 100 - this.getProgreso();
-                this.setDistanciaDelObjetivo(Math.max(0, distanciaRestante));
 
             }
         }
-        if(cantInicial >= cantidadDeDonaciones){
-            this.setEstadoDeMision(EstadoDeMision.COMPLETADA);
-            this.setFechaCompletada(java.time.LocalDate.now());
-            return Boolean.TRUE;
-        }else{
-            this.setEstadoDeMision(EstadoDeMision.BLOQUEADA);
-            return Boolean.FALSE;
-        }
 
-
+        return this.calcularProgresoyDistancia(cantInicial, cantidadDeDonacioneExitosas);
     }
-
-    public void subirProgreso(Integer cantDonaciones){
-        super.subirProgreso(cantDonaciones);
-    }
-
-
 }

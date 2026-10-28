@@ -1,7 +1,10 @@
 package ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador;
 
+import lombok.Data;
+
 import java.util.Set;
 import java.util.Map;
+
 
 public enum EstadoDonacion {
     EN_DEPOSITO,
@@ -10,7 +13,8 @@ public enum EstadoDonacion {
     EN_TRASLADO,
     ENTREGADA,
     ENTREGA_FALLIDA,
-    VENCIDA;
+    VENCIDA,
+    INICIO;
 
     //Transiciones validas seteadas
     private static final Map<EstadoDonacion, Set<EstadoDonacion>> TRANSICIONES_VALIDAS = Map.of(
@@ -32,6 +36,36 @@ public enum EstadoDonacion {
             throw new IllegalStateException(
                     "Transición inválida: " + this.name() + " → " + destino.name()
             );
+        }
+    }
+
+    public EstadoDonacion esUnEstado(String estadoString){
+        if(estadoString.equals(EstadoDonacion.EN_DEPOSITO.name())){
+            return EstadoDonacion.EN_DEPOSITO;
+        }
+        else if(estadoString.equals(EstadoDonacion.ASIGNACION_REALIZADA.name())){
+            return EstadoDonacion.ASIGNACION_REALIZADA;
+        }
+        else if(estadoString.equals(EstadoDonacion.LISTA_PARA_ENTREGAR.name())){
+            return EstadoDonacion.LISTA_PARA_ENTREGAR;
+        }
+        else if(estadoString.equals(EstadoDonacion.EN_TRASLADO.name())){
+            return EstadoDonacion.EN_TRASLADO;
+        }
+        else if(estadoString.equals(EstadoDonacion.ENTREGADA.name())){
+            return EstadoDonacion.ENTREGADA;
+        }
+        else if(estadoString.equals(EstadoDonacion.ENTREGA_FALLIDA.name())){
+            return EstadoDonacion.ENTREGA_FALLIDA;
+        }
+        else if(estadoString.equals(EstadoDonacion.VENCIDA.name())){
+            return EstadoDonacion.VENCIDA;
+        }
+        else if(estadoString.equals(EstadoDonacion.INICIO.name())){
+            return EstadoDonacion.INICIO;
+        }
+        else {
+            return null;
         }
     }
 }

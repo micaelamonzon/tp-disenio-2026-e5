@@ -1,0 +1,83 @@
+<html th:replace="~{layoutDonante/base :: html}">
+<div th:fragment="contenido">
+    <section id="view-donaciones" aria-labelledby="titulo-donaciones">
+        <div class="page-head">
+            <h1 id="titulo-donaciones">Mis Donaciones</h1>
+            <p class="page-sub">Gestiona y realiza seguimiento de todas tus donaciones</p>
+        </div>
+
+        <p class="empty-state" role="alert" th:if="${error}" th:text="${error}">Error</p>
+
+        <th:block th:unless="${error}">
+            <form class="filters-card" method="get" th:action="@{/donante/misDonaciones}">
+                <div class="filters-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                    Filtros
+                </div>
+                <div class="filters-grid">
+                    <label class="field">
+                        <span>Estado</span>
+                        <select name="estado">
+                            <option value="">Todos</option>
+                            <option th:each="e : ${estados}" th:value="${e.key}" th:text="${e.value}"
+                                    th:selected="${e.key == estadoSel}">En depósito</option>
+                        </select>
+                    </label>
+                    <label class="field">
+                        <span>Categoría</span>
+                        <select name="categoria">
+                            <option value="">Todas</option>
+                            <option th:each="c : ${categorias}" th:value="${c}" th:text="${c}"
+                                    th:selected="${c == categoriaSel}">Vestimenta</option>
+                        </select>
+                    </label>
+                    <label class="field">
+                        <span>Subcategoría</span>
+                        <select name="subcategoria">
+                            <option value="">Todas</option>
+                            <option th:each="s : ${subcategorias}" th:value="${s}" th:text="${s}"
+                                    th:selected="${s == subcategoriaSel}">Abrigos</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="filters-actions">
+                    <button type="submit" class="btn btn-primary">Aplicar filtros</button>
+                    <a class="btn" th:href="@{/donante/misDonaciones}">Limpiar</a>
+                </div>
+            </form>
+
+            <p class="results-count" aria-live="polite"
+               th:text="|Mostrando ${#lists.size(donaciones)} de ${totalSinFiltrar} donaciones|">Mostrando 0 de 0 donaciones</p>
+
+            <p class="empty-state" th:if="${totalSinFiltrar == 0}">Todavía no registraste donaciones.</p>
+            <p class="empty-state" th:if="${totalSinFiltrar > 0 and #lists.isEmpty(donaciones)}">
+                No se encontraron donaciones con esos filtros. Probá ajustar el estado, la categoría o la subcategoría.
+            </p>
+
+            <div class="donations-grid">
+                <article class="donation-card" th:each="d : ${donaciones}">
+                    <div class="donation-card-top">
+                        <!-- Sin número: el id es de la base (compartido entre todos los donantes) y confundía -->
+                        <span class="donation-qty">Donación</span>
+                        <span class="pill" th:classappend="${d.estadoCss}" th:text="${d.estadoLegible}">En depósito</span>
+                    </div>
+                    <th:block th:each="b : ${d.bienes}">
+                        <h3 class="donation-name" th:text="${b.nombre}">Bien</h3>
+                        <span class="donation-meta"
+                              th:text="|${b.subcategoria?.categoria?.nombre} / ${b.subcategoria?.nombre}|">Categoría / Subcategoría</span>
+                        <span class="donation-meta"
+                              th:text="|Cantidad: ${b.cantidad} ${#strings.toLowerCase(b.tipoUnidad)}|">Cantidad</span>
+                        <span class="donation-meta" th:if="${b.esUsado}"
+                              th:text="|Condición: ${#strings.capitalize(#strings.toLowerCase(b.esUsado))}|">Condición</span>
+                        <span class="donation-meta" th:if="${b.fechaDeVencimiento}"
+                              th:text="|Vence: ${#temporals.format(b.fechaDeVencimiento, 'dd/MM/yyyy')}|">Vence</span>
+                    </th:block>
+                    <span class="donation-meta" th:if="${d.fechaDeIngreso}"
+                          th:text="|Ingresó: ${#temporals.format(d.fechaDeIngreso, 'dd/MM/yyyy HH:mm')}|">Ingresó</span>
+                </article>
+            </div>
+        </th:block>
+    </section>
+</div>
+</html>
+

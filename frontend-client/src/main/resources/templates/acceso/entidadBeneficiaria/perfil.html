@@ -1,0 +1,65 @@
+<html th:replace="~{layoutEntidad/base :: html}">
+<div th:fragment="contenido">
+    <section id="view-perfil">
+        <div class="page-head">
+            <h1>Mi Perfil</h1>
+            <p class="page-sub">Tu información como Entidad Beneficiaria</p>
+        </div>
+
+        <p th:if="${errorPerfil}" th:text="${errorPerfil}"></p>
+
+        <div class="profile-layout" th:if="${entidad != null}">
+
+            <div class="profile-card profile-header">
+                <div class="avatar profile-avatar" th:text="${entidad.iniciales()}"></div>
+                <div class="profile-header-info">
+                    <h2 class="profile-username" th:text="${entidad.razonSocial}"></h2>
+                    <span class="profile-role"></span>
+                </div>
+                <div class="profile-header-stats">
+                    <div class="profile-stat">
+                        <b th:text="${#lists.size(entidad.representantes)}"></b>
+                        <span>Representantes</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="profile-card">
+                <h3 class="profile-section-title">Información de la Entidad</h3>
+                <dl class="profile-grid">
+                    <div class="profile-field">
+                        <dt>Razón Social</dt>
+                        <dd th:text="${entidad.razonSocial}"></dd>
+                    </div>
+                    <div class="profile-field">
+                        <dt>Teléfono</dt>
+                        <dd th:text="${entidad.telefono}"></dd>
+                    </div>
+                    <div class="profile-field profile-field-wide">
+                        <dt>Dirección</dt>
+                        <dd th:text="${entidad.direccion}"></dd>
+                    </div>
+                </dl>
+            </div>
+
+            <div class="profile-card">
+                <h3 class="profile-section-title">Representantes de la Entidad</h3>
+                <div class="rep-list">
+                    <article class="rep-item" th:each="r : ${entidad.representantes}">
+                        <div class="rep-avatar" th:text="${r.iniciales()}"></div>
+                        <div class="rep-info">
+                            <h4 class="rep-name" th:text="${r.nombreCompleto()}"></h4>
+                            <a class="rep-mail" th:href="'mailto:' + ${r.obtenerMail()}" th:text="${r.obtenerMail()}"></a>
+                        </div>
+                    </article>
+                </div>
+                <p class="profile-empty" th:if="${#lists.isEmpty(entidad.representantes)}">
+                    No hay representantes registrados.
+                </p>
+            </div>
+
+        </div>
+    </section>
+    <script th:src="@{/js/entidades/entidades.js}"></script>
+</div>
+</html>

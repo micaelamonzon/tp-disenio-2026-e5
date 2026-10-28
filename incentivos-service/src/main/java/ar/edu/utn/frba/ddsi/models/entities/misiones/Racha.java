@@ -1,64 +1,58 @@
 package ar.edu.utn.frba.ddsi.models.entities.misiones;
 
-import ar.edu.utn.frba.ddsi.models.entities.donaciones.DonacionSinSegmentar;
+import ar.edu.utn.frba.ddsi.models.entities.donaciones.DonacionSegmentada;
 import ar.edu.utn.frba.ddsi.models.entities.persona.Insignia;
+import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
 import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.List;
-import java.time.LocalDateTime;
-import java.time.Month;
-@Data
+
+@Getter
+@Setter
+@NoArgsConstructor
+@Entity
+@DiscriminatorValue("Racha")
 public class Racha extends Mision{
+    @Column
     private Integer meses; //minimo 2 meses y maximo 12 meses
-    private Integer mesInicial; // ej: marzo -> 3
-    private Integer mesFinal; // ej: abril -> 4
+    @Column
+    private Integer mesInicial; // ej: marzo= 3
+    @Column
+    private Integer mesFinal; // ej: abril= 4
 
 
-    public Racha(String nombre,Integer meses,Integer mesInicial, Integer mesFinal){
+    public Racha(NombreDeMision nombre,Integer mesInicial, Integer mesFinal){
         this.setNombre(nombre);
-        this.meses = meses;
+        this.meses = mesFinal - mesInicial + 1; //calculo la cantidad de meses que dura la racha
         this.mesInicial = mesInicial; //empiezo en el mes 1
         this.mesFinal = mesFinal; // termino en el num de mes
-        this.setInsigniaGanadora(Insignia.RACHA);
     }
 
     @Override
-    public Boolean seCompletoLaMision(List<DonacionSinSegmentar> donaciones) {
-        // pedirle al servicio de donaciones,
-        // todas las donaciones de la persona donante y que se hayan hecho durante los x meses consecutivos
+    public AvanceDeMision seCompletoLaMision(List<DonacionSegmentada> donaciones) {
 
-        this.setProgreso(0);
         //por lo menos una donacion tiene que haber sido donada al mes siguiente
         int mesI = this.mesInicial;
         int mesF = this.mesFinal;
+        int contadorDeMesesConDonaciones = 0;
 
         while(mesI <= mesF){
-            int finalMesI = mesI;
-            boolean cumple = donaciones.stream().map(DonacionSinSegmentar::getFechaDeIngreso).
-                    anyMatch( f ->  f.getMonthValue() == finalMesI);
-            if(!cumple){
-                int distanciaRestante = 100 - this.getProgreso();
-                this.setDistanciaDelObjetivo(Math.max(0, distanciaRestante));
-                this.bajarProgreso();
-            }else {
-                this.subirProgreso();
+            int mes = mesI;
+            boolean cumple = donaciones.stream().map(DonacionSegmentada::getFechaDeIngreso).
+                    anyMatch( f ->  f.getMonthValue() == mes);
+
+            if(cumple){
+              contadorDeMesesConDonaciones++;
             }
             mesI += 1;
         }
 
-        if (this.getProgreso() == 100) {
-            this.setEstadoDeMision(EstadoDeMision.COMPLETADA);
-            this.setFechaCompletada(java.time.LocalDate.now());
-            return Boolean.TRUE;
-        } else {
-            this.setEstadoDeMision(EstadoDeMision.BLOQUEADA);
-            return Boolean.FALSE;
-        }
+        return this.calcularProgresoyDistancia(contadorDeMesesConDonaciones,meses);
     }
-    public void subirProgreso(){
-        super.subirProgreso(this.meses);
-    }
-    public void bajarProgreso(){
-        super.bajarProgreso(this.meses);
-    }
+
 }

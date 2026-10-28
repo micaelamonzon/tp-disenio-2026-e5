@@ -1,59 +1,87 @@
 package ar.edu.utn.frba.ddsi.models.entities.persona;
 
-import ar.edu.utn.frba.ddsi.models.entities.categorias.CategoriaDeDonante;
-import ar.edu.utn.frba.ddsi.models.entities.donaciones.DonacionSinSegmentar;
+
+import ar.edu.utn.frba.ddsi.models.entities.donaciones.DonacionSegmentada;
 import ar.edu.utn.frba.ddsi.models.entities.misiones.EstadoDeMision;
 import ar.edu.utn.frba.ddsi.models.entities.misiones.Mision;
+import ar.edu.utn.frba.ddsi.models.entities.misiones.MisionParticular;
+import ar.edu.utn.frba.ddsi.models.entities.persistente.Persistente;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.time.YearMonth;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 @Data
-@NoArgsConstructor
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class Donante {
-    private Long id;
-    private LocalDateTime fechaDeRegistro;
-    private String cuit;
+@Entity
+@Table(name = "Donante")
+public class Donante extends Persistente {
+
+    @Column(name = "id_en_donaciones")
+    private Long idEnDonaciones; //id en donaciones
+
+    @Enumerated(EnumType.STRING)
+    private TipoDeDonante tipoDeDonante;
+
+    @Column(name = "nombre")
+    private String nombre;
+
+    @Column(name = "apellido")
+    private String apellido;
+
+    @Column(name = "razon_social")
     private String razonSocial;
 
-    private List<DonacionSinSegmentar> donaciones;
+    @Column(name = "fechaDeRegistro")
+    private LocalDateTime fechaDeRegistro;
+
+    @OneToMany(mappedBy = "donante", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<DonacionSegmentada> donaciones = new ArrayList<>();
+
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "perfil_id", referencedColumnName = "id")
     private Perfil perfil;
-    private List<Mision> misiones;
-    private CategoriaDeDonante categoria;
 
-    private String nombre;
-    private String apellido;
-    private Integer edad;
-    private Integer DNI;
-    private String genero;
-    private String direccion;
 
-    public Donante(Long id,String cuit,String razonSocial,String nombre,String apellido,Integer edad,Integer DNI,String genero,String direccion,List<DonacionSinSegmentar> donaciones, List<Mision> misiones, CategoriaDeDonante categoria,LocalDateTime fechaDeRegistro) {
-        this.id = id;
-        this.cuit = cuit;
-        this.razonSocial = razonSocial;
+    @OneToMany(mappedBy = "donante", fetch = FetchType.EAGER,cascade = CascadeType.ALL)
+    private List<MisionParticular> misiones = new ArrayList<>();; //historial de misiones tanto en curso como pasadas
+
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "mision_en_curso_id", referencedColumnName = "id")
+    private MisionParticular misionEnCurso;
+
+    @OneToMany(mappedBy = "donante")
+    private List<RankingPosicion> posicionesEnRankings = new ArrayList<>();
+
+    public Donante(Long idEnDonaciones,String nombre, String apellido, String razonSocial, LocalDateTime fechaDeRegistro, List<DonacionSegmentada> donaciones ,TipoDeDonante tipo) {
+        this.idEnDonaciones = idEnDonaciones;
         this.nombre = nombre;
         this.apellido = apellido;
-        this.edad = edad;
-        this.DNI = DNI;
-        this.genero=genero;
-        this.direccion=direccion;
+        this.razonSocial = razonSocial;
         this.donaciones = donaciones;
-        this.misiones = misiones;
-        this.categoria = categoria;
         this.fechaDeRegistro = fechaDeRegistro;
+        this.tipoDeDonante = tipo;
+    }
+
+    public Donante() {
 
     }
+
+    public void agregarMision(MisionParticular mision) {
+        this.misiones.add(mision);
+    }
+
+
     public Integer calcularMisionesCumplidasEn(YearMonth periodo) {
         return (int) this.misiones.stream()
-                .filter(m -> m.getEstadoDeMision() == EstadoDeMision.COMPLETADA) 
+                .filter(m -> m.getEstado() == EstadoDeMision.COMPLETADA)
                 .filter(m -> m.getFechaCompletada() != null)
                 .filter(m -> YearMonth.from(m.getFechaCompletada()).equals(periodo))
                 .count();
@@ -70,6 +98,12 @@ public class Donante {
                 .map(Map.Entry::getKey)
                 .orElse(null);
     }
+
+
+    public List<MisionParticular> obtenerMisionesCompletadas(){
+        return this.misiones.stream().filter(m -> m.getEstado() == EstadoDeMision.COMPLETADA).collect(Collectors.toList()) ;
+    }
+
 
 
     public long cantidadDonacionesEnMes(YearMonth mes) {
@@ -90,14 +124,33 @@ public class Donante {
                 .map(entry -> new MetricaMensual(
                         entry.getKey(),
                         entry.getValue().size(),
-                        0  // organizaciones: se completa cuando tengamos entidad en donación
+                        // organizaciones distintas que RECIBIERON las donaciones de ese mes
+                        (int) entry.getValue().stream()
+                                .filter(Donante::fueEntregada)
+                                .map(DonacionSegmentada::getEntidadBeneficiariaId)
+                                .filter(java.util.Objects::nonNull)
+                                .distinct()
+                                .count()
                 ))
                 .toList();
     }
 
-    // Total historico
+    // Total historico: todas las donaciones realizadas, en cualquier estado
     public int totalDonaciones() {
         return donaciones.size();
+    }
+
+    // Las que ya llegaron a una entidad beneficiaria
+    public int totalDonacionesEntregadas() {
+        if (this.donaciones == null) {
+            return 0;
+        }
+        return (int) this.donaciones.stream().filter(Donante::fueEntregada).count();
+    }
+
+    // donacionEntregada puede venir null si la donación todavía no fue entregada
+    private static boolean fueEntregada(DonacionSegmentada donacion) {
+        return Boolean.TRUE.equals(donacion.getDonacionEntregada());
     }
 
     public int compararConMesAnterior() {
@@ -118,7 +171,8 @@ public class Donante {
         }
 
         return (int) this.donaciones.stream()
-                .map(DonacionSinSegmentar::getOrganizacionId)
+                .filter(Donante::fueEntregada)
+                .map(DonacionSegmentada::getEntidadBeneficiariaId)
                 .filter(java.util.Objects::nonNull)
                 .distinct()
                 .count();
@@ -128,5 +182,11 @@ public class Donante {
         return YearMonth.from(fechaDeRegistro.toLocalDate()).equals(periodo);
     }
 
+    public void agregarDonacion(DonacionSegmentada donacion) {
+        if (donacion == null) {
+           return;
+        }
+        this.donaciones.add(donacion);
+    }
 
 }

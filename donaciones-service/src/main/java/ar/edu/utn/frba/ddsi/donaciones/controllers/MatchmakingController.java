@@ -1,8 +1,10 @@
 package ar.edu.utn.frba.ddsi.donaciones.controllers;
-import ar.edu.utn.frba.ddsi.donaciones.models.entities.donacion.PropuestaMatch;
+import ar.edu.utn.frba.ddsi.donaciones.dto.PropuestaMatchDTO;
 import ar.edu.utn.frba.ddsi.donaciones.services.MatchmakingService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/servicioDeDonaciones/matchmaking")
@@ -20,23 +22,21 @@ public class MatchmakingController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<PropuestaMatch> obtener(@PathVariable Long id) {
-        try {
-            return ResponseEntity.ok(matchmakingService.obtenerPropuestaPorId(id));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+    @GetMapping("/donacion/{donacionId}")
+    public PropuestaMatchDTO obtenerPorDonacion(@PathVariable Long donacionId) {
+        return matchmakingService.obtenerPropuestaDTODeDonacion(donacionId);
     }
 
-    @PostMapping("/{id}/seleccionar")
-    public ResponseEntity<PropuestaMatch> seleccionar(
-            @PathVariable Long id,
-            @RequestParam Long necesidadId) {
-        try {
-            return ResponseEntity.ok(matchmakingService.seleccionarNecesidad(id, necesidadId));
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().build();
-        }
+    @GetMapping("/pendientes")
+    public List<PropuestaMatchDTO> obtenerPendientes() {
+        return matchmakingService.obtenerPropuestasDePendientes();
+    }
+
+    @PostMapping("/{propuestaId}/seleccionar")
+    public ResponseEntity<Void> seleccionar(@PathVariable Long propuestaId,
+                                            @RequestParam Long necesidadId,
+                                            @RequestParam String responsableId) {
+        matchmakingService.seleccionarNecesidad(propuestaId, necesidadId, responsableId);
+        return ResponseEntity.noContent().build();
     }
 }

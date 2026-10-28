@@ -1,0 +1,39 @@
+<html th:replace="~{layoutEntidad/base :: html}">
+<div th:fragment="contenido" class="row">
+    <section id="view-notificaciones">
+        <div class="page-head">
+            <h1>Notificaciones</h1>
+            <p class="page-sub">Mantente al día con tus entregas, donaciones recibidas y más</p>
+        </div>
+
+
+        <p th:if="${errorNotificaciones}" class="page-sub" role="alert"
+           th:text="${errorNotificaciones}">No pudimos cargar tus notificaciones.</p>
+
+
+        <p th:if="${errorNotificaciones == null and #lists.isEmpty(notificaciones)}" class="page-sub">
+            Todavía no tenés notificaciones.
+        </p>
+
+        <div th:unless="${#lists.isEmpty(notificaciones)}">
+
+
+            <div class="notifications-list" id="notificationsList">
+
+                <article class="notification-card" th:each="n : ${notificaciones}">
+                    <span th:replace="~{fragments/iconosDeNotificacion :: iconoGeneral}"></span>
+                    <div>
+                        <div class="notification-title" th:text="${n.mensaje}">Mensaje de la notificación</div>
+                        <div class="notification-desc" th:if="${n.medio}"
+                             th:text="${n.estado == 'FALLIDA'} ? 'No se pudo enviar por ' + ${#strings.toLowerCase(n.medio)} : 'Enviada por ' + ${#strings.toLowerCase(n.medio)}">Enviada por email</div>
+                        <div class="notification-time" th:if="${n.fechaEnvio}"
+                             th:text="${#temporals.format(n.fechaEnvio, 'dd/MM/yyyy HH:mm')}">10/10/2026 15:30</div>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <script th:src="@{/js/entidades/notificaciones.js}"></script>
+</div>
+</html>

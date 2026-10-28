@@ -1,0 +1,88 @@
+<html th:replace="~{layoutDonante/base :: html}">
+<div th:fragment="contenido">
+    <section id="view-incentivos">
+        <div class="page-head">
+            <h1>Incentivos</h1>
+            <p class="page-sub">Tu progreso y logros en la comunidad solidaria</p>
+        </div>
+        <h2 class="section-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+            Misiones
+        </h2>
+        <p th:if="${error}" class="page-sub" th:text="${error}" role="alert"></p>
+        <p th:if="${errorComenzar}" class="page-sub" th:text="${errorComenzar}" role="alert"></p>
+        <p th:if="${error == null and #lists.isEmpty(misiones)}" class="page-sub">
+            Todavía no hay misiones disponibles.
+        </p>
+
+        <div class="missions-grid" id="missionsGrid">
+            <article class="mission-card"
+                     th:each="m, st : ${misiones}"
+                     th:with="comenzable=${puedeComenzar != null and puedeComenzar and st.first},
+                  completada=${m.estado.name() == 'COMPLETADA'},
+                  bloqueada=${m.estado.name() == 'BLOQUEADA' and !comenzable},
+                  actual=${m.estado.name() == 'ACTUAL'},
+                  prog=${m.progreso != null ? m.progreso : 0},
+                  dist=${m.distanciaDelObjetivo != null ? m.distanciaDelObjetivo : 0},
+                  objetivo=${prog + dist},
+                  pct=${completada ? 100 : (objetivo > 0 ? (prog * 100) / objetivo : 0)}"
+                     th:classappend="${bloqueada} ? 'locked' : (${actual} ? 'current' : '')"
+                     th:attr="aria-disabled=${bloqueada}">
+
+                <div class="mission-top">
+                    <div>
+                        <h3 class="mission-name" th:text="${m.nombre}">Racha de 10 meses</h3>
+                        <p class="mission-desc" th:text="'Categoría: ' + ${m.categoria}">Categoría: COLABORADOR</p>
+
+                        <p class="mission-desc" th:if="${m.meses != null}"
+                           th:text="'Doná durante ' + ${m.meses} + ' meses consecutivos. Desde ' + ${m.mesInicial} + ' hasta ' + ${m.mesFinal}+'.'"></p>
+                        <p class="mission-desc" th:if="${m.objetivoDeCategoriasDistintas != null}"
+                           th:text="'Realizá donaciones de ' + ${m.objetivoDeCategoriasDistintas} + ' categorías distintas.'"></p>
+                        <p class="mission-desc" th:if="${m.cantidadDeDonaciones != null}"
+                           th:text="'Lográ que ' + ${m.cantidadDeDonaciones} + ' donaciones sean recibidas por una entidad beneficiaria.'"></p>
+                        <p class="mission-desc" th:if="${m.cantidadDeBienes != null}"
+                           th:text="'Lográ que una donación supere los ' + ${m.cantidadDeBienes} + ' bienes.'"></p>
+                        <span class="mission-state done" th:if="${completada}">Completada</span>
+                        <span class="mission-state"      th:if="${actual}">En curso</span>
+                    </div>
+
+                    <th:block th:if="${completada}">
+                        <span th:replace="~{fragments/iconosDeMisiones :: iconoCheck}"></span>
+                    </th:block>
+                    <th:block th:if="${bloqueada}">
+                        <span th:replace="~{fragments/iconosDeMisiones :: iconoCandado}"></span>
+                    </th:block>
+                </div>
+
+                <div class="mission-progress" th:unless="${bloqueada or comenzable}">
+                    <p class="mission-distance" th:unless="${completada}"
+                       th:text="'Te falta ' + ${dist} + '% para el objetivo'"></p>
+
+                    <div class="mission-progress-labels">
+                        <span>Progreso</span>
+                        <span th:text="${completada ? objetivo : prog} + ' / ' + ${objetivo}">0 / 10</span>
+                    </div>
+                    <div class="progress-track" role="progressbar"
+                         aria-valuemin="0" aria-valuemax="100" th:attr="aria-valuenow=${pct}">
+                        <div class="progress-fill done" th:classappend="${completada} ? 'done'"
+                             th:style="'width:' + ${pct} + '%'"></div>
+                    </div>
+                    <p class="mission-desc" th:if="${m.cantidadDeDonaciones != null}"
+                       th:text="'Lográ que ' + ${m.cantidadDeDonaciones} + ' donaciones sean recibidas por una entidad beneficiaria.'"></p>
+                </div>
+
+                <p class="mission-desc mission-locked-msg" th:if="${bloqueada}">
+                    Completá las misiones anteriores para desbloquearla.
+                </p>
+
+                <form class="mission-start" th:if="${comenzable}" method="post"
+                      th:action="@{/donante/incentivos/comenzar/{id}(id=${m.id})}">
+                    <button type="submit" class="btn btn-primary">Comenzar</button>
+                </form>
+            </article>
+        </div>
+
+    </section>
+    <script th:src="@{/js/donante/incentivos.js}"></script>
+</div>
+</html>

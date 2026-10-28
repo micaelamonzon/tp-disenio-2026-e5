@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${titulo} + ' - DonaTrack'">Crear Cuenta - DonaTrack</title>
+    <link rel="stylesheet" th:href="@{/css/landingPage/landingPage.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body style="background-color: #f8fafc; color: #334155; font-family: system-ui, -apple-system, sans-serif;">
+
+<header th:replace="~{layoutAcceso/layoutAcceso :: header}"></header>
+<nav th:replace="~{layoutAcceso/layoutAcceso :: navBar}"></nav>
+
+<main class="page" style="padding: 2.5rem 1rem 4rem 1rem;">
+
+    <div style="text-align: center; margin-bottom: 2rem;">
+        <h1 style="font-size: 2.25rem; font-weight: 800; color: #0f172a; margin-bottom: 0.5rem;">Crear Cuenta</h1>
+        <p style="color: #64748b; font-size: 1rem; margin: 0;">Únete a nuestra comunidad y forma parte del cambio</p>
+    </div>
+
+    <div class="form-container" style="background: #ffffff; padding: 2rem; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.04); max-width: 580px; margin: 0 auto; border: 1px solid #f1f5f9;">
+
+        <!-- 1. SELECTOR DE ROL PRINCIPAL -->
+        <div class="role-selector" style="display: flex; gap: 0.5rem; background: #f1f5f9; padding: 0.25rem; border-radius: 12px; margin-bottom: 1.25rem;">
+            <button type="button" class="role-btn active" id="btn-role-donante" onclick="setMainRole('DONANTE')"
+                    style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.75rem; border: none; border-radius: 10px; background-color: #2563eb; color: #ffffff; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.2s;">
+                <i class="fa-regular fa-user"></i> Soy Donante
+            </button>
+            <button type="button" class="role-btn" id="btn-role-entidad" onclick="setMainRole('ENTIDAD')"
+                    style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.75rem; border: none; border-radius: 10px; background-color: transparent; color: #64748b; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.2s;">
+                <i class="fa-solid fa-store"></i> Soy Entidad Beneficiaria
+            </button>
+        </div>
+
+        <!-- 2. SUB-SELECTOR DE PERSONERÍA (SOLO DONANTES) -->
+        <div id="sub-personeria-wrapper" style="margin-bottom: 1.5rem; background: #f8fafc; padding: 0.75rem; border-radius: 10px; border: 1px dashed #cbd5e1;">
+            <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #475569; margin-bottom: 0.5rem; text-align: center;">TIPO DE DONANTE</label>
+            <div style="display: flex; justify-content: center; gap: 1.5rem;">
+                <label style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.88rem; font-weight: 600; color: #334155; cursor: pointer;">
+                    <input type="radio" name="tipoDonanteRadio" id="radio-humana" value="HUMANA" checked onclick="switchDonanteForm('HUMANA')">
+                    Persona Humana
+                </label>
+                <label style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.88rem; font-weight: 600; color: #334155; cursor: pointer;">
+                    <input type="radio" name="tipoDonanteRadio" id="radio-juridica" value="JURIDICA" onclick="switchDonanteForm('JURIDICA')">
+                    Persona Jurídica (Empresa/ONG)
+                </label>
+            </div>
+        </div>
+
+        <!-- MENSAJE DE ERROR -->
+        <div th:if="${error != null}" class="toast error" style="margin-bottom: 1.25rem; background: #fef2f2; border: 1px solid #fca5a5; color: #991b1b; padding: 0.75rem; border-radius: 8px; font-size: 0.88rem;">
+            <span th:text="${error}">Error al registrar la cuenta.</span>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- FORMULARIO 1: PERSONA HUMANA               -->
+        <!-- ========================================== -->
+        <form th:action="@{/acceso/registro/donante-humana}" method="post" id="form-humana">
+            <div style="display: flex; gap: 0.75rem; margin-bottom: 1rem;">
+                <div style="flex: 1;">
+                    <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.3rem;">Nombre *</label>
+                    <input type="text" name="nombre" placeholder="Juan" required style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;">
+                </div>
+                <div style="flex: 1;">
+                    <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.3rem;">Apellido *</label>
+                    <input type="text" name="apellido" placeholder="Pérez" required style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;">
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 0.75rem; margin-bottom: 1rem;">
+                <div style="flex: 1;">
+                    <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.3rem;">DNI *</label>
+                    <input type="number" name="DNI" placeholder="12345678" required style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;">
+                </div>
+                <div style="flex: 1;">
+                    <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.3rem;">Fecha de nacimiento *</label>
+                    <input type="date" name="fechaDeNacimiento" required style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;">
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.3rem;">Género</label>
+                <input type="text" name="genero" placeholder="Masculino / Femenino / Otro" style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;">
+            </div>
+
+            <!-- EMAIL PRINCIPAL (OBLIGATORIO) -->
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.3rem;">Correo Electrónico (Principal) *</label>
+                <input type="email" name="email" id="email-humana" placeholder="juan@ejemplo.com" required style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;">
+                <small style="color: #64748b; font-size: 0.75rem;">Se utilizará para iniciar sesión y enviar el correo de bienvenida.</small>
+            </div>
+
+            <!-- MEDIOS DE NOTIFICACIÓN PREFERIDOS -->
+            <div style="background: #f8fafc; padding: 1rem; border-radius: 10px; border: 1px solid #e2e8f0; margin-bottom: 1.25rem;">
+                <label style="display: block; font-weight: 700; font-size: 0.88rem; color: #1e293b; margin-bottom: 0.25rem;">Medios de Notificación Preferidos</label>
+                <p style="font-size: 0.78rem; color: #64748b; margin-top: 0; margin-bottom: 0.75rem;">Indicá canales adicionales y seleccioná cuál preferís para avisos del sistema.</p>
+
+                <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <input type="radio" name="medioPredeterminado" value="EMAIL" checked id="radio-email-humana">
+                        <label for="radio-email-humana" style="font-size: 0.85rem; font-weight: 600; color: #334155; cursor: pointer;">
+                            Usar el Correo Electrónico Principal para notificaciones
+                        </label>
+                    </div>
+
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <input type="radio" name="medioPredeterminado" value="TELEFONO" id="radio-tel-humana">
+                        <div style="flex: 1;">
+                            <input type="tel" name="telefono" placeholder="Teléfono (+54 11 1234-5678)" style="width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.85rem; box-sizing: border-box;">
+                        </div>
+                    </div>
+
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <input type="radio" name="medioPredeterminado" value="WHATSAPP" id="radio-wsp-humana">
+                        <div style="flex: 1;">
+                            <input type="tel" name="whatsapp" placeholder="WhatsApp (+54 9 11 1234-5678)" style="width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.85rem; box-sizing: border-box;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1.25rem;">
+                <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.3rem;">Contraseña *</label>
+                <input type="password" name="password" placeholder="Mínimo 8 caracteres" minlength="8" required style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;">
+            </div>
+
+            <button type="submit" style="width: 100%; padding: 0.85rem; border: none; border-radius: 10px; background-color: #2563eb; color: #ffffff; font-weight: 700; cursor: pointer;">Registrarme como Donante Humano</button>
+        </form>
+
+        <!-- ========================================== -->
+        <!-- FORMULARIO 2: PERSONA JURÍDICA             -->
+        <!-- ========================================== -->
+        <form th:action="@{/acceso/registro/donante-juridica}" method="post" id="form-juridica" style="display: none;">
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.3rem;">Razón Social *</label>
+                <input type="text" name="razonSocial" placeholder="Tech S.A." required style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;">
+            </div>
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.3rem;">CUIT *</label>
+                <input type="text" name="cuit" placeholder="30-12345678-9" required style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;">
+            </div>
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.3rem;">Tipo de Organización</label>
+                <select name="tipo" style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;">
+                    <option value="Empresa">Empresa</option>
+                    <option value="ONG">ONG</option>
+                    <option value="Gubernamental">Gubernamental</option>
+                    <option value="Institucion">Institución</option>
+                </select>
+            </div>
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.3rem;">Rubro *</label>
+                <input type="text" name="rubro" placeholder="Tecnología / Alimenticio" required style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;">
+            </div>
+
+            <!-- EMAIL INSTITUCIONAL (OBLIGATORIO) -->
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.3rem;">Email Institucional (Principal) *</label>
+                <input type="email" name="email" placeholder="contacto@empresa.com" required style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;">
+            </div>
+
+            <!-- CORREOS DE REPRESENTANTES DESIGNADOS (SOLO EMAILS) -->
+            <div style="background: #f8fafc; padding: 1rem; border-radius: 10px; border: 1px solid #e2e8f0; margin-bottom: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                    <label style="font-weight: 700; font-size: 0.88rem; color: #1e293b;">Correos de Representantes Designados *</label>
+                    <button type="button" onclick="agregarCorreoRepresentanteJuridica()" style="background: #e0ebff; color: #1a61ff; border: none; padding: 0.4rem 0.75rem; border-radius: 6px; font-weight: 600; font-size: 0.78rem; cursor: pointer;">
+                        <i class="fa-solid fa-plus"></i> Agregar Correo
+                    </button>
+                </div>
+
+                <div id="container-reps-juridica" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                    <div class="rep-item" style="display: flex; gap: 0.5rem; background: #ffffff; padding: 0.65rem; border-radius: 6px; border: 1px solid #cbd5e1;">
+                        <input type="email" name="correosRepresentantes[0]" placeholder="correo.representante@ejemplo.com" required style="flex: 1; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 0.85rem;">
+                    </div>
+                </div>
+            </div>
+
+            <!-- MEDIOS DE NOTIFICACIÓN PREFERIDOS -->
+            <div style="background: #f8fafc; padding: 1rem; border-radius: 10px; border: 1px solid #e2e8f0; margin-bottom: 1.25rem;">
+                <label style="display: block; font-weight: 700; font-size: 0.88rem; color: #1e293b; margin-bottom: 0.25rem;">Medios de Notificación Preferidos</label>
+
+                <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <input type="radio" name="medioPredeterminado" value="EMAIL" checked id="radio-email-juridica">
+                        <label for="radio-email-juridica" style="font-size: 0.85rem; font-weight: 600; color: #334155; cursor: pointer;">
+                            Usar Email Institucional para notificaciones
+                        </label>
+                    </div>
+
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <input type="radio" name="medioPredeterminado" value="TELEFONO" id="radio-tel-juridica">
+                        <div style="flex: 1;">
+                            <input type="tel" name="telefono" placeholder="Teléfono institucional (+54 11 1234-5678)" style="width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.85rem; box-sizing: border-box;">
+                        </div>
+                    </div>
+
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <input type="radio" name="medioPredeterminado" value="WHATSAPP" id="radio-wsp-juridica">
+                        <div style="flex: 1;">
+                            <input type="tel" name="whatsapp" placeholder="WhatsApp institucional (+54 9 11 1234-5678)" style="width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.85rem; box-sizing: border-box;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1.25rem;">
+                <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.3rem;">Contraseña *</label>
+                <input type="password" name="password" placeholder="Mínimo 8 caracteres" minlength="8" required style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;">
+            </div>
+
+            <button type="submit" style="width: 100%; padding: 0.85rem; border: none; border-radius: 10px; background-color: #2563eb; color: #ffffff; font-weight: 700; cursor: pointer;">Registrar Empresa / Organización</button>
+        </form>
+
+        <!-- ========================================== -->
+        <!-- FORMULARIO 3: ENTIDAD BENEFICIARIA         -->
+        <!-- ========================================== -->
+        <form th:action="@{/acceso/registro/entidad-beneficiaria}" method="post" id="form-entidad" style="display: none;">
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.3rem;">Razón Social *</label>
+                <input type="text" name="razonSocial" placeholder="Comedor San José" required style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;">
+            </div>
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.3rem;">Dirección Completa *</label>
+                <input type="text" name="direccion" placeholder="Av. Medrano 951, CABA" required style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;">
+            </div>
+
+            <!-- EMAIL INSTITUCIONAL (OBLIGATORIO) -->
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.3rem;">Email de la Entidad (Principal) *</label>
+                <input type="email" name="email" placeholder="contacto@entidad.org" required style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;">
+            </div>
+
+            <!-- CORREOS DE REPRESENTANTES DESIGNADOS (SOLO EMAILS) -->
+            <div style="background: #f8fafc; padding: 1rem; border-radius: 10px; border: 1px solid #e2e8f0; margin-bottom: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                    <label style="font-weight: 700; font-size: 0.88rem; color: #1e293b;">Correos de Representantes Designados *</label>
+                    <button type="button" onclick="agregarCorreoRepresentanteEntidad()" style="background: #e0ebff; color: #1a61ff; border: none; padding: 0.4rem 0.75rem; border-radius: 6px; font-weight: 600; font-size: 0.78rem; cursor: pointer;">
+                        <i class="fa-solid fa-plus"></i> Agregar Correo
+                    </button>
+                </div>
+
+                <div id="container-reps-entidad" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                    <div class="rep-item" style="display: flex; gap: 0.5rem; background: #ffffff; padding: 0.65rem; border-radius: 6px; border: 1px solid #cbd5e1;">
+                        <input type="email" name="correosRepresentantes[0]" placeholder="correo.representante@ejemplo.com" required style="flex: 1; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 0.85rem;">
+                    </div>
+                </div>
+            </div>
+
+            <!-- MEDIOS DE NOTIFICACIÓN PREFERIDOS -->
+            <div style="background: #f8fafc; padding: 1rem; border-radius: 10px; border: 1px solid #e2e8f0; margin-bottom: 1.25rem;">
+                <label style="display: block; font-weight: 700; font-size: 0.88rem; color: #1e293b; margin-bottom: 0.25rem;">Medios de Notificación Preferidos</label>
+
+                <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <input type="radio" name="medioPredeterminado" value="EMAIL" checked id="radio-email-entidad">
+                        <label for="radio-email-entidad" style="font-size: 0.85rem; font-weight: 600; color: #334155; cursor: pointer;">
+                            Usar Email de la Entidad para notificaciones
+                        </label>
+                    </div>
+
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <input type="radio" name="medioPredeterminado" value="TELEFONO" id="radio-tel-entidad">
+                        <div style="flex: 1;">
+                            <input type="tel" name="telefono" placeholder="Teléfono (+54 11 1234-5678)" style="width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.85rem; box-sizing: border-box;">
+                        </div>
+                    </div>
+
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <input type="radio" name="medioPredeterminado" value="WHATSAPP" id="radio-wsp-entidad">
+                        <div style="flex: 1;">
+                            <input type="tel" name="whatsapp" placeholder="WhatsApp (+54 9 11 1234-5678)" style="width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.85rem; box-sizing: border-box;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1.25rem;">
+                <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.3rem;">Contraseña *</label>
+                <input type="password" name="password" placeholder="Mínimo 8 caracteres" minlength="8" required style="width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;">
+            </div>
+
+            <button type="submit" style="width: 100%; padding: 0.85rem; border: none; border-radius: 10px; background-color: #2563eb; color: #ffffff; font-weight: 700; cursor: pointer;">Registrar Entidad Beneficiaria</button>
+        </form>
+
+        <p style="text-align: center; font-size: 0.88rem; color: #64748b; margin-top: 1.5rem; margin-bottom: 0;">
+            ¿Ya tienes una cuenta? <a th:href="@{/acceso/login}" style="color: #2563eb; text-decoration: none; font-weight: 600;">Inicia Sesión</a>
+        </p>
+    </div>
+</main>
+
+<footer th:replace="~{layoutAcceso/layoutAcceso :: footer}"></footer>
+
+<script th:inline="javascript">
+
+    const tipoFormulario = /*[[${tipoFormulario}]]*/ null;
+
+    function setMainRole(role) {
+        const btnDonante = document.getElementById('btn-role-donante');
+        const btnEntidad = document.getElementById('btn-role-entidad');
+        const subPersoneriaWrapper = document.getElementById('sub-personeria-wrapper');
+        const formEntidad = document.getElementById('form-entidad');
+
+        if (role === 'DONANTE') {
+            btnDonante.style.backgroundColor = '#2563eb';
+            btnDonante.style.color = '#ffffff';
+            btnEntidad.style.backgroundColor = 'transparent';
+            btnEntidad.style.color = '#64748b';
+
+            subPersoneriaWrapper.style.display = 'block';
+            formEntidad.style.display = 'none';
+
+            const selectedPersoneria = document.querySelector('input[name="tipoDonanteRadio"]:checked').value;
+            switchDonanteForm(selectedPersoneria);
+        } else {
+            btnEntidad.style.backgroundColor = '#2563eb';
+            btnEntidad.style.color = '#ffffff';
+            btnDonante.style.backgroundColor = 'transparent';
+            btnDonante.style.color = '#64748b';
+
+            subPersoneriaWrapper.style.display = 'none';
+            document.getElementById('form-humana').style.display = 'none';
+            document.getElementById('form-juridica').style.display = 'none';
+            formEntidad.style.display = 'block';
+        }
+    }
+
+    function switchDonanteForm(personeria) {
+        const formHumana = document.getElementById('form-humana');
+        const formJuridica = document.getElementById('form-juridica');
+
+        if (personeria === 'HUMANA') {
+            formHumana.style.display = 'block';
+            formJuridica.style.display = 'none';
+        } else {
+            formHumana.style.display = 'none';
+            formJuridica.style.display = 'block';
+        }
+    }
+
+    // AGREGAR CORREO DE REPRESENTANTE PARA PERSONA JURÍDICA (Solo Email)
+    function agregarCorreoRepresentanteJuridica() {
+        const container = document.getElementById('container-reps-juridica');
+        const index = container.children.length;
+
+        const repDiv = document.createElement('div');
+        repDiv.className = 'rep-item';
+        repDiv.style.cssText = 'display: flex; gap: 0.5rem; background: #ffffff; padding: 0.65rem; border-radius: 6px; border: 1px solid #cbd5e1; align-items: center;';
+
+        repDiv.innerHTML = `
+            <input type="email" name="correosRepresentantes[${index}]" placeholder="correo.representante@ejemplo.com" required style="flex: 1; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 0.85rem;">
+            <button type="button" onclick="this.parentElement.remove()" style="background: #fee2e2; color: #dc2626; border: none; padding: 0.5rem; border-radius: 4px; cursor: pointer;" title="Eliminar correo">
+                <i class="fa-solid fa-trash"></i>
+            </button>
+        `;
+
+        container.appendChild(repDiv);
+    }
+
+    // AGREGAR CORREO DE REPRESENTANTE PARA ENTIDAD BENEFICIARIA (Solo Email)
+    function agregarCorreoRepresentanteEntidad() {
+        const container = document.getElementById('container-reps-entidad');
+        const index = container.children.length;
+
+        const repDiv = document.createElement('div');
+        repDiv.className = 'rep-item';
+        repDiv.style.cssText = 'display: flex; gap: 0.5rem; background: #ffffff; padding: 0.65rem; border-radius: 6px; border: 1px solid #cbd5e1; align-items: center;';
+
+        repDiv.innerHTML = `
+            <input type="email" name="correosRepresentantes[${index}]" placeholder="correo.representante@ejemplo.com" required style="flex: 1; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 0.85rem;">
+            <button type="button" onclick="this.parentElement.remove()" style="background: #fee2e2; color: #dc2626; border: none; padding: 0.5rem; border-radius: 4px; cursor: pointer;" title="Eliminar correo">
+                <i class="fa-solid fa-trash"></i>
+            </button>
+        `;
+
+        container.appendChild(repDiv);
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        if (tipoFormulario === 'entidad-beneficiaria') {
+            setMainRole('ENTIDAD');
+        } else if (tipoFormulario === 'donante-juridica') {
+            document.getElementById('radio-juridica').checked = true;
+            setMainRole('DONANTE');
+        } else {
+            setMainRole('DONANTE');
+        }
+    });
+</script>
+
+</body>
+</html>

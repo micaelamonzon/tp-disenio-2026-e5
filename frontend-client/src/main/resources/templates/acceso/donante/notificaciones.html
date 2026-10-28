@@ -1,0 +1,45 @@
+<html th:replace="~{layoutDonante/base :: html}">
+<div th:fragment="contenido">
+    <section id="view-notificaciones">
+        <div class="page-head">
+            <h1>Notificaciones</h1>
+            <p class="page-sub">Mantente al día con tus actividades de donación</p>
+        </div>
+
+
+        <p th:if="${error}" class="page-sub" role="alert" th:text="${error}">
+            El servicio de notificaciones no está disponible.
+        </p>
+
+
+        <p th:if="${avisoNotificaciones}" class="page-sub" th:text="${avisoNotificaciones}">
+            Las notificaciones para personas jurídicas todavía no están disponibles.
+        </p>
+
+
+        <p th:if="${error == null and avisoNotificaciones == null and #lists.isEmpty(notificaciones)}" class="page-sub">
+            Todavía no tenés notificaciones.
+        </p>
+
+        <div class="notifications-list" id="notificationsList" aria-live="polite">
+            <!-- Una tarjeta por notificación (ya vienen de la más nueva a la más vieja) -->
+            <article class="notif-card" th:each="n : ${notificaciones}">
+                <span class="notif-icon asignada">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                    </svg>
+                </span>
+                <div class="notif-body">
+                    <h3 class="notif-title" th:text="${n.mensaje}">Mensaje de la notificación</h3>
+                    <p class="notif-desc" th:if="${n.medio}"
+                       th:text="${n.estado == 'FALLIDA'} ? 'No se pudo enviar por ' + ${#strings.toLowerCase(n.medio)} : 'Enviada por ' + ${#strings.toLowerCase(n.medio)}">Enviada por email</p>
+                    <span class="notif-time" th:if="${n.fechaEnvio}"
+                          th:text="${#temporals.format(n.fechaEnvio, 'dd/MM/yyyy HH:mm')}">10/10/2026 15:30</span>
+                </div>
+            </article>
+        </div>
+    </section>
+    <script th:src="@{/js/donante/notificaciones.js}"></script>
+</div>
+</html>

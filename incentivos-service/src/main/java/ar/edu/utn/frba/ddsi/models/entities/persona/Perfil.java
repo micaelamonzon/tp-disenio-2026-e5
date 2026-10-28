@@ -1,42 +1,59 @@
 package ar.edu.utn.frba.ddsi.models.entities.persona;
-
-
-import ar.edu.utn.frba.ddsi.models.entities.categorias.CategoriaDeDonante;
-import ar.edu.utn.frba.ddsi.models.entities.donaciones.DonacionSinSegmentar;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import ar.edu.utn.frba.ddsi.models.entities.categoriasDeMisiones.CategoriaDeMision;
+import ar.edu.utn.frba.ddsi.models.entities.persistente.Persistente;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Data
 @NoArgsConstructor
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class Perfil {
-    List<Insignia> insignias;
-    Boolean insigniaPrivada;
-    String nombreDeUsuario;
-    CategoriaDeDonante categoria;
-    Integer totalHistoricoPorPeriodo;
-    List<MetricaMensual> evolucionMensual;
+@Entity
+@Table(name = "Perfil")
+public class Perfil extends Persistente {
 
-    public Perfil ( String nombreDeUsuario, CategoriaDeDonante categoria) {
+    @ElementCollection
+    @CollectionTable(name = "perfil_insignia", joinColumns = @JoinColumn(name="perfil_id"))
+    @Column(name = "insignia")
+    private List<String> insignias;
+
+    @Column
+    private String nombreDeUsuario; // lo sacamos del nombre y apellido del donante o de la razón social de la empresa
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "categoria_id", referencedColumnName ="id")
+    private CategoriaDeMision categoria;
+
+    @Column
+    private Integer totalHistoricoPorPeriodo;
+
+    @Transient
+    private List<MetricaMensual> evolucionMensual;
+
+    @Column
+    private Boolean insigniasPrivadas;
+
+
+    public Perfil (String nombreDeUsuario, CategoriaDeMision categoria) {
         this.insignias = new ArrayList<>();
-        this.insigniaPrivada = false;
+        this.insigniasPrivadas = false;
         this.nombreDeUsuario = nombreDeUsuario;
         this.categoria = categoria;
+        this.evolucionMensual = new ArrayList<>();
     }
 
-    public void subirDeCategoria(CategoriaDeDonante categoria, List<DonacionSinSegmentar> donaciones){
-        if(categoria.pasaSiguienteCategoria(donaciones)){
-            this.categoria = categoria;
-        }else{
-            throw new RuntimeException("Ya no podes subir de categoria, estas en la ultima categoria");
-        }
-    }
-
-    public void agregarInsignia(Insignia insignia){
+    public void agregarInsignia(String insignia){
         this.insignias.add(insignia);
     }
 }

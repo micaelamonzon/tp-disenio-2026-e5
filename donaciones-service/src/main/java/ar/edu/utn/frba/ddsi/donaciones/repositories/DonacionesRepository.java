@@ -1,26 +1,20 @@
 package ar.edu.utn.frba.ddsi.donaciones.repositories;
 
-import ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante.PersonaHumana;
-import ar.edu.utn.frba.ddsi.donaciones.models.entities.Donante.PersonaJuridica;
-import ar.edu.utn.frba.ddsi.donaciones.models.entities.donacion.Donacion;
-import ar.edu.utn.frba.ddsi.donaciones.models.entities.donacion.Estado;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.DonacionSegmentada;
-import org.springframework.stereotype.Repository;
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.EstadoDonacion;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+
 import java.util.List;
 
 
-public interface DonacionesRepository {
-    // Spring genera la query basándose en el parámetro Estado
-   // List<Donacion> findByEstado(Estado estado);
-
-    //void deleteHumano(Long id);
-
-    //void deleteJuridico(Long id);
-    List<DonacionSegmentada> findByEstado(String nombreEstado);
-    List<PersonaHumana> findAllHumanos();
-    List<PersonaJuridica> findAllJuridicos();
-    PersonaJuridica saveJuridica(PersonaJuridica donante);
-    PersonaHumana saveHumana(PersonaHumana donante);
-    void deleteJuridica(PersonaJuridica donante);
-    void deleteHumana(PersonaHumana donante);
+public interface DonacionesRepository extends JpaRepository<DonacionSegmentada, Long> {
+    @Query("SELECT ds FROM DonacionSegmentada  ds WHERE ds.donanteHumano.id = :idDeHumano")
+    List<DonacionSegmentada> findDonacionesPorIdHumano(Long idDeHumano);
+    @Query("SELECT ds FROM DonacionSegmentada  ds WHERE ds.donanteJuridico.id = :idDeJuridico")
+    List<DonacionSegmentada> findDonacionesPorIdJuridico(Long idDeJuridico);
+    @Query("SELECT ds FROM DonacionSegmentada  ds WHERE ds.estadoActual = :estado")
+    List<DonacionSegmentada> findByEstado(EstadoDonacion estado);
+    @Query("SELECT ds FROM DonacionSegmentada  ds WHERE ds.entidadBeneficiaria.id = :entidadId")
+    List<DonacionSegmentada> findByEntidadBeneficiariaId(Long entidadId);
 }

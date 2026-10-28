@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${titulo} + ' - DonaTrack'">Mapa de Donaciones - DonaTrack</title>
+
+
+    <link rel="stylesheet" th:href="@{/css/landingPage/landingPage.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+<body style="background-color: #f8fafc; color: #334155; font-family: system-ui, -apple-system, sans-serif;">
+
+
+<header th:replace="~{layoutAcceso/layoutAcceso :: header}"></header>
+<nav th:replace="~{layoutAcceso/layoutAcceso :: navBar}"></nav>
+
+<main style="max-width: 1100px; margin: 0 auto; padding: 2.5rem 1rem 4rem 1rem;">
+
+    <div style="text-align: center; margin-bottom: 2rem;">
+        <h1 style="font-size: 2.25rem; font-weight: 800; color: #0f172a; margin-bottom: 0.5rem;">Mapa de Donaciones Entregadas</h1>
+        <p style="color: #64748b; font-size: 1rem; margin: 0;">Explorá la ubicación de cada donación entregada a través de UTN Solidaria. Hacé clic en los marcadores para ver los detalles de cada entrega.</p>
+    </div>
+
+
+    <div style="position: relative; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.06); border: 1px solid #e2e8f0; margin-bottom: 3rem; background-color: #e2e8f0;">
+
+
+        <div id="real-map" style="width: 100%; height: 480px; min-height: 480px; display: block; z-index: 1;"></div>
+    </div>
+
+    <!-- TARJETAS DE PUNTOS DE ENTREGA -->
+    <section>
+        <!-- DATOS DINÁMICOS DESDE SPRING BOOT -->
+        <div th:if="${donacionesMapa != null and !#lists.isEmpty(donacionesMapa)}"
+             style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+
+            <article th:each="donacion : ${donacionesMapa}"
+                     style="background: #ffffff; border-radius: 12px; padding: 1.25rem; box-shadow: 0 2px 10px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; cursor: pointer;">
+
+                <h3 style="font-size: 1.05rem; font-weight: 700; color: #0f172a; margin-bottom: 0.75rem;"
+                    th:text="${donacion.subcategoria != null ? donacion.subcategoria : (donacion.categoria != null ? donacion.categoria : 'Donación Solidaria')}">Título</h3>
+
+                <div style="display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.88rem; color: #64748b;">
+                    <span style="display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="fa-solid fa-box-open" style="width: 16px; color: #2563eb;"></i>
+                        <span th:text="${donacion.cantidadTotalItems + ' ítems / unidades'}">Cantidad</span>
+                    </span>
+                    <span style="display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="fa-solid fa-location-dot" style="width: 16px; color: #2563eb;"></i>
+                        <span th:text="${donacion.nombreEntidad != null ? donacion.nombreEntidad : 'Entidad beneficiaria'}">Entidad</span>
+                    </span>
+                    <span style="display: flex; align-items: center; gap: 0.5rem;" th:if="${donacion.fechaDeIngreso != null}">
+                        <i class="fa-regular fa-calendar" style="width: 16px; color: #2563eb;"></i>
+                        <span th:text="${#temporals.format(donacion.fechaDeIngreso, 'dd/MM/yyyy')}">Fecha</span>
+                    </span>
+                </div>
+            </article>
+        </div>
+
+        <!-- SIN DATOS -->
+        <div th:if="${donacionesMapa == null or #lists.isEmpty(donacionesMapa)}"
+             style="text-align: center; padding: 3rem 1rem; color: #64748b;">
+            <i class="fa-solid fa-map-location-dot" style="font-size: 3rem; color: #cbd5e1; margin-bottom: 1rem;"></i>
+            <p style="font-size: 1.1rem; font-weight: 500;">No hay donaciones geolocalizadas registradas por el momento.</p>
+        </div>
+    </section>
+</main>
+
+<footer th:replace="~{layoutAcceso/layoutAcceso :: footer}"></footer>
+
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script th:inline="javascript">
+    document.addEventListener("DOMContentLoaded", function() {
+
+        const jsonRaw = /*[[${donacionesMapaJson}]]*/ '[]';
+
+        let donacionesServidor = [];
+        try {
+            donacionesServidor = JSON.parse(jsonRaw);
+        } catch (e) {
+            console.error("Error al parsear el JSON de donaciones:", e);
+        }
+
+        const mapContainer = document.getElementById('real-map') || document.getElementById('map');
+        if (!mapContainer || typeof L === 'undefined') return;
+
+        const map = L.map(mapContainer.id).setView([-34.6037, -58.3816], 11);
+
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Los textos vienen de datos cargados por usuarios (razón social, dirección):
+        // se escapan antes de meterlos en el HTML del popup.
+        const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        }[c]));
+
+        // Solo se dibujan las donaciones cuya entidad tiene coordenadas reales
+        const conUbicacion = (donacionesServidor || [])
+            .filter(d => d.latitud != null && d.longitud != null);
+
+        // Agrupa las donaciones por entidad: misma ubicación = un solo marcador
+        const porEntidad = new Map();
+        conUbicacion.forEach(d => {
+            const clave = d.organizacionId ?? `${d.latitud},${d.longitud}`;
+            if (!porEntidad.has(clave)) porEntidad.set(clave, []);
+            porEntidad.get(clave).push(d);
+        });
+
+        const puntos = [];
+
+        porEntidad.forEach(donaciones => {
+            const e = donaciones[0]; // los datos de la entidad son iguales para todas
+
+            const items = donaciones.map(d => {
+                const titulo = d.subcategoria || d.categoria || "Donación entregada";
+                const cantidad = d.cantidadTotalItems || 1;
+                return `<li style="margin: 2px 0;">${esc(titulo)} — <b>${esc(cantidad)}</b> unidades</li>`;
+            }).join('');
+
+            const circle = L.circleMarker([e.latitud, e.longitud], {
+                color: '#ffffff',
+                weight: 2,
+                fillColor: '#2563eb',
+                fillOpacity: 1,
+                radius: 10 + Math.min(donaciones.length, 5)
+            }).addTo(map);
+
+            circle.bindPopup(`
+                <div style="font-family: system-ui, sans-serif; padding: 4px; min-width: 200px;">
+                    <strong style="color: #0f172a;">🏠 ${esc(e.nombreEntidad)}</strong><br>
+                    <span style="color: #64748b; font-size: 0.8rem;">📍 ${esc(e.direccionEntidad)}</span>
+                    <div style="margin-top: 6px; font-size: 0.85rem;">
+                        <b>${donaciones.length}</b> donación(es) entregada(s):
+                        <ul style="margin: 4px 0 0 16px; padding: 0;">${items}</ul>
+                    </div>
+                </div>
+            `);
+
+            puntos.push([e.latitud, e.longitud]);
+        });
+
+        // Ajusta el zoom para que se vean todos los marcadores
+        if (puntos.length > 0) {
+            map.fitBounds(puntos, { padding: [40, 40], maxZoom: 15 });
+        }
+
+        setTimeout(() => {
+            map.invalidateSize();
+        }, 200);
+    });
+</script>
+
+</body>
+</html>

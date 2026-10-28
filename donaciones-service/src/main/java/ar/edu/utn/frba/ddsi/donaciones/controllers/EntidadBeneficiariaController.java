@@ -1,6 +1,7 @@
 package ar.edu.utn.frba.ddsi.donaciones.controllers;
 
 import ar.edu.utn.frba.ddsi.donaciones.dto.EntidadBeneficiariaDTO;
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.Necesidad.EntidadPublicaDTO;
 import ar.edu.utn.frba.ddsi.donaciones.services.EntidadBeneficiariaService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,13 +19,13 @@ public class EntidadBeneficiariaController {
         this.entidadBeneficiariaService = entidadBeneficiariaService;
     }
 
-    @GetMapping("/obtenerEntidades")
+    @GetMapping("/entidades")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public List<EntidadBeneficiariaDTO> obtenerTodas() {
         return this.entidadBeneficiariaService.obtenerTodas();
     }
 
-    @GetMapping("/obtenerEntidad/{id}")
+    @GetMapping("/entidad/{id}")
     public ResponseEntity<EntidadBeneficiariaDTO> obtenerPorId(@PathVariable Long id) {
         try {
             EntidadBeneficiariaDTO entidad = this.entidadBeneficiariaService.obtenerPorId(id);
@@ -35,13 +36,18 @@ public class EntidadBeneficiariaController {
         }
     }
 
-    @PostMapping("/crearEntidad")
+    @PutMapping("entidad/{id}")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public EntidadBeneficiariaDTO modificar(@RequestBody EntidadBeneficiariaDTO body, @PathVariable Long id){
+        return this.entidadBeneficiariaService.modificar(body,id);
+    }
+    @PostMapping("/entidad")
     @ResponseStatus(HttpStatus.CREATED)
     public EntidadBeneficiariaDTO crear(@RequestBody EntidadBeneficiariaDTO body) {
         return this.entidadBeneficiariaService.crear(body);
     }
 
-    @DeleteMapping("/eliminarEntidad/{id}")
+    @DeleteMapping("/entidad/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
         try {
             this.entidadBeneficiariaService.eliminar(id);
@@ -50,5 +56,13 @@ public class EntidadBeneficiariaController {
             System.out.println(e.getMessage());
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @GetMapping("/entidades/publicas")
+    public List<EntidadPublicaDTO> entidadesPublicas() {
+        return entidadBeneficiariaService.obtenerTodas().stream()
+                .map(e -> new EntidadPublicaDTO(e.id(), e.razonSocial(), e.direccion(),
+                        e.latitud(), e.longitud()))
+                .toList();
     }
 }

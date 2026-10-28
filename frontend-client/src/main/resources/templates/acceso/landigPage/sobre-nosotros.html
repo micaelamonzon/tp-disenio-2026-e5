@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${titulo} + ' - DonaTrack'">Sobre Nosotros - DonaTrack</title>
+
+
+    <link rel="stylesheet" th:href="@{/css/landingPage/landingPage.css}">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+
+<header th:replace="~{layoutAcceso/layoutAcceso :: header}"></header>
+<nav th:replace="~{layoutAcceso/layoutAcceso :: navBar}"></nav>
+
+<main class="page">
+
+    <section class="blue-header-banner" style="background-color: #1a61ff; color: #ffffff; text-align: center; padding: 4rem 1rem;">
+        <h1 style="font-size: 2.75rem; font-weight: 800; margin-bottom: 0.75rem;">Sobre Nosotros</h1>
+        <p style="font-size: 1.15rem; opacity: 0.95;">Construyendo puentes entre la universidad y la comunidad desde el corazón de UTN</p>
+    </section>
+
+    <div class="container" style="max-width: 1000px; margin: 0 auto; padding: 3rem 1rem 5rem 1rem;">
+
+
+        <article class="about-block" style="background: #ffffff; padding: 2.5rem; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.04); margin-bottom: 2rem;">
+            <h2 style="font-size: 1.6rem; font-weight: 800; color: #1e293b; display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.25rem;">
+                <i class="fa-solid fa-heart" style="color: #1a61ff;"></i> Nuestra Historia
+            </h2>
+            <div style="color: #64748b; font-size: 0.98rem; line-height: 1.7; display: flex; flex-direction: column; gap: 1rem;">
+                <p>UTN Solidaria nació en 2018 como una iniciativa de la Subsecretaría de Asuntos Estudiantiles de la Facultad Regional Buenos Aires, con el propósito de crear un espacio donde estudiantes, docentes y graduados pudieran canalizar su vocación de servicio hacia la comunidad.</p>
+                <p>Lo que comenzó como un pequeño grupo de voluntarios organizando la entrega de viandas en los alrededores de la sede Medrano, se ha transformado en un programa integral que abarca múltiples dimensiones del apoyo comunitario: desde la distribución de alimentos y abrigo hasta el acompañamiento a instituciones educativas y de salud.</p>
+                <p>Con el paso de los años, fuimos testigos de cómo el compromiso estudiantil se fortalecía y expandía. Cada donación recibida, cada hora dedicada al voluntariado y cada sonrisa de agradecimiento nos impulsó a seguir creciendo. Hoy, UTN Solidaria es reconocida no solo dentro de nuestra facultad, sino también en la comunidad que servimos.</p>
+                <p>En 2026, decidimos dar un paso más: crear DonaTrack, una plataforma tecnológica desarrollada por estudiantes y para la comunidad, que permite dar total transparencia y trazabilidad a cada donación. Esta herramienta refleja nuestro ADN: combinar la excelencia técnica de nuestra formación en Ingeniería en Sistemas con el compromiso social que nos define como universidad pública.</p>
+            </div>
+        </article>
+
+        <article class="about-block" style="background: #ffffff; padding: 2.5rem; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.04); margin-bottom: 3rem;">
+            <h2 style="font-size: 1.6rem; font-weight: 800; color: #1e293b; display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.25rem;">
+                <i class="fa-solid fa-bullseye" style="color: #1a61ff;"></i> Nuestra Misión
+            </h2>
+            <p style="color: #64748b; font-size: 0.98rem; line-height: 1.7; margin: 0;">
+                Acompañar y asistir a personas en situación de vulnerabilidad a través de acciones solidarias organizadas y transparentes, complementando la formación académica de nuestros estudiantes con valores de responsabilidad social, empatía y trabajo colaborativo. Aspiramos a ser el puente entre la Universidad Tecnológica Nacional y la comunidad, generando impacto positivo y sostenible mediante la articulación de conocimiento técnico y vocación de servicio.
+            </p>
+        </article>
+
+
+        <section class="values-section" style="margin-bottom: 3.5rem;">
+            <h2 style="text-align: center; font-size: 2rem; font-weight: 800; color: #1e293b; margin-bottom: 2rem;">Nuestros Valores</h2>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
+
+
+                <div class="value-card" style="background: #ffffff; padding: 1.75rem; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.04);">
+                    <div style="background: #dbeafe; color: #1a61ff; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; margin-bottom: 1rem;">
+                        <i class="fa-regular fa-heart"></i>
+                    </div>
+                    <h3 style="font-size: 1.15rem; font-weight: 700; color: #1e293b; margin-bottom: 0.5rem;">Solidaridad</h3>
+                    <p style="color: #64748b; font-size: 0.9rem; line-height: 1.6; margin: 0;">Creemos en la importancia de tender la mano a quienes más lo necesitan, actuando con empatía y compromiso genuino con el bienestar de nuestra comunidad.</p>
+                </div>
+
+
+                <div class="value-card" style="background: #ffffff; padding: 1.75rem; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.04);">
+                    <div style="background: #dbeafe; color: #1a61ff; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; margin-bottom: 1rem;">
+                        <i class="fa-regular fa-bookmark"></i>
+                    </div>
+                    <h3 style="font-size: 1.15rem; font-weight: 700; color: #1e293b; margin-bottom: 0.5rem;">Transparencia</h3>
+                    <p style="color: #64748b; font-size: 0.9rem; line-height: 1.6; margin: 0;">Cada donación cuenta con trazabilidad total. Creemos que la confianza se construye con claridad y honestidad en cada una de nuestras acciones.</p>
+                </div>
+
+
+                <div class="value-card" style="background: #ffffff; padding: 1.75rem; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.04);">
+                    <div style="background: #dbeafe; color: #1a61ff; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; margin-bottom: 1rem;">
+                        <i class="fa-solid fa-users"></i>
+                    </div>
+                    <h3 style="font-size: 1.15rem; font-weight: 700; color: #1e293b; margin-bottom: 0.5rem;">Trabajo en Equipo</h3>
+                    <p style="color: #64748b; font-size: 0.9rem; line-height: 1.6; margin: 0;">Fomentamos la colaboración entre estudiantes, docentes, graduados y la comunidad, porque juntos logramos mucho más que individualmente.</p>
+                </div>
+
+
+                <div class="value-card" style="background: #ffffff; padding: 1.75rem; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.04);">
+                    <div style="background: #dbeafe; color: #1a61ff; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; margin-bottom: 1rem;">
+                        <i class="fa-regular fa-lightbulb"></i>
+                    </div>
+                    <h3 style="font-size: 1.15rem; font-weight: 700; color: #1e293b; margin-bottom: 0.5rem;">Innovación</h3>
+                    <p style="color: #64748b; font-size: 0.9rem; line-height: 1.6; margin: 0;">Aplicamos conocimiento técnico para crear soluciones que optimicen el impacto social, como DonaTrack, nuestra plataforma de gestión de donaciones.</p>
+                </div>
+
+
+                <div class="value-card" style="background: #ffffff; padding: 1.75rem; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.04);">
+                    <div style="background: #dbeafe; color: #1a61ff; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; margin-bottom: 1rem;">
+                        <i class="fa-solid fa-hand-holding-heart"></i>
+                    </div>
+                    <h3 style="font-size: 1.15rem; font-weight: 700; color: #1e293b; margin-bottom: 0.5rem;">Responsabilidad Social</h3>
+                    <p style="color: #64748b; font-size: 0.9rem; line-height: 1.6; margin: 0;">Formamos profesionales conscientes de su rol en la sociedad, comprometidos con la transformación positiva de su entorno.</p>
+                </div>
+
+
+                <div class="value-card" style="background: #ffffff; padding: 1.75rem; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.04);">
+                    <div style="background: #dbeafe; color: #1a61ff; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; margin-bottom: 1rem;">
+                        <i class="fa-solid fa-bullseye"></i>
+                    </div>
+                    <h3 style="font-size: 1.15rem; font-weight: 700; color: #1e293b; margin-bottom: 0.5rem;">Impacto Sostenible</h3>
+                    <p style="color: #64748b; font-size: 0.9rem; line-height: 1.6; margin: 0;">No buscamos acciones aisladas, sino generar cambios duraderos que mejo ren la calidad de vida de las personas de manera continua.</p>
+                </div>
+
+            </div>
+        </section>
+
+
+        <section class="why-banner" style="background-color: #1a61ff; color: #ffffff; padding: 3rem 2.5rem; border-radius: 16px; margin-bottom: 3rem;">
+            <h2 style="font-size: 2rem; font-weight: 800; text-align: center; margin-bottom: 1.75rem;">¿Por qué elegimos esta actividad?</h2>
+            <div style="font-size: 1rem; line-height: 1.75; opacity: 0.95; display: flex; flex-direction: column; gap: 1.25rem;">
+                <p>Como estudiantes y miembros de la Universidad Tecnológica Nacional, entendemos que nuestro aprendizaje no debe limitarse a las aulas. La ingeniería tiene sentido cuando se pone al servicio de las personas, cuando resuelve problemas reales y mejora la vida de quienes nos rodean.</p>
+                <p>Elegimos esta actividad porque creemos en el poder transformador de la educación combinada con la acción. Porque reconocemos que, en una sociedad con profundas desigualdades, quienes tenemos la oportunidad de formarnos en una universidad pública de calidad tenemos también la responsabilidad de retribuir a la comunidad.</p>
+                <p>Cada estudiante que participa en UTN Solidaria no solo está ayudando a otros, sino también creciendo como persona y como futuro profesional. Aprende sobre gestión de proyectos, trabajo en equipo, resolución de problemas complejos y, sobre todo, desarrolla la sensibilidad social que toda sociedad necesita de sus líderes técnicos.</p>
+                <p>DonaTrack es la materialización de esta filosofía: un proyecto donde la tecnología se encuentra con la solidaridad, donde el código y los algoritmos sirven para generar confianza, transparencia e impacto social real. Es nuestra manera de demostrar que otro modelo de universidad es posible: una que forma profesionales técnicamente excelentes y socialmente comprometidos.</p>
+            </div>
+        </section>
+
+
+        <section class="impact-section" style="background: #ffffff; padding: 2.5rem; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.04);">
+            <h2 style="text-align: center; font-size: 1.85rem; font-weight: 800; color: #1e293b; margin-bottom: 2rem;">Nuestro Impacto</h2>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.25rem;">
+
+                <div style="background: #f1f5f9; padding: 1.5rem; border-radius: 12px; text-align: center;">
+                    <span style="font-size: 2.25rem; font-weight: 800; color: #1a61ff; display: block; margin-bottom: 0.25rem;">+15,000</span>
+                    <span style="color: #64748b; font-size: 0.88rem; font-weight: 600;">Donaciones entregadas</span>
+                </div>
+
+
+                <div style="background: #f1f5f9; padding: 1.5rem; border-radius: 12px; text-align: center;">
+                    <span style="font-size: 2.25rem; font-weight: 800; color: #1a61ff; display: block; margin-bottom: 0.25rem;">+250</span>
+                    <span style="color: #64748b; font-size: 0.88rem; font-weight: 600;">Donante activos</span>
+                </div>
+
+
+                <div style="background: #f1f5f9; padding: 1.5rem; border-radius: 12px; text-align: center;">
+                    <span style="font-size: 2.25rem; font-weight: 800; color: #1a61ff; display: block; margin-bottom: 0.25rem;">+30</span>
+                    <span style="color: #64748b; font-size: 0.88rem; font-weight: 600;">Instituciones beneficiadas</span>
+                </div>
+
+
+                <div style="background: #f1f5f9; padding: 1.5rem; border-radius: 12px; text-align: center;">
+                    <span style="font-size: 2.25rem; font-weight: 800; color: #1a61ff; display: block; margin-bottom: 0.25rem;">8</span>
+                    <span style="color: #64748b; font-size: 0.88rem; font-weight: 600;">Años de trayectoria</span>
+                </div>
+            </div>
+        </section>
+
+    </div>
+</main>
+
+
+<footer th:replace="~{layoutAcceso/layoutAcceso :: footer}"></footer>
+
+</body>
+</html>

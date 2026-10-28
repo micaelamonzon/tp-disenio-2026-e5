@@ -1,5 +1,7 @@
 package ar.edu.utn.frba.ddsi.donaciones.services;
 
+import ar.edu.utn.frba.ddsi.donaciones.dto.DonacionAsignadaDTO;
+import ar.edu.utn.frba.ddsi.donaciones.dto.DonacionSegmentadaDTO;
 import ar.edu.utn.frba.ddsi.donaciones.dto.DonacionSinSegmentarDTO;
 import ar.edu.utn.frba.ddsi.donaciones.dto.PersonaDonanteDTO;
 import ar.edu.utn.frba.ddsi.donaciones.dto.PersonaHumanaDTO;
@@ -8,15 +10,18 @@ import ar.edu.utn.frba.ddsi.donaciones.dto.PersonaJuridicaDTO;
 import java.util.List;
 
 public interface DonacionesService {
-    List<PersonaDonanteDTO> obtenerTodosHumanos();
-    List<PersonaDonanteDTO> obtenerTodosJuridicos();
+
+    List<PersonaHumanaDTO> obtenerTodosHumanos();
+    List<PersonaJuridicaDTO> obtenerTodosJuridicos();
     PersonaHumanaDTO obtenerHumanoPorId(Long id);
     PersonaJuridicaDTO obtenerJuridicoPorId(Long id);
-    PersonaDonanteDTO obtenerDonacionesDeHumano(Long id);
-    PersonaDonanteDTO obtenerDonacionesDeJuridico(Long id);
+    List<DonacionSegmentadaDTO>  obtenerDonacionesDeHumano(Long id);
+    List<DonacionSegmentadaDTO>  obtenerDonacionesDeJuridico(Long id);
+    List<DonacionSegmentadaDTO> obtenerDonacionesEntregadas();
     PersonaHumanaDTO crearDonanteHumano(PersonaHumanaDTO body);
-    DonacionSinSegmentarDTO crearDonacionDeJuridico(DonacionSinSegmentarDTO body, Long id);
-    DonacionSinSegmentarDTO crearDonacionDeHumano(DonacionSinSegmentarDTO body, Long id);
+    PersonaJuridicaDTO crearDonanteJuridico(PersonaJuridicaDTO request);
+    List<DonacionSegmentadaDTO> crearDonacionDeJuridico(DonacionSinSegmentarDTO body, Long id);
+    List<DonacionSegmentadaDTO> crearDonacionDeHumano(DonacionSinSegmentarDTO body, Long id);
     List<DonacionSinSegmentarDTO> modificarDonacionDeHumano(DonacionSinSegmentarDTO body, Long idHumano, Long idDonacion, Long idBien);
     public List<DonacionSinSegmentarDTO> modificarDonacionDeJuridica(DonacionSinSegmentarDTO body, Long idJuridica, Long idDonacion, Long idBien);
     List<DonacionSinSegmentarDTO> eliminarDonacionDeHumano(Long idHumano, Long idDonacion);
@@ -24,8 +29,11 @@ public interface DonacionesService {
     List<PersonaDonanteDTO> obtenerTodosLosDonantesUnificados();
 
     void eliminarDonanteJuridico(Long id);
-    PersonaJuridicaDTO crearDonanteJuridico(PersonaJuridicaDTO request);
     PersonaHumanaDTO modificarDonanteHumano(Long id, PersonaHumanaDTO request);
     PersonaJuridicaDTO modificarDonanteJuridico(Long id, PersonaJuridicaDTO request);
     void eliminarDonanteHumano(Long id);
+
+     void arrancarImportacionDeCSV( String file);
+
+     List<DonacionAsignadaDTO> obtenerDonacionesAsiganadasAUnaEntidad(Long idEntidad);
 }

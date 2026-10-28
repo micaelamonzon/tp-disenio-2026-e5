@@ -1,0 +1,76 @@
+<html lang="es"  th:replace="~{layoutEntidad/base :: html}">
+    <div th:fragment="contenido" class="row">
+        <section id="view-estado-necesidades">
+            <div class="page-head">
+                <h1>Estado de Donaciones</h1>
+                <p class="page-sub">En esta sección podrá ver el estado de sus donaciones</p>
+            </div>
+            <div class="estado-necesidades-container">
+                <div class="status-list-container" id="statusNeedsList">
+
+                    <div th:if="${errorDonaciones}" class="alert alert-danger" th:text="${errorDonaciones}"></div>
+
+                    <p th:if="${#lists.isEmpty(donaciones) and errorDonaciones == null}" class="page-sub">
+                        Todavía no tenés donaciones asignadas.
+                    </p>
+
+                    <article class="status-card" th:each="d : ${donaciones}">
+                        <div class="status-card-left">
+
+                            <th:block th:switch="${d.estadoActual}">
+                                <th:block th:case="'EN_DEPOSITO'">
+                                    <span th:replace="~{fragments/iconosDeEstado :: iconoEnDeposito}"></span>
+                                </th:block>
+                                <th:block th:case="'ASIGNACION_REALIZADA'">
+                                    <span th:replace="~{fragments/iconosDeEstado :: iconoAsignacionRealizada}"></span>
+                                </th:block>
+                                <th:block th:case="'LISTA_PARA_ENTREGAR'">
+                                    <span th:replace="~{fragments/iconosDeEstado :: iconoListaParaEntregar}"></span>
+                                </th:block>
+                                <th:block th:case="'EN_TRASLADO'">
+                                    <span th:replace="~{fragments/iconosDeEstado :: iconoEnTraslado}"></span>
+                                </th:block>
+                                <th:block th:case="'ENTREGADA'">
+                                    <span th:replace="~{fragments/iconosDeEstado :: iconoEntregado}"></span>
+                                </th:block>
+                                <th:block th:case="'ENTREGA_FALLIDA'">
+                                    <span th:replace="~{fragments/iconosDeEstado :: iconoEntregaFallida}"></span>
+                                </th:block>
+                                <th:block th:case="'VENCIDA'">
+                                    <span th:replace="~{fragments/iconosDeEstado :: iconoVencida}"></span>
+                                </th:block>
+                                <th:block th:case="*">
+                                    <span th:replace="~{fragments/iconosDeEstado :: iconoEnDeposito}"></span>
+                                </th:block>
+                            </th:block>
+                            <div class="status-card-info">
+                                <h3 th:text="${d.subcategoria}">Subcategoría</h3>
+                                <p class="status-card-sub" th:text="${d.descripcion} + '.'"></p>
+                                <div class="status-card-details">
+                                    <span th:text="'Cantidad: ' + ${d.cantidad}"></span>
+                                    <span th:text="${d.Hace()}"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="status-card-right">
+                            <th:block th:switch="${d.estadoActual}">
+                                <span th:case="'ASIGNACION_REALIZADA'" class="status-tag status-asignacion-realizada">Asignación realizada</span>
+                                <span th:case="'LISTA_PARA_ENTREGAR'"  class="status-tag status-lista-para-entregar">Lista para entregar</span>
+                                <span th:case="'EN_TRASLADO'"          class="status-tag status-en-traslado">En traslado</span>
+                                <span th:case="'ENTREGADA'"            class="status-tag status-entregado">Entregado</span>
+                                <span th:case="'ENTREGA_FALLIDA'"      class="status-tag status-entrega-fallida">Entrega fallida</span>
+                                <span th:case="'VENCIDA'"              class="status-tag status-vencida">Vencida</span>
+                                <span th:case="*"                      class="status-tag status-en-deposito">En depósito</span>
+                            </th:block>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </section>
+    </div>
+</html>
+
+
+
+
+

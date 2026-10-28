@@ -1,57 +1,50 @@
 package ar.edu.utn.frba.ddsi.models.entities.misiones;
 
-import ar.edu.utn.frba.ddsi.models.entities.donaciones.DonacionSinSegmentar;
-import ar.edu.utn.frba.ddsi.models.entities.persona.Bien;
+import ar.edu.utn.frba.ddsi.models.entities.donaciones.DonacionSegmentada;
 import ar.edu.utn.frba.ddsi.models.entities.persona.Categoria;
 import ar.edu.utn.frba.ddsi.models.entities.persona.Insignia;
+import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Table;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Data
+@NoArgsConstructor
+@Entity
+@DiscriminatorValue("Completitud")
 public class Completitud extends Mision {
 
-    private List<Categoria> categorias;
+    @Column
+    private Integer objetivoDeCategoriasDistintas;
 
-    public Completitud(String nombre,List<Categoria> categorias){
+    public Completitud(NombreDeMision nombre,Integer objetivoDeCategoriasDistintas){
         this.setNombre(nombre);
-        this.categorias = categorias;
-        setInsigniaGanadora(Insignia.COMPLETITUD);
+        this.objetivoDeCategoriasDistintas = objetivoDeCategoriasDistintas;
+
     }
 
     //Completitud: realizar donaciones de X categorías distintas
     @Override
-    public Boolean seCompletoLaMision(List<DonacionSinSegmentar> donaciones) {
-        this.setProgreso(0);
+    public AvanceDeMision seCompletoLaMision(List<DonacionSegmentada> donaciones) {
+
         List<Categoria> todasLasCategorias = donaciones.stream()
-                .flatMap(d -> d.getBienes().stream())
-                .map(bien -> bien.getSubcategoria().getCategoria())
+                .map(d -> d.getCategoria())
                 .toList();
 
-        long categoriasUnicas = todasLasCategorias.stream()
+        Long categoriasUnicas = todasLasCategorias.stream()
                 .distinct()
                 .count();
 
-        boolean todasSonDistintas = todasLasCategorias.size() == categoriasUnicas;
 
-        int distanciaRestante = 100 - this.getProgreso();
-        this.setDistanciaDelObjetivo(Math.max(0, distanciaRestante));
-
-        if (todasSonDistintas) {
-            this.setEstadoDeMision(EstadoDeMision.COMPLETADA);
-            this.setFechaCompletada(java.time.LocalDate.now());
-            this.subirProgreso(donaciones.size());
-            return Boolean.TRUE;
-        }
-
-        this.setEstadoDeMision(EstadoDeMision.BLOQUEADA);
-        return Boolean.FALSE;
-
+      return this.calcularProgresoyDistancia(categoriasUnicas.intValue(),this.objetivoDeCategoriasDistintas);
     }
 
-    public void subirProgreso(Integer cantDonaciones){
-       super.subirProgreso(cantDonaciones);
-    }
+
 
 
 }

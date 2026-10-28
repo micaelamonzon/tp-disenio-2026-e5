@@ -1,20 +1,24 @@
 package ar.edu.utn.frba.ddsi.donaciones.controllers;
 
-import ar.edu.utn.frba.ddsi.donaciones.dto.CambioEstadoRequestDTO;
-import ar.edu.utn.frba.ddsi.donaciones.dto.DonacionSegmentadaDTO;
-
+import ar.edu.utn.frba.ddsi.donaciones.dto.*;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.Subcategoria;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.DonacionSegmentada;
 import ar.edu.utn.frba.ddsi.donaciones.services.EstadoDonacionServiceimpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/servicioDeDonaciones")
 public class EstadoDonacionController {
 
-    private final EstadoDonacionServiceimpl estadoDonacionService; // ← cambia acá
+    private static final Logger estadosDonacionController = LoggerFactory.getLogger(EstadoDonacionController.class);
+
+    private final EstadoDonacionServiceimpl estadoDonacionService;
 
     public EstadoDonacionController(EstadoDonacionServiceimpl estadoDonacionService) { // ← y acá
         this.estadoDonacionService = estadoDonacionService;
@@ -69,12 +73,15 @@ public class EstadoDonacionController {
         }
     }
 
+    // El body con las fotos es opcional: si no viene, se confirma la entrega igual que antes
     @PatchMapping("/donacion/{id}/entregar")
     public ResponseEntity<DonacionSegmentadaDTO> entregar(
             @PathVariable Long id,
-            @RequestParam String responsableId) {
+            @RequestParam String responsableId,
+            @RequestBody(required = false) FotosEntregaDTO body) {
         try {
-            return ResponseEntity.ok(estadoDonacionService.entregar(id, responsableId));
+            List<String> fotosUrl = body != null ? body.fotosUrl() : null;
+            return ResponseEntity.ok(estadoDonacionService.entregar(id, responsableId, fotosUrl));
         } catch (IllegalStateException e) {
             return ResponseEntity.badRequest().build();
         }
@@ -103,4 +110,18 @@ public class EstadoDonacionController {
             return ResponseEntity.badRequest().build();
         }
     }
+
+    //Para que logística pueda consultar donaciones según estado
+    @GetMapping("/donaciones")
+    public ResponseEntity<List<DonacionDTO>> buscarPorEstado(@RequestParam String estado) {
+        estadosDonacionController.info("SOLICITANDO TODAS LAS DONACIONES PARA ENVIARSELAS AL SERVICIO DE LOGISTICA");
+        List<DonacionDTO> encontradas = estadoDonacionService.findByEstado(estado);
+        return ResponseEntity.ok(encontradas);
+    }
+
+    @GetMapping("/admin/donaciones")
+    public List<DonacionAdminDTO> listarParaAdmin(@RequestParam String estado) {
+        return estadoDonacionService.listarParaAdmin(estado);
+    }
+
 }

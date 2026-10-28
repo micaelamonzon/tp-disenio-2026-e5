@@ -1,16 +1,21 @@
 package ar.edu.utn.frba.ddsi;
 import ar.edu.utn.frba.ddsi.config.NotificacionesProperties;
 import ar.edu.utn.frba.ddsi.config.RestProperties;
+import ar.edu.utn.frba.ddsi.services.impl.IncentivosServiceImpl;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
+@EnableScheduling
 @EnableConfigurationProperties({RestProperties.class, NotificacionesProperties.class})
 public class IncentivosServiceApplication
 {
     public static void main( String[] args )
     {
         SpringApplication.run(IncentivosServiceApplication.class, args);
+
+
     }
 }

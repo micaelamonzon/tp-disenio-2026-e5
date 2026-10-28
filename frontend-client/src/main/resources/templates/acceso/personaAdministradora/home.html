@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${titulo ?: 'DonaTrack - Panel de Administración'}">DonaTrack - Panel de Administración</title>
+    <meta name="_csrf" th:if="${_csrf != null}" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:if="${_csrf != null}" th:content="${_csrf.headerName}">
+    <link rel="stylesheet" th:href="@{/css/admin/personaAdmin.css}">
+</head>
+<body>
+
+<!-- ===================== TOPBAR ===================== -->
+<header class="topbar">
+    <div class="topbar-left">
+        <span class="logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 14h2a2 2 0 0 0 0-4h-3c-.6 0-1.1.2-1.4.6L3 16"/><path d="m14.45 13.39 5.05-4.694C20.196 8 21 6.85 21 5.75a2.75 2.75 0 0 0-4.797-1.837.276.276 0 0 1-.406 0A2.75 2.75 0 0 0 11 5.75c0 1.2.802 2.248 1.5 2.946L16 11.95"/><path d="m2 15 6 6"/><path d="m7 20 1.6-1.4c.3-.4.8-.6 1.4-.6h4c1.1 0 2.1-.4 2.8-1.2l4.6-4.4a1 1 0 0 0-2.75-2.91"/></svg>
+        </span>
+        <span class="logo-text">DonaTrack</span>
+    </div>
+
+    <div class="topbar-right">
+        <button class="admin-badge" id="userMenuTrigger" aria-haspopup="true" aria-expanded="false">
+            <span class="admin-avatar" th:text="${#strings.toUpperCase(#strings.substring(nombreUsuario ?: 'Administrador', 0, 1))}">A</span>
+            <span class="admin-badge-text">
+                <span class="admin-name" th:text="${nombreUsuario ?: 'Administrador'}">Administrador</span>
+                <span class="admin-role">Persona Administradora</span>
+            </span>
+        </button>
+        <div class="user-menu" id="userMenu" hidden>
+            <a class="user-menu-item" th:href="@{/personaAdministradora/notificaciones}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                Notificaciones
+            </a>
+            <form th:action="@{/logout}" method="post">
+                <button type="submit" class="user-menu-item" id="logoutBtn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    Cerrar sesión
+                </button>
+            </form>
+        </div>
+        <button class="hamburger-btn" id="sidebarToggle" aria-label="Abrir menú de gestión">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
+        </button>
+    </div>
+</header>
+
+<!-- ===================== SHELL: SIDEBAR + CONTENIDO ===================== -->
+<div class="admin-shell" id="adminShell">
+
+    <!-- ===================== SIDEBAR ===================== -->
+    <aside class="admin-sidebar" id="adminSidebar">
+        <div class="sidebar-title">Gestión de Donaciones</div>
+        <nav class="sidebar-nav">
+            <button type="button" class="sidebar-link active" data-view="dashboard">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                Dashboard
+            </button>
+            <button type="button" class="sidebar-link" data-view="registrar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="16" y1="11" x2="22" y2="11"/></svg>
+                Registrar Donaciones
+            </button>
+            <button type="button" class="sidebar-link" data-view="inventario">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="5" rx="1"/><path d="M4 8v11a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V8"/><line x1="10" y1="13" x2="14" y2="13"/></svg>
+                Inventario de Depósito
+            </button>
+            <button type="button" class="sidebar-link" data-view="asignacion">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                Asignación de Donaciones
+            </button>
+            <button type="button" class="sidebar-link" data-view="camiones">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 17h4V5H10z"/><path d="M20 17h2v-7l-3-4h-3v11h4z"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>
+                Gestión de Camiones
+            </button>
+            <button type="button" class="sidebar-link" data-view="ranking">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.5 13.5 17 22l-5-3-5 3 1.5-8.5"/></svg>
+                Ranking de Donantes
+            </button>
+            <button type="button" class="sidebar-link" data-view="importar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                Importar Donantes
+            </button>
+        </nav>
+    </aside>
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- ===================== CONTENIDO ===================== -->
+    <main class="admin-content">
+
+        <!-- ===== DASHBOARD ===== -->
+        <section id="view-dashboard" class="admin-view active">
+            <div class="page-head">
+                <h1>Panel de Administración</h1>
+                <p class="page-sub">Bienvenido, Administrador. Aquí tienes un resumen de las donaciones.</p>
+            </div>
+
+            <div id="dashboardError" class="form-error" th:if="${errorDashboard}" th:text="${errorDashboard}"></div>
+
+            <div class="dashboard-stats" id="dashboardStats">
+                <div class="stat-card">
+                    <div class="stat-card-head">
+                        <span>Donaciones Disponibles</span>
+                        <span class="stat-icon stat-icon-green">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                        </span>
+                    </div>
+                    <div class="stat-value" id="statDisponibles" th:text="${cantDisponibles ?: '–'}">–</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-head">
+                        <span>Donaciones Vencidas</span>
+                        <span class="stat-icon stat-icon-red">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                        </span>
+                    </div>
+                    <div class="stat-value" id="statVencidas" th:text="${cantVencidas ?: '–'}">–</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-head">
+                        <span>Donaciones Asignadas</span>
+                        <span class="stat-icon stat-icon-blue">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                        </span>
+                    </div>
+                    <div class="stat-value" id="statAsignadas" th:text="${cantAsignadas ?: '–'}">–</div>
+                </div>
+            </div>
+
+            <div class="table-card">
+                <div class="table-title">Donaciones Recientes</div>
+                <div id="dashboardRecientesList" class="recientes-list">
+                    <div class="reciente-item" th:each="d : ${recientes}">
+                        <div>
+                            <div class="reciente-item-name" th:text="${d.articulos}"></div>
+                            <div class="reciente-item-meta"
+                                 th:text="'Donante: ' + ${d.nombreDonante ?: ('Donante #' + d.idDelDonante)}"></div>
+                        </div>
+                        <div class="reciente-item-right">
+                            <div class="reciente-item-cant" th:text="${d.cantidadTotalItems + ' ' + d.unidad}"></div>
+                            <span class="pill"
+                                  th:classappend="${d.estadoActual == 'EN_DEPOSITO'} ? 'pill-Disponible' : 'pill-Asignada'"
+                                  th:text="${d.estadoActual == 'EN_DEPOSITO'} ? 'Disponible' : 'Asignada'"></span>
+                        </div>
+                    </div>
+                    <p class="empty-state" th:if="${#lists.isEmpty(recientes)}">No hay donaciones registradas todavía.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================== REGISTRAR DONACIONES ===================== -->
+        <section id="view-registrar" class="admin-view">
+            <div class="page-head">
+                <h1>Registrar Donante y Donación</h1>
+                <p class="page-sub">Complete los datos del donante y la donación recibida en el depósito.</p>
+            </div>
+
+            <form id="registrarForm" novalidate>
+
+                <!-- Datos del donante -->
+                <div class="form-card">
+                    <h2 class="form-card-title">Datos del Donante</h2>
+
+                    <div class="donor-mode-toggle" role="radiogroup" aria-label="Modo de donante">
+                        <label class="radio-pill">
+                            <input type="radio" name="donorMode" value="nuevo" checked>
+                            Donante nuevo
+                        </label>
+                        <label class="radio-pill">
+                            <input type="radio" name="donorMode" value="existente">
+                            Donante existente
+                        </label>
+                    </div>
+
+                    <!-- Búsqueda de donante existente -->
+                    <div id="donorSearchBlock" class="donor-search-block" hidden>
+                        <div class="field-row">
+                            <label class="field field-grow">
+                                <span>Buscar por nombre, apellido o razón social</span>
+                                <input type="text" id="donorSearchInput" placeholder="Ej: María González o Arcos Plateados">
+                            </label>
+                            <button type="button" class="btn btn-outline btn-search" id="donorSearchBtn">Buscar</button>
+                        </div>
+                        <div id="donorSearchResult" class="donor-search-result" hidden></div>
+                    </div>
+
+                    <!-- Alta de donante nuevo -->
+                    <div id="donorNewBlock">
+                        <label class="field field-inline">
+                            <span>Tipo de persona</span>
+                            <select id="tipoPersona">
+                                <option value="humana">Persona humana</option>
+                                <option value="juridica">Persona jurídica</option>
+                            </select>
+                        </label>
+
+                        <!-- Persona humana -->
+                        <div id="camposHumana" class="fields-grid">
+                            <label class="field">
+                                <span>Nombre *</span>
+                                <input type="text" id="donNombre" placeholder="Ej: María">
+                            </label>
+                            <label class="field">
+                                <span>Apellido *</span>
+                                <input type="text" id="donApellido" placeholder="Ej: González">
+                            </label>
+                            <label class="field">
+                                <span>Número de documento *</span>
+                                <input type="text" id="donDocumento" placeholder="Ej: 30111222">
+                            </label>
+                            <label class="field">
+                                <span>Edad</span>
+                                <input type="number" id="donEdad" min="0" placeholder="Ej: 34">
+                            </label>
+                            <label class="field">
+                                <span>Género</span>
+                                <select id="donGenero">
+                                    <option value="">Seleccionar</option>
+                                    <option value="Femenino">Femenino</option>
+                                    <option value="Masculino">Masculino</option>
+                                    <option value="No binario">No binario</option>
+                                    <option value="Prefiero no decir">Prefiero no decir</option>
+                                </select>
+                            </label>
+                            <label class="field field-grow">
+                                <span>Dirección *</span>
+                                <input type="text" id="donDireccion" placeholder="Ej: Av. Rivadavia 1234, CABA">
+                            </label>
+                        </div>
+
+                        <!-- Persona jurídica -->
+                        <div id="camposJuridica" class="fields-grid" hidden>
+                            <label class="field field-grow">
+                                <span>Razón social *</span>
+                                <input type="text" id="jurRazonSocial" placeholder="Ej: Arcos Plateados S.A.">
+                            </label>
+                            <label class="field">
+                                <span>CUIT *</span>
+                                <input type="text" id="jurCuit" placeholder="Ej: 30-12345678-9">
+                            </label>
+                            <label class="field">
+                                <span>Tipo de organización *</span>
+                                <select id="jurTipo">
+                                    <option value="">Seleccionar</option>
+                                    <option value="Gubernamental">Gubernamental</option>
+                                    <option value="ONG">ONG</option>
+                                    <option value="Empresa">Empresa</option>
+                                    <option value="Institución">Institución</option>
+                                </select>
+                            </label>
+                            <label class="field">
+                                <span>Rubro</span>
+                                <input type="text" id="jurRubro" placeholder="Ej: Alimenticio">
+                            </label>
+                            <label class="field field-grow">
+                                <span>Dirección</span>
+                                <input type="text" id="jurDireccion" placeholder="Ej: Av. Corrientes 4500, CABA">
+                                <span class="field-pending-note">⚠ PersonaJuridicaDTO no tiene campo "direccion" todavía: este dato se muestra pero no se envía al backend hasta que se agregue al DTO/entidad.</span>
+                            </label>
+                            <label class="field">
+                                <span>Nombre del representante</span>
+                                <input type="text" id="jurRepresentanteNombre" placeholder="Ej: Carlos">
+                            </label>
+                            <label class="field">
+                                <span>Apellido del representante</span>
+                                <input type="text" id="jurRepresentanteApellido" placeholder="Ej: López">
+                            </label>
+                            <label class="field">
+                                <span>DNI del representante</span>
+                                <input type="text" id="jurRepresentanteDni" placeholder="Ej: 28444555">
+                            </label>
+                        </div>
+
+                        <div class="fields-grid">
+                            <label class="field">
+                                <span>Email *</span>
+                                <input type="email" id="donEmail" placeholder="maria@ejemplo.com">
+                            </label>
+                            <label class="field">
+                                <span>Teléfono (opcional)</span>
+                                <input type="tel" id="donTelefono" placeholder="+54 11 1234-5678">
+                            </label>
+                            <label class="field">
+                                <span>WhatsApp (opcional)</span>
+                                <input type="tel" id="donWhatsapp" placeholder="+54 9 11 1234-5678">
+                            </label>
+                            <label class="field">
+                                <span>Medio de contacto predeterminado</span>
+                                <select id="donMedioPredeterminado">
+                                    <option value="email">Email</option>
+                                    <option value="telefono">Teléfono</option>
+                                    <option value="whatsapp">WhatsApp</option>
+                                </select>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Datos de la donación -->
+                <div class="form-card">
+                    <div class="form-card-title-row">
+                        <h2 class="form-card-title">Datos de la Donación</h2>
+                        <span class="form-card-hint">El sistema segmentará automáticamente por subcategoría.</span>
+                    </div>
+
+                    <label class="field field-grow">
+                        <span>Descripción general (opcional)</span>
+                        <textarea id="descripcionGeneral" rows="2" placeholder="Ej: Mudanza de oficina, se donan muebles en buen estado"></textarea>
+                    </label>
+
+                    <div id="bienesList" class="bienes-list"></div>
+
+                    <button type="button" class="btn btn-outline btn-add-bien" id="agregarBienBtn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        Agregar otro bien
+                    </button>
+                </div>
+
+                <div id="registrarError" class="form-error" hidden></div>
+
+                <button type="submit" class="btn btn-primary btn-block">Registrar Donación</button>
+            </form>
+
+            <div id="segmentacionResumen" class="segmentacion-resumen" hidden></div>
+        </section>
+
+        <!-- ===================== INVENTARIO DE DEPÓSITO ===================== -->
+        <section id="view-inventario" class="admin-view">
+            <div class="page-head">
+                <h1>Inventario de Depósito</h1>
+                <p class="page-sub">Gestione el estado de las donaciones disponibles en el depósito.</p>
+            </div>
+
+            <p class="form-error" th:if="${errorInventario}" th:text="${errorInventario}"></p>
+            <p class="alert-info" th:if="${mensajeInventario}" th:text="${mensajeInventario}"></p>
+
+            <div class="inventory-toolbar">
+                <input type="search" id="inventorySearch" class="search-input" placeholder="Buscar por artículo...">
+                <label class="field field-inline field-compact">
+                    <span>Estado</span>
+                    <select id="inventoryFilterEstado">
+                        <option value="todos">Todos</option>
+                        <option value="EN_DEPOSITO">En depósito</option>
+                        <option value="VENCIDA">Vencida</option>
+                    </select>
+                </label>
+            </div>
+
+            <div class="table-card">
+                <div class="table-title">Donaciones en Depósito</div>
+                <div class="table-scroll">
+                    <table class="data-table">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Artículo</th>
+                            <th>Cantidad</th>
+                            <th>Categoría</th>
+                            <th>Fecha Ingreso</th>
+                            <th>Vencimiento</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                        </thead>
+                        <tbody id="inventoryTableBody">
+                        <tr th:each="d : ${inventario}"
+                            th:data-articulo="${#strings.toLowerCase(d.articulos)}"
+                            th:data-estado="${d.estadoActual}">
+                            <td th:text="${d.id}"></td>
+                            <td th:text="${d.articulos}"></td>
+                            <td th:text="${d.cantidadTotalItems + ' ' + d.unidad}"></td>
+                            <td th:text="${d.categoria}"></td>
+                            <td th:text="${#temporals.format(d.fechaDeIngreso, 'dd/MM/yyyy')}"></td>
+                            <td th:text="${d.vencimiento != null ? #temporals.format(d.vencimiento, 'dd/MM/yyyy') : '—'}"></td>
+                            <td>
+                                <span class="pill"
+                                    th:classappend="${d.estadoActual == 'VENCIDA'} ? 'pill-Vencida' : 'pill-Disponible'"
+                                    th:text="${d.estadoLegible}"></span>
+                            </td>
+                            <td>
+                                <form th:if="${d.puedeVencerse}" method="post"
+                                      th:action="@{/personaAdministradora/inventario/{id}/vencer(id=${d.id})}">
+                                    <button type="submit" class="action-link expire">Marcar vencida</button>
+                                </form>
+                                <span th:unless="${d.puedeVencerse}" class="reciente-item-meta">—</span>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="empty-state" id="inventoryEmpty" hidden>No hay donaciones que coincidan con la búsqueda.</p>
+            </div>
+        </section>
+
+        <!-- ===================== ASIGNACIÓN DE DONACIONES ===================== -->
+        <section id="view-asignacion" class="admin-view">
+            <div class="page-head">
+                <h1>Asignación de Donaciones</h1>
+                <p class="page-sub">Sistema de matchmaking con algoritmos de Compatibilidad Semántica y Prioridad a Sub-atendidos.</p>
+            </div>
+
+            <div class="alert-info">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                <div>
+                    <b>Algoritmos de Matchmaking</b>
+                    <ul>
+                        <li><b>Compatibilidad Semántica:</b> analiza correspondencia entre características del bien donado y las necesidades de las entidades.</li>
+                        <li><b>Prioridad a Sub-atendidos:</b> prioriza organizaciones que recibieron menos donaciones en el último trimestre.</li>
+                        <li>Los algoritmos se ejecutan en horarios de baja carga para no degradar el desempeño del sistema.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h2 class="section-title-plain">Donaciones en Depósito - Pendientes de Asignación</h2>
+            <p class="form-error" th:if="${errorAsignacion}" th:text="${errorAsignacion}"></p>
+            <p class="alert-info" th:if="${mensajeAsignacion}" th:text="${mensajeAsignacion}"></p>
+
+            <form method="post" data-loading th:action="@{/personaAdministradora/asignacion/ejecutar}" style="margin: 16px 0;">
+                <button type="submit" class="btn btn-primary">Ejecutar Matchmaking</button>
+            </form>
+
+            <div id="matchCardsContainer" class="match-cards">
+                <p class="empty-state" th:if="${#lists.isEmpty(pendientesAsignacion)}">
+                    No hay donaciones "En depósito" pendientes de asignación.
+                </p>
+
+                <article class="match-card" th:each="d : ${pendientesAsignacion}" th:with="p=${propuestas.get(d.id)}">
+                    <div class="match-head">
+                        <div>
+                            <div class="match-title" th:text="${d.articulos}"></div>
+                            <div class="match-meta"
+                                 th:text="${d.cantidadTotalItems + ' ' + d.unidad + ' · ' + d.categoria + ' · Donante: ' + d.nombreDonante}"></div>
+                        </div>
+                    </div>
+
+                    <p class="algo-item-desc" th:if="${p == null}">
+                        Todavía no hay propuesta para esta donación. Ejecutá el matchmaking.
+                    </p>
+
+                    <form th:if="${p != null}" method="post" data-loading
+                          th:action="@{/personaAdministradora/asignacion/{id}/seleccionar(id=${p.id})}">
+
+                        <div class="coincidencia-box" th:if="${!#lists.isEmpty(p.rankingConjunto)}">
+                            <div class="coincidencia-title"
+                                 th:text="'Coincidencias en Ambos Algoritmos (' + ${#lists.size(p.rankingConjunto)} + ')'"></div>
+                            <div class="coincidencia-sub">Estas entidades fueron recomendadas por ambos algoritmos. Seleccione una:</div>
+                            <label class="match-option" th:each="n, st : ${p.rankingConjunto}"
+                                   th:for="${'sel-' + d.id + '-c-' + n.id}">
+                                <input type="radio" name="necesidadId" required
+                                       th:id="${'sel-' + d.id + '-c-' + n.id}" th:value="${n.id}">
+                                <span class="match-rank-badge" th:text="${st.count}"></span>
+                                <span class="match-option-body">
+                        <span class="match-option-name" th:text="${n.entidadRazonSocial}"></span>
+                        <span class="match-option-desc" th:text="${n.descripcion}"></span>
+                    </span>
+                            </label>
+                        </div>
+                        <p class="algo-item-desc" style="margin-top:14px;" th:if="${#lists.isEmpty(p.rankingConjunto)}">
+                            No hubo coincidencias entre ambos algoritmos. Elija una necesidad de los rankings de abajo.
+                        </p>
+
+                        <div class="algo-columns">
+                            <div class="algo-column" th:each="r, rs : ${p.rankingsIndividuales}">
+                                <div class="algo-column-title">
+                                    <span class="algo-dot semantica"></span> <span th:text="${r.algoritmo}"></span>
+                                </div>
+                                <label class="algo-item" th:each="n, st : ${r.necesidades}"
+                                       th:for="${'sel-' + d.id + '-r' + rs.index + '-' + n.id}">
+                                    <input type="radio" name="necesidadId" required
+                                           th:id="${'sel-' + d.id + '-r' + rs.index + '-' + n.id}" th:value="${n.id}">
+                                    <span class="algo-item-rank" th:text="${st.count + '.'}"></span>
+                                    <span class="algo-item-body">
+                            <span class="algo-item-name" th:text="${n.entidadRazonSocial}"></span>
+                            <span class="algo-item-desc" th:text="${n.descripcion}"></span>
+                        </span>
+                                </label>
+                                <p class="algo-item-desc" th:if="${#lists.isEmpty(r.necesidades)}">Sin necesidades compatibles.</p>
+                            </div>
+                        </div>
+
+                        <div class="match-actions">
+                            <button type="submit" class="btn btn-primary">Confirmar Asignación a Entidad</button>
+                        </div>
+                    </form>
+                </article>
+            </div>
+        </section>
+
+        <!-- ===== GESTIÓN DE CAMIONES (datos renderizados por Thymeleaf) ===== -->
+        <section id="view-camiones" class="admin-view">
+            <div class="page-head-row">
+                <div class="page-head">
+                    <h1>Gestión de Camiones</h1>
+                    <p class="page-sub">Administre la flota de camiones disponibles para la distribución de donaciones.</p>
+                </div>
+                <button type="button" class="btn btn-primary" id="nuevoCamionBtn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Agregar Camión
+                </button>
+            </div>
+
+            <p class="form-error" th:if="${errorCamiones}" th:text="${errorCamiones}"></p>
+
+            <div class="dashboard-stats">
+                <div class="stat-card">
+                    <div class="stat-card-head">
+                        <span>Camiones Disponibles</span>
+                        <span class="stat-icon stat-icon-green">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 17h4V5H10z"/><path d="M20 17h2v-7l-3-4h-3v11h4z"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>
+                        </span>
+                    </div>
+                    <div class="stat-value stat-value-green" th:text="${camiones.?[disponible == true].size()}">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-head">
+                        <span>En Uso</span>
+                        <span class="stat-icon stat-icon-blue">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                        </span>
+                    </div>
+                    <div class="stat-value stat-value-blue" th:text="${camiones.?[disponible != true and rutaId != null].size()}">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-head">
+                        <span>No Disponibles</span>
+                        <span class="stat-icon stat-icon-orange">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                        </span>
+                    </div>
+                    <div class="stat-value stat-value-orange" th:text="${camiones.?[disponible != true and rutaId == null].size()}">0</div>
+                </div>
+            </div>
+
+            <!-- Formulario de alta (se muestra con "Agregar Camión") -->
+            <div class="form-card" id="nuevoCamionCard" hidden>
+                <form th:action="@{/logistica/camiones}" method="post">
+                    <h2 class="form-card-title">Nuevo Camión</h2>
+                    <div class="fields-grid">
+                        <label class="field">
+                            <span>Patente *</span>
+                            <input type="text" name="patente" placeholder="AB 123 CD" maxlength="10" required>
+                        </label>
+                        <label class="field">
+                            <span>Capacidad de carga (kg) *</span>
+                            <input type="number" name="capacidadCarga" placeholder="3500" min="1" step="any" required>
+                        </label>
+                        <label class="field">
+                            <span>Volumen (m³) *</span>
+                            <input type="number" name="volumen" placeholder="10" min="0" step="any" required>
+                        </label>
+                        <label class="field">
+                            <span>Altura (m) *</span>
+                            <input type="number" name="altura" placeholder="2.5" min="0" step="any" required>
+                        </label>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Agregar</button>
+                        <button type="button" class="btn btn-secondary" id="cancelarCamionBtn">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="table-card">
+                <div class="table-title">Flota de Camiones</div>
+                <div class="table-scroll">
+                    <table class="data-table">
+                        <thead>
+                        <tr>
+                            <th>Patente</th>
+                            <th>Volumen (m³)</th>
+                            <th>Altura (m)</th>
+                            <th>Capacidad (kg)</th>
+                            <th>Ruta</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="camion : ${camiones}">
+                            <td th:text="${camion.patente}">ABC123</td>
+                            <td th:text="${camion.volumen}">10</td>
+                            <td th:text="${camion.altura}">2.5</td>
+                            <td th:text="${camion.capacidadCarga}">1000</td>
+                            <td th:text="${camion.rutaId} ?: '-'">-</td>
+                            <td>
+                                <span th:if="${camion.disponible == true}" class="pill pill-Disponible">Disponible</span>
+                                <span th:if="${camion.disponible != true and camion.rutaId != null}" class="pill pill-Asignada">En uso</span>
+                                <span th:if="${camion.disponible != true and camion.rutaId == null}" class="pill pill-Mantenimiento">No disponible</span>
+                            </td>
+                            <td>
+                                <form th:action="@{/logistica/camiones/{id}/eliminar(id=${camion.id})}" method="post"
+                                      class="form-eliminar-camion" th:data-patente="${camion.patente}">
+                                    <button type="submit" class="icon-btn danger" title="Eliminar" aria-label="Eliminar camión">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="empty-state" th:if="${camiones == null or #lists.isEmpty(camiones)}">No hay camiones registrados.</p>
+            </div>
+        </section>
+
+
+        <!-- ===== RANKING DE DONANTES =====
+             Se reutiliza la página de la compañera tal cual: se toma su <main> y su <script>
+             (ranking.html) y se muestran acá dentro, así el sidebar sigue a la vista.
+             Los datos (rankingActual / historialRankings) los carga AdminController.home(). -->
+        <section id="view-ranking" class="admin-view admin-view-embebida">
+            <div th:replace="~{acceso/personaAdministradora/ranking :: main}"></div>
+            <th:block th:replace="~{acceso/personaAdministradora/ranking :: script}"></th:block>
+        </section>
+
+        <!-- ===== IMPORTAR DONANTES ===== -->
+        <section id="view-importar" class="admin-view">
+            <div class="page-head">
+                <h1>Importar Donantes desde CSV</h1>
+                <p class="page-sub">Importe donantes registrados desde archivos CSV con más de 10,000 filas para otorgarles usuario.</p>
+            </div>
+
+            <div class="alert-info">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                <div>
+                    <b>Requisitos del archivo CSV</b>
+                    <ul>
+                        <li>El archivo debe contener las columnas: nombre, apellido, email, teléfono, DNI</li>
+                        <li>Formato de codificación: UTF-8</li>
+                        <li>Capacidad para procesar más de 10,000 registros</li>
+                        <li>Se validará que los emails sean únicos y tengan formato válido</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="table-card" style="margin-bottom:18px;">
+                <div class="table-title">Seleccionar Archivo CSV</div>
+                <div id="importarError" class="form-error" hidden></div>
+
+                <div class="dropzone" id="csvDropzone" tabindex="0" role="button" aria-label="Seleccionar archivo CSV">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    <span class="dropzone-title">Haga clic para seleccionar un archivo CSV</span>
+                    <span class="dropzone-sub">o arrastre y suelte aquí</span>
+                </div>
+                <input type="file" id="csvInput" accept=".csv,text/csv" hidden>
+
+                <div class="file-chosen" id="archivoElegido" hidden>
+                    <div>
+                        <div class="history-name" id="archivoNombre"></div>
+                        <div class="history-date" id="archivoTamano"></div>
+                    </div>
+                    <div class="file-chosen-actions">
+                        <button type="button" class="btn btn-primary" id="importarBtn">Importar</button>
+                        <button type="button" class="btn btn-secondary" id="quitarArchivoBtn">Quitar</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-card">
+                <div class="table-title">Historial de Importaciones</div>
+                <div id="historialImportaciones">
+                    <p class="empty-state">Todavía no hay importaciones en esta sesión.</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+</div>
+
+<!-- ===================== CONFIRMAR ELIMINACIÓN ===================== -->
+<div class="confirm-overlay" id="confirmOverlay" hidden>
+    <div class="confirm-box" role="alertdialog" aria-modal="true" aria-labelledby="confirmTitle" aria-describedby="confirmText">
+        <div class="confirm-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+        </div>
+        <h2 id="confirmTitle">Eliminar camión</h2>
+        <p id="confirmText">Esta acción no se puede deshacer.</p>
+        <div class="confirm-actions">
+            <button type="button" class="btn btn-secondary" id="confirmCancel">Cancelar</button>
+            <button type="button" class="confirm-danger" id="confirmAccept">Eliminar</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===================== FOOTER ===================== -->
+<footer th:fragment="footer" class="footer">
+    <div class="footer-content">
+        <div class="footer-column">
+            <h3>DonaTrack</h3>
+            <p>Plataforma de gestión y trazabilidad de donaciones de <a href="https://frba.utn.edu.ar/estudiantes/accion-solidaria/" target="_blank" rel="noopener noreferrer" style="color: inherit; text-decoration: underline;">UTN Solidaria</a>.</p>
+        </div>
+        <div class="footer-column">
+            <h3>Enlaces</h3>
+            <ul>
+                <li><a href="#">Galería</a></li>
+                <li><a href="#">Mapa de Donaciones</a></li>
+                <li><a href="#">Sobre Nosotros</a></li>
+                <li><a href="#">Contacto</a></li>
+                <li><a href="#">Privacidad y Legal</a></li>
+            </ul>
+        </div>
+        <div class="footer-column">
+            <h3>Contacto</h3>
+            <p><a href="https://frba.utn.edu.ar/estudiantes/accion-solidaria/" target="_blank" rel="noopener noreferrer" style="color: inherit; text-decoration: underline;">UTN Solidaria</a> - Sede Medrano<br>Buenos Aires, Argentina</p>
+        </div>
+    </div>
+    <hr class="footer-divider">
+    <div class="footer-bottom">
+        <p>&copy; 2026 DonaTrack - <a href="https://frba.utn.edu.ar/estudiantes/accion-solidaria/" target="_blank" rel="noopener noreferrer" style="color: inherit; text-decoration: underline;">UTN Solidaria</a>. Todos los derechos reservados.</p>
+    </div>
+</footer>
+<script th:inline="javascript">
+    window.CATALOGO_SUBCATEGORIAS = /*[[${catalogoSubcategorias}]]*/ {};
+</script>
+<script th:src="@{/js/admin.js}"></script>
+</body>
+</html>

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${titulo != null ? titulo + ' - DonaTrack' : 'Galería de Donaciones - DonaTrack'}">Galería de Donaciones - DonaTrack</title>
+
+
+    <link rel="stylesheet" th:href="@{/css/landingPage/landingPage.css}">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+
+<header th:replace="~{layoutAcceso/layoutAcceso :: header}"></header>
+<nav th:replace="~{layoutAcceso/layoutAcceso :: navBar}"></nav>
+
+<main class="container" style="max-width: 1140px; margin: 0 auto; padding: 3rem 1rem 4rem 1rem;">
+
+    <div style="text-align: center; margin-bottom: 2.5rem;">
+        <h1 style="font-size: 2.25rem; font-weight: 800; color: #0f172a; margin-bottom: 0.5rem;">Galería de Donaciones</h1>
+        <p style="color: #64748b; font-size: 1rem;">Conocé el impacto de cada donación entregada a través de UTN Solidaria</p>
+    </div>
+
+
+    <section class="section" style="padding: 0;">
+
+
+        <div th:if="${donaciones != null and !#lists.isEmpty(donaciones)}"
+             style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.75rem;">
+
+            <article class="donation-card"
+                     th:each="donacion : ${donaciones}"
+                     style="background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); transition: transform 0.2s; cursor: pointer;"
+                     onclick="openModalFromCard(this)"
+                     th:attr="data-titulo=${donacion.subcategoria != null ? donacion.subcategoria : (donacion.categoria != null ? donacion.categoria : 'Donación Solidaria')},
+                     data-imagen=${donacion.imagenUrlEfectiva != null ? donacion.imagenUrlEfectiva : '/img/default.jpg'},
+                     data-entidad=${donacion.nombreEntidad != null ? donacion.nombreEntidad : 'Entidad Beneficiaria'},
+                     data-ubicacion=${donacion.direccionEntidad != null ? donacion.direccionEntidad : 'Dirección no especificada'},
+                     data-fecha=${donacion.fechaDeIngreso != null ? #temporals.format(donacion.fechaDeIngreso, 'dd/MM/yyyy') : 'Entregado'},
+                     data-desc=${'Donación correspondiente a la categoría ' + (donacion.categoria != null ? donacion.categoria : 'General') + ' con un total de ' + donacion.cantidadTotalItems + ' ítems recibidos.'}">
+                <div style="height: 200px; width: 100%; overflow: hidden;">
+
+                    <img th:src="${donacion.imagenUrlEfectiva != null ? donacion.imagenUrlEfectiva : '/img/default.jpg'}"
+                         onerror="this.onerror=null; this.src='/img/default.jpg';"
+                         th:alt="${donacion.subcategoria != null ? donacion.subcategoria : 'Donación'}"
+                         style="width: 100%; height: 100%; object-fit: cover;"
+                         loading="lazy">
+                </div>
+
+                <div style="padding: 1.25rem;">
+                    <h3 style="font-size: 1.1rem; font-weight: 700; color: #1e293b; margin-bottom: 0.75rem;"
+                        th:text="${donacion.subcategoria != null ? donacion.subcategoria : (donacion.categoria != null ? donacion.categoria : 'Donación')}">Subcategoría</h3>
+
+                    <div style="display: flex; flex-direction: column; gap: 0.4rem; color: #64748b; font-size: 0.88rem;">
+                        <span style="display: flex; align-items: center; gap: 0.5rem;">
+                            <i class="fa-solid fa-box-open" style="width: 16px;"></i>
+                            <span th:text="${donacion.cantidadTotalItems + ' unidades/ítems'}">Cantidad</span>
+                        </span>
+
+                        <span style="display: flex; align-items: center; gap: 0.5rem;">
+                            <i class="fa-solid fa-tag" style="width: 16px;"></i>
+                            <span th:text="${donacion.estadoLegible != null ? donacion.estadoLegible : 'En gestión'}">Estado</span>
+                        </span>
+
+                        <span style="display: flex; align-items: center; gap: 0.5rem;" th:if="${donacion.fechaDeIngreso != null}">
+                            <i class="fa-regular fa-calendar" style="width: 16px;"></i>
+                            <span th:text="${#temporals.format(donacion.fechaDeIngreso, 'd') + ' de ' + #temporals.format(donacion.fechaDeIngreso, 'MMMM, yyyy')}">Fecha</span>
+                        </span>
+                    </div>
+                </div>
+            </article>
+
+        </div>
+
+
+        <div th:if="${donaciones == null or #lists.isEmpty(donaciones)}" style="text-align: center; padding: 3rem 1rem; color: #64748b;">
+            <i class="fa-solid fa-box-open" style="font-size: 3rem; margin-bottom: 1rem; color: #cbd5e1;"></i>
+            <p style="font-size: 1.1rem; font-weight: 500;">No hay donaciones registradas en la galería en este momento.</p>
+        </div>
+
+    </section>
+</main>
+
+
+<div id="detail-modal" class="hidden" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); display: flex; align-items: center; justify-content: center; z-index: 1000;" onclick="closeModalOnOverlay(event)">
+    <div style="background: #ffffff; width: 90%; max-width: 600px; padding: 2rem; border-radius: 16px; position: relative;">
+        <button onclick="closeModal()" style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #64748b;">&times;</button>
+        <img id="modal-image" src="" onerror="this.onerror=null; this.src='/img/default.jpg';" alt="" style="width: 100%; height: 220px; object-fit: cover; border-radius: 12px; margin-bottom: 1rem;">
+        <h2 id="modal-title" style="margin-bottom: 0.75rem; color: #1e293b;">Título</h2>
+        <div style="margin-bottom: 1rem; color: #64748b; font-size: 0.95rem; display: flex; flex-direction: column; gap: 0.25rem;">
+            <p style="margin: 0;"><strong>Entidad:</strong> <span id="modal-entidad"></span></p>
+            <p style="margin: 0;"><strong>Ubicación:</strong> <span id="modal-ubicacion"></span></p>
+            <p style="margin: 0;"><strong>Fecha de Ingreso:</strong> <span id="modal-fecha"></span></p>
+        </div>
+        <p id="modal-description" style="color: #475569; line-height: 1.6; font-size: 0.95rem; margin: 0;"></p>
+    </div>
+</div>
+
+
+<footer th:replace="~{layoutAcceso/layoutAcceso :: footer}"></footer>
+
+<script>
+    function openModal(title, img, entidad, ubicacion, fecha, desc) {
+        document.getElementById('modal-title').textContent = title;
+        document.getElementById('modal-image').src = img;
+        document.getElementById('modal-entidad').textContent = entidad;
+        document.getElementById('modal-ubicacion').textContent = ubicacion;
+        document.getElementById('modal-fecha').textContent = fecha;
+        document.getElementById('modal-description').textContent = desc;
+
+        document.getElementById('detail-modal').classList.remove('hidden');
+    }
+
+    function openModalFromCard(element) {
+        openModal(
+            element.getAttribute('data-titulo'),
+            element.getAttribute('data-imagen'),
+            element.getAttribute('data-entidad'),
+            element.getAttribute('data-ubicacion'),
+            element.getAttribute('data-fecha'),
+            element.getAttribute('data-desc')
+        );
+    }
+
+    function closeModal() {
+        document.getElementById('detail-modal').classList.add('hidden');
+    }
+
+    function closeModalOnOverlay(e) {
+        if (e.target.id === 'detail-modal') {
+            closeModal();
+        }
+    }
+</script>
+
+<style>
+    .hidden { display: none !important; }
+</style>
+
+</body>
+</html>

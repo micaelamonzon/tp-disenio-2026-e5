@@ -1,0 +1,77 @@
+<html th:replace="~{layoutDonante/base :: html}">
+<div th:fragment="contenido">
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+    <section id="view-seguimiento">
+        <div class="page-head">
+            <h1>Seguimiento de Entregas</h1>
+            <p class="page-sub">Monitorea en tiempo real la ubicación de tus donaciones</p>
+        </div>
+        <div class="tracking-container">
+            <div class="map-card" id="mapCard">
+
+                <div class="map-viewport" id="mapViewport">
+
+                </div>
+            </div>
+            <aside class="tracking-sidebar" aria-label="Entregas activas">
+                <div class="sidebar-header">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 17h4V5H10z"/><path d="M20 17h2v-7l-3-4h-3v11h4z"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>
+                    Entregas Activas
+                </div>
+                <div class="deliveries-list" id="deliveriesList">
+                    <p class="page-sub" th:if="${#lists.isEmpty(entregas)}">No tenés entregas en curso.</p>
+
+                    <article class="delivery-card" th:each="e, st : ${entregas}" th:attr="data-entrega-id=${e.entregaId}">
+                        <div class="delivery-card-head">
+                            <div>
+                <span class="delivery-id">
+                    <span th:replace="~{fragments/iconosSeguimientoEntrega::iconoCamion}"></span>
+                    Entrega <span th:text="${st.count}">1</span>
+                </span>
+                                <span class="badge-status" th:text="${e.estadoActual}"
+                                      th:attr="data-estado=${e.estadoActual}">PENDIENTE</span>
+                            </div>
+                        </div>
+
+                        <div class="delivery-dest">
+                            <span th:replace="~{fragments/iconosSeguimientoEntrega::iconoPin}"></span>
+                            <div>
+                                <b>Destino:</b><br>
+                                <span th:text="${e.direccion}">Dirección</span>
+                            </div>
+                        </div>
+
+                        <div class="progress-track"><div class="progress-fill" data-progress-fill style="width:0%"></div></div>
+                        <span class="progress-label" data-progress-label>0% del recorrido</span>
+
+                        <div class="delivery-items" th:if="${!#lists.isEmpty(e.subcategorias)}">
+                            <span>Donaciones:</span>
+                            <ul>
+                                <li th:each="sub : ${e.subcategorias}" th:text="${sub}">Alimentos</li>
+                            </ul>
+                        </div>
+
+                        <div class="delivery-footer">
+            <span th:if="${e.ultimoAvance != null}">
+                Último avance: <b data-ultimo-avance th:attr="data-ts=${e.ultimoAvance.fecha}">...</b>
+            </span>
+                            <span th:unless="${e.ultimoAvance != null}">Sin avances registrados todavía</span>
+                        </div>
+                    </article>
+                </div>
+            </aside>
+        </div>
+    </section>
+    <script th:inline="javascript">
+        window.ENTREGAS_ACTIVAS = JSON.parse(/*[[${entregasJson}]]*/ "[]");
+        window.SEGUIMIENTO_URL = /*[[@{/donante/seguimiento/datos}]]*/ "/donante/seguimiento/datos";
+    </script>
+    <script th:src="@{/js/donante/seguimiento.js}"></script>
+</div>
+</html>

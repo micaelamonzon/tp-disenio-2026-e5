@@ -1,11 +1,12 @@
 package ar.edu.utn.frba.ddsi.donaciones.controllers;
 import ar.edu.utn.frba.ddsi.donaciones.dto.*;
-import ar.edu.utn.frba.ddsi.donaciones.models.entities.donacion.PropuestaMatch;
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.algoritmos.PropuestaMatch;
 import ar.edu.utn.frba.ddsi.donaciones.services.DonacionesService;
 import ar.edu.utn.frba.ddsi.donaciones.services.MatchmakingService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 @RestController
@@ -13,12 +14,10 @@ import java.util.List;
 public class DonacionesController {
 
     private final DonacionesService donacionesService;
-    private final MatchmakingService matchmakingService;
 
     public DonacionesController(DonacionesService donacionesService,
                                 MatchmakingService matchmakingService) {
         this.donacionesService = donacionesService;
-        this.matchmakingService = matchmakingService;
     }
 
     //Generales
@@ -29,63 +28,47 @@ public class DonacionesController {
         return "Hola desde el servicio de Donaciones!!";
     }
 
-    @GetMapping("/obtenerDonantes")
+    @GetMapping("/donantes")
     public ResponseEntity<List<PersonaDonanteDTO>> obtenerTodosLosDonantesUnificados() {
         return ResponseEntity.ok(donacionesService.obtenerTodosLosDonantesUnificados());
     }
-    // Matching
-
-    @GetMapping("/matcheos/{matcheoId}")
-    public PropuestaMatch obtenerRankingGenerado(
-            @PathVariable Long matcheoId) {
-        return matchmakingService.obtenerPropuestaPorId(matcheoId);
-    }
-
-    @PostMapping("/matcheos/ejecutar")
-    @ResponseStatus(HttpStatus.OK)
-    public String ejecutarAlgoritmosADemanda() {
-        matchmakingService.ejecutarProcesoMatchmaking();
-        return "Proceso de asignación ejecutado a demanda exitosamente.";
-    }
-
-    @PostMapping("/matcheos/{matcheoId}/seleccion")
-    public PropuestaMatch seleccionarNecesidad(
-            @PathVariable Long matcheoId,
-            @RequestBody SeleccionNecesidadRequestDTO request) {
-        return matchmakingService.seleccionarNecesidad(
-                matcheoId, request.necesidadId());
+    /*ESTE ENDPOINT ES PROVISORIO, MÁS ADELANTE SERÁ REEMPLAZADO PARA QUE ADMITA UN ARCHIVO POSTA, EN VEZ DE LA RUTA*/
+    @PostMapping("/importadorCSV") //FUNCIONA -> TESTEE CON POSTMAN
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public void importadorCSV(@RequestParam("file") String file) {
+        donacionesService.arrancarImportacionDeCSV(file);
     }
 
     // Donantes
-    @GetMapping("/obtenerDonantesJuridicos")
+    @GetMapping("donantes/juridicos") //FUNCIONA -> TESTEE CON POSTMAN
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public List<PersonaDonanteDTO> obtenerDonantesJuridicos() {
-        List<PersonaDonanteDTO> donantesDTOS = this.donacionesService.obtenerTodosJuridicos();
+    public List<PersonaJuridicaDTO> obtenerDonantesJuridicos() {
+        List<PersonaJuridicaDTO> donantesDTOS = this.donacionesService.obtenerTodosJuridicos();
         return donantesDTOS;
     }
 
-    @GetMapping("/obtenerDonantesHumanos")
+    @GetMapping("donantes/humanos") //FUNCIONA -> TESTEE CON POSTMAN
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public List<PersonaDonanteDTO> obtenerDonantesHumanos() {
-        List<PersonaDonanteDTO> donantesDTOS = this.donacionesService.obtenerTodosHumanos();
+    public List<PersonaHumanaDTO> obtenerDonantesHumanos() {
+        List<PersonaHumanaDTO> donantesDTOS = this.donacionesService.obtenerTodosHumanos();
         return donantesDTOS;
     }
 
-    @PostMapping("/crearDonanteHumano")
+    @PostMapping("donante/humano")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public PersonaHumanaDTO crearDonanteHumano(@RequestBody PersonaHumanaDTO request) {
         PersonaHumanaDTO personaHumanaDTO = this.donacionesService.crearDonanteHumano(request);
         return personaHumanaDTO;
     }
 
-    @PostMapping("/crearDonanteJuridico")
+    @PostMapping("/donante/juridico")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public PersonaJuridicaDTO crearDonanteJuridico(@RequestBody PersonaJuridicaDTO request) {
         PersonaJuridicaDTO personaJuridicaDTO = this.donacionesService.crearDonanteJuridico(request);
         return personaJuridicaDTO;
     }
 
-    @PutMapping("/modificarDonanteHumano/{id}")
+    @PutMapping("/donante/humano/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public PersonaHumanaDTO modificarDonanteHumano(
             @PathVariable Long id,
@@ -94,7 +77,7 @@ public class DonacionesController {
         return personaHumanaDTO;
     }
 
-    @PutMapping("/modificarDonanteJuridico/{id}")
+    @PutMapping("/donante/juridico/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public PersonaJuridicaDTO modificarDonanteJuridico(
             @PathVariable Long id,
@@ -103,49 +86,62 @@ public class DonacionesController {
         return personaJuridicaDTO;
     }
 
-    @DeleteMapping("/eliminarDonanteHumano/{id}")
+    @DeleteMapping("/donante/humano/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public void eliminarDonanteHumano(@PathVariable Long id) {
         this.donacionesService.eliminarDonanteHumano(id);
     }
 
-    @DeleteMapping("/eliminarDonanteJuridico/{id}")
+    @DeleteMapping("/donante/juridico/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public void eliminarDonanteJuridico(@PathVariable Long id) {
         this.donacionesService.eliminarDonanteJuridico(id);
     }
-    @GetMapping("/humano/{id}")
+
+    @GetMapping("donante/humano/{id}") //FUNICONA -> TESTEE CON POSTMAN
     public ResponseEntity<PersonaHumanaDTO> obtenerHumanoPorId(@PathVariable Long id) {
         return ResponseEntity.ok(this.donacionesService.obtenerHumanoPorId(id));
     }
+
+    @GetMapping("donante/juridico/{id}") //FUNICONA -> TESTEE CON POSTMAN
+    public ResponseEntity<PersonaJuridicaDTO> obtenerJuridicoPorId(@PathVariable Long id) {
+        return ResponseEntity.ok(this.donacionesService.obtenerJuridicoPorId(id));
+    }
+
     // Donaciones
 
-    @GetMapping("/humano/obtenerDonaciones/{id}")
-    public ResponseEntity<PersonaDonanteDTO> obtenerDonacionesDeHumano(
+    // Público: mapa y galería de la landing (donaciones ya entregadas, sin datos del donante)
+    @GetMapping("/donaciones/entregadas")
+    public List<DonacionSegmentadaDTO> obtenerDonacionesEntregadas() {
+        return this.donacionesService.obtenerDonacionesEntregadas();
+    }
+
+    @GetMapping("donaciones/humano/{id}")//FUNCIONA -> TESTEE CON POSTMAN
+    public ResponseEntity<List<DonacionSegmentadaDTO>> obtenerDonacionesDeHumano(
             @PathVariable Long id) {
         try {
-            PersonaDonanteDTO personaDonanteDTO = this.donacionesService.obtenerDonacionesDeHumano(id);
-            return ResponseEntity.ok(personaDonanteDTO);
+            List<DonacionSegmentadaDTO> donaciones= this.donacionesService.obtenerDonacionesDeHumano(id);
+            return ResponseEntity.ok(donaciones);
         } catch (RuntimeException e) {
             System.out.println(e.getMessage());
             return ResponseEntity.notFound().build();
         }
     }
 
-    @PostMapping("/humana/CrearDonacion/{id}")
-    public ResponseEntity<DonacionSinSegmentarDTO> crearDonacionDeHumano(
+    @PostMapping("/humano/donacion/{id}")
+    public ResponseEntity<List<DonacionSegmentadaDTO>> crearDonacionDeHumano(
             @RequestBody DonacionSinSegmentarDTO request,
             @PathVariable Long id) {
         try {
-            DonacionSinSegmentarDTO donacionSinSegmentarDTO = this.donacionesService.crearDonacionDeHumano(request, id);
-            return ResponseEntity.ok(donacionSinSegmentarDTO);
+            List<DonacionSegmentadaDTO> donacionesSegmentadasDTO = this.donacionesService.crearDonacionDeHumano(request, id);
+            return ResponseEntity.ok(donacionesSegmentadasDTO);
         } catch (RuntimeException e) {
-            System.out.println(e.getMessage());
+            e.printStackTrace(); // Muestra la clase y la línea exacta del fallo
             return ResponseEntity.notFound().build();
         }
     }
 
-    @PutMapping("/humana/ModificarDonacion/{idHumano}/{idDonacion}/{idBien}")
+    @PutMapping("/humano/donacion/{idHumano}/{idDonacion}/{idBien}")
     public ResponseEntity<List<DonacionSinSegmentarDTO>> modificarDonacionDeHumano(
             @RequestBody DonacionSinSegmentarDTO request,
             @PathVariable Long idHumano,
@@ -160,7 +156,7 @@ public class DonacionesController {
         }
     }
 
-    @DeleteMapping("/humana/EliminarDonacion/{idHumano}/{idDonacion}")
+    @DeleteMapping("/humano/donacion/{idHumano}/{idDonacion}")
     public ResponseEntity<List<DonacionSinSegmentarDTO>> eliminarDonacionDeHumano(
             @PathVariable Long idHumano,
             @PathVariable Long idDonacion) {
@@ -176,32 +172,32 @@ public class DonacionesController {
     }
 
 
-    @GetMapping("/juridica/obtenerDonaciones/{id}")
-    public ResponseEntity<PersonaDonanteDTO> obtenerDonacionesDeJuridico(
+    @GetMapping("donaciones/juridico/{id}") //FUNCIONA -> TESTEE CON POSTMAN
+    public ResponseEntity<List<DonacionSegmentadaDTO>> obtenerDonacionesDeJuridico(
             @PathVariable Long id) {
         try {
-            PersonaDonanteDTO personaDonanteDTO = this.donacionesService.obtenerDonacionesDeJuridico(id);
-            return ResponseEntity.ok(personaDonanteDTO);
+            List<DonacionSegmentadaDTO> donacionesDTO = this.donacionesService.obtenerDonacionesDeJuridico(id);
+            return ResponseEntity.ok(donacionesDTO);
         } catch (RuntimeException e) {
             System.out.println(e.getMessage());
             return ResponseEntity.notFound().build();
         }
     }
 
-    @PostMapping("/juridica/CrearDonacion/{id}")
-    public ResponseEntity<DonacionSinSegmentarDTO> crearDonacionDeJuridico(
+    @PostMapping("/juridico/donacion/{id}") //FUNCIONA -> TESTEE CON POSTMAN
+    public ResponseEntity<List<DonacionSegmentadaDTO>> crearDonacionDeJuridico(
             @RequestBody DonacionSinSegmentarDTO request,
             @PathVariable Long id) {
         try {
-            DonacionSinSegmentarDTO donacionSinSegmentarDTO = this.donacionesService.crearDonacionDeJuridico(request, id);
-            return ResponseEntity.ok(donacionSinSegmentarDTO);
+            List<DonacionSegmentadaDTO> donacionesSegmentadasDTO = this.donacionesService.crearDonacionDeJuridico(request, id);
+            return ResponseEntity.ok(donacionesSegmentadasDTO);
         } catch (RuntimeException e) {
             System.out.println(e.getMessage());
             return ResponseEntity.notFound().build();
         }
     }
 
-    @PutMapping("/juridico/ModificarDonacion/{idJuridico}/{idDonacion}/{idBien}")
+    @PutMapping("/juridico/donacion/{idJuridico}/{idDonacion}/{idBien}")
     public ResponseEntity<List<DonacionSinSegmentarDTO>> modificarDonacionDeJuridico(
             @RequestBody DonacionSinSegmentarDTO request,
             @PathVariable Long idJuridico,
@@ -216,7 +212,7 @@ public class DonacionesController {
         }
     }
 
-    @DeleteMapping("/juridico/EliminarDonacion/{idJuridico}/{idDonacion}")
+    @DeleteMapping("/juridico/donacion/{idJuridico}/{idDonacion}")
     public ResponseEntity<List<DonacionSinSegmentarDTO>> eliminarDonacionDeJuridico(
             @PathVariable Long idJuridico,
             @PathVariable Long idDonacion) {
@@ -231,4 +227,10 @@ public class DonacionesController {
         }
     }
 
+    @GetMapping("/entidadBeneficiaria/{idEntidad}/donaciones")
+    public ResponseEntity<List<DonacionAsignadaDTO>>obtenerDonacionesAsignadas(@PathVariable Long idEntidad) {
+        List<DonacionAsignadaDTO> donaciones = this.donacionesService.obtenerDonacionesAsiganadasAUnaEntidad(idEntidad);
+
+        return ResponseEntity.ok(donaciones);
+    }
 }

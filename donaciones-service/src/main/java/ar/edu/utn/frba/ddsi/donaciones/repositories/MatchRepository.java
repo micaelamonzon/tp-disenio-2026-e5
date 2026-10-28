@@ -1,15 +1,18 @@
 package ar.edu.utn.frba.ddsi.donaciones.repositories;
 
-import ar.edu.utn.frba.ddsi.donaciones.models.entities.donacion.PropuestaMatch;
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.algoritmos.PropuestaMatch;
 
-import org.springframework.stereotype.Repository;
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.EstadoDonacion;
+import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 
-public interface MatchRepository  {
-    PropuestaMatch findById(Long matcheoId);
+public interface MatchRepository extends JpaRepository<PropuestaMatch, Long> {
+    List<PropuestaMatch> findByDonacionId(Long donacionId);
+    List<PropuestaMatch> findByDonacionEstadoActual(EstadoDonacion estado);
 
-    PropuestaMatch save(PropuestaMatch propuesta);
-    // Hereda automáticamente .save(propuesta) para persistir en la base de datos
+    // La más reciente de una donación
+    Optional<PropuestaMatch> findFirstByDonacionIdOrderByIdDesc(Long donacionId);
 }

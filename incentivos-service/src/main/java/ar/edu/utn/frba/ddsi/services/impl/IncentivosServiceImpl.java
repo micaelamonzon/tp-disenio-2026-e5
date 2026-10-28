@@ -1,42 +1,42 @@
 package ar.edu.utn.frba.ddsi.services.impl;
-
 import ar.edu.utn.frba.ddsi.config.NotificacionesProperties;
 import ar.edu.utn.frba.ddsi.config.RestProperties;
-import ar.edu.utn.frba.ddsi.dto.DonacionSinSegmentarDTO;
 import ar.edu.utn.frba.ddsi.dto.InsigniaDTO;
 import ar.edu.utn.frba.ddsi.dto.MisionDTO;
 import ar.edu.utn.frba.ddsi.dto.PersonaDonanteDTO;
-import ar.edu.utn.frba.ddsi.exceptions.ResourceNotFoundException;
-import ar.edu.utn.frba.ddsi.models.entities.categorias.CategoriaDeDonante;
 import ar.edu.utn.frba.ddsi.dto.*;
-import ar.edu.utn.frba.ddsi.models.entities.donaciones.DonacionSinSegmentar;
+import ar.edu.utn.frba.ddsi.models.entities.categoriasDeMisiones.CategoriaDeMision;
+import ar.edu.utn.frba.ddsi.models.entities.categoriasDeMisiones.TipoCategoria;
+import ar.edu.utn.frba.ddsi.models.entities.donaciones.DonacionSegmentada;
 import ar.edu.utn.frba.ddsi.models.entities.misiones.Completitud;
 import ar.edu.utn.frba.ddsi.models.entities.misiones.DonacionesExitosas;
+import ar.edu.utn.frba.ddsi.models.entities.misiones.Estado;
 import ar.edu.utn.frba.ddsi.models.entities.misiones.EstadoDeMision;
 import ar.edu.utn.frba.ddsi.models.entities.misiones.HabilDonador;
 import ar.edu.utn.frba.ddsi.models.entities.misiones.Mision;
+import ar.edu.utn.frba.ddsi.models.entities.misiones.MisionParticular;
+import ar.edu.utn.frba.ddsi.models.entities.misiones.NombreDeMision;
 import ar.edu.utn.frba.ddsi.models.entities.misiones.Racha;
 import ar.edu.utn.frba.ddsi.models.entities.persona.*;
+import ar.edu.utn.frba.ddsi.repositories.CategoriaDeMisionRepository;
+import ar.edu.utn.frba.ddsi.repositories.EstadoMisionRepository;
 import ar.edu.utn.frba.ddsi.repositories.IncentivosRepository;
+import ar.edu.utn.frba.ddsi.repositories.MisionParticularRepository;
+import ar.edu.utn.frba.ddsi.repositories.MisionRepository;
+import ar.edu.utn.frba.ddsi.repositories.RankingMensualRepository;
 import ar.edu.utn.frba.ddsi.services.IncentivosService;
+import org.hibernate.Hibernate;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.net.URI;
-import java.time.LocalDate;
 import java.time.YearMonth;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
-@RestController
+import java.util.*;
+import java.util.stream.Collectors;
+
 @Service
 public class IncentivosServiceImpl implements IncentivosService {
 
@@ -47,154 +47,158 @@ public class IncentivosServiceImpl implements IncentivosService {
     private RankingMensual ultimoRanking;
     private List<Donante> rankingCompletoOrdenado = new ArrayList<>();
     private final NotificacionesProperties notificacionesProperties;
+    private final RankingMensualRepository rankingMensualRepository;
+    private final MisionRepository misionRepository;
+    private final CategoriaDeMisionRepository categoriaDeMisionRepository;
+    private final MisionParticularRepository misionParticularRepository;
+    private final EstadoMisionRepository estadoMisionRepository;
 
-    public IncentivosServiceImpl(IncentivosRepository incentivosRepository, RestTemplate restTemplate, RestProperties propiedades, InsigniaPublicadorService publicadorService, NotificacionesProperties notificacionesProperties) {
+    public IncentivosServiceImpl(IncentivosRepository incentivosRepository, RestTemplate restTemplate, RestProperties propiedades,
+                                 InsigniaPublicadorService publicadorService, NotificacionesProperties notificacionesProperties,
+                                 RankingMensualRepository rankingMensualRepository, MisionRepository misionRepository,
+                                 CategoriaDeMisionRepository categoriaDeMisionRepository, MisionParticularRepository misionParticularRepository,
+                                 EstadoMisionRepository estadoMisionRepository) {
         this.incentivosRepository = incentivosRepository;
         this.restTemplate = restTemplate;
         this.propiedades = propiedades;
         this.publicadorService = publicadorService;
         this.notificacionesProperties = notificacionesProperties;
+        this.rankingMensualRepository = rankingMensualRepository;
+        this.misionRepository = misionRepository;
+        this.categoriaDeMisionRepository = categoriaDeMisionRepository;
+        this.misionParticularRepository = misionParticularRepository;
+        this.estadoMisionRepository = estadoMisionRepository;
+
     }
 
+
+
     @Override
-    public List<MisionDTO> obtenerDonanteHumano(Long id) {
+    @Transactional
+    public void agregarMisionADonante(Long id, TipoDeDonante tipoDeDonante, Long misionId){
 
-       // URI uri = UriComponentsBuilder.fromUriString(propiedades.getUrl()).path("/donaciones/humano/{id}")
+       Mision mision  = this.misionRepository.findById(misionId).orElseThrow(() -> new RuntimeException("Misión no encontrada"));
 
-        URI uri = UriComponentsBuilder.fromUriString(propiedades.getUrl()).path("/humano/obtenerDonaciones/{id}")
-                .buildAndExpand(id)
-                .toUri();
+       Donante donante = incentivosRepository.findByIdEnDonaciones(id,tipoDeDonante);
 
-        ResponseEntity<PersonaDonanteDTO> response = restTemplate.getForEntity(uri, PersonaDonanteDTO.class);
+       MisionParticular misionParticular = new MisionParticular(mision, donante);
 
-        PersonaDonanteDTO personaDonante = response.getBody();
+       misionParticularRepository.save(misionParticular);
 
-        System.out.println("Donante recibido: " + personaDonante);
-        System.out.println("Misiones recibidas: " + personaDonante.misiones());
-        System.out.println("Donaciones recibidas: " + personaDonante.donaciones().size());
+       Estado nuevoEstado = new Estado(EstadoDeMision.ACTUAL, donante, misionParticular);
 
-        List<DonacionSinSegmentar> donaciones = this.convertirDonacionesDTO(personaDonante.donaciones());
+       misionParticular.agregarEstado(nuevoEstado); //aca dentro se le setea en false al estadoAnterior
 
-        List<Mision> misiones = this.convertirMisionesDTO(personaDonante.misiones());
+       this.estadoMisionRepository.save(nuevoEstado);
 
-        Donante nuevoDonante = new Donante(personaDonante.id(), null, null, personaDonante.nombre(), personaDonante.apellido(), personaDonante.edad(), personaDonante.DNI(), personaDonante.genero(), personaDonante.direccion(), donaciones, misiones, new CategoriaDeDonante(personaDonante.categoria()), personaDonante.fechaDeRegistro());
+        donante.agregarMision(misionParticular);
+        donante.setMisionEnCurso(misionParticular);
 
-        this.incentivosRepository.guardarDonante(nuevoDonante);
+        if(donante.getPerfil() != null && misionParticular.getMision().getCategoria() != null) {
+            donante.getPerfil().setCategoria(misionParticular.getMision().getCategoria());
+        }
+    }
 
-        nuevoDonante.setPerfil(new Perfil(nuevoDonante.getNombre(),nuevoDonante.getCategoria()));
+    @Transactional
+    @Override
+    public List<MisionParticularDTO> obtenerMisionesCompletadas(Long id,TipoDeDonante tipoDeDonante) {
 
-        // Establece la categoría siguiente para poder detectar cambios de categoría
-        nuevoDonante.getCategoria().establecerCategoriaSiguiente();
-        // Fix temporal: si nombreDeCategoriaActual tiene siguiente, lo seteamos manualmente
-        if (nuevoDonante.getCategoria().getNombreDeCategoriaActual() != null &&
-                nuevoDonante.getCategoria().getNombreDeCategoriaActual().obtenerSiguiente() != null) {
-            nuevoDonante.getCategoria().setCategoriaSiguiente(
-                    new CategoriaDeDonante(nuevoDonante.getCategoria().getNombreDeCategoriaActual().obtenerSiguiente())
-            );
+        Donante donante = this.incentivosRepository.findByIdEnDonaciones(id,tipoDeDonante);
+
+        if(donante == null){
+            throw new RuntimeException("No se encontro el donante con id: " + id + " tipo " + tipoDeDonante);
         }
 
-        //defino el tipo de mision que es
-        List<Mision> misionesDefinidas = this.definirMisiones(misiones);
+        List<MisionParticular> misionesCompletadas = donante.obtenerMisionesCompletadas();
 
-        if(misionesDefinidas!=null){
-            misionesDefinidas.forEach(m->nuevoDonante.getCategoria().agregarMision(m));
-        }else{
-            throw new RuntimeException("No hay misiones definidas para esta persona");
-        }
+        System.out.println(misionesCompletadas);
 
-        List<Mision> misionesCompletadas = nuevoDonante.getCategoria().obtenerMisionesCompletadas(nuevoDonante.getDonaciones());
-        this.agregarInsignias(nuevoDonante, misionesCompletadas);
-
-        // Evento 4: Notificar al donante que cumplió una misión
+        // Difusión de insignias en n8n
         if (misionesCompletadas != null && !misionesCompletadas.isEmpty()) {
-            String nombreMision = misionesCompletadas.get(0).getNombre();
-            // Usamos el email del donante obtenido del servicio de donaciones
-            if (personaDonante.medioDeNotificacionPredeterminado() != null) {
-                notificar(
-                        personaDonante.medioDeNotificacionPredeterminado().datoDeContacto(),
-                        "Felicitaciones!+Completaste+la+mision+" + nombreMision,
-                        personaDonante.medioDeNotificacionPredeterminado().tipoDeNotificacion()
-                );
+            for (MisionParticular mision : misionesCompletadas) {
+                String nombreMision = mision.getMision().getNombre().toString();
+                String insigniaGanadora = mision.getMision().getInsigniaGanadora();
+
+                try {
+                    this.publicarYDifundirInsignia(donante.getIdEnDonaciones(), insigniaGanadora, tipoDeDonante.name());
+                } catch (Exception e) {
+                    System.out.println("Error al difundir la insignia automáticamente en n8n: " + e.getMessage());
+                }
+
             }
         }
 
-        // Evento 5: Notificar al donante que cambió de categoría
-        if (nuevoDonante.getCategoria().pasaSiguienteCategoria(nuevoDonante.getDonaciones())) {
-            if (personaDonante.medioDeNotificacionPredeterminado() != null) {
-                String nuevaCategoria = nuevoDonante.getCategoria().getNombreDeCategoriaActual().obtenerSiguiente().name();
-                notificar(
-                        personaDonante.medioDeNotificacionPredeterminado().datoDeContacto(),
-                        "Subiste+de+categoria!+Ahora+sos+donante+" + nuevaCategoria,
-                        personaDonante.medioDeNotificacionPredeterminado().tipoDeNotificacion()
-                );
-            }
-        }
-
-        List <MisionDTO> misionesCompletadasDTO = this.obtenerMisionDTO(misionesCompletadas);
+        List <MisionParticularDTO> misionesCompletadasDTO = this.obtenerMisionParticularDTO(misionesCompletadas);
 
         return misionesCompletadasDTO;
     }
 
-    public void agregarInsignias(Donante nuevoDonante, List<Mision> misionesCompletadas){
-        if(misionesCompletadas != null && !misionesCompletadas.isEmpty()){
-            misionesCompletadas.forEach(m->{nuevoDonante.getPerfil().agregarInsignia(m.getInsigniaGanadora());});
+    @Override
+    public Boolean pasaSiguienteCategoria(Donante donante) {
+
+        MisionParticular enCurso = donante.getMisionEnCurso();
+        if (enCurso == null) {
+            return false;
+        }
+
+        CategoriaDeMision categoriaActual = donante.getMisionEnCurso().getMision().getCategoria();
+
+        List<MisionParticular> misionesParticularesDeCategoriaActual = donante.getMisiones().stream()
+                .filter(m -> m.getMision().getCategoria().getNombre().toString().equals(categoriaActual.getNombre().toString()))
+                .toList();
+
+
+        List<MisionParticular> misionesParticularesCompletadasDeCategoriaActual = misionesParticularesDeCategoriaActual.stream()
+                .filter(m -> m.getEstado().equals(EstadoDeMision.COMPLETADA))
+                .toList();
+
+        return misionesParticularesCompletadasDeCategoriaActual.size() == categoriaActual.getMisiones().size();
+    }
+
+
+    @Transactional
+    public void setearSiguienteCategoria(Donante donante) {
+        CategoriaDeMision categoriaActual = donante.getMisionEnCurso().getMision().getCategoria();
+        CategoriaDeMision categoriaSiguiente = this.categoriaDeMisionRepository.findByNombre(categoriaActual.getCategoriaSiguiente());
+        if(categoriaSiguiente == null || categoriaSiguiente.getNombre() == categoriaActual.getNombre()){
+            donante.getPerfil().setCategoria(categoriaActual);
+            donante.setMisionEnCurso(null);
+            return;
+        }
+        donante.getPerfil().setCategoria(categoriaSiguiente);
+        this.agregarMisionADonante(donante.getIdEnDonaciones(),donante.getTipoDeDonante(), categoriaSiguiente.getMisiones().get(0).getId());
+
+    }
+
+    public void pasaASiguienteMisionDeLaMismaCategoria(Donante donante){
+
+        CategoriaDeMision categoriaActual = donante.getMisionEnCurso().getMision().getCategoria();
+
+        List<Mision> misionesDeCategoriaActual = categoriaActual.getMisiones();
+
+        MisionParticular misionEnCurso = donante.getMisionEnCurso();
+
+        if ((misionEnCurso.getMision().getOrdenSecuencial() - 1 )< misionesDeCategoriaActual.size()) {
+            int ordenActual = misionEnCurso.getMision().getOrdenSecuencial();
+            Optional<Mision> siguienteMision = misionesDeCategoriaActual.stream()
+                    .filter(m -> m.getOrdenSecuencial() > ordenActual)
+                    .min(Comparator.comparingInt(Mision::getOrdenSecuencial));
+
+            if (siguienteMision.isPresent()) {
+                this.agregarMisionADonante(donante.getIdEnDonaciones(), donante.getTipoDeDonante(), siguienteMision.get().getId());
+            }
+
+        } else {
+            donante.setMisionEnCurso(null);
         }
     }
-    @Override
-    public List<MisionDTO> obtenerDonanteJuridico(Long id) {
 
-        URI uri = UriComponentsBuilder.fromUriString(propiedades.getUrl()).path("/juridica/obtenerDonaciones/{id}")
-                .buildAndExpand(id)
-                .toUri();
-
-        ResponseEntity<PersonaDonanteDTO> response = restTemplate.getForEntity(uri, PersonaDonanteDTO.class);
-
-        PersonaDonanteDTO personaDonante = response.getBody();
-
-        List<DonacionSinSegmentar> donaciones = this.convertirDonacionesDTO(personaDonante.donaciones());
-
-        List<Mision> misiones = this.convertirMisionesDTO(personaDonante.misiones());
-
-        Donante nuevoDonante = new Donante(personaDonante.id(), personaDonante.cuit(), personaDonante.razonSocial(), null, null, null, null, null, null, donaciones, misiones, new CategoriaDeDonante(personaDonante.categoria()), personaDonante.fechaDeRegistro());
-
-        this.incentivosRepository.guardarDonante(nuevoDonante);
-
-        nuevoDonante.setPerfil(new Perfil(nuevoDonante.getNombre(),nuevoDonante.getCategoria()));
-        //defino el tipo de mision que es
-        List<Mision> misionesDefinidas = this.definirMisiones(misiones);
-            if(misionesDefinidas!=null){
-                misionesDefinidas.forEach(m->nuevoDonante.getCategoria().agregarMision(m));
-            }else{
-                throw new RuntimeException("No hay misiones definidas para esta persona");
-            }
-
-        List<Mision> misionesCompletadas = nuevoDonante.getCategoria().obtenerMisionesCompletadas(nuevoDonante.getDonaciones());
-        List <MisionDTO> misionesCompletadasDTO = this.obtenerMisionDTO(misionesCompletadas);
-        this.agregarInsignias(nuevoDonante, misionesCompletadas);
-        return  misionesCompletadasDTO;
-    }
-
-    List<Mision> definirMisiones( List<Mision>  misionesSinDefinir){
-        return misionesSinDefinir.stream().map(m -> {
-            if(m.getNombre().equals("Racha")){
-                return new Racha(m.getNombre(),2, 2, 3);
-            } else if (m.getNombre().equals("HabilDonador")) {
-                return new HabilDonador(m.getNombre(), 10);
-            } else if (m.getNombre().equals("DonacionesExitosas")) {
-                return new DonacionesExitosas(m.getNombre(), 2);
-            } else  if (m.getNombre().equals("Completitud")) {
-                return new Completitud(m.getNombre(), List.of(new Categoria("Alimentos"), new Categoria("Ropa"), new Categoria("Juguetes")));
-            }
-            return null;
-        }).toList();
-
-    }
 
     @Override
-    public List<InsigniaDTO> buscarInsigniasPorId(Long id) {
-        Donante donante = this.incentivosRepository.buscarDonantePorId(id);
+    public List<InsigniaDTO> buscarInsigniasPorId(Long id,TipoDeDonante tipoDeDonante) {
+        Donante donante = this.incentivosRepository.findByIdEnDonaciones(id, tipoDeDonante);
         if (donante == null) {
-            throw new RuntimeException("No se encontro el donante con id: " + id);
+            throw new RuntimeException("No se encontro el donante con id: " + id + " tipo " + tipoDeDonante);
         }
         List<InsigniaDTO> insigniasDTO = this.obtenerInsigniasDTO(donante);
 
@@ -202,166 +206,148 @@ public class IncentivosServiceImpl implements IncentivosService {
     }
 
     @Override
-    public MisionDTO buscarMisionActualPorId(Long id) {
-        Donante donante = this.incentivosRepository.buscarDonantePorId(id);
+    public MisionParticularDTO buscarMisionActualPorId(Long id, TipoDeDonante tipoDeDonante) {
+        Donante donante = this.incentivosRepository.findByIdEnDonaciones(id, tipoDeDonante);
         if (donante == null) {
-            throw new RuntimeException("No se encontro el donante con id: " + id);
+            throw new RuntimeException("No se encontro el donante con id: " + id + "tipo " + tipoDeDonante);
         }
-        Mision misionActual = donante.getMisiones().stream().filter(m -> m.getEstadoDeMision() == EstadoDeMision.ACTUAL)
-                .findFirst()
-                .orElse(null);
-        if (misionActual == null) {
-            throw new RuntimeException("No se encontro una mision actual para el donante con id: " + id);
-        }
-        MisionDTO misionActualDTO = new MisionDTO(misionActual.getNombre(), misionActual.getEstadoDeMision(), misionActual.getFechaCompletada());
 
+        MisionParticularDTO misionActualDTO = new MisionParticularDTO(donante.getMisionEnCurso().getMision().getNombre().toString(), donante.getMisionEnCurso().getEstado());
         return misionActualDTO;
     }
-
     @Override
-    public String publicarYDifundirInsignia(Long id, Insignia insignia) {
-        Donante donante = incentivosRepository.buscarDonantePorId(id);
+    public String publicarYDifundirInsignia(Long id, String insignia,
+                                            String tipoDeDonante) {
+
+        TipoDeDonante tipo = TipoDeDonante.valueOf(tipoDeDonante);
+        Donante donante = incentivosRepository.findByIdEnDonaciones(id, tipo);
+
         if (donante == null) {
-            System.out.println("Donante " + id + " no encontrado localmente. Sincronizando...");
+            System.out.println("Donante " + id + " no encontrado. Sincronizando...");
 
             try {
+                String path = tipoDeDonante.equals("HUMANO")
+                        ? "/humano/obtenerDonaciones/{id}"
+                        : "/juridico/obtenerDonaciones/{id}";
+
                 URI uri = UriComponentsBuilder
-                        .fromUriString("http://localhost:8080/servicioDeDonaciones")
-                        .path("/humano/{id}")
+                        .fromUriString(propiedades.getUrl())
+                        .path(path)
                         .buildAndExpand(id)
                         .toUri();
 
-                Donante donanteImportado = restTemplate.getForObject(uri, Donante.class);
+                ResponseEntity<PersonaDonanteDTO> response =
+                        restTemplate.getForEntity(uri, PersonaDonanteDTO.class);
+                PersonaDonanteDTO dto = response.getBody();
 
-                if (donanteImportado != null) {
-                    incentivosRepository.guardarDonante(donanteImportado);
-                    donante = donanteImportado;
-                    System.out.println("Sincronización exitosa: " + donante.getNombre());
+                if (dto != null) {
+                    Donante nuevo = new Donante();
+                    nuevo.setIdEnDonaciones(id);
+                    nuevo.setTipoDeDonante(tipo);
+                    nuevo.setNombre(dto.nombre());
+                    nuevo.setApellido(dto.apellido());
+                    nuevo.setRazonSocial(dto.razonSocial());
+
+                    incentivosRepository.save(nuevo);
+                    donante = nuevo;
+
                 } else {
-                    throw new ResourceNotFoundException("Donante no existe en el sistema integral: " + id);
+                    throw new RuntimeException("Donante no existe: " + id);
                 }
+
             } catch (Exception e) {
-                e.printStackTrace();
-                throw new ResourceNotFoundException("No se pudo recuperar al donante del servicio externo: " + id);
+                throw new RuntimeException("No se pudo recuperar el donante: " + id, e);
             }
         }
-        String nombre = donante.getNombre();
+
+        String nombre = donante.getNombre() != null
+                ? donante.getNombre() + " " +
+                  (donante.getApellido() != null ? donante.getApellido() : "")
+                : donante.getRazonSocial();
+
         return publicadorService.publicarYDifundirInsignia(nombre, insignia);
     }
 
+    @Transactional
     @Override
     public void calcularYGuardarRanking() {
-        URI uri = UriComponentsBuilder
-                .fromUriString(propiedades.getUrl())
-                .path("/obtenerDonantes")
-                .build()
-                .toUri();
+        // el scheduler corre el día 1, así que el mes que se cierra es el anterior.
+        // !! para probar con las misiones de este mes, cambiar esta línea por: YearMonth.now()
+        YearMonth periodo = YearMonth.now().minusMonths(1);
 
-        ResponseEntity<PersonaDonanteDTO[]> response = restTemplate.getForEntity(uri, PersonaDonanteDTO[].class);
-        PersonaDonanteDTO[] array = response.getBody();
-        if (array == null || array.length == 0) return;
-
-        YearMonth mesPasado = YearMonth.now().minusMonths(1);
-
-        List<Donante> donantes = Arrays.stream(array).map(dto -> {
-            List<Mision> misionesLocales = dto.misiones().stream()
-                    .map(misionDTO -> {
-                        Mision m = new Mision(misionDTO.nombre(), misionDTO.estado());
-                        m.setFechaCompletada(misionDTO.fechaCompletada());
-                        return m;
-                    }).toList();
-
-            return new Donante(
-                    dto.id(), null, null,
-                    dto.nombre(), dto.apellido(),
-                    null, null, null, null,
-                    null, misionesLocales, null, null
-            );
-        }).toList();
-
-        this.rankingCompletoOrdenado = donantes.stream()
+        List<Donante> ordenados = incentivosRepository.findAll().stream()
+                .filter(d -> d.calcularMisionesCumplidasEn(periodo) > 0)
                 .sorted(Comparator.comparingInt(
-                        (Donante d) -> -d.calcularMisionesCumplidasEn(mesPasado)))
-                .toList();
+                        (Donante d) -> -d.calcularMisionesCumplidasEn(periodo)))
+                .toList(); // saco los donates de incentivos 
 
-        this.ultimoRanking = new RankingMensual(
-                LocalDate.now().minusMonths(1),
-                rankingCompletoOrdenado.get(0),
-                rankingCompletoOrdenado.get(1),
-                rankingCompletoOrdenado.get(2),
-                rankingCompletoOrdenado
-        );
+        if (ordenados.isEmpty()) {
+            System.out.println("Ranking " + periodo + ": nadie completó misiones, no se guarda");
+            return;
+        }
+
+        rankingMensualRepository.findAll().stream()
+                .filter(r -> YearMonth.from(r.getFecha()).equals(periodo))
+                .forEach(rankingMensualRepository::delete);
+
+        RankingMensual nuevo = new RankingMensual(
+                periodo.atDay(1),
+                ordenados.get(0),
+                ordenados.size() > 1 ? ordenados.get(1) : null,
+                ordenados.size() > 2 ? ordenados.get(2) : null,
+                ordenados);
+
+        rankingMensualRepository.save(nuevo);
+
     }
-
     @Override
+    @Transactional(readOnly = true)
     public RankingMensual obtenerUltimoRanking() {
-        return ultimoRanking;
+        return rankingMensualRepository.findTopByOrderByFechaDesc().orElse(null);
+    }
+
+    @Transactional(readOnly = true)
+    public Integer obtenerPosicion(Long idEnDonaciones, TipoDeDonante tipo) {
+        RankingMensual ranking = rankingMensualRepository.findTopByOrderByFechaDesc().orElse(null);
+        Donante donante = incentivosRepository.findByIdEnDonaciones(idEnDonaciones, tipo);
+        if (ranking == null || donante == null) return null;
+        return ranking.getPosicion(donante);
     }
 
 
-    public List<DonacionSinSegmentar> convertirDonacionesDTO(List<DonacionSinSegmentarDTO> donacionesDTO) {
 
-        List<DonacionSinSegmentar> donaciones = donacionesDTO.stream().map(
-                donacion -> {
-                    List<Bien> bienes =
-                            donacion.bienes().stream()
-                                    .map(b -> new Bien(
-                                            b.nombre(),
-                                            b.descripcion(),
-                                            new Subcategoria(
-                                                    b.subcategoria().nombre(),
-                                                    b.subcategoria().esPerecedero(),
-                                                    new Categoria(
-                                                            b.subcategoria().categoria().nombre()
-                                                    )
-                                            ),
-                                            b.fechaDeVencimiento(),
-                                            b.esUsado(),
-                                            b.tipoUnidad(),
-                                            b.cantidad()
-                                    ))
-                                    .toList();
 
-                    return new DonacionSinSegmentar(
-                            bienes,
-                            donacion.fechaDeIngreso(),
-                            donacion.donacionEntregada(),
-                            donacion.organizacionId()
-                    );
-                }).toList();
+    public List<MisionParticularDTO> obtenerMisionParticularDTO(List<MisionParticular> misiones) {
 
-        return donaciones;
-    }
-
-    public List<Mision> convertirMisionesDTO(List<MisionDTO> misionesDTO) {
-
-        List<Mision> misiones = misionesDTO.stream().map(m -> new Mision(m.nombre(), m.estado())).toList();
-
-        return misiones;
-    }
-
-    public List<MisionDTO> obtenerMisionDTO(List<Mision> misiones) {
-        return misiones.stream().map(m -> new MisionDTO(m.getNombre(), m.getEstadoDeMision(), m.getFechaCompletada())).toList();
+        List<MisionParticularDTO> misionesDTO = new ArrayList<>();
+        misiones.forEach(m -> misionesDTO.add(
+                new MisionParticularDTO(
+                        m.getMision() != null ? this.obtenerNombreDeMisionParticular(m.getMision()): null,
+                        m.getEstado())));
+        return misionesDTO;
     }
 
     public List<InsigniaDTO> obtenerInsigniasDTO(Donante donante) {
-        List<InsigniaDTO> insigniasDTO = donante.getPerfil().getInsignias().stream().map(i -> new InsigniaDTO(i.getNombre(), i.texto())).toList();
-        return insigniasDTO;
+
+        List<MisionParticular> misionesCompletadas = donante.obtenerMisionesCompletadas();
+        List<InsigniaDTO> insiginas = misionesCompletadas.stream()
+                .map(m -> new InsigniaDTO(this.obtenerNombreDeMisionParticular(m.getMision()),m.getMision().getInsigniaGanadora())).toList();
+
+        return insiginas;
     }
 
+
+
+
     @Override
-    public MetricasImpactoDTO obtenerMetricasDeImpacto(Long idDonante) {
+    @Transactional
+    public MetricasImpactoDTO obtenerMetricasDeImpacto(Long idEnDonaciones, TipoDeDonante tipoDeDonante) {
 
-        Donante donante = incentivosRepository.buscarDonantePorId(idDonante);
-
+        Donante donante = incentivosRepository.findByIdEnDonaciones(idEnDonaciones, tipoDeDonante);
         if (donante == null) {
-            obtenerDonanteHumano(idDonante);
-            donante = incentivosRepository.buscarDonantePorId(idDonante);
+            throw new RuntimeException("Donante no encontrado: " + idEnDonaciones + " (" + tipoDeDonante + ")");
         }
-
-        if (donante == null) {
-            throw new RuntimeException("Donante no encontrado: " + idDonante);
-        }
+        Long idDonante = idEnDonaciones;
 
         String nombre = donante.getNombre() != null
                 ? donante.getNombre() + " " + donante.getApellido()
@@ -381,6 +367,7 @@ public class IncentivosServiceImpl implements IncentivosService {
                 idDonante,
                 nombre,
                 donante.totalDonaciones(),
+                donante.totalDonacionesEntregadas(),
                 mesPico,
                 mesPico != null ? donante.cantidadDonacionesEnMes(mesPico) : 0,
                 donante.calcularEvolucionMensual(),
@@ -390,17 +377,10 @@ public class IncentivosServiceImpl implements IncentivosService {
         );
     }
 
+
     @Override
-    public String procesarLogro(Long id, Insignia insignia, boolean esHumana) {
-        Donante donante = incentivosRepository.buscarDonantePorId(id);
-        if (donante == null) {
-            if (esHumana) {
-                obtenerDonanteHumano(id);
-            } else {
-                obtenerDonanteJuridico(id);
-            }
-            donante = incentivosRepository.buscarDonantePorId(id);
-        }
+    public String procesarLogro(Long id, String insignia, TipoDeDonante tipoDeDonante) {
+        Donante donante = incentivosRepository.findByIdEnDonaciones(id,tipoDeDonante);
 
         String nombre = donante.getNombre() != null
                 ? donante.getNombre() + " " + donante.getApellido()
@@ -410,7 +390,7 @@ public class IncentivosServiceImpl implements IncentivosService {
 
     @Override
     public MetricasSistemaDTO obtenerMetricasDelSistema() {
-        List<Donante> todos = incentivosRepository.findAllDonantes();
+        List<Donante> todos = incentivosRepository.findAll();
         YearMonth mesActual = YearMonth.now();
         YearMonth mesAnterior = mesActual.minusMonths(1);
 
@@ -488,17 +468,26 @@ public class IncentivosServiceImpl implements IncentivosService {
         return mapearDto(ranking);
     }
 
-    private RankingMensualDTO mapearDto(RankingMensual ranking) {
+    private RankingMensualDTO mapearDto(RankingMensual r) {
         return new RankingMensualDTO(
-                ranking.getFecha(),
-                ranking.getPrimerPuesto() != null ? ranking.getPrimerPuesto().getNombre() : "N/A",
-                ranking.getSegundoPuesto() != null ? ranking.getSegundoPuesto().getNombre() : "N/A",
-                ranking.getTercerPuesto() != null ? ranking.getTercerPuesto().getNombre() : "N/A"
-        );
+                r.getFecha(),
+                nombreDe(r.getPrimerPuesto()),
+                nombreDe(r.getSegundoPuesto()),
+                nombreDe(r.getTercerPuesto()),
+                r.getMisionesPrimerPuesto(),
+                r.getMisionesSegundoPuesto(),
+                r.getMisionesTercerPuesto() );
     }
+
+    private String nombreDe(Donante d) {
+        if (d == null) return null;
+        return d.getNombre() != null ? d.getNombre() + " " + d.getApellido() : d.getRazonSocial();
+    }
+
+    @Transactional
     @Override
     public List<RankingMensualDTO> buscarRankings(Integer mes, Integer anio) {
-        List<RankingMensual> todosLosRankings = incentivosRepository.findAllRankings();
+        List<RankingMensual> todosLosRankings = rankingMensualRepository.findAll();
 
         return todosLosRankings.stream()
                 .filter(r -> (anio == null || r.getFecha().getYear() == anio))
@@ -507,18 +496,225 @@ public class IncentivosServiceImpl implements IncentivosService {
                 .toList();
     }
 
-    // Método para llamar al servicio de notificaciones
-    // URL resultante: http://localhost:8081/servicioDeNotificaciones/notificar?destinatario=X&mensaje=Y&medio=Z
-    private void notificar(String destinatario, String mensaje, String medio) {
-        try {
-            String url = notificacionesProperties.getUrl() +
-                    "/servicioDeNotificaciones/notificar" +
-                    "?destinatario=" + URLEncoder.encode(destinatario, StandardCharsets.UTF_8) +
-                    "&mensaje=" + mensaje +
-                    "&medio=" + medio;
-            restTemplate.postForObject(url, null, String.class);
-        } catch (Exception e) {
-            System.out.println("Error al notificar: " + e.getMessage());
+    public CategoriaDeMisionDTO crearCategoriaMision(CategoriaDeMisionDTO categoriaDto){
+        if(categoriaDto == null){
+            throw new RuntimeException("El DTO de categoria no puede ser nulo");
         }
+
+        if(categoriaDto.nombre() == null){
+            throw new RuntimeException("El nombre de la categoria no puede ser nulo");
+        }
+        if (!TipoCategoria.perteneceAEnum(categoriaDto.nombre().toString())) {
+            throw new RuntimeException("El nombre de la categoria no pertenece a los nombres de categorias permitidas");
+        }
+        if(categoriaDto.categoriaSiguiente() == null && TipoCategoria.obtenerCategoriaSiguiente(categoriaDto.nombre()) != null){
+            throw new RuntimeException("La categoria siguiente no puede ser nula");
+        }
+        CategoriaDeMision categoriaDeMision = new CategoriaDeMision(categoriaDto.nombre(), categoriaDto.categoriaSiguiente());
+
+        this.categoriaDeMisionRepository.save(categoriaDeMision);
+
+        return this.mapearAcategoriaDeMisionDTO(categoriaDeMision);
+
+    }
+
+    public CategoriaDeMisionDTO mapearAcategoriaDeMisionDTO(CategoriaDeMision categoria){
+        if(categoria == null){
+            throw new RuntimeException("La categoria no puede ser nula");
+        }
+        return new CategoriaDeMisionDTO(categoria.getId(), categoria.getNombre(), categoria.getCategoriaSiguiente());
+    }
+
+    @Transactional
+     public MisionDTO crearMision(MisionDTO mision){
+        if(mision == null){
+            throw new RuntimeException("El DTO de mision no puede ser nulo");
+        }
+
+        if(mision.nombre() == null){
+            throw new RuntimeException("El nombre de la mision no puede ser nulo");
+        }
+         if (!NombreDeMision.perteneceAEnum(mision.nombre().toString())) {
+             throw new RuntimeException("El nombre de la mision no pertenece a los nombres de misiones permitidas");
+         }
+        if(mision.categoriaId() == null){
+            throw new RuntimeException("La categoria de la mision no puede ser nula");
+        }
+
+        if(mision.ordenSecuencial() == 0 || mision.ordenSecuencial() < 0){
+            throw new RuntimeException("El orden secuencial de la mision no puede ser cero o menor a 1");
+
+        }
+        CategoriaDeMision categoria = this.categoriaDeMisionRepository.findById(mision.categoriaId())
+                .orElseThrow(() -> new RuntimeException("No se encontro la categoria con id: " + mision.categoriaId()));
+
+        boolean ordenRepetido = categoria.getMisiones().stream()
+                .anyMatch(m -> m.getOrdenSecuencial() == mision.ordenSecuencial());
+        if (ordenRepetido) {
+            throw new RuntimeException("Ya existe una misión con orden " + mision.ordenSecuencial()
+                    + " en la categoría " + categoria.getNombre());
+        }
+        Mision nuevaMision = this.crearMisionSegunTipo(mision, categoria);
+        categoria.agregarMision(nuevaMision);
+
+        this.misionRepository.save(nuevaMision);
+
+        return this.mapearAMisionDTO(nuevaMision);
+     }
+
+    public MisionDTO mapearAMisionDTO(Mision mision) {
+        Long categoriaId = mision.getCategoria().getId();
+
+        return switch (mision) {
+            case Racha r -> new MisionDTO(
+                    r.getId(), r.getNombre(), categoriaId, r.getOrdenSecuencial(), r.getInsigniaGanadora(),
+                    r.getMeses(), r.getMesInicial(), r.getMesFinal(), null, null, null);
+
+            case Completitud c -> new MisionDTO(
+                    c.getId(), c.getNombre(), categoriaId, c.getOrdenSecuencial(), c.getInsigniaGanadora(),
+                    null, null, null, c.getObjetivoDeCategoriasDistintas(), null, null);
+
+            case DonacionesExitosas d -> new MisionDTO(
+                    d.getId(), d.getNombre(), categoriaId, d.getOrdenSecuencial(), d.getInsigniaGanadora(),
+                    null, null, null, null, d.getCantidadDeDonacioneExitosas(), null);
+
+            case HabilDonador h -> new MisionDTO(
+                    h.getId(), h.getNombre(), categoriaId, h.getOrdenSecuencial(), h.getInsigniaGanadora(),
+                    null, null, null, null, null, h.getCantidadDeBienes());
+
+            default -> throw new IllegalArgumentException("Tipo de misión no soportado: " + mision.getClass());
+        };
+    }
+
+    public Mision crearMisionSegunTipo(MisionDTO dto, CategoriaDeMision categoria) {
+        Mision mision = switch (dto.nombre()) {
+            case RACHA               -> new Racha(dto.nombre(), dto.mesInicial(), dto.mesFinal());
+            case COMPLETITUD         -> new Completitud(dto.nombre(), dto.objetivoDeCategoriasDistintas());
+            case DONACIONES_EXITOSAS -> new DonacionesExitosas(dto.nombre(), dto.cantidadDeDonaciones());
+            case HABIL_DONADOR       -> new HabilDonador(dto.nombre(), dto.cantidadDeBienes());
+        };
+
+        mision.setCategoria(categoria);
+        mision.setOrdenSecuencial(dto.ordenSecuencial());
+        mision.setInsigniaGanadora(dto.insigniaGanadora());
+        return mision;
+    }
+
+    @Transactional(readOnly = true)
+    public List<MisionFrontDTO> obtenerTodasLasMisionesPorId(Long id, TipoDeDonante tipoDeDonante) {
+        Donante donante = incentivosRepository.findByIdEnDonaciones(id,tipoDeDonante);
+        if (donante == null) {
+            throw new RuntimeException("No se encontró el donante con id : " + id + "TIPO" + tipoDeDonante);
+        }
+
+        List<MisionFrontDTO> misionesParaFront = donante.getMisiones().stream()
+                .map(mp -> mapearAMisionFrontDTO(mp.getId(), mp.getMision(), mp.getEstado(), mp))
+                .collect(Collectors.toCollection(ArrayList::new));
+
+        Set<Long> idsAsignados = donante.getMisiones().stream()
+                .map(mp -> mp.getMision().getId())
+                .collect(Collectors.toSet());
+
+        misionRepository.findAll().stream()
+                .filter(m -> !idsAsignados.contains(m.getId()))
+                .map(m -> mapearAMisionFrontDTO(m.getId(), m, EstadoDeMision.BLOQUEADA, null))
+                .forEach(misionesParaFront::add);
+
+        return misionesParaFront;
+    }
+
+    private MisionFrontDTO mapearAMisionFrontDTO(Long id, Mision mision, EstadoDeMision estado, MisionParticular mp) {
+        return new MisionFrontDTO(
+                id,
+                obtenerNombreDeMisionParticular(mision),
+                mision.getCategoria().getNombre().toString(),
+                mision.getOrdenSecuencial(),
+                mision.getInsigniaGanadora(),
+                mision instanceof Racha r ? r.getMeses() : null,
+                mision instanceof Racha r ? this.obtenerNombreDeMes(r.getMesInicial()) : null,
+                mision instanceof Racha r ? this.obtenerNombreDeMes(r.getMesFinal()) : null,
+                mision instanceof Completitud c ? c.getObjetivoDeCategoriasDistintas() : null,
+                mision instanceof DonacionesExitosas d ? d.getCantidadDeDonacioneExitosas() : null,
+                mision instanceof HabilDonador h ? h.getCantidadDeBienes() : null,
+                estado,
+                mp != null ? mp.getProgreso(): null,
+                mp != null ? mp.getDistanciaDelObjetivo() : null
+                );
+    }
+
+    public String obtenerNombreDeMes(Integer numMes) {
+        if(numMes == null){
+            return null;
+        }
+        if(numMes == 1){
+            return "Enero";
+        } else if (numMes == 2) {
+            return "Febrero";
+        }
+        else if (numMes == 3) {
+            return "Marzo";
+        }else if (numMes == 4) {
+            return "Abril";
+        }else if (numMes == 5) {
+            return "Mayo";
+        }else if (numMes == 6) {
+            return "Junio";
+        }else if (numMes == 7) {
+            return "Julio";
+        }else if (numMes == 8) {
+            return "Agosto";
+        }else if (numMes == 9) {
+            return "Septiembre";
+        }else if (numMes == 10) {
+            return "Octubre";
+        }else if (numMes == 11) {
+            return "Noviembre";
+        } else if (numMes == 12) {
+            return "Diciembre";
+        }else{
+            return null;
+        }
+    }
+
+    public String obtenerNombreDeMisionParticular(Mision m) {
+        m = (Mision) Hibernate.unproxy(m);
+
+        return switch (m) {
+            case Racha r -> r.getNombre() + " de " + r.getMeses() + " meses";
+            case Completitud c -> c.getNombre() + " de " + c.getObjetivoDeCategoriasDistintas();
+            case DonacionesExitosas d -> this.pulirNombre(d.getNombre())+ " de " + d.getCantidadDeDonacioneExitosas();
+            case HabilDonador h -> this.pulirNombre( h.getNombre()) + " de " + h.getCantidadDeBienes();
+            default -> "Sin nombre de misión";
+        };
+    }
+
+    public String pulirNombre(NombreDeMision nombreDeMision) {
+        return switch (nombreDeMision){
+            case DONACIONES_EXITOSAS -> "DONACIONES EXITOSAS";
+            case HABIL_DONADOR -> "HÁBIL DONADOR";
+            default ->  " ";
+        };
+    }
+
+    @Transactional()
+    public PerfilDTO obtenerPerfilPorId(Long idEnDonaciones, TipoDeDonante tipoDeDonante) {
+        Donante donante = incentivosRepository.findByIdEnDonaciones(idEnDonaciones, tipoDeDonante);
+        if (donante == null) {
+            throw new RuntimeException("No se encontró el donante con id: " + idEnDonaciones + " y tipo: " + tipoDeDonante);
+        }
+        Perfil perfil = donante.getPerfil();
+        Integer cantMisionesCumplidas = donante.obtenerMisionesCompletadas().size();
+        Integer cantInsignias = perfil.getInsignias().size();
+        List<InsigniaDTO> insigniasDTO = this.obtenerInsigniasDTO(donante);
+        RankingMensual rankingActual = obtenerUltimoRanking();
+        Integer puestoRanking = (rankingActual != null) ? rankingActual.getPosicion(donante) : null;
+        return new PerfilDTO(
+                cantMisionesCumplidas,
+                cantInsignias,
+                perfil.getNombreDeUsuario(),
+                insigniasDTO,
+                perfil.getCategoria() != null ? perfil.getCategoria().getNombre().toString() : null,
+                puestoRanking
+        );
     }
 }

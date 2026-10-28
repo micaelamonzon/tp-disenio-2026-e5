@@ -1,36 +1,48 @@
 package ar.edu.utn.frba.ddsi.donaciones.models.entities.Necesidad;
 
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.Persistente;
 import ar.edu.utn.frba.ddsi.donaciones.models.entities.bien.Subcategoria;
-import ar.edu.utn.frba.ddsi.donaciones.models.entities.donacion.Donacion;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Inheritance;
-import jakarta.persistence.InheritanceType;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.Transient;
+
+import ar.edu.utn.frba.ddsi.donaciones.models.entities.segmentador.DonacionSegmentada;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-@Data
-@Getter
-@NoArgsConstructor
-public abstract class Necesidad {
 
+@Getter
+@Setter
+@NoArgsConstructor
+@Entity
+@Table(name = "necesidad")
+@Inheritance(strategy = InheritanceType.JOINED)
+public abstract class Necesidad{
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private EntidadBeneficiaria entidadBeneficiaria;
+
+    @ManyToOne
+    @JoinColumn(name = "entidad_beneficiaria_id")
+    private EntidadBeneficiaria entidadBeneficiaria; 
+
+    @ManyToOne
+    @JoinColumn(name = "subcategoria_id")
     private Subcategoria subcategoria;
 
+    @Column(name = "descripcion")
     private String descripcion;
+
+    @Column(name = "esta_satisfecho")
     private boolean estaSatisfecha;
 
-    private List<Donacion> donacionesRecibidas = new ArrayList<>();
+    @OneToMany(mappedBy = "necesidad")
+    private List<DonacionSegmentada> donacionesRecibidas = new ArrayList<>();
 
     public Necesidad(Subcategoria subcategoria, String descripcion) {
         this(null, subcategoria, descripcion);
@@ -44,19 +56,23 @@ public abstract class Necesidad {
     }
 
     public abstract void satisfacer(int cantidadRecibida);
+    public abstract String tipo();
+    public abstract int cantidadSolicitada();
+    public abstract int cantidadRecibida();
+
 
     protected void marcarComoSatisfecha() {
         this.estaSatisfecha = true;
     }
 
-    public int contarDonacionesDesde(LocalDate fechaLimite) {
+    public int contarDonacionesDesde(LocalDateTime fechaLimite) {
         return (int) this.donacionesRecibidas.stream()
                 .filter(d -> d.getFechaEntrega() != null && d.getFechaEntrega().isAfter(fechaLimite))
                 .count();
     }
 
     public boolean estaSatisfecha() {
-        return true;
+        return this.estaSatisfecha;
     }
 
 
