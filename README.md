@@ -1,104 +1,89 @@
-# ddsi-tp-template
+# 🎁 DonaTrack — Sistema de Gestión y Trazabilidad de Donaciones
 
-Plantilla base para el trabajo práctico de DDSI (UTN FRBA). Implementa una arquitectura de servicios con Spring Boot y una biblioteca compartida, usando un reactor de Maven multi-módulo.
+Plataforma web para organizar, registrar y monitorear donaciones de bienes materiales, desde que llegan al depósito de la organización hasta que se entregan a entidades beneficiarias.
 
----
+Trabajo Práctico Anual Integrador de la cátedra **Diseño de Sistemas de Información** (UTN FRBA, 2026). Usa como caso de estudio a **UTN Solidaria**, la iniciativa de la Subsecretaría de Asuntos Estudiantiles de la facultad.
 
-## Requisitos previos
+![Java](https://img.shields.io/badge/Java-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot-6DB33F?style=for-the-badge&logo=springboot&logoColor=white)
+![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white)
+![n8n](https://img.shields.io/badge/n8n-EA4B71?style=for-the-badge&logo=n8n&logoColor=white)
+![Git](https://img.shields.io/badge/Git-F05032?style=for-the-badge&logo=git&logoColor=white)
 
-- JDK 21
-- Maven 3.9+
-- Docker (opcional, solo para construir y ejecutar contenedores)
+## 🎯 Problema que resuelve
 
----
+Una organización sin fines de lucro que recibe y distribuye donaciones suele tener registros duplicados y poca claridad sobre el destino de lo que recibe. DonaTrack unifica todo en un solo sistema para mejorar la distribución de recursos y fortalecer la confianza de donantes y entidades beneficiarias.
 
-## Estructura del repositorio
+## 🏗️ Arquitectura
 
-```
-ddsi-tp-template/
-├── pom.xml                    # POM padre: versiones y dependencyManagement
-├── common-lib/                # Librería compartida (JAR), importada por los servicios
-├── donaciones-service/        # Servicio de donaciones — puerto 8080
-└── notificaciones-service/    # Cervicio de notificaciones — puerto 8081
-```
+Arquitectura distribuida en servicios, con un cliente liviano desacoplado que consume sus APIs REST.
 
-Cada servicio es una aplicación Spring Boot independiente que declara `common-lib` como dependencia local del reactor.
 
----
+| Servicio | Responsabilidad |
+|---|---|
+| **Donaciones** | Alta, baja y modificación de donantes (humanos y jurídicos) y entidades beneficiarias, registro de donaciones con trazabilidad y auditoría de estados, importación masiva por CSV y asignación de donaciones a entidades. |
+| **Logística** | Flota de camiones, planificación de rutas, seguimiento de entregas y monitoreo de camiones en tiempo real. |
+| **Incentivos** | Analítica de donantes, misiones, insignias, categorías y ranking mensual. |
+| **Notificaciones** | Envío por correo electrónico, SMS y WhatsApp ante los eventos relevantes del sistema. |
+| **Autenticación** | Gestión de tokens de autorización desde el frontend hacia los servicios. |
+| **Cliente liviano** | Interfaz web con arquitectura MVC y motor de plantillas, desacoplada de la lógica de negocio. |
 
-## Tecnologías
+## 👥 Roles y funcionalidades
 
-| Tecnología          | Versión       |
-|---------------------|---------------|
-| Java                | 21            |
-| Spring Boot         | 4.0.5         |
-| Spring Cloud BOM    | 2025.1.1      |
-| Lombok              | 1.18.34       |
-| Maven               | 3.9+          |
+- **Persona donante** (humana o jurídica): registra su cuenta, filtra sus donaciones por estado y categoría, consulta misiones e insignias, sigue en un mapa las entregas activas y recibe notificaciones.
+- **Entidad beneficiaria**: registra necesidades (recurrentes y extraordinarias), ve el estado de sus donaciones, confirma la recepción cargando fotos y sigue las entregas en un mapa.
+- **Persona administradora**: registra donantes y donaciones en el depósito, confirma la entidad destino de cada donación, administra los camiones, ve el ranking mensual e importa donantes desde CSV (más de 10.000 filas).
+- **Chofer**: informa el inicio de su ruta.
+- **Público general**: landing page, mapa de donaciones entregadas y fotos sin necesidad de login.
 
-El BOM de Spring Cloud está declarado en el POM padre para que los módulos puedan incorporar dependencias de Spring Cloud sin especificar versión explícita.
+## 🔄 Ciclo de vida de una donación
 
----
-
-## Desarrollo local (Maven)
-
-Todos los comandos se ejecutan desde la **raíz del proyecto**.
-
-### Compilar todos los módulos
-
-```bash
-mvn clean install
-```
-
-Esto construye `common-lib` primero y luego los servicios que dependen de ella.
-
-### Ejecutar un servicio
-
-```bash
-# Servicio de donaciones (puerto 8080)
-mvn spring-boot:run -pl donaciones-service
-
-# Servicio de notificaciones (puerto 8081)
-mvn spring-boot:run -pl notificaciones-service
+```mermaid
+stateDiagram-v2
+    [*] --> EnDeposito: Donación registrada
+    EnDeposito --> AsignacionRealizada: Algoritmo asigna entidad
+    EnDeposito --> Vencida: Se vence la donación
+    AsignacionRealizada --> ListaParaEntregar: Ruta planificada
+    ListaParaEntregar --> EnTraslado: Camión inicia el recorrido
+    EnTraslado --> Entregada: Entidad confirma entrega
+    EnTraslado --> EntregaFallida: No se pudo entregar
+    EntregaFallida --> EnDeposito: Retorna al depósito
+    Entregada --> [*]
+    Vencida --> [*]
 ```
 
-Maven resuelve `common-lib` directamente desde el reactor, por lo que no hace falta instalarla por separado si se ejecuta desde la raíz.
+Cada cambio de estado queda registrado para garantizar trazabilidad y auditoría. Cuando una entrega falla se registra una justificación.
 
----
+## ⚙️ Aspectos técnicos destacados
 
-## Construcción de imágenes Docker
+- **Segmentación automática de donaciones:** una sola carga se divide en donaciones independientes agrupadas por subcategoría (y por fecha de vencimiento en bienes perecederos).
+- **Matchmaking con algoritmos intercambiables:** *Compatibilidad Semántica* (coincidencia entre bienes y necesidades) y *Prioridad a sub-atendidos* (entidades con menos donaciones en el último trimestre). Proponen hasta diez entidades y se ejecutan de forma asincrónica en horarios de baja carga.
+- **Necesidades recurrentes y extraordinarias:** las extraordinarias se satisfacen con donaciones parciales hasta alcanzar la cantidad requerida.
+- **Sistema de incentivos con ludificación:** tres categorías (Colaborador, Sostenedor y Transformador), misiones secuenciales (racha, completitud, hábil donador, donaciones exitosas) e insignias.
+- **Automatización con n8n:** al obtener una insignia se dispara un flujo que genera una imagen y publica el logro en una red social. Otro flujo programado calcula el ranking mensual.
+- **Integración con planificador de rutas externo:** solicitudes en lotes (máximo 100 donaciones por ejecución), URL de *callback* para recibir el resultado y verificación de firma **HMAC SHA-256**. Las donaciones sin asignar se vuelven a planificar.
+- **Notificaciones asincrónicas:** los servicios de dominio se comunican con el de Notificaciones mediante una cola de mensajes para no afectar la disponibilidad ante picos de carga.
+- **Persistencia políglota:** ORM sobre MySQL para los servicios relacionales y base documental (ODM) para Logística, con desnormalización donde optimiza las lecturas.
+- **Interfaz:** diseño orientado a usabilidad heurística, responsive y accesible (WCAG AA).
 
-Este proyecto utiliza una arquitectura multi-módulo de Maven. Los microservicios dependen del `pom.xml` padre y de `common-lib`, por lo que **el contexto de construcción de Docker siempre debe ser la raíz del proyecto**. Si se limita el contexto a la carpeta del microservicio, Maven fallará al no encontrar el POM padre ni las dependencias comunes.
+## 📦 Estado del proyecto
 
-### Construcción manual (CLI)
+| Entrega | Contenido | Estado |
+|---|---|---|
+| 1 | Arquitectura y modelado en objetos, parte I y diseño de interfaz (bocetos) | ✅ Completa |
+| 2 | Trazabilidad, asignación de necesidades, incentivos, notificaciones reales y exposición REST | ✅ Completa |
+| 3 | Logística: planificación de rutas, integración externa y monitoreo en tiempo real | ✅ Completa |
+| 4 | Persistencia (ORM / ODM) y maquetado de interfaz con HTML5 y CSS | ✅ Completa |
+| 5 | Arquitectura web MVC: cliente liviano desacoplado y servicio de autenticación | ✅ Completa |
+| 6 | Despliegue en la nube, observabilidad, monitoreo, rate limiting y gRPC o GraphQL | 🚧 En desarrollo |
 
-Posicionarse en la carpeta raíz del proyecto y pasar el Dockerfile con `-f`, dejando `.` como contexto:
+## 🙋‍♀️ Mi aporte
 
-```bash
-# donaciones-service (expone el puerto 8080)
-docker build -t donaciones-img -f donaciones-service/Dockerfile .
+Dentro del trabajo en equipo, me encargué entre otras cosas de de:
 
-# notificaciones-service (expone el puerto 8081)
-docker build -t notificaciones-img -f notificaciones-service/Dockerfile .
-```
+- **Servicio de Incentivos:** misiones, insignias, categorías y ranking mensual, incluyendo los flujos de automatización en n8n.
+- **Servicio de Logística:** planificación de rutas mediante el patrón de *webhook/callback* con verificación de firma HMAC SHA-256.
 
-### Ejecutar los contenedores
+## 🎓 Contexto académico
 
-```bash
-docker run -p 8080:8080 donaciones-img
-docker run -p 8081:8081 notificaciones-img
-```
-
-### Nota sobre `ARG SERVICE_NAME`
-
-Cada Dockerfile define un `ARG SERVICE_NAME` cuyo valor por defecto ya coincide con el nombre del servicio (p. ej. `donaciones-service`). Solo es necesario sobreescribirlo si se reutiliza un Dockerfile genérico para construir un servicio diferente:
-
-```bash
-docker build --build-arg SERVICE_NAME=otro-service -f otro-service/Dockerfile .
-```
-
----
-
-## Estado del proyecto
-
-Los servicios son aplicaciones Spring Boot mínimas, listas para extender con controladores, repositorios y lógica de negocio. `common-lib` contiene el código compartido entre servicios.
+Cátedra Diseño de Sistemas de Información, Universidad Tecnológica Nacional (Facultad Regional Buenos Aires), 2026.
